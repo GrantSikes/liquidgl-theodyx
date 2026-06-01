@@ -1,4 +1,4 @@
-/* theodyx-hero — homepage hero film (Cloudflare Stream) + fullscreen/mute controls
+/* theodyx-hero — homepage hero film (Cloudflare Stream) + vertical wordmark + controls
  * Hosted for the Theodyx site; loaded as registered script `nv2hero`.
  */
 (function () {
@@ -12,10 +12,15 @@
   var I_FS =
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 00-2 2v3M16 3h3a2 2 0 012 2v3M16 21h3a2 2 0 002-2v-3M8 21H5a2 2 0 01-2-2v-3"/></svg>';
   var CSS =
+    ".hero-row{display:flex;align-items:stretch;width:100%}" +
+    ".hero-row>.hero-media{flex:0 0 auto}" +
+    ".hero-vlabel{flex:1 1 0;min-width:0;display:flex;align-items:center;justify-content:center}" +
+    ".hero-vlabel span{writing-mode:vertical-rl;text-orientation:mixed;font-family:'Sinhala Sangam MN',serif;font-size:clamp(20px,2.1vw,38px);letter-spacing:.18em;text-transform:uppercase;color:#1b1916;opacity:.82;white-space:nowrap;line-height:1;user-select:none}" +
     ".hero-ctrls{position:absolute;right:12px;bottom:12px;z-index:4;display:inline-flex;gap:8px}" +
     ".hero-ctrls button{width:34px;height:34px;padding:0;border-radius:999px;border:1px solid rgba(255,255,255,.35);background:rgba(18,16,26,.34);-webkit-backdrop-filter:blur(8px) saturate(160%);backdrop-filter:blur(8px) saturate(160%);color:#fff;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .2s ease,background .2s ease;box-shadow:0 4px 12px rgba(0,0,0,.28)}" +
     ".hero-ctrls button:hover{transform:scale(1.08);background:rgba(18,16,26,.55)}" +
-    ".hero-ctrls svg{width:16px;height:16px;display:block}";
+    ".hero-ctrls svg{width:16px;height:16px;display:block}" +
+    "@media screen and (max-width:991px){.hero-vlabel{display:none}}";
   function el(t, c) {
     var e = document.createElement(t);
     if (c) e.className = c;
@@ -29,6 +34,16 @@
     st.id = "theodyx-hero-css";
     st.textContent = CSS;
     document.head.appendChild(st);
+    /* wrap the video + the vertical wordmark in a row */
+    var fr = b.parentNode,
+      row = el("div", "hero-row");
+    fr.insertBefore(row, b);
+    row.appendChild(b);
+    var lab = el("div", "hero-vlabel"),
+      sp = el("span");
+    sp.textContent = "THEODYX";
+    lab.appendChild(sp);
+    row.appendChild(lab);
     /* the Cloudflare Stream player */
     var f = el("iframe");
     f.id = "heroStream";
