@@ -28,14 +28,15 @@
     '.footer .footer-link{position:relative;display:inline-block!important;width:auto!important;padding:7px 0!important;margin:0!important;color:rgba(245,241,232,.62)!important;font:400 15.5px/1.35 "Google Sans Flex","Google Sans",system-ui,sans-serif!important;text-decoration:none!important;background:none!important;transition:color .2s ease,transform .2s ease}',
     '.footer .footer-link:hover{color:#fff!important;transform:translateX(4px)}',
     '.thx-fmark{position:relative;margin:clamp(48px,7vw,96px) auto 0!important;width:100%;max-width:1180px;height:clamp(104px,21vw,250px);user-select:none}',
-    '.thx-fmark canvas{display:block;width:100%;height:100%}',
+    '.thx-fmark .thx-grad{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:"Google Sans Flex","Google Sans",system-ui,sans-serif;font-weight:800;font-size:clamp(56px,17.4vw,236px);line-height:1;letter-spacing:-.04em;white-space:nowrap;background:linear-gradient(106deg,#b9854a,#ecd6a0 46%,#c79a5e 82%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;opacity:.96;transition:opacity .7s ease;pointer-events:none}',
+    '.thx-fmark canvas{position:absolute;inset:0;display:block;width:100%;height:100%;opacity:0;transition:opacity .7s ease}',
     '.footer .footer-bottom-1{margin:clamp(30px,4vw,52px) auto 0!important;padding-top:24px!important;border-top:1px solid rgba(245,241,232,.1)!important;display:flex!important;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px}',
     '.footer .footer-bottom-1 .copyright{margin:0!important;color:rgba(245,241,232,.46)!important;font:400 13px/1.55 "Google Sans Flex","Google Sans",system-ui,sans-serif!important}',
     '.thx-fsoc{display:flex;gap:10px}',
     '.thx-fsoc a{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:999px;border:1px solid rgba(245,241,232,.16);color:rgba(245,241,232,.72)!important;text-decoration:none!important;transition:transform .2s,background .2s,border-color .2s,color .2s}',
     '.thx-fsoc a:hover{transform:translateY(-3px);background:rgba(245,241,232,.08);border-color:rgba(245,241,232,.45);color:#fff!important}',
     '.thx-fsoc svg{width:17px;height:17px;display:block;fill:currentColor}',
-    '@media(max-width:600px){.footer{text-align:left}.thx-fcols{gap:30px 40px}.footer .footer-col{min-width:42%}.thx-fbtn{width:100%;justify-content:center}.thx-fcta h2{font-size:clamp(26px,7.5vw,34px)}.thx-fmark{height:clamp(82px,29vw,150px)}.footer .footer-bottom-1{justify-content:flex-start}}'
+    '@media(max-width:600px){.footer{text-align:left}.thx-fcols{gap:30px 40px}.footer .footer-col{min-width:42%}.thx-fbtn{width:100%;justify-content:center}.thx-fcta h2{font-size:clamp(26px,7.5vw,34px)}.thx-fmark{height:clamp(82px,29vw,150px)}.thx-fmark .thx-grad{font-size:clamp(46px,19vw,92px)}.footer .footer-bottom-1{justify-content:flex-start}}'
   ].join('');
 
   var ICONS = {
@@ -224,35 +225,37 @@
       }
       return { frame: frame, resize: build };
     }
-    function mount(node) {
-      var inst = null, running = false, raf = 0, reduce = false, tries = 0, started = false, inView = false, done = false;
+    function mount(node, grad) {
+      var inst = null, running = false, raf = 0, reduce = false, tries = 0, started = false, inView = false, done = false, shown = false;
       try { reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
       node.__thxMode = 'init';
+      if (reduce) { node.__thxMode = 'reduced'; return; }   // honour reduced-motion: keep the static gradient wordmark, no swarm
       function loop(now) { if (!running) return; try { inst && inst.frame && inst.frame(now || performance.now()); } catch (e) {} raf = requestAnimationFrame(loop); }
-      function animate() { if (!inst || !inView) return; if (reduce) { try { inst.frame(performance.now()); inst.frame(performance.now() + 16); } catch (e) {} return; } if (!running) { running = true; raf = requestAnimationFrame(loop); } }
+      function show() {
+        if (!inst || !inView) return;
+        if (!running) { running = true; raf = requestAnimationFrame(loop); }
+        if (!shown) { shown = true; try { node.style.opacity = '1'; if (grad) grad.style.opacity = '0'; } catch (e) {} }  // crossfade: solid wordmark dissolves into the swarm
+      }
       function build() {
         if (done || inst) return;
-        // makeSwarm returns null on any failure WITHOUT touching the canvas as 2D, so a transient
-        // WebGL miss (GPU still contended by the nav + hero on first paint) leaves the canvas
-        // pristine and we can simply retry it — instead of locking it into the 2D fallback.
+        // makeSwarm returns null on any (often transient) WebGL miss WITHOUT tainting the canvas,
+        // so we simply retry the same pristine canvas. The gradient wordmark stays fully visible the
+        // whole time (no blank gap, no permanent 2D lock); the swarm just crossfades in once ready.
         var s = null; try { s = makeSwarm(node); } catch (e) { s = null; }
-        if (s) { inst = s; done = true; node.__thxMode = 'swarm'; animate(); return; }
-        if (tries < 14) { tries++; setTimeout(build, 500); return; }
-        // last resort (~7s of no WebGL): draw the 2D gradient wordmark on a FRESH canvas
-        try { var fresh = node.cloneNode(false); if (node.parentNode) node.parentNode.replaceChild(fresh, node); try { io && io.observe(fresh); } catch (e2) {} node = fresh; } catch (e) {}
-        try { inst = fallback(node); done = true; node.__thxMode = 'fallback'; animate(); } catch (e) {}
+        if (s) { inst = s; done = true; node.__thxMode = 'swarm'; show(); return; }
+        if (tries < 60) { tries++; setTimeout(build, 500); return; }   // ~30s of generous retries while the page settles
+        node.__thxMode = 'gradient';                                   // WebGL never came up; the static gradient remains
       }
-      function start() { if (inst) { animate(); return; } if (started) return; started = true; build(); }
+      function start() { inView = true; if (inst) { show(); return; } if (started) return; started = true; build(); }
       function stop() { running = false; if (raf) cancelAnimationFrame(raf); }
-      var io = null;
       try {
-        io = new IntersectionObserver(function (es) { es.forEach(function (en) { inView = en.isIntersecting; if (inView) start(); else stop(); }); }, { threshold: 0.04 });
+        var io = new IntersectionObserver(function (es) { es.forEach(function (en) { if (en.isIntersecting) start(); else { inView = false; stop(); } }); }, { threshold: 0.04 });
         io.observe(node);
       } catch (e) { inView = true; start(); }
       // kick: if the footer is already on-screen once laid out, start without waiting on an IO change event
-      function kick() { try { var r = node.getBoundingClientRect(); if (r.height > 0 && r.top < (window.innerHeight || 0) && r.bottom > 0) { inView = true; start(); } } catch (e) {} }
+      function kick() { try { var r = node.getBoundingClientRect(); if (r.height > 0 && r.top < (window.innerHeight || 0) && r.bottom > 0) start(); } catch (e) {} }
       if (document.readyState === 'complete') setTimeout(kick, 80); else window.addEventListener('load', function () { setTimeout(kick, 80); });
-      document.addEventListener('visibilitychange', function () { if (document.hidden) stop(); else animate(); });
+      document.addEventListener('visibilitychange', function () { if (document.hidden) stop(); else if (inst && inView) show(); });
       var rt; window.addEventListener('resize', function () { clearTimeout(rt); rt = setTimeout(function () { if (inst && inst.resize) try { inst.resize(); } catch (e) {} }, 220); }, { passive: true });
     }
     return { mount: mount };
@@ -311,14 +314,16 @@
     }
 
     var mark = el('div', 'thx-fmark'); mark.setAttribute('role', 'img'); mark.setAttribute('aria-label', 'THEODYX');
-    var cv = el('canvas'); cv.setAttribute('aria-hidden', 'true'); mark.appendChild(cv);
+    var grad = el('div', 'thx-grad'); grad.setAttribute('aria-hidden', 'true'); grad.textContent = 'THEODYX';
+    var cv = el('canvas'); cv.setAttribute('aria-hidden', 'true');
+    mark.appendChild(grad); mark.appendChild(cv);
     if (bottom) {
       bottom.parentNode.insertBefore(mark, bottom);
       if (soc.children.length) bottom.appendChild(soc);
     } else {
       f.appendChild(mark); if (soc.children.length) f.appendChild(soc);
     }
-    try { SW.mount(cv); } catch (e) {}
+    try { SW.mount(cv, grad); } catch (e) {}
   }
 
   function links() {
