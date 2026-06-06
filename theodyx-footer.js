@@ -22,7 +22,7 @@
     '.thx-fbtn .ar{transition:transform .25s}',
     '.thx-fbtn:hover .ar{transform:translateX(4px)}',
     '.thx-fcols{display:flex;flex-wrap:wrap;gap:clamp(34px,6vw,84px)}',
-    '.footer .footer-col{display:flex!important;flex-direction:column!important;align-items:flex-start!important;min-width:118px;gap:0!important}',
+    '.footer .footer-col{position:static!important;float:none!important;inset:auto!important;display:flex!important;flex-direction:column!important;align-items:flex-start!important;min-width:118px;gap:0!important}',
     '.footer .footer-col.thx-hide{display:none!important}',
     '.footer .footer-h{margin:0 0 16px!important;padding:0!important;font:600 12px/1 "Google Sans Flex","Google Sans",system-ui,sans-serif!important;letter-spacing:.18em!important;text-transform:uppercase!important;color:rgba(245,241,232,.42)!important;background:none!important}',
     '.footer .footer-link{position:relative;display:inline-block!important;width:auto!important;padding:7px 0!important;margin:0!important;color:rgba(245,241,232,.62)!important;font:400 15.5px/1.35 "Google Sans Flex","Google Sans",system-ui,sans-serif!important;text-decoration:none!important;background:none!important;transition:color .2s ease,transform .2s ease}',
