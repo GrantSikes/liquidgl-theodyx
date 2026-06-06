@@ -1,0 +1,3029 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#0a0a0c" />
+<title>THEODYX · Wordmark Lab II — Out of This World</title>
+<style>
+  :root{--bg:#0a0a0c;--ink:#f5f1e8}
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Google Sans Flex","Google Sans","Helvetica Neue",system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;overflow-x:hidden}
+  .head{padding:clamp(34px,6vw,76px) clamp(20px,5vw,64px) 14px}
+  .head h1{margin:0 0 10px;font-size:clamp(22px,3.4vw,36px);font-weight:800;letter-spacing:-.02em}
+  .head h1 .g{background:linear-gradient(108deg,#7894f6,#a87cff 44%,#ff8fb1 80%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .head p{margin:0;max-width:66ch;color:rgba(245,241,232,.6);font-size:clamp(14px,1.6vw,16px);line-height:1.6}
+  .ver{position:relative;padding:clamp(30px,5vw,60px) clamp(14px,4vw,52px) clamp(36px,5vw,66px);border-top:1px solid rgba(245,241,232,.08)}
+  .tag{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin:0 0 clamp(14px,2vw,22px);padding:0 clamp(4px,2vw,14px)}
+  .tag b{font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:#fff;font-weight:700}
+  .tag em{font-size:13.5px;color:rgba(245,241,232,.52);font-style:normal}
+  .stage{position:relative;width:100%;height:clamp(120px,28vw,330px);display:flex;align-items:center;justify-content:center;overflow:hidden;border-radius:18px;background:#08080a}
+  .stage canvas{display:block;width:100%;height:100%}
+  .hint{margin:14px clamp(4px,2vw,14px) 0;font-size:12.5px;color:rgba(245,241,232,.4)}
+  .footnote{padding:clamp(28px,5vw,54px) clamp(20px,5vw,64px) clamp(60px,9vw,100px);border-top:1px solid rgba(245,241,232,.08);color:rgba(245,241,232,.55);font-size:14.5px;line-height:1.65}
+  @media (prefers-reduced-motion:reduce){.stage canvas{opacity:.92}}
+</style>
+</head>
+<body>
+  <header class="head">
+    <h1>THEODYX · Wordmark Lab <span class="g">II</span></h1>
+    <p>Ten out-of-this-world treatments — real-time fluid sims, gravitational lensing, GPU particle swarms, holographic foil, volumetric space. Move your cursor or finger across the letters; they react. Built to degrade gracefully and stay smooth on phones. Tell me the ones that make you go <em>whoa</em>.</p>
+  </header>
+
+  <section class="ver"><div class="tag"><b>01 &middot; Liquid Chrome</b><em>Molten brand-metal flows through the letters, reflecting blue to pink</em></div><div class="stage"><canvas data-fx="chrome"></canvas></div><div class="hint">Move your pointer to push the liquid metal; it ripples and drifts on its own at rest</div></section>
+<section class="ver"><div class="tag"><b>02 &middot; Cosmic Nebula</b><em>A living deep-space nebula glowing through the THEODYX letters — drifting clouds, filaments, and parallax starfields in brand blue-purple-pink.</em></div><div class="stage"><canvas data-fx="nebula"></canvas></div><div class="hint">Move your cursor (or tilt your phone&#x27;s view) to parallax through the cloud; it drifts and twinkles on its own at rest.</div></section>
+<section class="ver"><div class="tag"><b>03 &middot; GPU Fluid Dye</b><em>Brand-colored ink swirls through real-time fluid, revealed inside THEODYX.</em></div><div class="stage"><canvas data-fx="fluid"></canvas></div><div class="hint">Move your pointer to push the dye — it flows, swirls, and settles on its own.</div></section>
+<section class="ver"><div class="tag"><b>04 &middot; Holographic Foil</b><em>Iridescent thin-film foil that flexes its spectrum as you tilt the wordmark</em></div><div class="stage"><canvas data-fx="holo"></canvas></div><div class="hint">Move your pointer across the letters to tilt the foil and shift its rainbow; it auto-orbits and sweeps on its own when idle (and on phones).</div></section>
+<section class="ver"><div class="tag"><b>05 &middot; Particle Swarm</b><em>16k GPU particles swarm into THEODYX, then explode and reform around your cursor.</em></div><div class="stage"><canvas data-fx="swarm"></canvas></div><div class="hint">Move or tap over the wordmark to scatter the swarm; it springs back into the letters.</div></section>
+<section class="ver"><div class="tag"><b>06 &middot; Black Hole</b><em>Gravitational lensing bends a starfield and nebula around the THEODYX silhouette, with a Doppler-shifted accretion ring and a near-black event horizon inside the letters.</em></div><div class="stage"><canvas data-fx="blackhole"></canvas></div><div class="hint">Move the pointer (or touch) to drag the mass center and warp the lens; it auto-orbits when idle so it stays alive on a phone at rest.</div></section>
+<section class="ver"><div class="tag"><b>07 &middot; Liquid Light</b><em>Caustic veins of light rippling through the letters like sun on water</em></div><div class="stage"><canvas data-fx="liquid-light"></canvas></div><div class="hint">Move your cursor to drag the caustics — they drift and shimmer on their own at rest.</div></section>
+<section class="ver"><div class="tag"><b>08 &middot; Plasma Lightning</b><em>Tesla-coil crackle and electric filaments arc across the THEODYX letters</em></div><div class="stage"><canvas data-fx="plasma"></canvas></div><div class="hint">Move your cursor to draw a spark; the discharge follows. Auto-crackles at rest.</div></section>
+<section class="ver"><div class="tag"><b>09 &middot; Volumetric Aurora</b><em>Flowing aurora curtains of brand light woven through the THEODYX letters</em></div><div class="stage"><canvas data-fx="aurora"></canvas></div><div class="hint">Move your cursor to push a cool aurora pulse through the curtains</div></section>
+<section class="ver"><div class="tag"><b>10 &middot; Crystal Dispersion</b><em>A faceted jewel of THEODYX, alive with prismatic fire and spectral dispersion.</em></div><div class="stage"><canvas data-fx="crystal"></canvas></div><div class="hint">Move your pointer to swing the studio light across the facets; it auto-orbits at rest.</div></section>
+
+  <div class="footnote">Pick your favorites (rank a few, or mix — “Chrome surface + Nebula colors”). I'll engineer the winner into the live footer, mobile-optimized, with real creator selfies if you want the Faces variant in the mix.</div>
+
+  <!-- FRAMEWORK -->
+  <script>
+  (function(){
+    var THX = window.THX = {};
+    THX.WORD = "THEODYX";
+    THX.BLUE=[0.47,0.58,0.96]; THX.PURP=[0.66,0.49,1.0]; THX.PINK=[1.0,0.56,0.69];
+    THX.dpr = function(){ return Math.min(window.devicePixelRatio||1, 2); };
+    THX.mixc = function(a,b,t){ return [a[0]+(b[0]-a[0])*t, a[1]+(b[1]-a[1])*t, a[2]+(b[2]-a[2])*t]; };
+    THX.textMask = function(cssW, cssH, scale){
+      scale = scale||1;
+      var c=document.createElement("canvas");
+      var w=Math.max(2,Math.floor(cssW*scale)), h=Math.max(2,Math.floor(cssH*scale));
+      c.width=w; c.height=h; var x=c.getContext("2d");
+      var target=w*0.88, fs=h*0.92, i=0;
+      x.textAlign="center"; x.textBaseline="middle";
+      do{ x.font="900 "+fs+"px 'Google Sans Flex','Arial Black',Arial,system-ui,sans-serif";
+          var mw=x.measureText(THX.WORD).width; if(mw<=target||fs<8) break; fs*= target/mw; i++; }while(i<8);
+      x.clearRect(0,0,w,h); x.fillStyle="#fff";
+      x.font="900 "+fs+"px 'Google Sans Flex','Arial Black',Arial,system-ui,sans-serif";
+      x.fillText(THX.WORD, w/2, h/2 + fs*0.02);
+      return {canvas:c,w:w,h:h,fs:fs};
+    };
+    THX.canvas2DFallback = function(stage){
+      var ctx=stage.getContext("2d");
+      function size(){var r=stage.getBoundingClientRect(),d=THX.dpr();stage.width=Math.max(2,r.width*d);stage.height=Math.max(2,r.height*d);}
+      size();
+      return { resize:size, frame:function(now){
+        var w=stage.width,h=stage.height; if(!w)return; ctx.clearRect(0,0,w,h);
+        var g=ctx.createLinearGradient(0,0,w,0); var s=(Math.sin(now/2400)+1)/2;
+        g.addColorStop(0,"#7894f6"); g.addColorStop(Math.max(.02,Math.min(.98,.4+s*.2)),"#a87cff"); g.addColorStop(1,"#ff8fb1");
+        ctx.fillStyle=g; ctx.fillRect(0,0,w,h);
+        var m=THX.textMask(w/THX.dpr(),h/THX.dpr(),THX.dpr());
+        ctx.globalCompositeOperation="destination-in"; ctx.drawImage(m.canvas,0,0,w,h);
+        ctx.globalCompositeOperation="source-over";
+      }};
+    };
+    THX.FX = {};
+  })();
+  </script>
+
+  <script>
+;(function(){
+THX.FX["chrome"] = function(stage){
+  // ---- WebGL context (guarded) ----
+  var gl=null;
+  try{ gl=stage.getContext("webgl",{premultipliedAlpha:false,alpha:true,antialias:true})
+        || stage.getContext("experimental-webgl",{premultipliedAlpha:false,alpha:true,antialias:true}); }
+  catch(e){ gl=null; }
+  if(!gl){ return THX.canvas2DFallback(stage); }
+
+  var VS="attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}";
+
+  // Liquid-chrome fragment shader. GLSL ES 1.00 only.
+  // Domain-warped FBM gives a flowing metal height field; a finite-difference
+  // normal drives a screen-space (2D) reflection + anisotropic specular streaks.
+  var FS=[
+   "precision highp float;",
+   "uniform vec2 uRes;uniform float uT;uniform vec2 uM;uniform sampler2D uMask;",
+   "uniform vec3 uBlue;uniform vec3 uPurp;uniform vec3 uPink;",
+   // hash / value noise
+   "float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453123);}",
+   "float n(vec2 p){vec2 i=floor(p),f=fract(p);vec2 u=f*f*(3.-2.*f);",
+   " return mix(mix(h(i),h(i+vec2(1.,0.)),u.x),mix(h(i+vec2(0.,1.)),h(i+vec2(1.,1.)),u.x),u.y);}",
+   // 5-octave fbm (constant bound)
+   "float fbm(vec2 p){float v=0.,a=.5;for(int i=0;i<5;i++){v+=a*n(p);p=p*2.02+vec2(7.1,3.7);a*=.5;}return v;}",
+   // domain-warped flow field -> the molten metal height
+   "float flow(vec2 p,float t){",
+   "  vec2 q=vec2(fbm(p+vec2(0.,t*0.30)),fbm(p+vec2(5.2,1.3)-t*0.21));",
+   "  vec2 r=vec2(fbm(p+2.4*q+vec2(1.7,9.2)+t*0.15),fbm(p+2.4*q+vec2(8.3,2.8)-t*0.13));",
+   "  return fbm(p+3.0*r);",
+   "}",
+   // simple tonemap to keep highlights from clipping pure white
+   "vec3 tonemap(vec3 c){return c/(c+vec3(0.85));}",
+   "void main(){",
+   "  vec2 uv=gl_FragCoord.xy/max(uRes,vec2(1.));",
+   // sample mask first so we can early-out where there are no letters
+   "  float m=texture2D(uMask,vec2(uv.x,1.0-uv.y)).a;",
+   "  if(m<0.003){ gl_FragColor=vec4(0.); return; }",
+   "  float asp=uRes.x/max(uRes.y,1.);",
+   "  vec2 sp=vec2(uv.x*asp,uv.y);",
+   "  float t=uT*0.16;",
+   // pointer adds a gentle swell to the flow domain
+   "  vec2 mp=vec2(uM.x*asp,uM.y);",
+   "  float md=distance(sp,mp);",
+   "  vec2 warp=(sp-mp)*exp(-md*3.5)*0.25;",
+   "  vec2 fp=sp*3.0+warp;",
+   // height field + finite-difference normal (4 taps)
+   "  float e=0.0016;",
+   "  float c =flow(fp,t);",
+   "  float cx=flow(fp+vec2(e,0.),t);",
+   "  float cy=flow(fp+vec2(0.,e),t);",
+   "  vec2 grad=vec2(cx-c,cy-c)/e;",
+   "  vec3 N=normalize(vec3(-grad*0.12,1.0));",
+   // view + animated light; reflect view about the surface normal
+   "  vec3 V=vec3(0.,0.,1.);",
+   "  vec3 L=normalize(vec3(0.55*sin(uT*0.5),0.55*cos(uT*0.37),0.85));",
+   "  vec3 R=reflect(-V,N);",
+   // fresnel-ish rim + screen-space reflection ramp along the bent normal
+   "  float fres=pow(clamp(1.0-N.z,0.0,1.0),2.5);",
+   "  float refl=clamp(R.y*0.5+0.5,0.0,1.0);",
+   // base metal: blue->purple->pink driven by reflection + height
+   "  float mixA=clamp(refl*0.8+c*0.4,0.0,1.0);",
+   "  vec3 metal=mix(uBlue,uPurp,clamp(mixA*1.4,0.0,1.0));",
+   "  metal=mix(metal,uPink,clamp((mixA-0.55)*2.0,0.0,1.0));",
+   // dark valleys to read as chrome (not flat)
+   "  metal*=mix(0.28,1.05,clamp(c*1.3+0.15,0.0,1.0));",
+   // anisotropic specular streaks (Blinn) + a tight hot spot
+   "  vec3 H=normalize(L+V);",
+   "  float spec=pow(max(dot(N,H),0.0),48.0);",
+   "  float streak=pow(max(dot(N,H),0.0),12.0)*0.5;",
+   "  vec3 col=metal + spec*vec3(1.0,0.96,0.92) + streak*uPink*0.6 + fres*uBlue*0.7;",
+   // tonemap + gentle gamma, scrub NaN (ES1 has no isnan)
+   "  col=tonemap(col);",
+   "  col=pow(clamp(col,0.0,1.0),vec3(0.85));",
+   "  if(!(col.r==col.r)) col=vec3(0.);",
+   "  if(!(col.g==col.g)) col=vec3(0.);",
+   "  if(!(col.b==col.b)) col=vec3(0.);",
+   "  gl_FragColor=vec4(col,m);",
+   "}"].join("\n");
+
+  function sh(tp,s){var o=gl.createShader(tp);gl.shaderSource(o,s);gl.compileShader(o);
+    if(!gl.getShaderParameter(o,gl.COMPILE_STATUS)){console.warn(gl.getShaderInfoLog(o));return null;}return o;}
+  var vs=sh(gl.VERTEX_SHADER,VS), fs=sh(gl.FRAGMENT_SHADER,FS);
+  if(!vs||!fs){ return THX.canvas2DFallback(stage); }
+  var pr=gl.createProgram();gl.attachShader(pr,vs);gl.attachShader(pr,fs);gl.linkProgram(pr);
+  if(!gl.getProgramParameter(pr,gl.LINK_STATUS)){ console.warn(gl.getProgramInfoLog(pr)); return THX.canvas2DFallback(stage); }
+  gl.useProgram(pr);
+
+  var buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+  gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
+  var lp=gl.getAttribLocation(pr,"p");gl.enableVertexAttribArray(lp);gl.vertexAttribPointer(lp,2,gl.FLOAT,false,0,0);
+
+  var uRes=gl.getUniformLocation(pr,"uRes"),
+      uT  =gl.getUniformLocation(pr,"uT"),
+      uM  =gl.getUniformLocation(pr,"uM"),
+      uBlue=gl.getUniformLocation(pr,"uBlue"),
+      uPurp=gl.getUniformLocation(pr,"uPurp"),
+      uPink=gl.getUniformLocation(pr,"uPink");
+
+  var tex=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,tex);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+  gl.uniform1i(gl.getUniformLocation(pr,"uMask"),0);
+
+  // static brand colors (set once)
+  gl.uniform3f(uBlue,THX.BLUE[0],THX.BLUE[1],THX.BLUE[2]);
+  gl.uniform3f(uPurp,THX.PURP[0],THX.PURP[1],THX.PURP[2]);
+  gl.uniform3f(uPink,THX.PINK[0],THX.PINK[1],THX.PINK[2]);
+
+  gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
+
+  var mouse=[0.5,0.55];          // current pointer (auto-drifts when idle)
+  var target=[0.5,0.55];
+  var hasInput=false;
+
+  function size(){
+    var r=stage.getBoundingClientRect(), d=THX.dpr();
+    var w=Math.max(1,Math.floor((r.width||1)*d)), hgt=Math.max(1,Math.floor((r.height||1)*d));
+    stage.width=w; stage.height=hgt;
+    var mk=THX.textMask(r.width||1, r.height||1, d);
+    gl.bindTexture(gl.TEXTURE_2D,tex);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,false);
+    gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,mk.canvas);
+    gl.viewport(0,0,w,hgt);
+  }
+  size();
+
+  stage.addEventListener("pointermove",function(e){
+    var r=stage.getBoundingClientRect();
+    if(!r.width||!r.height) return;
+    target=[(e.clientX-r.left)/r.width, 1-(e.clientY-r.top)/r.height];
+    hasInput=true;
+  });
+
+  var t0=performance.now();
+  function frame(now){
+    var tt=(now-t0)/1000;
+    // idle auto-motion so it looks alive with no pointer (phones at rest)
+    if(!hasInput){ target[0]=0.5+0.30*Math.sin(tt*0.45); target[1]=0.55+0.22*Math.cos(tt*0.33); }
+    // ease toward target (no per-frame allocation: mutate in place)
+    mouse[0]+=(target[0]-mouse[0])*0.06;
+    mouse[1]+=(target[1]-mouse[1])*0.06;
+
+    gl.useProgram(pr);
+    gl.uniform2f(uRes,stage.width,stage.height);
+    gl.uniform1f(uT,tt);
+    gl.uniform2f(uM,mouse[0],mouse[1]);
+    gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,tex);
+    gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+  }
+  return {frame:frame,resize:size};
+};
+})();
+</script>
+<script>
+;(function(){
+THX.FX["nebula"] = function(stage){
+  // ---- WebGL context (guarded) ----
+  var gl=null;
+  try{ gl=stage.getContext("webgl",{premultipliedAlpha:false,alpha:true,antialias:false,depth:false,stencil:false,preserveDrawingBuffer:false}); }catch(e){}
+  if(!gl){ try{ gl=stage.getContext("experimental-webgl",{premultipliedAlpha:false,alpha:true}); }catch(e2){} }
+  if(!gl){ return THX.canvas2DFallback(stage); }
+
+  var VS="attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}";
+
+  // ---- Fragment shader: volumetric nebula window inside the letters ----
+  var FS=[
+  "precision highp float;",
+  "uniform vec2 uRes;",      // backing-store resolution (px)
+  "uniform float uT;",       // time (s)
+  "uniform vec2 uM;",        // pointer 0..1 (y up)
+  "uniform float uLow;",     // 1.0 = low-power path (phones), 0.0 = full quality
+  "uniform sampler2D uMask;",// THEODYX alpha mask
+
+  // ---------- hashes / noise ----------
+  "vec2 h22(vec2 p){vec3 q=fract(vec3(p.xyx)*vec3(123.34,234.34,345.65));q+=dot(q,q.yzx+34.45);return fract(vec2(q.x*q.y,q.y*q.z));}",
+  "float h31(vec3 p){p=fract(p*0.3183099+0.1);p*=17.0;return fract(p.x*p.y*p.z*(p.x+p.y+p.z));}",
+
+  "float vnoise(vec3 x){",
+  " vec3 i=floor(x),f=fract(x);",
+  " f=f*f*(3.0-2.0*f);",
+  " float n000=h31(i+vec3(0,0,0)),n100=h31(i+vec3(1,0,0));",
+  " float n010=h31(i+vec3(0,1,0)),n110=h31(i+vec3(1,1,0));",
+  " float n001=h31(i+vec3(0,0,1)),n101=h31(i+vec3(1,0,1));",
+  " float n011=h31(i+vec3(0,1,1)),n111=h31(i+vec3(1,1,1));",
+  " float x00=mix(n000,n100,f.x),x10=mix(n010,n110,f.x);",
+  " float x01=mix(n001,n101,f.x),x11=mix(n011,n111,f.x);",
+  " return mix(mix(x00,x10,f.y),mix(x01,x11,f.y),f.z);",
+  "}",
+
+  // domain-warped fbm (the nebula density field)
+  // constant loop bound (GLSL ES 1.00); last octave is skipped on low-power
+  "float fbm(vec3 p){",
+  " float v=0.0,a=0.5;",
+  " for(int i=0;i<5;i++){",
+  "  float w=(i==4)?(1.0-uLow):1.0;",
+  "  v+=a*vnoise(p)*w; p=p*2.02+vec3(11.3,7.1,3.7); a*=0.5;",
+  " }",
+  " return v;",
+  "}",
+
+  // ridged variant for filament structure
+  "float ridged(vec3 p){",
+  " float v=0.0,a=0.5;",
+  " for(int i=0;i<4;i++){",
+  "  float w=(i==3)?(1.0-uLow):1.0;",
+  "  float n=vnoise(p); n=1.0-abs(2.0*n-1.0); v+=a*n*n*w; p=p*2.03+vec3(3.1,9.2,5.4); a*=0.5;",
+  " }",
+  " return v;",
+  "}",
+
+  // ---------- starfield (parallax layers) ----------
+  "vec3 stars(vec2 uv,float scale,float par,float tw,float seed){",
+  " vec2 g=uv*scale+vec2(seed*13.0,seed*7.0);",
+  " vec2 id=floor(g);",
+  " vec2 fp=fract(g)-0.5;",
+  " vec2 rnd=h22(id+seed);",
+  " float present=step(0.86,rnd.x);",
+  " vec2 off=(h22(id*1.7+seed)-0.5)*0.7;",
+  " float d=length(fp-off);",
+  " float core=smoothstep(0.16,0.0,d);",
+  " float spike=smoothstep(0.012,0.0,abs(fp.x-off.x))+smoothstep(0.012,0.0,abs(fp.y-off.y));",
+  " spike*=smoothstep(0.30,0.0,d);",
+  " float bri=core+spike*0.45*step(0.95,rnd.y);",
+  " float tw1=0.55+0.45*sin(tw*(1.5+rnd.y*4.0)+rnd.x*30.0);",
+  " bri*=present*tw1;",
+  " vec3 cw=vec3(0.85,0.90,1.0);",
+  " vec3 cb=vec3(0.55,0.66,1.0);",
+  " vec3 cp=vec3(1.0,0.78,0.90);",
+  " vec3 sc=mix(cw,cb,smoothstep(0.0,0.5,rnd.y));",
+  " sc=mix(sc,cp,smoothstep(0.7,1.0,rnd.x)*0.6);",
+  " return sc*bri;",
+  "}",
+
+  // ---------- palette ----------
+  "vec3 brandBlue=vec3(0.471,0.580,0.965);",
+  "vec3 brandPurp=vec3(0.659,0.486,1.0);",
+  "vec3 brandPink=vec3(1.0,0.561,0.694);",
+
+  "void main(){",
+  " vec2 frag=gl_FragCoord.xy;",
+  " vec2 uv=frag/uRes;",
+  " float asp=uRes.x/max(uRes.y,1.0);",
+  " vec2 p=vec2((uv.x-0.5)*asp,(uv.y-0.5));",
+
+  " vec2 par=(uM-0.5);",
+  " float t=uT;",
+  " vec2 drift=vec2(t*0.012, t*0.006);",
+
+  " vec3 col=vec3(0.0);",
+  " float dens=0.0;",
+  " vec2 q=p*1.35 + drift + par*0.06;",
+
+  " vec3 wp=vec3(q*1.6, t*0.03);",
+  " float w1=fbm(wp);",
+  " float w2=fbm(wp+vec3(5.2,1.3,2.1)+w1);",
+  " vec2 warp=vec2(w1,w2)-0.5;",
+  " vec2 sp=q + warp*0.55;",
+
+  " // depth slabs marched front-to-back (constant bound 5; 5th off on phones)",
+  " const float SLABN=5.0;",
+  " for(int s=0;s<5;s++){",
+  "  float fs=float(s);",
+  "  float sw=(s==4)?(1.0-uLow):1.0;",
+  "  float depth=fs/SLABN;",
+  "  vec2 layerOff=par*(0.02+depth*0.10) + vec2(t*0.01*(1.0-depth), -t*0.006*depth);",
+  "  vec3 cp3=vec3((sp+layerOff)*(1.0+depth*0.6), depth*2.0 + t*0.02);",
+  "  float d=fbm(cp3*1.8);",
+  "  float fil=ridged(cp3*2.6 + d);",
+  "  float body=smoothstep(0.42,0.95,d);",
+  "  float fl=smoothstep(0.55,1.0,fil)*body;",
+  "  float local=(body*0.6 + fl*0.9)*sw;",
+  "  float hue=clamp(d*1.1 - depth*0.25 + fl*0.5, 0.0, 1.0);",
+  "  vec3 e=mix(brandBlue,brandPurp,smoothstep(0.0,0.55,hue));",
+  "  e=mix(e,brandPink,smoothstep(0.55,1.0,hue));",
+  "  float atten=mix(1.0,0.35,depth);",
+  "  float vis=clamp(1.0-dens*0.55,0.0,1.0);",
+  "  col+=e*local*atten*vis;",
+  "  dens+=local*atten;",
+  " }",
+
+  " float core=smoothstep(0.6,2.2,dens);",
+  " col+=mix(brandPurp,brandPink,core)*core*0.6;",
+
+  " float dust=fbm(vec3(sp*3.2 - drift*2.0, t*0.05));",
+  " float lane=smoothstep(0.62,0.30,dust);",
+  " col*=mix(1.0,0.45,lane*0.7);",
+
+  " // ---- starfields: far + mid always; near off on phones ----",
+  " vec2 suv=p + par*vec2(0.015,0.015);",
+  " vec3 st=vec3(0.0);",
+  " st+=stars(suv+drift*0.3,        9.0, 0.2, t*0.9, 1.0)*0.55;",
+  " st+=stars(suv*1.0+par*0.02,    14.0, 0.5, t*1.3, 2.0)*0.8;",
+  " st+=stars(suv*1.0+par*0.05,    22.0, 1.0, t*1.8, 3.0)*1.0*(1.0-uLow);",
+  " float starVis=clamp(1.0-dens*0.7,0.15,1.0);",
+  " col+=st*starVis;",
+
+  " vec3 deep=mix(vec3(0.02,0.025,0.05), vec3(0.05,0.03,0.08), uv.y);",
+  " col+=deep*0.6;",
+
+  " float vig=smoothstep(1.25,0.2,length(p*vec2(1.0/max(asp,0.0001),1.0))*1.1);",
+  " col*=mix(0.7,1.15,vig);",
+
+  " col+=pow(max(col-0.6,0.0),vec3(1.5))*0.6;",
+
+  " col=col/(1.0+col);",
+  " col=pow(clamp(col,0.0,1.0),vec3(0.85));",
+  " float lum=dot(col,vec3(0.299,0.587,0.114));",
+  " col=mix(vec3(lum),col,1.18);",
+
+  " float m=texture2D(uMask,vec2(uv.x,1.0-uv.y)).a;",
+  " m=clamp(m,0.0,1.0);",
+
+  " // guard NaN/Inf per channel (ES1.00-safe: float selectors only)",
+  " vec3 bad=vec3(0.0);",
+  " if(!(col.x>=0.0)&&!(col.x<=0.0)) bad.x=1.0;",
+  " if(!(col.y>=0.0)&&!(col.y<=0.0)) bad.y=1.0;",
+  " if(!(col.z>=0.0)&&!(col.z<=0.0)) bad.z=1.0;",
+  " col=col*(1.0-bad);",
+  " col=clamp(col,0.0,1.0);",
+
+  " gl_FragColor=vec4(col,m);",
+  "}"].join("\n");
+
+  // ---- compile helpers ----
+  function sh(tp,src){
+    var o=gl.createShader(tp); gl.shaderSource(o,src); gl.compileShader(o);
+    if(!gl.getShaderParameter(o,gl.COMPILE_STATUS)){ console.warn("nebula shader:",gl.getShaderInfoLog(o)); return null; }
+    return o;
+  }
+  var vs=sh(gl.VERTEX_SHADER,VS), fs=sh(gl.FRAGMENT_SHADER,FS);
+  if(!vs||!fs){ return THX.canvas2DFallback(stage); }
+  var pr=gl.createProgram(); gl.attachShader(pr,vs); gl.attachShader(pr,fs); gl.linkProgram(pr);
+  if(!gl.getProgramParameter(pr,gl.LINK_STATUS)){ console.warn("nebula link:",gl.getProgramInfoLog(pr)); return THX.canvas2DFallback(stage); }
+  gl.useProgram(pr);
+
+  // ---- fullscreen tri-strip ----
+  var buf=gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+  gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1, 1,-1, -1,1, 1,1]),gl.STATIC_DRAW);
+  var lp=gl.getAttribLocation(pr,"p"); gl.enableVertexAttribArray(lp);
+  gl.vertexAttribPointer(lp,2,gl.FLOAT,false,0,0);
+
+  // ---- uniforms ----
+  var uRes=gl.getUniformLocation(pr,"uRes"),
+      uT=gl.getUniformLocation(pr,"uT"),
+      uM=gl.getUniformLocation(pr,"uM"),
+      uLow=gl.getUniformLocation(pr,"uLow");
+  gl.uniform1i(gl.getUniformLocation(pr,"uMask"),0);
+
+  // ---- mask texture ----
+  var tex=gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D,tex);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+
+  gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
+
+  // ---- pointer (smoothed) ----
+  var mouse=[0.5,0.5], target=[0.5,0.5];
+  stage.addEventListener("pointermove",function(e){
+    var r=stage.getBoundingClientRect();
+    if(r.width<=0||r.height<=0) return;
+    target[0]=(e.clientX-r.left)/r.width;
+    target[1]=1-(e.clientY-r.top)/r.height;
+  },{passive:true});
+
+  // ---- low-power detection (phones / coarse pointer / few cores / large surface) ----
+  var coarse=false;
+  try{ coarse=(typeof matchMedia==="function") && matchMedia("(pointer:coarse)").matches; }catch(e){}
+  var smallVP=false;
+  try{ smallVP=(Math.min(screen.width,screen.height)<=820); }catch(e){}
+  var fewCores=false;
+  try{ fewCores=(navigator.hardwareConcurrency||8)<=4; }catch(e){}
+  var lowFlag=0.0;
+
+  function size(){
+    var r=stage.getBoundingClientRect();
+    var cssW=Math.max(1,r.width), cssH=Math.max(1,r.height);
+    var d=THX.dpr();
+    var heavyArea=cssW*cssH*d*d;
+    var phoneish=coarse||smallVP||fewCores||(cssW<=560);
+    var rscale=1.0;
+    if(phoneish) rscale=0.72;
+    if(heavyArea>2600000) rscale=Math.min(rscale,0.66);
+    lowFlag=(phoneish||heavyArea>2200000)?1.0:0.0;
+
+    var w=Math.max(1,Math.floor(cssW*d*rscale)),
+        hh=Math.max(1,Math.floor(cssH*d*rscale));
+    if(stage.width!==w||stage.height!==hh){ stage.width=w; stage.height=hh; }
+    var m=THX.textMask(cssW,cssH,d*rscale);
+    gl.bindTexture(gl.TEXTURE_2D,tex);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,false);
+    gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,m.canvas);
+    gl.viewport(0,0,stage.width,stage.height);
+  }
+  size();
+
+  var t0=performance.now();
+  function frame(now){
+    var tt=(now-t0)/1000;
+    var ax=0.5+0.18*Math.sin(tt*0.23), ay=0.5+0.12*Math.cos(tt*0.17);
+    mouse[0]+=( (target[0]*0.7+ax*0.3) - mouse[0])*0.05;
+    mouse[1]+=( (target[1]*0.7+ay*0.3) - mouse[1])*0.05;
+
+    gl.useProgram(pr);
+    gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+    gl.enableVertexAttribArray(lp);
+    gl.vertexAttribPointer(lp,2,gl.FLOAT,false,0,0);
+    gl.uniform2f(uRes,stage.width,stage.height);
+    gl.uniform1f(uT,tt);
+    gl.uniform2f(uM,mouse[0],mouse[1]);
+    gl.uniform1f(uLow,lowFlag);
+    gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D,tex);
+    gl.clearColor(0,0,0,0); gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+  }
+  return {frame:frame,resize:size};
+};
+})();
+</script>
+<script>
+;(function(){
+THX.FX["fluid"] = function(stage){
+  // ===== GPU Fluid Dye =====
+  // Real-time Navier-Stokes: advect -> divergence -> Jacobi pressure -> gradient
+  // subtract -> vorticity confinement. Brand-colored dye revealed inside THEODYX.
+  var gl=null;
+  try{ gl=stage.getContext("webgl",{premultipliedAlpha:false,alpha:true,antialias:false,depth:false,stencil:false,preserveDrawingBuffer:false}); }catch(e){}
+  if(!gl){ return THX.canvas2DFallback(stage); }
+
+  // ---- float texture support (required for the sim) ----
+  var hasFloat = gl.getExtension("OES_texture_float");
+  var hasHalf  = gl.getExtension("OES_texture_half_float");
+  gl.getExtension("OES_texture_float_linear");
+  gl.getExtension("OES_texture_half_float_linear");
+  var TYPE;
+  if(hasFloat){ TYPE=gl.FLOAT; }
+  else if(hasHalf){ TYPE=hasHalf.HALF_FLOAT_OES; }
+  else { return THX.canvas2DFallback(stage); }
+
+  // ---- shared GL helpers ----
+  function sh(tp,src){
+    var o=gl.createShader(tp); gl.shaderSource(o,src); gl.compileShader(o);
+    if(!gl.getShaderParameter(o,gl.COMPILE_STATUS)){ console.warn(gl.getShaderInfoLog(o)); return null; }
+    return o;
+  }
+  function prog(vsrc,fsrc){
+    var v=sh(gl.VERTEX_SHADER,vsrc), f=sh(gl.FRAGMENT_SHADER,fsrc);
+    if(!v||!f) return null;
+    var p=gl.createProgram(); gl.attachShader(p,v); gl.attachShader(p,f); gl.linkProgram(p);
+    if(!gl.getProgramParameter(p,gl.LINK_STATUS)){ console.warn(gl.getProgramInfoLog(p)); return null; }
+    return p;
+  }
+
+  // fullscreen triangle-strip quad
+  var quad=gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER,quad);
+  gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1, 1,-1, -1,1, 1,1]),gl.STATIC_DRAW);
+
+  var VS=[
+    "attribute vec2 p;",
+    "varying vec2 vUv;",
+    "void main(){ vUv = p*0.5+0.5; gl_Position=vec4(p,0.0,1.0); }"
+  ].join("\n");
+
+  // ---- fragment programs ----
+  // common header
+  var H="precision highp float;\nvarying vec2 vUv;\n";
+
+  // Advection (semi-Lagrangian), with dissipation
+  var FS_ADVECT = H+[
+    "uniform sampler2D uVel;",   // velocity field (source coords)
+    "uniform sampler2D uSrc;",   // quantity to advect
+    "uniform vec2 uTexel;",      // 1/sim size
+    "uniform float uDt;",
+    "uniform float uDiss;",
+    "void main(){",
+    "  vec2 vel = texture2D(uVel, vUv).xy;",
+    "  vec2 coord = vUv - uDt * vel * uTexel;",
+    "  vec4 q = texture2D(uSrc, coord);",
+    "  gl_FragColor = uDiss * q;",
+    "}"
+  ].join("\n");
+
+  // Curl of velocity (z component) -> stored in r
+  var FS_CURL = H+[
+    "uniform sampler2D uVel;",
+    "uniform vec2 uTexel;",
+    "void main(){",
+    "  float l = texture2D(uVel, vUv-vec2(uTexel.x,0.0)).y;",
+    "  float r = texture2D(uVel, vUv+vec2(uTexel.x,0.0)).y;",
+    "  float b = texture2D(uVel, vUv-vec2(0.0,uTexel.y)).x;",
+    "  float t = texture2D(uVel, vUv+vec2(0.0,uTexel.y)).x;",
+    "  float curl = 0.5*((r-l)-(t-b));",
+    "  gl_FragColor = vec4(curl,0.0,0.0,1.0);",
+    "}"
+  ].join("\n");
+
+  // Vorticity confinement -> adds swirling force to velocity
+  var FS_VORT = H+[
+    "uniform sampler2D uVel;",
+    "uniform sampler2D uCurl;",
+    "uniform vec2 uTexel;",
+    "uniform float uDt;",
+    "uniform float uCurlAmt;",
+    "void main(){",
+    "  float l = abs(texture2D(uCurl, vUv-vec2(uTexel.x,0.0)).x);",
+    "  float r = abs(texture2D(uCurl, vUv+vec2(uTexel.x,0.0)).x);",
+    "  float b = abs(texture2D(uCurl, vUv-vec2(0.0,uTexel.y)).x);",
+    "  float t = abs(texture2D(uCurl, vUv+vec2(0.0,uTexel.y)).x);",
+    "  float c = texture2D(uCurl, vUv).x;",
+    "  vec2 grad = vec2(r-l, t-b)*0.5;",
+    "  float len = max(length(grad), 1e-5);",
+    "  vec2 N = grad/len;",
+    "  vec2 force = uCurlAmt * c * vec2(N.y, -N.x);",
+    "  vec2 vel = texture2D(uVel, vUv).xy;",
+    "  vel += force * uDt;",
+    "  vel = clamp(vel, -1000.0, 1000.0);",
+    "  gl_FragColor = vec4(vel,0.0,1.0);",
+    "}"
+  ].join("\n");
+
+  // Divergence of velocity
+  var FS_DIV = H+[
+    "uniform sampler2D uVel;",
+    "uniform vec2 uTexel;",
+    "void main(){",
+    "  float l = texture2D(uVel, vUv-vec2(uTexel.x,0.0)).x;",
+    "  float r = texture2D(uVel, vUv+vec2(uTexel.x,0.0)).x;",
+    "  float b = texture2D(uVel, vUv-vec2(0.0,uTexel.y)).y;",
+    "  float t = texture2D(uVel, vUv+vec2(0.0,uTexel.y)).y;",
+    "  float div = 0.5*((r-l)+(t-b));",
+    "  gl_FragColor = vec4(div,0.0,0.0,1.0);",
+    "}"
+  ].join("\n");
+
+  // Jacobi pressure iteration
+  var FS_PRESS = H+[
+    "uniform sampler2D uPress;",
+    "uniform sampler2D uDiv;",
+    "uniform vec2 uTexel;",
+    "void main(){",
+    "  float l = texture2D(uPress, vUv-vec2(uTexel.x,0.0)).x;",
+    "  float r = texture2D(uPress, vUv+vec2(uTexel.x,0.0)).x;",
+    "  float b = texture2D(uPress, vUv-vec2(0.0,uTexel.y)).x;",
+    "  float t = texture2D(uPress, vUv+vec2(0.0,uTexel.y)).x;",
+    "  float d = texture2D(uDiv, vUv).x;",
+    "  float p = (l+r+b+t - d)*0.25;",
+    "  gl_FragColor = vec4(p,0.0,0.0,1.0);",
+    "}"
+  ].join("\n");
+
+  // Subtract pressure gradient -> makes velocity divergence-free
+  var FS_GRAD = H+[
+    "uniform sampler2D uPress;",
+    "uniform sampler2D uVel;",
+    "uniform vec2 uTexel;",
+    "void main(){",
+    "  float l = texture2D(uPress, vUv-vec2(uTexel.x,0.0)).x;",
+    "  float r = texture2D(uPress, vUv+vec2(uTexel.x,0.0)).x;",
+    "  float b = texture2D(uPress, vUv-vec2(0.0,uTexel.y)).x;",
+    "  float t = texture2D(uPress, vUv+vec2(0.0,uTexel.y)).x;",
+    "  vec2 vel = texture2D(uVel, vUv).xy;",
+    "  vel -= 0.5*vec2(r-l, t-b);",
+    "  gl_FragColor = vec4(vel,0.0,1.0);",
+    "}"
+  ].join("\n");
+
+  // Gaussian-ish splat: inject velocity (into vel buffer) or dye (into dye buffer)
+  var FS_SPLAT = H+[
+    "uniform sampler2D uTarget;",
+    "uniform vec2 uPoint;",     // sim-space 0..1
+    "uniform vec3 uColor;",     // value to add (xyz)
+    "uniform float uRadius;",
+    "uniform float uAspect;",
+    "void main(){",
+    "  vec2 d = vUv - uPoint;",
+    "  d.x *= uAspect;",
+    "  float g = exp(-dot(d,d)/max(uRadius,1e-6));",
+    "  vec3 base = texture2D(uTarget, vUv).xyz;",
+    "  gl_FragColor = vec4(base + g*uColor, 1.0);",
+    "}"
+  ].join("\n");
+
+  // Final display: sample dye, tone-map, add subtle bloom/specular, mask to text
+  var FS_DISP = H+[
+    "uniform sampler2D uDye;",
+    "uniform sampler2D uVel;",
+    "uniform sampler2D uMask;",
+    "uniform vec2 uTexel;",
+    "uniform float uT;",
+    "vec3 aces(vec3 x){",
+    "  return clamp((x*(2.51*x+0.03))/(x*(2.43*x+0.59)+0.14),0.0,1.0);",
+    "}",
+    "void main(){",
+    "  vec2 uv = vUv;",
+    "  vec3 dye = texture2D(uDye, uv).rgb;",
+    "  // normal from dye luminance -> fake illumination / sheen",
+    "  float lc = dot(texture2D(uDye, uv).rgb, vec3(0.299,0.587,0.114));",
+    "  float lx = dot(texture2D(uDye, uv+vec2(uTexel.x,0.0)).rgb, vec3(0.299,0.587,0.114));",
+    "  float ly = dot(texture2D(uDye, uv+vec2(0.0,uTexel.y)).rgb, vec3(0.299,0.587,0.114));",
+    "  vec3 N = normalize(vec3(lc-lx, lc-ly, 0.18));",
+    "  vec3 L = normalize(vec3(0.55,0.65,0.85));",
+    "  float spec = pow(max(dot(N,L),0.0), 22.0);",
+    "  float rim  = pow(1.0-clamp(N.z,0.0,1.0), 2.0);",
+    "  vec3 col = dye;",
+    "  col += spec*0.9*vec3(0.8,0.85,1.0);",
+    "  col += rim*0.12*vec3(0.5,0.45,0.8);",
+    "  // velocity shimmer: faint chroma where flow is fast",
+    "  float sp = length(texture2D(uVel, uv).xy)*0.004;",
+    "  col += sp*vec3(0.10,0.06,0.16);",
+    "  col = aces(col*1.25);",
+    "  // gamma-ish lift for richness",
+    "  col = pow(col, vec3(0.86));",
+    "  float lum = dot(col, vec3(0.299,0.587,0.114));",
+    "  float m = texture2D(uMask, vec2(uv.x, 1.0-uv.y)).a;",
+    "  // alpha follows both the text mask and how much dye/light is present",
+    "  float a = m * clamp(lum*1.7 + 0.06, 0.0, 1.0);",
+    "  gl_FragColor = vec4(col, a);",
+    "}"
+  ].join("\n");
+
+  // compile everything; bail to fallback on any failure
+  var pAdvect=prog(VS,FS_ADVECT), pCurl=prog(VS,FS_CURL), pVort=prog(VS,FS_VORT),
+      pDiv=prog(VS,FS_DIV), pPress=prog(VS,FS_PRESS), pGrad=prog(VS,FS_GRAD),
+      pSplat=prog(VS,FS_SPLAT), pDisp=prog(VS,FS_DISP);
+  if(!pAdvect||!pCurl||!pVort||!pDiv||!pPress||!pGrad||!pSplat||!pDisp){
+    return THX.canvas2DFallback(stage);
+  }
+
+  // cache attribute + uniform locations
+  function loc(p,names){ var o={}; for(var i=0;i<names.length;i++){ o[names[i]]=gl.getUniformLocation(p,names[i]); } o._pos=gl.getAttribLocation(p,"p"); return o; }
+  var uAdvect=loc(pAdvect,["uVel","uSrc","uTexel","uDt","uDiss"]);
+  var uCurl  =loc(pCurl,  ["uVel","uTexel"]);
+  var uVort  =loc(pVort,  ["uVel","uCurl","uTexel","uDt","uCurlAmt"]);
+  var uDiv   =loc(pDiv,   ["uVel","uTexel"]);
+  var uPress =loc(pPress, ["uPress","uDiv","uTexel"]);
+  var uGrad  =loc(pGrad,  ["uPress","uVel","uTexel"]);
+  var uSplat =loc(pSplat, ["uTarget","uPoint","uColor","uRadius","uAspect"]);
+  var uDisp  =loc(pDisp,  ["uDye","uVel","uMask","uTexel","uT"]);
+
+  function bindQuad(p){ gl.bindBuffer(gl.ARRAY_BUFFER,quad); gl.enableVertexAttribArray(p._pos); gl.vertexAttribPointer(p._pos,2,gl.FLOAT,false,0,0); }
+
+  // ---- FBO / texture infrastructure ----
+  function makeTex(w,h,filter){
+    var t=gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D,t);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,filter);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,filter);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+    gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,w,h,0,gl.RGBA,TYPE,null);
+    return t;
+  }
+  function makeFBO(w,h,filter){
+    var t=makeTex(w,h,filter);
+    var f=gl.createFramebuffer();
+    gl.bindFramebuffer(gl.FRAMEBUFFER,f);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER,gl.COLOR_ATTACHMENT0,gl.TEXTURE_2D,t,0);
+    return {tex:t,fbo:f,w:w,h:h};
+  }
+  function makeDouble(w,h,filter){
+    var a=makeFBO(w,h,filter), b=makeFBO(w,h,filter);
+    return {
+      read:a, write:b,
+      swap:function(){ var tmp=this.read; this.read=this.write; this.write=tmp; }
+    };
+  }
+
+  // verify the float FBO is actually renderable AT THE FILTER WE WILL USE.
+  // Many devices (esp. iOS Safari with half-float) advertise the extension and
+  // can render to a NEAREST attachment but NOT a LINEAR-filtered one. The sim
+  // uses LINEAR for smooth advection, so probe LINEAR first; if that fails,
+  // retry NEAREST (blockier but valid); only then fall back to the 2D gradient.
+  function probeFilter(filter){
+    var ok=false, probe=null;
+    try{
+      probe=makeFBO(4,4,filter);
+      ok=(gl.checkFramebufferStatus(gl.FRAMEBUFFER)===gl.FRAMEBUFFER_COMPLETE);
+      if(ok){
+        // actually attempt a clear+draw-free render path validation
+        gl.viewport(0,0,4,4);
+        gl.clearColor(0,0,0,1); gl.clear(gl.COLOR_BUFFER_BIT);
+        if(gl.getError()!==gl.NO_ERROR) ok=false;
+      }
+    }catch(e){ ok=false; }
+    gl.bindFramebuffer(gl.FRAMEBUFFER,null);
+    if(probe){ gl.deleteFramebuffer(probe.fbo); gl.deleteTexture(probe.tex); }
+    return ok;
+  }
+  // sim filter: prefer LINEAR (smoother advection) but accept NEAREST.
+  var simFilter;
+  if(probeFilter(gl.LINEAR)){ simFilter=gl.LINEAR; }
+  else if(probeFilter(gl.NEAREST)){ simFilter=gl.NEAREST; }
+  else { return THX.canvas2DFallback(stage); }
+
+  // ---- simulation grid (modest, scaled to device) ----
+  var SIM = 0, simW=0, simH=0, aspect=1;
+  var vel, dye, curl, divg, press;
+
+  // release a single FBO bundle's GPU resources
+  function freeFBO(b){ if(b){ if(b.fbo) gl.deleteFramebuffer(b.fbo); if(b.tex) gl.deleteTexture(b.tex); } }
+  function freeDouble(d){ if(d){ freeFBO(d.read); freeFBO(d.write); } }
+  // release all previously-allocated sim fields (prevents GPU leak on resize)
+  function freeSim(){
+    freeDouble(vel); freeDouble(dye); freeDouble(press);
+    freeFBO(curl); freeFBO(divg);
+    vel=dye=press=curl=divg=null;
+  }
+
+  function buildSim(){
+    var r=stage.getBoundingClientRect();
+    aspect = Math.max(0.0001, r.width / Math.max(1,r.height));
+    var isPhone = Math.min(window.innerWidth, window.innerHeight) < 760;
+    SIM = isPhone ? 128 : 200;
+    // grid follows aspect so dye doesn't stretch
+    if(aspect>=1){ simW=SIM; simH=Math.max(32,Math.round(SIM/aspect)); }
+    else         { simH=SIM; simW=Math.max(32,Math.round(SIM*aspect)); }
+
+    // free any prior allocation before reallocating (resize-safe)
+    freeSim();
+
+    // (re)allocate fields
+    vel  = makeDouble(simW,simH,simFilter);
+    dye  = makeDouble(simW,simH,simFilter);
+    press= makeDouble(simW,simH,gl.NEAREST);
+    curl = makeFBO(simW,simH,gl.NEAREST);
+    divg = makeFBO(simW,simH,gl.NEAREST);
+
+    // clear all sim buffers to zero
+    [vel.read,vel.write,dye.read,dye.write,press.read,press.write,curl,divg].forEach(function(b){
+      gl.bindFramebuffer(gl.FRAMEBUFFER,b.fbo);
+      gl.viewport(0,0,b.w,b.h);
+      gl.clearColor(0,0,0,1); gl.clear(gl.COLOR_BUFFER_BIT);
+    });
+    gl.bindFramebuffer(gl.FRAMEBUFFER,null);
+  }
+
+  // ---- text mask texture (display only) ----
+  var maskTex=gl.createTexture();
+  function buildMask(){
+    var r=stage.getBoundingClientRect(), d=THX.dpr();
+    var m=THX.textMask(r.width,r.height,d);
+    gl.bindTexture(gl.TEXTURE_2D,maskTex);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+    gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,m.canvas);
+  }
+
+  // ---- backing store sizing ----
+  function size(){
+    var r=stage.getBoundingClientRect(), d=THX.dpr();
+    var W=Math.max(1,Math.floor(r.width*d)), Hh=Math.max(1,Math.floor(r.height*d));
+    if(stage.width!==W||stage.height!==Hh){ stage.width=W; stage.height=Hh; }
+    buildSim();
+    buildMask();
+  }
+
+  // ---- draw helpers ----
+  function drawTo(target){
+    gl.bindFramebuffer(gl.FRAMEBUFFER,target.fbo);
+    gl.viewport(0,0,target.w,target.h);
+    gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+  }
+  function bindTex(unit,tex,locU){
+    gl.activeTexture(gl.TEXTURE0+unit);
+    gl.bindTexture(gl.TEXTURE_2D,tex);
+    gl.uniform1i(locU,unit);
+  }
+
+  // splat into a double-buffered field (reads current, writes new, swaps)
+  function splat(field, px,py, cx,cy,cz, radius){
+    gl.useProgram(pSplat); bindQuad(uSplat);
+    bindTex(0, field.read.tex, uSplat.uTarget);
+    gl.uniform2f(uSplat.uPoint, px,py);
+    gl.uniform3f(uSplat.uColor, cx,cy,cz);
+    gl.uniform1f(uSplat.uRadius, radius);
+    gl.uniform1f(uSplat.uAspect, aspect);
+    drawTo(field.write);
+    field.swap();
+  }
+
+  // ---- interaction state ----
+  var pointer={x:0.5,y:0.5,px:0.5,py:0.5,down:false,moved:false};
+  function setPointer(e){
+    var r=stage.getBoundingClientRect();
+    var nx=(e.clientX-r.left)/Math.max(1,r.width);
+    var ny=1.0-(e.clientY-r.top)/Math.max(1,r.height); // sim y-up
+    pointer.px=pointer.x; pointer.py=pointer.y;
+    pointer.x=nx; pointer.y=ny; pointer.moved=true;
+  }
+  stage.addEventListener("pointermove",function(e){ setPointer(e); },{passive:true});
+  stage.addEventListener("pointerdown",function(e){ pointer.down=true; setPointer(e); pointer.px=pointer.x; pointer.py=pointer.y; },{passive:true});
+  window.addEventListener("pointerup",function(){ pointer.down=false; },{passive:true});
+
+  // ---- brand palette (0..1) ----
+  var B=THX.BLUE, P=THX.PURP, K=THX.PINK;
+  function paletteAt(t){
+    // cycle blue->purple->pink->purple...
+    t = t - Math.floor(t);
+    if(t<0.5) return THX.mixc(B,P, t*2.0);
+    return THX.mixc(P,K, (t-0.5)*2.0);
+  }
+
+  size();
+
+  // ---- timing & sim params ----
+  var t0=performance.now(), last=t0, accum=0;
+  var DT=1/60;               // fixed sim step
+  var PRESS_ITER=20;         // Jacobi iterations
+  var VEL_DISS=0.0;          // recomputed per-size below
+  var DYE_DISS=0.0;
+  function tuneDissipation(){
+    // dissipation per step; gentle so smoke lingers but never saturates
+    VEL_DISS = 0.992;
+    DYE_DISS = 0.990;
+  }
+  tuneDissipation();
+
+  // ambient auto-injection emitters so it's alive with zero input
+  var emitters=[
+    {ox:0.18,oy:0.40,sx:0.7,sy:1.1,fx:1.0,fy:1.0,ph:0.0,  ch:0.00},
+    {ox:0.50,oy:0.55,sx:1.0,sy:0.6,fx:0.7,fy:1.3,ph:2.1,  ch:0.33},
+    {ox:0.82,oy:0.45,sx:0.8,sy:1.0,fx:1.2,fy:0.8,ph:4.2,  ch:0.66}
+  ];
+
+  function simStep(now){
+    var txx=1/simW, txy=1/simH;   // texel size (scalars, no per-frame array alloc)
+    var tSec=(now-t0)/1000;
+
+    // 1) advect velocity by itself
+    gl.useProgram(pAdvect); bindQuad(uAdvect);
+    bindTex(0, vel.read.tex, uAdvect.uVel);
+    bindTex(1, vel.read.tex, uAdvect.uSrc);
+    gl.uniform2f(uAdvect.uTexel, txx,txy);
+    gl.uniform1f(uAdvect.uDt, DT*simW); // scale: velocity stored in grid units
+    gl.uniform1f(uAdvect.uDiss, VEL_DISS);
+    drawTo(vel.write); vel.swap();
+
+    // 2) vorticity confinement (curl then apply)
+    gl.useProgram(pCurl); bindQuad(uCurl);
+    bindTex(0, vel.read.tex, uCurl.uVel);
+    gl.uniform2f(uCurl.uTexel, txx,txy);
+    drawTo(curl);
+
+    gl.useProgram(pVort); bindQuad(uVort);
+    bindTex(0, vel.read.tex, uVort.uVel);
+    bindTex(1, curl.tex, uVort.uCurl);
+    gl.uniform2f(uVort.uTexel, txx,txy);
+    gl.uniform1f(uVort.uDt, DT);
+    gl.uniform1f(uVort.uCurlAmt, 26.0);
+    drawTo(vel.write); vel.swap();
+
+    // 3) ambient + pointer injection (velocity + dye)
+    // ambient swirls
+    for(var i=0;i<3;i++){
+      var em=emitters[i];
+      var a = tSec*0.5*em.fx + em.ph;
+      var px = em.ox + 0.06*Math.cos(a*em.fx);
+      var py = em.oy + 0.05*Math.sin(a*em.fy*1.3+em.ph);
+      var ang = tSec*0.8 + em.ph;
+      var fx = Math.cos(ang)*em.sx*120.0;
+      var fy = Math.sin(ang*1.07+1.0)*em.sy*120.0;
+      splat(vel, px,py, fx,fy,0.0, 0.0009);
+      var col=paletteAt(tSec*0.045 + em.ch);
+      var pulse=0.35+0.25*Math.sin(tSec*0.9+em.ph*1.7);
+      splat(dye, px,py, col[0]*pulse, col[1]*pulse, col[2]*pulse, 0.00045);
+    }
+    // a slow drifting global current keeps the whole field breathing
+    (function(){
+      var gx=0.5+0.34*Math.sin(tSec*0.21);
+      var gy=0.5+0.22*Math.cos(tSec*0.17);
+      var fx=Math.cos(tSec*0.6)*40.0, fy=Math.sin(tSec*0.45)*30.0;
+      splat(vel, gx,gy, fx,fy,0.0, 0.004);
+    })();
+
+    // pointer drag: inject velocity along motion + brand dye
+    if(pointer.moved){
+      var dx=(pointer.x-pointer.px), dy=(pointer.y-pointer.py);
+      var speed=Math.sqrt(dx*dx+dy*dy);
+      var fxp=dx*6000.0, fyp=dy*6000.0;
+      // clamp force magnitude
+      var fm=Math.sqrt(fxp*fxp+fyp*fyp), MAX=900.0;
+      if(fm>MAX){ fxp*=MAX/fm; fyp*=MAX/fm; }
+      splat(vel, pointer.x,pointer.y, fxp,fyp,0.0, 0.0016);
+      var dc=paletteAt(tSec*0.08 + 0.15);
+      var amp=Math.min(1.0, 0.4+speed*14.0);
+      splat(dye, pointer.x,pointer.y, dc[0]*amp, dc[1]*amp, dc[2]*amp, 0.0010);
+      pointer.moved=false;
+    }
+
+    // 4) projection: divergence
+    gl.useProgram(pDiv); bindQuad(uDiv);
+    bindTex(0, vel.read.tex, uDiv.uVel);
+    gl.uniform2f(uDiv.uTexel, txx,txy);
+    drawTo(divg);
+
+    // clear pressure to zero before iterating
+    gl.bindFramebuffer(gl.FRAMEBUFFER,press.read.fbo);
+    gl.viewport(0,0,press.read.w,press.read.h);
+    gl.clearColor(0,0,0,1); gl.clear(gl.COLOR_BUFFER_BIT);
+
+    // 5) Jacobi pressure solve
+    gl.useProgram(pPress); bindQuad(uPress);
+    gl.uniform2f(uPress.uTexel, txx,txy);
+    for(var k=0;k<PRESS_ITER;k++){
+      bindTex(0, press.read.tex, uPress.uPress);
+      bindTex(1, divg.tex, uPress.uDiv);
+      drawTo(press.write); press.swap();
+    }
+
+    // 6) subtract pressure gradient
+    gl.useProgram(pGrad); bindQuad(uGrad);
+    bindTex(0, press.read.tex, uGrad.uPress);
+    bindTex(1, vel.read.tex, uGrad.uVel);
+    gl.uniform2f(uGrad.uTexel, txx,txy);
+    drawTo(vel.write); vel.swap();
+
+    // 7) advect dye through the divergence-free velocity field
+    gl.useProgram(pAdvect); bindQuad(uAdvect);
+    bindTex(0, vel.read.tex, uAdvect.uVel);
+    bindTex(1, dye.read.tex, uAdvect.uSrc);
+    gl.uniform2f(uAdvect.uTexel, txx,txy);
+    gl.uniform1f(uAdvect.uDt, DT*simW);
+    gl.uniform1f(uAdvect.uDiss, DYE_DISS);
+    drawTo(dye.write); dye.swap();
+  }
+
+  // ---- render ----
+  function frame(now){
+    // fixed-step integration with a clamp so tab-switches don't explode the sim
+    var dtMs = now-last; last=now;
+    if(dtMs>100) dtMs=100;            // avoid huge catch-up after stalls
+    accum += dtMs/1000;
+    var steps=0;
+    while(accum>=DT && steps<3){ simStep(now); accum-=DT; steps++; }
+    if(steps===0 && (now-t0)<50){ simStep(now); } // guarantee first frame moves
+
+    // ---- composite to screen, masked to THEODYX ----
+    gl.bindFramebuffer(gl.FRAMEBUFFER,null);
+    gl.viewport(0,0,stage.width,stage.height);
+    gl.clearColor(0,0,0,0); gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
+
+    gl.useProgram(pDisp); bindQuad(uDisp);
+    bindTex(0, dye.read.tex, uDisp.uDye);
+    bindTex(1, vel.read.tex, uDisp.uVel);
+    bindTex(2, maskTex, uDisp.uMask);
+    gl.uniform2f(uDisp.uTexel, 1/simW, 1/simH);
+    gl.uniform1f(uDisp.uT, (now-t0)/1000);
+    gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+    gl.disable(gl.BLEND);
+  }
+
+  function resize(){ size(); }
+
+  return { frame:frame, resize:resize };
+};
+})();
+</script>
+<script>
+;(function(){
+THX.FX["holo"] = function(stage){
+  var gl=null;
+  try{ gl=stage.getContext("webgl",{premultipliedAlpha:false,alpha:true,antialias:true,depth:false,stencil:false,preserveDrawingBuffer:false}); }catch(e){}
+  if(!gl){ return THX.canvas2DFallback(stage); }
+
+  var VS="attribute vec2 p;varying vec2 v;void main(){v=p*0.5+0.5;gl_Position=vec4(p,0.,1.);}";
+
+  // --- Fragment shader: thin-film / diffraction-grating holographic foil ---
+  var FS=[
+  "precision highp float;",
+  "varying vec2 v;",
+  "uniform vec2  uRes;",
+  "uniform float uT;",
+  "uniform vec2  uM;",      // pointer 0..1 (acts as view-tilt)
+  "uniform float uA;",      // pointer activity 0..1 (eases toward target)
+  "uniform sampler2D uMask;",
+  "uniform vec2  uTexel;",
+
+  // brand palette (matches THX.BLUE/PURP/PINK)
+  "const vec3 BLU=vec3(0.470,0.580,0.964);",
+  "const vec3 PRP=vec3(0.659,0.486,1.000);",
+  "const vec3 PNK=vec3(1.000,0.561,0.694);",
+
+  // ---- hash / value noise / fbm ----
+  "float h21(vec2 p){p=fract(p*vec2(127.1,311.7));p+=dot(p,p+34.5);return fract(p.x*p.y);}",
+  "float vnoise(vec2 p){vec2 i=floor(p),f=fract(p);vec2 u=f*f*(3.-2.*f);",
+  " float a=h21(i),b=h21(i+vec2(1,0)),c=h21(i+vec2(0,1)),d=h21(i+vec2(1,1));",
+  " return mix(mix(a,b,u.x),mix(c,d,u.x),u.y);}",
+  "float fbm(vec2 p){float s=0.,a=.5;mat2 m=mat2(1.6,1.2,-1.2,1.6);",
+  " for(int i=0;i<5;i++){s+=a*vnoise(p);p=m*p;a*=.5;}return s;}",
+
+  // ---- iridescent spectral ramp: phase -> rainbow biased to brand hues ----
+  // cosine palette (Inigo Quilez style) tuned blue->purple->pink->gold
+  "vec3 spectrum(float t){",
+  " t=fract(t);",
+  " vec3 a=vec3(0.52,0.45,0.58);",
+  " vec3 b=vec3(0.45,0.42,0.45);",
+  " vec3 c=vec3(1.00,1.00,1.00);",
+  " vec3 d=vec3(0.00,0.18,0.40);",
+  " vec3 col=a+b*cos(6.28318*(c*t+d));",
+  // pull toward brand triad so it reads as THEODYX not a generic rainbow
+  " vec3 brand=( t<0.5 )? mix(BLU,PRP,t*2.0) : mix(PRP,PNK,(t-0.5)*2.0);",
+  " return mix(col,brand,0.42);",
+  "}",
+
+  // soft luminance
+  "float luma(vec3 c){return dot(c,vec3(0.299,0.587,0.114));}",
+
+  "void main(){",
+  " vec2 uv=v;",
+  " float asp=uRes.x/max(uRes.y,1.0);",
+  " vec2 sp=vec2((uv.x-0.5)*asp,uv.y-0.5);",   // centered, aspect-correct
+
+  // ---- mask sample (alpha = inside letters) ----
+  " vec2 mc=vec2(uv.x,1.0-uv.y);",
+  " float m=texture2D(uMask,mc).a;",
+  " if(m<=0.003){ gl_FragColor=vec4(0.0); return; }",
+
+  // cheap gradient of the mask -> a fake surface normal so the foil
+  // catches light along the letter edges (gives it body / bevel)
+  " float mx1=texture2D(uMask,mc+vec2(uTexel.x,0.0)).a;",
+  " float mx0=texture2D(uMask,mc-vec2(uTexel.x,0.0)).a;",
+  " float my1=texture2D(uMask,mc+vec2(0.0,uTexel.y)).a;",
+  " float my0=texture2D(uMask,mc-vec2(0.0,uTexel.y)).a;",
+  " vec2 edge=vec2(mx1-mx0,my1-my0);",
+  " float edgeMag=length(edge);",
+
+  // ---- view direction driven by pointer (and gentle auto-orbit) ----
+  " float t=uT;",
+  " vec2 autoTilt=vec2(sin(t*0.23),cos(t*0.19))*0.5+0.5;", // 0..1 idle sweep
+  " vec2 view=mix(autoTilt,uM,uA);",                       // pointer takes over when active
+  " vec2 tilt=(view-0.5)*2.0;",                            // -1..1
+
+  // ---- noise-perturbed surface normal (the 'foil grain') ----
+  " float t2=t*0.06;",
+  " float nf=fbm(sp*3.0+vec2(t2,-t2*0.7));",
+  " float nf2=fbm(sp*7.0-vec2(t2*1.3,t2));",
+  " vec2 nrm=vec2(",
+  "   fbm(sp*5.0+vec2(11.0,nf*2.0))-0.5,",
+  "   fbm(sp*5.0+vec2(nf2*2.0,29.0))-0.5",
+  " );",
+  " nrm+=edge*1.6;",                 // edges bend the normal outward (bevel)
+
+  // ---- thin-film interference phase ----
+  // phase = optical path diff ~ filmThickness * cos(viewAngle).
+  // We synthesize it from: position, perturbed normal . view, noise thickness.
+  " float thick=0.55+0.45*nf;",                            // varying film thickness
+  " float ndotv=dot(normalize(nrm+1e-4),tilt);",
+  " float baseHue=dot(sp,vec2(0.9,1.5))*0.9;",             // spatial rainbow spread
+  " float phase=baseHue*1.4",
+  "   + ndotv*2.3",                                        // view-angle hue shift
+  "   + thick*2.0",                                        // film thickness bands
+  "   + nf2*0.8",                                          // micro perturbation
+  "   + t*0.05;",                                          // slow living drift
+
+  // ---- fine diffraction-grating shimmer (sparkly) ----
+  // high-freq grating whose pitch shifts with view -> rainbow sparkle
+  " float gPitch=mix(70.0,150.0,thick);",
+  " float grating=sin((sp.x*0.6+sp.y)*gPitch + ndotv*8.0 + t*1.2);",
+  " float spark=pow(max(grating,0.0),6.0);",
+  // tiny per-cell glints
+  " float cell=h21(floor(sp*220.0)+floor(vec2(t*2.0)));",
+  " float glint=pow(max(0.0,1.0-abs(fract(cell+t*0.6)-0.5)*4.0),8.0);",
+  " spark=max(spark,glint*0.9);",
+  " phase+=spark*0.18;",
+
+  // ---- compose iridescent base color ----
+  " vec3 col=spectrum(phase);",
+  // second, offset spectral layer for richer thin-film banding
+  " col=mix(col,spectrum(phase*0.5+0.33+ndotv*0.5),0.35);",
+
+  // ---- sweeping specular light bar (premium hologram sweep) ----
+  // a diagonal band that travels across the wordmark
+  " float diag=(sp.x*0.7+sp.y*0.7);",
+  " float sweepPos=fract(t*0.11)*2.4-1.2;",
+  " float sweep=smoothstep(0.16,0.0,abs(diag-sweepPos));",
+  " float sweep2=smoothstep(0.05,0.0,abs(diag-sweepPos+0.06));", // hot core
+  " vec3 sweepCol=mix(vec3(1.0),PNK,0.25);",
+  " col+=sweepCol*(sweep*0.45+sweep2*0.85);",
+  // sweep also kicks the local hue (foil flashes color as light passes)
+  " col=mix(col,spectrum(phase+0.5),sweep*0.4);",
+
+  // ---- subtle parallax depth shimmer (two-layer caustic) ----
+  " float caus=fbm(sp*9.0+tilt*0.6+vec2(t*0.13,-t*0.1));",
+  " col+=spectrum(phase+caus)*caus*0.12;",
+
+  // ---- edge rim light: bright iridescent contour ----
+  " float rim=smoothstep(0.0,0.9,edgeMag*9.0);",
+  " col+=spectrum(phase+0.25)*rim*0.6;",
+
+  // ---- specular hotspot following the pointer ----
+  " vec2 lp=(view-0.5)*vec2(asp,1.0)*1.3;",
+  " float spec=exp(-dot(sp-lp,sp-lp)*6.0);",
+  " col+=vec3(1.0)*spec*0.30*(0.5+0.5*uA);",
+
+  // ---- tone / contrast: keep it rich, lift sparkle, deepen base ----
+  " float lz=luma(col);",
+  " col=mix(col, col*col*(3.0-2.0*col), 0.25);",          // gentle s-curve
+  " col*=0.82+0.55*smoothstep(0.0,1.0,lz);",              // contrast in luma
+  " col+=spark*vec3(1.0)*0.5;",                           // white sparkle pop
+  " col=clamp(col,0.0,1.6);",
+
+  // ---- premium vignette across the wordmark + soft inner glow ----
+  " float bodyGlow=smoothstep(0.0,0.35,m)*0.12;",
+  " col+=spectrum(phase+0.1)*bodyGlow;",
+
+  // ---- alpha: anti-aliased letter coverage, with a faint outer aura ----
+  " float core=smoothstep(0.04,0.32,m);",
+  " float a=clamp(core,0.0,1.0);",
+
+  // final hardening: clamp is the portable NaN/Inf guard. Every path above is
+  // already bounded, so no driver-specific float-compare tricks are needed.
+  " col=clamp(col,0.0,2.0);",
+  " a=clamp(a,0.0,1.0);",
+
+  " gl_FragColor=vec4(col,a);",
+  "}"].join("\n");
+
+  function sh(tp,src){
+    var o=gl.createShader(tp);gl.shaderSource(o,src);gl.compileShader(o);
+    if(!gl.getShaderParameter(o,gl.COMPILE_STATUS)){
+      try{console.warn("[holo] shader:",gl.getShaderInfoLog(o));}catch(e){}
+      return null;
+    }
+    return o;
+  }
+  var vs=sh(gl.VERTEX_SHADER,VS), fs=sh(gl.FRAGMENT_SHADER,FS);
+  if(!vs||!fs){ return THX.canvas2DFallback(stage); }
+  var pr=gl.createProgram();gl.attachShader(pr,vs);gl.attachShader(pr,fs);gl.linkProgram(pr);
+  if(!gl.getProgramParameter(pr,gl.LINK_STATUS)){
+    try{console.warn("[holo] link:",gl.getProgramInfoLog(pr));}catch(e){}
+    return THX.canvas2DFallback(stage);
+  }
+  gl.useProgram(pr);
+
+  var buf=gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+  gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1, 1,-1, -1,1, 1,1]),gl.STATIC_DRAW);
+  var lp=gl.getAttribLocation(pr,"p");
+  gl.enableVertexAttribArray(lp);
+  gl.vertexAttribPointer(lp,2,gl.FLOAT,false,0,0);
+
+  var uRes=gl.getUniformLocation(pr,"uRes"),
+      uT  =gl.getUniformLocation(pr,"uT"),
+      uM  =gl.getUniformLocation(pr,"uM"),
+      uA  =gl.getUniformLocation(pr,"uA"),
+      uTexel=gl.getUniformLocation(pr,"uTexel");
+  gl.uniform1i(gl.getUniformLocation(pr,"uMask"),0);
+
+  var tex=gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D,tex);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+
+  gl.enable(gl.BLEND);
+  gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
+  gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL,false);
+
+  var maskW=1,maskH=1;
+
+  function size(){
+    var r=stage.getBoundingClientRect(),d=THX.dpr();
+    var w=Math.max(1,Math.floor(r.width*d)), hh=Math.max(1,Math.floor(r.height*d));
+    stage.width=w; stage.height=hh;
+    var mk=THX.textMask(r.width,r.height,d);
+    maskW=mk.w||mk.canvas.width; maskH=mk.h||mk.canvas.height;
+    gl.bindTexture(gl.TEXTURE_2D,tex);
+    gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,mk.canvas);
+    gl.viewport(0,0,w,hh);
+  }
+  size();
+
+  // ---- interaction: pointer drives view direction; eases for smoothness ----
+  var mTarget=[0.5,0.5], mCur=[0.5,0.5], actTarget=0.0, actCur=0.0, lastMove=-1e9;
+  function onMove(e){
+    var r=stage.getBoundingClientRect();
+    var cx,cy;
+    if(e.touches&&e.touches.length){ cx=e.touches[0].clientX; cy=e.touches[0].clientY; }
+    else { cx=e.clientX; cy=e.clientY; }
+    mTarget[0]=Math.min(1,Math.max(0,(cx-r.left)/Math.max(1,r.width)));
+    mTarget[1]=1-Math.min(1,Math.max(0,(cy-r.top)/Math.max(1,r.height)));
+    actTarget=1.0; lastMove=performance.now();
+  }
+  try{
+    stage.addEventListener("pointermove",onMove,{passive:true});
+    stage.addEventListener("touchmove",onMove,{passive:true});
+    stage.addEventListener("pointerdown",onMove,{passive:true});
+  }catch(e){ /* listeners are best-effort; effect still auto-animates */ }
+
+  // ---- GPU context-loss guard: never throw from frame() if the GPU resets ----
+  var lost=false;
+  try{
+    stage.addEventListener("webglcontextlost",function(ev){ try{ev.preventDefault();}catch(e){} lost=true; },false);
+    stage.addEventListener("webglcontextrestored",function(){ lost=false; },false);
+  }catch(e){}
+
+  var t0=performance.now();
+  function frame(now){
+    if(lost || gl.isContextLost()) return;    // GPU gone: skip, don't crash
+    if(typeof now!=="number" || now!==now) now=performance.now(); // clock safety (NaN/undefined)
+    // ease pointer + activity (no per-frame allocations)
+    mCur[0]+=(mTarget[0]-mCur[0])*0.08;
+    mCur[1]+=(mTarget[1]-mCur[1])*0.08;
+    if(now-lastMove>1400) actTarget=0.0;     // hand back to auto-orbit when idle
+    actCur+=(actTarget-actCur)*0.04;
+
+    gl.useProgram(pr);
+    gl.uniform2f(uRes,stage.width,stage.height);
+    gl.uniform1f(uT,(now-t0)/1000);
+    gl.uniform2f(uM,mCur[0],mCur[1]);
+    gl.uniform1f(uA,actCur);
+    gl.uniform2f(uTexel,1.0/Math.max(1,maskW),1.0/Math.max(1,maskH));
+
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D,tex);
+
+    gl.clearColor(0,0,0,0);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+  }
+
+  return { frame:frame, resize:size };
+};
+})();
+</script>
+<script>
+;(function(){
+THX.FX["swarm"] = function(stage){
+  // ============================================================ GPGPU SWARM
+  // Particle positions & velocities live in RGBA float (or half-float) textures
+  // advanced by ping-pong FBO passes. Particles spring toward points sampled
+  // from the THEODYX mask, drift with 2D curl noise, hover in personal orbits
+  // so they form a glowing CLOUD over the letters, and explode/reform around the
+  // pointer. A point-sprite pass reads the position texture via vertex texture
+  // fetch and draws additive, gradient-colored glows.
+  var gl=null;
+  try{
+    gl=stage.getContext("webgl",{premultipliedAlpha:false,alpha:true,antialias:false,
+      depth:false,stencil:false,preserveDrawingBuffer:false,powerPreference:"high-performance"});
+  }catch(e){}
+  if(!gl){ return THX.canvas2DFallback(stage); }
+
+  // ---- feature detection -------------------------------------------------
+  // Need: float (or half-float) textures, renderable as FBO targets, AND
+  // vertex texture fetch (to read positions in the particle vertex shader).
+  var floatExt = gl.getExtension("OES_texture_float");
+  var halfExt  = gl.getExtension("OES_texture_half_float");
+  gl.getExtension("WEBGL_color_buffer_float");
+  gl.getExtension("EXT_color_buffer_half_float");
+  gl.getExtension("OES_texture_float_linear");
+  gl.getExtension("OES_texture_half_float_linear");
+
+  var maxVTU = gl.getParameter(gl.MAX_VERTEX_TEXTURE_IMAGE_UNITS)|0;
+  if(maxVTU < 1){ return THX.canvas2DFallback(stage); }   // no vertex texture fetch
+
+  var TEXTYPE=null;
+  if(floatExt) TEXTYPE=gl.FLOAT;
+  else if(halfExt) TEXTYPE=halfExt.HALF_FLOAT_OES;
+  else return THX.canvas2DFallback(stage);
+
+  function probe(type){
+    var t=gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D,t);
+    gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,4,4,0,gl.RGBA,type,null);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.NEAREST);
+    var f=gl.createFramebuffer();
+    gl.bindFramebuffer(gl.FRAMEBUFFER,f);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER,gl.COLOR_ATTACHMENT0,gl.TEXTURE_2D,t,0);
+    var ok=gl.checkFramebufferStatus(gl.FRAMEBUFFER)===gl.FRAMEBUFFER_COMPLETE;
+    gl.bindFramebuffer(gl.FRAMEBUFFER,null); gl.deleteFramebuffer(f); gl.deleteTexture(t);
+    return ok;
+  }
+  if(!probe(TEXTYPE)){
+    // chosen type isn't FBO-renderable here; try the half-float path before bailing
+    if(halfExt && probe(halfExt.HALF_FLOAT_OES)) TEXTYPE=halfExt.HALF_FLOAT_OES;
+    else return THX.canvas2DFallback(stage);
+  }
+
+  // ---- shader plumbing ---------------------------------------------------
+  function sh(tp,src){
+    var o=gl.createShader(tp); gl.shaderSource(o,src); gl.compileShader(o);
+    if(!gl.getShaderParameter(o,gl.COMPILE_STATUS)){ console.warn("swarm sh:",gl.getShaderInfoLog(o)); return null; }
+    return o;
+  }
+  function prog(vs,fs){
+    var v=sh(gl.VERTEX_SHADER,vs), f=sh(gl.FRAGMENT_SHADER,fs);
+    if(!v||!f) return null;
+    var p=gl.createProgram(); gl.attachShader(p,v); gl.attachShader(p,f); gl.linkProgram(p);
+    if(!gl.getProgramParameter(p,gl.LINK_STATUS)){ console.warn("swarm link:",gl.getProgramInfoLog(p)); return null; }
+    return p;
+  }
+
+  var SIM_VS=[
+    "attribute vec2 p;","varying vec2 uv;",
+    "void main(){ uv=p*0.5+0.5; gl_Position=vec4(p,0.,1.); }"
+  ].join("\n");
+
+  // value noise + 2D curl (bounded, no normalize -> no 0/0 NaN)
+  var NOISE=[
+    "vec3 hash3(vec3 p){",
+    "  p=vec3(dot(p,vec3(127.1,311.7,74.7)),dot(p,vec3(269.5,183.3,246.1)),dot(p,vec3(113.5,271.9,124.6)));",
+    "  return fract(sin(p)*43758.5453)*2.0-1.0;",
+    "}",
+    "float vnoise(vec3 x){",
+    "  vec3 i=floor(x),f=fract(x); vec3 u=f*f*(3.0-2.0*f);",
+    "  return mix(mix(mix(dot(hash3(i+vec3(0,0,0)),f-vec3(0,0,0)),dot(hash3(i+vec3(1,0,0)),f-vec3(1,0,0)),u.x),",
+    "                 mix(dot(hash3(i+vec3(0,1,0)),f-vec3(0,1,0)),dot(hash3(i+vec3(1,1,0)),f-vec3(1,1,0)),u.x),u.y),",
+    "             mix(mix(dot(hash3(i+vec3(0,0,1)),f-vec3(0,0,1)),dot(hash3(i+vec3(1,0,1)),f-vec3(1,0,1)),u.x),",
+    "                 mix(dot(hash3(i+vec3(0,1,1)),f-vec3(0,1,1)),dot(hash3(i+vec3(1,1,1)),f-vec3(1,1,1)),u.x),u.y),u.z);",
+    "}",
+    "vec2 curl2(vec3 p){",
+    "  float e=0.5;",
+    "  float dx=(vnoise(p+vec3(0.0,e,0.0))-vnoise(p-vec3(0.0,e,0.0)))/(2.0*e);",
+    "  float dy=(vnoise(p+vec3(e,0.0,0.0))-vnoise(p-vec3(e,0.0,0.0)))/(2.0*e);",
+    "  return vec2(dx,-dy);",
+    "}"
+  ].join("\n");
+
+  // POSITION integrate (semi-implicit Euler) with self-healing guards.
+  var POS_FS=[
+    "precision highp float;",
+    "varying vec2 uv;",
+    "uniform sampler2D uPos;",
+    "uniform sampler2D uVel;",
+    "uniform float uDt;",
+    "void main(){",
+    "  vec4 P=texture2D(uPos,uv);",
+    "  vec4 V=texture2D(uVel,uv);",
+    "  float dt=clamp(uDt,0.0,0.033);",
+    "  vec2 pos=P.xy + V.xy*dt;",
+    "  if(!(pos.x==pos.x)||!(pos.y==pos.y)||abs(pos.x)>30.0||abs(pos.y)>30.0){",
+    "    pos=vec2((P.z-0.5)*2.4,(P.w-0.5)*1.4);",
+    "  }",
+    "  gl_FragColor=vec4(pos,P.z,P.w);",
+    "}"
+  ].join("\n");
+
+  // VELOCITY update: forces -> accel -> integrate -> clamp.
+  var VEL_FS=[
+    "precision highp float;",
+    NOISE,
+    "varying vec2 uv;",
+    "uniform sampler2D uPos;",
+    "uniform sampler2D uVel;",
+    "uniform sampler2D uTarget;",
+    "uniform float uDt;",
+    "uniform float uT;",
+    "uniform vec2  uPointer;",
+    "uniform float uBlast;",
+    "void main(){",
+    "  vec4 P=texture2D(uPos,uv);",
+    "  vec4 V=texture2D(uVel,uv);",
+    "  vec4 T=texture2D(uTarget,uv);",
+    "  vec2 pos=clamp(P.xy,vec2(-30.0),vec2(30.0));",
+    "  vec2 vel=V.xy;",
+    "  float dt=clamp(uDt,0.0,0.033);",
+    "  float ph=P.z*6.2831;",
+    "  float orb=0.010+0.045*P.w;",
+    "  vec2 hover=vec2(cos(uT*0.7+ph),sin(uT*0.9+ph*1.3))*orb",
+    "            +vec2(sin(uT*0.31+ph*2.1),cos(uT*0.27+ph))*orb*0.55;",
+    "  vec2 home=T.xy+hover;",
+    "  vec2 acc=vec2(0.0);",
+    "  vec2 toHome=home-pos;",
+    "  float stiff=mix(2.0,3.4,T.a)*(1.0-0.85*uBlast);",
+    "  acc += toHome*stiff;",
+    "  float far=clamp(length(toHome)*2.0,0.0,1.0);",
+    "  vec2 flow=curl2(vec3(pos*1.7, uT*0.20 + P.w*4.0));",
+    "  acc += flow*(1.0+far*1.6)*5.0;",
+    "  acc += vec2(-pos.y,pos.x)*0.8*(0.5+0.5*sin(uT*0.6+ph));",
+    "  vec2 dvec=pos-uPointer;",
+    "  float dist=length(dvec)+1e-3;",
+    "  vec2 dir=dvec/dist;",
+    "  float infl=exp(-dist*dist*3.0);",
+    "  acc += dir*infl*(8.0+uBlast*60.0);",
+    "  float wave=exp(-dist*0.4);",
+    "  acc += dir*uBlast*(70.0*wave + 22.0);",
+    "  acc += vec2(-dir.y,dir.x)*uBlast*22.0*wave;",
+    "  float al=length(acc);",
+    "  if(al>200.0) acc*=200.0/al;",
+    "  vel += acc*dt;",
+    "  vel *= mix(0.90,0.99,clamp(uBlast,0.0,1.0));",
+    "  if(!(vel.x==vel.x)||!(vel.y==vel.y)) vel=vec2(0.0);",
+    "  vel=clamp(vel,vec2(-22.0),vec2(22.0));",
+    "  gl_FragColor=vec4(vel,V.z,V.w);",
+    "}"
+  ].join("\n");
+
+  // SEED both slots procedurally on the GPU (works for FLOAT and HALF alike).
+  var SEED_FS=[
+    "precision highp float;",
+    "varying vec2 uv;",
+    "uniform float uMode;",
+    "float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}",
+    "void main(){",
+    "  float a=h(uv)*6.2831, r=h(uv+3.1);",
+    "  if(uMode<0.5){ gl_FragColor=vec4(cos(a)*r*1.5, sin(a)*r*0.9, h(uv+7.0), h(uv+11.0)); }",
+    "  else { gl_FragColor=vec4(0.0,0.0,h(uv+5.0),h(uv+9.0)); }",
+    "}"
+  ].join("\n");
+
+  // RENDER: point sprite reads position texture in the vertex shader.
+  var REND_VS=[
+    "precision highp float;",
+    "attribute vec2 ref;",
+    "uniform sampler2D uPos;",
+    "uniform sampler2D uTarget;",
+    "uniform float uAsp;",
+    "uniform float uSize;",
+    "uniform float uT;",
+    "varying float vT;",
+    "varying float vGlow;",
+    "void main(){",
+    "  vec4 P=texture2D(uPos,ref);",
+    "  vec4 T=texture2D(uTarget,ref);",
+    "  vec2 pos=P.xy;",
+    "  gl_Position=vec4(pos.x/uAsp, pos.y, 0.0, 1.0);",
+    "  float tw=0.55+0.45*sin(uT*2.0+P.z*30.0);",
+    "  gl_PointSize=uSize*tw*mix(0.5,1.0,T.a);",
+    "  vT=clamp(T.z,0.0,1.0);",
+    "  vGlow=tw;",
+    "}"
+  ].join("\n");
+
+  var REND_FS=[
+    "precision highp float;",
+    "varying float vT;",
+    "varying float vGlow;",
+    "uniform vec3 uC0;uniform vec3 uC1;uniform vec3 uC2;",
+    "void main(){",
+    "  vec2 c=gl_PointCoord-0.5;",
+    "  float r=dot(c,c)*4.0;",
+    "  float a=exp(-r*3.0)+0.22*exp(-r*1.1);",
+    "  if(a<0.004) discard;",
+    "  vec3 col = vT<0.5 ? mix(uC0,uC1,vT*2.0) : mix(uC1,uC2,(vT-0.5)*2.0);",
+    "  col *= (0.7+0.6*vGlow);",
+    "  gl_FragColor=vec4(col*a, a);",
+    "}"
+  ].join("\n");
+
+  var posProg=prog(SIM_VS,POS_FS), velProg=prog(SIM_VS,VEL_FS),
+      seedProg=prog(SIM_VS,SEED_FS), rndProg=prog(REND_VS,REND_FS);
+  if(!posProg||!velProg||!seedProg||!rndProg){ return THX.canvas2DFallback(stage); }
+
+  // ---- geometry ----------------------------------------------------------
+  var quad=gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER,quad);
+  gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
+
+  // ---- pick particle grid (power-of-two; cheap on phones) ----------------
+  var rect0=stage.getBoundingClientRect();
+  var area=Math.max(1,(rect0.width||300)*(rect0.height||80));
+  var isPhone=Math.min(window.innerWidth||9999,window.innerHeight||9999)<=640 ||
+              /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent||"");
+  var SIM = isPhone?64:128;
+  if(area<26000) SIM=isPhone?48:96;
+  (function(){ var p=1; while(p*2<=SIM) p*=2; SIM=p; })();   // force POT
+  var COUNT=SIM*SIM;
+
+  // ---- per-particle reference UVs ---------------------------------------
+  var refs=new Float32Array(COUNT*2);
+  for(var i=0;i<COUNT;i++){ refs[i*2]=((i%SIM)+0.5)/SIM; refs[i*2+1]=((i/SIM|0)+0.5)/SIM; }
+  var refBuf=gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER,refBuf);
+  gl.bufferData(gl.ARRAY_BUFFER,refs,gl.STATIC_DRAW);
+
+  // ---- ping-pong textures + FBOs ----------------------------------------
+  function mkTex(){
+    var t=gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D,t);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+    gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,SIM,SIM,0,gl.RGBA,TEXTYPE,null);
+    return t;
+  }
+  function mkFBO(tex){
+    var f=gl.createFramebuffer();
+    gl.bindFramebuffer(gl.FRAMEBUFFER,f);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER,gl.COLOR_ATTACHMENT0,gl.TEXTURE_2D,tex,0);
+    return f;
+  }
+  var posTex=[mkTex(),mkTex()], velTex=[mkTex(),mkTex()];
+  var posFBO=[mkFBO(posTex[0]),mkFBO(posTex[1])];
+  var velFBO=[mkFBO(velTex[0]),mkFBO(velTex[1])];
+  var targetTex=gl.createTexture();
+  gl.bindFramebuffer(gl.FRAMEBUFFER,null);
+
+  // ---- uniform locations -------------------------------------------------
+  var L={
+    posPos:gl.getUniformLocation(posProg,"uPos"), posVel:gl.getUniformLocation(posProg,"uVel"),
+    posDt:gl.getUniformLocation(posProg,"uDt"),
+    velPos:gl.getUniformLocation(velProg,"uPos"), velVel:gl.getUniformLocation(velProg,"uVel"),
+    velTar:gl.getUniformLocation(velProg,"uTarget"), velDt:gl.getUniformLocation(velProg,"uDt"),
+    velT:gl.getUniformLocation(velProg,"uT"), velPtr:gl.getUniformLocation(velProg,"uPointer"),
+    velBl:gl.getUniformLocation(velProg,"uBlast"),
+    seedMode:gl.getUniformLocation(seedProg,"uMode"),
+    rPos:gl.getUniformLocation(rndProg,"uPos"), rTar:gl.getUniformLocation(rndProg,"uTarget"),
+    rAsp:gl.getUniformLocation(rndProg,"uAsp"), rSize:gl.getUniformLocation(rndProg,"uSize"),
+    rT:gl.getUniformLocation(rndProg,"uT"),
+    rC0:gl.getUniformLocation(rndProg,"uC0"), rC1:gl.getUniformLocation(rndProg,"uC1"),
+    rC2:gl.getUniformLocation(rndProg,"uC2")
+  };
+  var posPLoc=gl.getAttribLocation(posProg,"p"),
+      velPLoc=gl.getAttribLocation(velProg,"p"),
+      seedPLoc=gl.getAttribLocation(seedProg,"p"),
+      refLoc=gl.getAttribLocation(rndProg,"ref");
+
+  // helper: draw a fullscreen quad into the currently-bound FBO with prog `pr`
+  function fsQuad(pr,pLoc){
+    gl.bindBuffer(gl.ARRAY_BUFFER,quad);
+    gl.enableVertexAttribArray(pLoc);
+    gl.vertexAttribPointer(pLoc,2,gl.FLOAT,false,0,0);
+    gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+    gl.disableVertexAttribArray(pLoc);
+  }
+
+  // ---- seed BOTH ping-pong slots so no uninitialized texel is ever sampled
+  function seedAll(){
+    gl.viewport(0,0,SIM,SIM);
+    gl.useProgram(seedProg);
+    for(var s=0;s<2;s++){
+      gl.bindFramebuffer(gl.FRAMEBUFFER,posFBO[s]);
+      gl.uniform1f(L.seedMode,0.0); fsQuad(seedProg,seedPLoc);
+      gl.bindFramebuffer(gl.FRAMEBUFFER,velFBO[s]);
+      gl.uniform1f(L.seedMode,1.0); fsQuad(seedProg,seedPLoc);
+    }
+    gl.bindFramebuffer(gl.FRAMEBUFFER,null);
+  }
+
+  // ---- IEEE-754 float32 -> float16 (for the HALF_FLOAT_OES upload path) ---
+  // Spec-correct: a HALF_FLOAT_OES texture MUST receive Uint16 half-floats, not
+  // a Float32Array (that is INVALID_OPERATION and silently zeroes the texture).
+  var _f32=new Float32Array(1), _u32=new Uint32Array(_f32.buffer);
+  function f32toHalf(v){
+    _f32[0]=v; var x=_u32[0];
+    var s=(x>>16)&0x8000, e=((x>>23)&0xff)-112, m=x&0x7fffff;
+    if(e<=0){ if(e<-10) return s; m|=0x800000; var t=14-e; var a=(m>>t)+((m>>(t-1))&1); return s|a; }
+    if(e>=0x1f){ return s|0x7c00; }
+    return s|(e<<10)|((m+0x1000)>>13);
+  }
+  function halfArray(f32){
+    var n=f32.length, out=new Uint16Array(n);
+    for(var k=0;k<n;k++) out[k]=f32toHalf(f32[k]);
+    return out;
+  }
+  // upload `data` (Float32Array, length COUNT*4) into targetTex with the right
+  // type for the active TEXTYPE; returns true on a clean (glError==0) upload.
+  function uploadTarget(data){
+    gl.bindTexture(gl.TEXTURE_2D,targetTex);
+    while(gl.getError()!==gl.NO_ERROR){}            // drain stale errors
+    if(TEXTYPE===gl.FLOAT){
+      gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,SIM,SIM,0,gl.RGBA,gl.FLOAT,data);
+    } else {
+      gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,SIM,SIM,0,gl.RGBA,TEXTYPE,halfArray(data));
+    }
+    return gl.getError()===gl.NO_ERROR;
+  }
+
+  // ---- build target texture from THEODYX mask ----------------------------
+  var ASP=4.0, ptSize=2.0;
+  function buildTarget(cssW,cssH){
+    var d=THX.dpr();
+    var m=THX.textMask(cssW,cssH,d);
+    var mc=document.createElement("canvas"); mc.width=m.w; mc.height=m.h;
+    var mx=mc.getContext("2d"); mx.drawImage(m.canvas,0,0);
+    var img=null; try{ img=mx.getImageData(0,0,m.w,m.h).data; }catch(e){}
+    ASP=m.w/m.h;
+    var data=new Float32Array(COUNT*4), W=m.w, H=m.h;
+    for(var p=0;p<COUNT;p++){
+      var fx,fy,got=false;
+      if(img){
+        for(var tr=0;tr<28;tr++){
+          var rx=(Math.random()*W)|0, ry=(Math.random()*H)|0;
+          if(img[(ry*W+rx)*4+3]>40){ fx=rx; fy=ry; got=true; break; }
+        }
+      }
+      if(!got){ fx=Math.random()*W; fy=Math.random()*H; }
+      data[p*4  ]=(fx/W*2.0-1.0)*ASP;     // sim-space x  (-asp..asp)
+      data[p*4+1]=(1.0-fy/H*2.0);          // sim-space y  (-1..1)
+      data[p*4+2]=fx/W;                    // color param across wordmark
+      data[p*4+3]=got?1.0:0.0;             // valid (lands on a letter)
+    }
+    gl.bindTexture(gl.TEXTURE_2D,targetTex);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+    // uploadTarget() checks gl.getError() — a HALF target fed a Float32Array
+    // is INVALID_OPERATION and does NOT throw, so a try/catch alone would miss
+    // it and ship a zeroed (blob-at-origin) target. On a true GL error we bail
+    // to the canvas2D fallback rather than render a broken wordmark.
+    return uploadTarget(data);
+  }
+
+  // ---- sizing ------------------------------------------------------------
+  var targetOK=true;
+  function size(){
+    var r=stage.getBoundingClientRect(), d=THX.dpr();
+    var w=Math.max(1,Math.floor((r.width||300)*d)), h=Math.max(1,Math.floor((r.height||80)*d));
+    stage.width=w; stage.height=h;
+    targetOK=buildTarget(r.width||300,r.height||80);
+    ptSize=Math.max(1.5, h/120)*(isPhone?1.1:1.0);
+  }
+
+  seedAll();
+  size();
+  if(targetOK===false){ return THX.canvas2DFallback(stage); }
+  // If setup left the GL machine in an error state (bad FBO, failed upload on a
+  // quirky driver), don't ship a broken effect — fall back to the 2D gradient.
+  if(gl.getError()!==gl.NO_ERROR || gl.isContextLost()){ return THX.canvas2DFallback(stage); }
+
+  // ---- interaction -------------------------------------------------------
+  var pointer=[99,99], pointerActive=false, blast=0.0, lastMove=-1e9;
+  function setPointer(cx,cy){
+    var r=stage.getBoundingClientRect();
+    var nx=((cx-r.left)/Math.max(1,r.width))*2.0-1.0;
+    var ny=(1.0-(cy-r.top)/Math.max(1,r.height))*2.0-1.0;
+    pointer=[nx*ASP, ny]; pointerActive=true; lastMove=performance.now();
+  }
+  stage.addEventListener("pointermove",function(e){ setPointer(e.clientX,e.clientY); },{passive:true});
+  stage.addEventListener("pointerdown",function(e){ setPointer(e.clientX,e.clientY); blast=1.0; },{passive:true});
+  stage.addEventListener("pointerleave",function(){ pointerActive=false; pointer=[99,99]; });
+
+  gl.disable(gl.DEPTH_TEST);
+  gl.clearColor(0,0,0,0);
+
+  var ping=0, t0=performance.now(), tPrev=t0, simT=0;
+
+  function simStep(dt){
+    gl.viewport(0,0,SIM,SIM);
+    var src=ping, dst=1-ping;
+    // VELOCITY: read src.pos, src.vel, target -> write dst.vel
+    gl.bindFramebuffer(gl.FRAMEBUFFER,velFBO[dst]);
+    gl.useProgram(velProg);
+    gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D,posTex[src]); gl.uniform1i(L.velPos,0);
+    gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D,velTex[src]); gl.uniform1i(L.velVel,1);
+    gl.activeTexture(gl.TEXTURE2); gl.bindTexture(gl.TEXTURE_2D,targetTex);   gl.uniform1i(L.velTar,2);
+    gl.uniform1f(L.velDt,dt); gl.uniform1f(L.velT,simT);
+    gl.uniform2f(L.velPtr,pointer[0],pointer[1]); gl.uniform1f(L.velBl,blast);
+    fsQuad(velProg,velPLoc);
+    // POSITION: read src.pos + new dst.vel -> write dst.pos
+    gl.bindFramebuffer(gl.FRAMEBUFFER,posFBO[dst]);
+    gl.useProgram(posProg);
+    gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D,posTex[src]); gl.uniform1i(L.posPos,0);
+    gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D,velTex[dst]); gl.uniform1i(L.posVel,1);
+    gl.uniform1f(L.posDt,dt);
+    fsQuad(posProg,posPLoc);
+    ping=dst;
+  }
+
+  function frame(now){
+    if(gl.isContextLost()) return;        // GPU reset / tab-switch: idle, don't crash
+    var dt=(now-tPrev)/1000; tPrev=now;
+    if(!(dt>0)) dt=0.016;
+    if(dt>0.05) dt=0.05;
+    simT=(now-t0)/1000;
+
+    // auto-life: phantom attractor drifts when the pointer is idle, with an
+    // occasional soft pulse so the swarm keeps breathing on a phone at rest.
+    if(!pointerActive || (now-lastMove)>2200){
+      var tt=now*0.00038;
+      pointer[0]=Math.sin(tt*1.3)*ASP*0.78; pointer[1]=Math.cos(tt*0.9)*0.6;  // mutate, no alloc
+      blast=Math.max(blast, 0.06*Math.pow(0.5+0.5*Math.sin(now*0.0009),14.0));
+    }
+    blast*=0.955; if(blast<0.001) blast=0.0;
+
+    simStep(dt*0.55);
+    simStep(dt*0.55);
+
+    // RENDER additive glow
+    gl.bindFramebuffer(gl.FRAMEBUFFER,null);
+    gl.viewport(0,0,stage.width,stage.height);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.SRC_ALPHA,gl.ONE);
+    gl.useProgram(rndProg);
+    gl.bindBuffer(gl.ARRAY_BUFFER,refBuf);
+    gl.enableVertexAttribArray(refLoc);
+    gl.vertexAttribPointer(refLoc,2,gl.FLOAT,false,0,0);
+    gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D,posTex[ping]); gl.uniform1i(L.rPos,0);
+    gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D,targetTex);    gl.uniform1i(L.rTar,1);
+    gl.uniform1f(L.rAsp,ASP); gl.uniform1f(L.rSize,ptSize); gl.uniform1f(L.rT,simT);
+    gl.uniform3f(L.rC0,THX.BLUE[0],THX.BLUE[1],THX.BLUE[2]);
+    gl.uniform3f(L.rC1,THX.PURP[0],THX.PURP[1],THX.PURP[2]);
+    gl.uniform3f(L.rC2,THX.PINK[0],THX.PINK[1],THX.PINK[2]);
+    gl.drawArrays(gl.POINTS,0,COUNT);
+    gl.disableVertexAttribArray(refLoc);
+    gl.disable(gl.BLEND);
+  }
+
+  return { frame:frame, resize:size };
+};
+})();
+</script>
+<script>
+;(function(){
+THX.FX["blackhole"] = function(stage){
+  // ---- WebGL context (guarded) -------------------------------------------
+  var gl=null;
+  try{ gl=stage.getContext("webgl",{premultipliedAlpha:false,alpha:true,antialias:true,depth:false,stencil:false,preserveDrawingBuffer:false}); }catch(e){}
+  if(!gl){ try{ gl=stage.getContext("experimental-webgl",{premultipliedAlpha:false,alpha:true}); }catch(e2){} }
+  if(!gl){ return THX.canvas2DFallback(stage); }
+
+  var VS="attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}";
+
+  // ---- Fragment shader: screen-space gravitational lensing ----------------
+  // Background = procedural starfield + faint nebula. The THEODYX mask acts as
+  // a mass distribution: we read the mask's *blurred* field to get a smooth
+  // potential, take its gradient for the deflection direction, and bend the
+  // background sample UVs toward the letter cores (negative gradient = inward).
+  // A bright photon ring + Doppler-shifted accretion rim glows on the silhouette.
+  var FS=[
+   "precision highp float;",
+   "uniform vec2 uRes;",       // backing-store pixels
+   "uniform float uT;",        // seconds
+   "uniform vec2 uM;",         // pointer 0..1 (y up)
+   "uniform vec2 uTexel;",     // 1/maskResolution for gradient sampling
+   "uniform float uReduce;",   // 1.0 normal, 0.0 reduced-motion
+   "uniform sampler2D uMask;", // WHITE letters in alpha
+   "",
+   "float hash(vec2 p){ p=fract(p*vec2(123.34,456.21)); p+=dot(p,p+45.32); return fract(p.x*p.y); }",
+   "float vnoise(vec2 p){",
+   "  vec2 i=floor(p), f=fract(p); vec2 u=f*f*(3.-2.*f);",
+   "  float a=hash(i), b=hash(i+vec2(1,0)), c=hash(i+vec2(0,1)), d=hash(i+vec2(1,1));",
+   "  return mix(mix(a,b,u.x),mix(c,d,u.x),u.y);",
+   "}",
+   "float fbm(vec2 p){",
+   "  float v=0.0, a=0.5; mat2 m=mat2(1.6,1.2,-1.2,1.6);",
+   "  for(int i=0;i<5;i++){ v+=a*vnoise(p); p=m*p; a*=0.5; }",
+   "  return v;",
+   "}",
+   "",
+   // sample mask alpha with safe clamped coords (texture set to CLAMP_TO_EDGE)
+   "float maskA(vec2 uv){ return texture2D(uMask, uv).a; }",
+   "",
+   // multi-tap blurred mask -> smooth gravitational potential field
+   "float potential(vec2 uv){",
+   "  float s=0.0; vec2 e=uTexel*2.2;",
+   "  s+=maskA(uv)*0.26;",
+   "  s+=maskA(uv+vec2( e.x,0.0))*0.13; s+=maskA(uv+vec2(-e.x,0.0))*0.13;",
+   "  s+=maskA(uv+vec2(0.0, e.y))*0.13; s+=maskA(uv+vec2(0.0,-e.y))*0.13;",
+   "  s+=maskA(uv+e)*0.055; s+=maskA(uv-e)*0.055;",
+   "  s+=maskA(uv+vec2(e.x,-e.y))*0.055; s+=maskA(uv+vec2(-e.x,e.y))*0.055;",
+   "  vec2 e2=e*3.0;",
+   "  s+=maskA(uv+vec2( e2.x,0.0))*0.0125; s+=maskA(uv+vec2(-e2.x,0.0))*0.0125;",
+   "  s+=maskA(uv+vec2(0.0, e2.y))*0.0125; s+=maskA(uv+vec2(0.0,-e2.y))*0.0125;",
+   "  return s;",
+   "}",
+   "",
+   // starfield: sparse bright points across 3 cells layers, twinkle in time
+   "vec3 stars(vec2 uv, float t){",
+   "  vec3 col=vec3(0.0);",
+   "  for(int L=0;L<3;L++){",
+   "    float sc=mix(70.0,180.0, float(L)/2.0);",
+   "    vec2 g=uv*sc; vec2 id=floor(g); vec2 f=fract(g)-0.5;",
+   "    float h=hash(id+float(L)*37.1);",
+   "    float thr=0.965-0.02*float(L);",
+   "    if(h>thr){",
+   "      vec2 off=(vec2(hash(id+1.3),hash(id+7.7))-0.5)*0.7;",
+   "      float d=length(f-off);",
+   "      float tw=0.55+0.45*sin(t*(1.5+3.0*h)+h*30.0);",
+   "      float pt=smoothstep(0.06,0.0,d)*tw;",
+   "      vec3 sc3=mix(vec3(0.7,0.8,1.0), vec3(1.0,0.85,0.75), hash(id+4.2));",
+   "      col+=sc3*pt*(0.5+0.5*float(2-L));",
+   "    }",
+   "  }",
+   "  return col;",
+   "}",
+   "",
+   "void main(){",
+   "  vec2 res=max(uRes, vec2(1.0));",
+   "  vec2 uv=gl_FragCoord.xy/res;",          // 0..1, y up
+   "  vec2 muv=vec2(uv.x, 1.0-uv.y);",        // mask is y-down
+   "  float asp=res.x/res.y;",
+   "  float t=uT*mix(0.06,1.0,uReduce);",      // reduce-motion slows drift
+   "",
+   "  // ---- mass center: blend silhouette centroid feel via pointer nudge ----",
+   "  vec2 ptr=clamp(uM, vec2(0.0), vec2(1.0));",
+   "  vec2 cen=mix(vec2(0.5,0.5), ptr, 0.5);", // mass center follows pointer (damped)
+   "",
+   "  // ---- potential & gradient (deflection field) -------------------------",
+   "  float pot=potential(muv);",
+   "  vec2 gx=vec2(uTexel.x*2.2,0.0), gy=vec2(0.0,uTexel.y*2.2);",
+   "  float dX=potential(muv+gx)-potential(muv-gx);",
+   "  float dY=potential(muv+gy)-potential(muv-gy);",
+   "  vec2 grad=vec2(dX, -dY);",               // flip y back to uv-up space
+   "  // radial pull toward chosen mass center adds a global lens lobe",
+   "  vec2 rv=(cen-uv); rv.x*=asp;",
+   "  float rd=length(rv)+1e-4;",
+   "  vec2 rdir=rv/rd;",                        // SAFE normalized dir (rd>=1e-4, no NaN)
+   "  float lobe=0.10/(rd*rd+0.03);",          // soft 1/r^2 well, clamped",
+   "  lobe=min(lobe,2.2);",
+   "",
+   "  // total deflection: letter-edge bending + radial well, breathing in time",
+   "  float breathe=0.85+0.15*sin(t*0.9);",
+   "  vec2 defl = grad*5.5*breathe + rdir*lobe*0.020;",
+   "  // strongest bend just outside the silhouette (photon-ring zone)",
+   "  float edge=clamp(length(grad)*9.0,0.0,1.0);",
+   "",
+   "  // ---- sample lensed background ----------------------------------------",
+   "  vec2 buv=uv - defl;",                    // bend incoming light",
+   "  vec2 sp=vec2(buv.x*asp, buv.y);",
+   "  // slow rotating nebula advection",
+   "  float ca=cos(t*0.05), sa=sin(t*0.05);",
+   "  vec2 rot=mat2(ca,-sa,sa,ca)*(sp-vec2(0.5*asp,0.5))+vec2(0.5*asp,0.5);",
+   "  float neb=fbm(rot*2.3 + vec2(t*0.08, -t*0.05));",
+   "  float neb2=fbm(rot*5.1 - vec2(t*0.04, t*0.06));",
+   "  neb=pow(clamp(neb*0.7+neb2*0.4,0.0,1.0),1.6);",
+   "",
+   "  vec3 BLUE=vec3(0.470,0.580,0.965);",
+   "  vec3 PURP=vec3(0.659,0.486,1.0);",
+   "  vec3 PINK=vec3(1.0,0.561,0.694);",
+   "  vec3 nebCol=mix(mix(BLUE,PURP,neb), PINK, neb*neb*0.6)*neb;",
+   "  nebCol*=0.55;",
+   "",
+   "  vec3 col=stars(sp,t)*1.4 + nebCol;",
+   "",
+   "  // ---- Doppler: shift color by tangential flow around the well ----------",
+   "  vec2 tang=vec2(-rv.y,rv.x)/rd;",        // tangential dir (rd guarded)
+   "  float dl=length(defl)+1e-5;",            // SAFE: avoid normalize() of ~0 vec
+   "  float dop=dot(defl/dl, tang);",          // approaching/receding
+   "  col=mix(col, col*vec3(0.7,0.85,1.25), clamp(-dop,0.0,1.0)*0.6);", // blueshift
+   "  col=mix(col, col*vec3(1.3,0.8,0.6),  clamp( dop,0.0,1.0)*0.6);",  // redshift
+   "",
+   "  // ---- event horizon: darken the letter interior ----------------------",
+   "  float core=maskA(muv);",
+   "  float horizon=smoothstep(0.35,0.9,core);",
+   "  col*=mix(1.0, 0.04, horizon);",          // near-black inside letters
+   "",
+   "  // ---- photon ring + accretion rim glow on the silhouette edge ---------",
+   "  float ringT=t*0.6;",
+   "  float ring=edge*(0.6+0.4*sin(ringT*6.0+pot*20.0));",
+   "  vec3 ringHue=mix(THX_BLUE, THX_PINK, 0.5+0.5*sin(ringT+uv.x*3.0));",
+   "  // accretion disk color: hot inner (white/blue) -> cooler outer (pink)",
+   "  vec3 accret=mix(vec3(1.0,0.95,0.85), ringHue, clamp(rd*1.4,0.0,1.0));",
+   "  // Doppler on the ring itself",
+   "  accret=mix(accret, accret*vec3(0.65,0.8,1.3), clamp(-dop,0.0,1.0)*0.5);",
+   "  accret=mix(accret, accret*vec3(1.35,0.75,0.55), clamp( dop,0.0,1.0)*0.5);",
+   "  col+=accret*ring*1.7;",
+   "",
+   "  // thin ultra-bright photon ring exactly at the silhouette boundary",
+   "  float thin=pow(edge,2.5)*smoothstep(0.55,0.05,abs(core-0.35));",
+   "  col+=vec3(1.0,0.97,0.9)*thin*1.2;",
+   "",
+   "  // ---- gentle vignette + lift, tone-map -------------------------------",
+   "  float vig=smoothstep(1.25,0.25,length((uv-0.5)*vec2(asp,1.0)));",
+   "  col*=mix(0.7,1.12,vig);",
+   "  col=col/(1.0+col);",                     // Reinhard tone-map (no blowout)
+   "  col=pow(max(col,0.0), vec3(0.85));",      // mild gamma for punch
+   "",
+   "  // ---- window alpha: show effect everywhere but keep page-dark base ----",
+   "  // brightness-driven alpha so dark void is transparent, glow is opaque.",
+   "  float lum=dot(col,vec3(0.299,0.587,0.114));",
+   "  float a=clamp(lum*1.6 + horizon*0.85 + ring*0.5, 0.0, 1.0);",
+   "  // guard against NaN/Inf on BOTH color and alpha (x==x is false for NaN).",
+   "  // clamp() does NOT sanitize NaN on all GPUs, so test explicitly first.",
+   "  if(!(a==a)) a=0.0;",
+   "  if(!(col.r==col.r)) col.r=0.0;",
+   "  if(!(col.g==col.g)) col.g=0.0;",
+   "  if(!(col.b==col.b)) col.b=0.0;",
+   "  col=clamp(col,0.0,1.0);",
+   "  gl_FragColor=vec4(col, a);",
+   "}"]
+   .join("\n")
+   .replace(/THX_BLUE/g,"vec3(0.470,0.580,0.965)")
+   .replace(/THX_PINK/g,"vec3(1.0,0.561,0.694)");
+
+  // ---- compile helpers ----------------------------------------------------
+  function sh(tp,src){
+    var o=gl.createShader(tp); gl.shaderSource(o,src); gl.compileShader(o);
+    if(!gl.getShaderParameter(o,gl.COMPILE_STATUS)){ console.warn("blackhole shader:",gl.getShaderInfoLog(o)); return null; }
+    return o;
+  }
+  var vs=sh(gl.VERTEX_SHADER,VS), fs=sh(gl.FRAGMENT_SHADER,FS);
+  if(!vs||!fs){ return THX.canvas2DFallback(stage); }
+  var pr=gl.createProgram(); gl.attachShader(pr,vs); gl.attachShader(pr,fs); gl.linkProgram(pr);
+  if(!gl.getProgramParameter(pr,gl.LINK_STATUS)){
+    console.warn("blackhole link:",gl.getProgramInfoLog(pr));
+    try{ gl.deleteShader(vs); gl.deleteShader(fs); gl.deleteProgram(pr); }catch(e){}
+    return THX.canvas2DFallback(stage);
+  }
+  gl.useProgram(pr);
+
+  // ---- fullscreen triangle-strip quad -------------------------------------
+  var buf=gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+  gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
+  var lp=gl.getAttribLocation(pr,"p"); gl.enableVertexAttribArray(lp);
+  gl.vertexAttribPointer(lp,2,gl.FLOAT,false,0,0);
+
+  // ---- uniforms -----------------------------------------------------------
+  var uRes=gl.getUniformLocation(pr,"uRes"),
+      uT=gl.getUniformLocation(pr,"uT"),
+      uM=gl.getUniformLocation(pr,"uM"),
+      uTexel=gl.getUniformLocation(pr,"uTexel"),
+      uReduce=gl.getUniformLocation(pr,"uReduce");
+  gl.uniform1i(gl.getUniformLocation(pr,"uMask"),0);
+
+  // ---- mask texture -------------------------------------------------------
+  var tex=gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D,tex);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+  try{ gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false); }catch(e){}
+
+  gl.enable(gl.BLEND);
+  gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
+  // ---- reduced-motion ------------------------------------------------------
+  var reduce=1.0;
+  try{
+    var mq=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)");
+    if(mq){ reduce=mq.matches?0.0:1.0; (mq.addEventListener?mq.addEventListener("change",function(e){reduce=e.matches?0.0:1.0;}):mq.addListener&&mq.addListener(function(e){reduce=e.matches?0.0:1.0;})); }
+  }catch(e){}
+
+  // ---- pointer (damped, auto-orbit when idle) ------------------------------
+  var mTarget=[0.5,0.5], mCur=[0.5,0.5], lastMove=-1e9;
+  function onMove(e){
+    var r=stage.getBoundingClientRect();
+    var cx=(e.touches?e.touches[0].clientX:e.clientX);
+    var cy=(e.touches?e.touches[0].clientY:e.clientY);
+    mTarget=[(cx-r.left)/Math.max(1,r.width), 1-(cy-r.top)/Math.max(1,r.height)];
+    lastMove=performance.now();
+  }
+  stage.addEventListener("pointermove",onMove,{passive:true});
+  stage.addEventListener("touchmove",onMove,{passive:true});
+
+  // ---- sizing -------------------------------------------------------------
+  var maskW=2,maskH=2;
+  function size(){
+    var r=stage.getBoundingClientRect();
+    var d=THX.dpr();
+    var w=Math.max(1,Math.floor((r.width||1)*d));
+    var h=Math.max(1,Math.floor((r.height||1)*d));
+    if(stage.width!==w) stage.width=w;
+    if(stage.height!==h) stage.height=h;
+    var m=THX.textMask(r.width||1, r.height||1, d);
+    maskW=Math.max(1,(m&&m.w)||(m&&m.canvas&&m.canvas.width)||1);
+    maskH=Math.max(1,(m&&m.h)||(m&&m.canvas&&m.canvas.height)||1);
+    // Upload guarded: a backgrounded tab / detached or 0x0 canvas can make
+    // texImage2D throw on real browsers. Never let resize() bubble an error.
+    try{
+      gl.bindTexture(gl.TEXTURE_2D,tex);
+      if(m&&m.canvas) gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,m.canvas);
+    }catch(e){ /* keep previous texture; effect still renders */ }
+    gl.viewport(0,0,stage.width,stage.height);
+  }
+  // Initial sizing must not throw the factory; fall back cleanly if it does.
+  try{ size(); }catch(e){
+    try{ gl.deleteProgram(pr); gl.deleteTexture(tex); gl.deleteBuffer(buf); }catch(e2){}
+    return THX.canvas2DFallback(stage);
+  }
+
+  // ---- frame --------------------------------------------------------------
+  var t0=performance.now();
+  function frame(now){
+    // damp pointer toward target; idle -> slow auto-orbit so it's alive at rest
+    var idle=(now-lastMove)>2200;
+    if(idle){
+      var a=(now-t0)*0.00018;
+      mTarget[0]=0.5+0.26*Math.cos(a);          // mutate in place (no per-frame alloc)
+      mTarget[1]=0.5+0.16*Math.sin(a*1.3);
+    }
+    mCur[0]+=(mTarget[0]-mCur[0])*0.06;
+    mCur[1]+=(mTarget[1]-mCur[1])*0.06;
+
+    gl.useProgram(pr);
+    gl.uniform2f(uRes, stage.width, stage.height);
+    gl.uniform1f(uT, (now-t0)/1000);
+    gl.uniform2f(uM, mCur[0], mCur[1]);
+    gl.uniform2f(uTexel, 1.0/maskW, 1.0/maskH);
+    gl.uniform1f(uReduce, reduce);
+    gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D,tex);
+    gl.clearColor(0,0,0,0); gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+  }
+
+  return { frame:frame, resize:size };
+};
+})();
+</script>
+<script>
+;(function(){
+THX.FX["liquid-light"] = function(stage){
+
+  // -------- WebGL context (guarded) --------
+  var gl=null;
+  try{ gl=stage.getContext("webgl",{premultipliedAlpha:false,alpha:true,antialias:true,depth:false,stencil:false,preserveDrawingBuffer:false})
+        || stage.getContext("experimental-webgl",{premultipliedAlpha:false,alpha:true,antialias:true}); }catch(e){}
+  if(!gl){ return THX.canvas2DFallback(stage); }
+
+  // -------- brand colors: read from THX, guard against malformed arrays --------
+  function c3(v,fb){ return (v && v.length===3 &&
+      v[0]===v[0] && v[1]===v[1] && v[2]===v[2]) ? [+v[0],+v[1],+v[2]] : fb; }
+  var BLUE=c3(THX.BLUE,[0.471,0.580,0.965]);
+  var PURP=c3(THX.PURP,[0.659,0.486,1.000]);
+  var PINK=c3(THX.PINK,[1.000,0.561,0.694]);
+
+  var VS="attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}";
+
+  // qual: 0 = phone/low (single caustic layer, no normal taps),
+  //       1 = desktop (two layers + finite-diff highlight). Set from canvas size.
+  var FS=[
+"precision highp float;",
+"uniform vec2 uRes;",          // backing-store px
+"uniform float uT;",           // seconds
+"uniform vec2 uM;",            // pointer 0..1 (y up)
+"uniform float uMOn;",         // pointer ease 0..1
+"uniform float uQual;",        // 0.0 low / 1.0 high
+"uniform vec3 uBLUE;",
+"uniform vec3 uPURP;",
+"uniform vec3 uPINK;",
+"uniform sampler2D uMask;",    // THEODYX alpha mask
+
+// ---- hash / value noise (constant-bound fbm) ----
+"float h21(vec2 p){p=fract(p*vec2(127.1,311.7));p+=dot(p,p+34.345);return fract(p.x*p.y);}",
+"float vn(vec2 p){vec2 i=floor(p),f=fract(p);vec2 u=f*f*(3.-2.*f);",
+" float a=h21(i),b=h21(i+vec2(1,0)),c=h21(i+vec2(0,1)),d=h21(i+vec2(1,1));",
+" return mix(mix(a,b,u.x),mix(c,d,u.x),u.y);}",
+"float fbm(vec2 p){float v=0.,a=0.55;mat2 m=mat2(1.6,1.2,-1.2,1.6);",
+" for(int i=0;i<4;i++){v+=a*vn(p);p=m*p;a*=0.5;}return v;}",
+
+// ---- animated Voronoi (caustic cells). 3x3 neighborhood, constant bounds ----
+// Returns smooth distance-to-nearest feature point -> sharp bright veins.
+"float voro(vec2 uv){",
+" vec2 g=floor(uv), f=fract(uv);",
+" float md=1.0e9;",
+" for(int j=-1;j<=1;j++){",
+"  for(int i=-1;i<=1;i++){",
+"   vec2 o=vec2(float(i),float(j));",
+"   vec2 rnd=vec2(h21(g+o), h21(g+o+vec2(31.7,17.3)));",
+// points orbit over time -> liquid shimmer
+"   vec2 pnt=o+0.5+0.42*sin(uT*0.9+6.2831*rnd);",
+"   vec2 r=pnt-f;",
+"   float d=dot(r,r);",
+"   md=min(md,d);",
+"  }",
+" }",
+" return sqrt(max(md,0.0));",
+"}",
+
+// one caustic layer: warped domain -> voronoi -> sharpened veins
+"float caustic(vec2 uv, float t){",
+" vec2 w=vec2(fbm(uv*1.7+t), fbm(uv*1.7+vec2(5.2,1.3)-t));",
+" vec2 p=uv + (w-0.5)*0.9;",
+" float v=voro(p*2.6 + t*0.6);",
+" float lines=1.0 - smoothstep(0.0,0.55,v);",   // bright where cells meet
+" return pow(max(lines,0.0),2.2);",             // crisp filaments
+"}",
+
+"void main(){",
+" vec2 uv=gl_FragCoord.xy/max(uRes,vec2(1.0));",       // 0..1, y up
+" float asp=uRes.x/max(uRes.y,1.0);",
+" vec2 sp=vec2((uv.x-0.5)*asp, uv.y-0.5);",
+
+" float t=uT*0.12;",
+" vec2 pm=(uM-0.5);",
+// pointer pulls the caustic field (eased); auto-drift keeps it alive at rest
+" vec2 flow=sp + pm*uMOn*0.45 + vec2(sin(t*0.7)*0.05, cos(t*0.6)*0.05);",
+
+// ---- caustic intensity (always >=1 layer; 2nd layer + highlight only when high) ----
+" float c1=caustic(flow*1.0, t);",
+" float c=c1;",
+" float hl=0.0;",                                     // finite-diff highlight
+" if(uQual>0.5){",
+"   float c2=caustic(flow*1.9 + 7.3, t*1.27);",       // finer secondary layer
+"   c=c1*0.65 + c2*0.55;",
+"   float e=2.0/max(uRes.y,1.0);",                    // screen-space tap
+"   float cx=caustic(flow*1.0+vec2(e,0.0),t);",
+"   float cy=caustic(flow*1.0+vec2(0.0,e),t);",
+"   hl=clamp((c1-cx)+(c1-cy),0.0,1.0);",              // ridge specular
+" }",
+" c=clamp(c,0.0,2.0);",
+
+// ---- color: blue->purple->pink driven by caustic depth + height + slow hue drift ----
+" float depth=clamp(c*0.8 + fbm(flow*1.2+t*0.5)*0.4, 0.0, 1.0);",
+" float hue=clamp(depth + 0.18*sin(t*0.8+uv.x*3.0) + uv.y*0.25, 0.0, 1.0);",
+" vec3 col=mix(uBLUE,uPURP,smoothstep(0.0,0.6,hue));",
+" col=mix(col,uPINK,smoothstep(0.5,1.0,hue));",
+// bright caustic veins push toward white-pink for a 'light through water' glint
+" col=mix(col, mix(col,vec3(1.0),0.6), smoothstep(0.55,1.0,c));",
+" col+=uPINK*hl*0.9;",                                // crisp specular sparkle (high only)
+" col*=0.35+0.95*c;",                                 // veins glow, troughs go dark
+
+// pointer glow: soft caustic bloom following the cursor
+" vec2 mp=vec2((uM.x-0.5)*asp,(uM.y-0.5));",
+" float md=length(sp-mp);",
+" float pulse=exp(-md*md*7.0)*uMOn;",
+" col+=mix(uBLUE,uPINK,uM.y)*pulse*0.5;",
+
+// ---- tone map: bounded, no overflow/NaN into alpha ----
+" col=col/(col+vec3(0.85));",
+" col=pow(max(col,0.0),vec3(0.85));",
+" col=clamp(col,0.0,1.0);",
+
+// ---- mask to THEODYX letters ----
+" float m=texture2D(uMask,vec2(uv.x,1.0-uv.y)).a;",
+" float lum=clamp(c*0.9+pulse*0.6, 0.0, 1.0);",
+" float baseFill=0.18;",                              // letters always legible
+" float a=m*clamp(baseFill+lum,0.0,1.0);",
+
+// NaN guards
+" if(!(a==a)) a=0.0;",
+" if(!(col.x==col.x)||!(col.y==col.y)||!(col.z==col.z)) col=vec3(0.0);",
+" gl_FragColor=vec4(col,a);",
+"}"].join("\n");
+
+  function sh(tp,s){
+    var o=gl.createShader(tp);gl.shaderSource(o,s);gl.compileShader(o);
+    if(!gl.getShaderParameter(o,gl.COMPILE_STATUS)){console.warn("liquid-light shader:",gl.getShaderInfoLog(o));return null;}
+    return o;
+  }
+  var vs=sh(gl.VERTEX_SHADER,VS), fs=sh(gl.FRAGMENT_SHADER,FS);
+  if(!vs||!fs){ return THX.canvas2DFallback(stage); }
+  var pr=gl.createProgram();gl.attachShader(pr,vs);gl.attachShader(pr,fs);gl.linkProgram(pr);
+  if(!gl.getProgramParameter(pr,gl.LINK_STATUS)){console.warn("liquid-light link:",gl.getProgramInfoLog(pr));return THX.canvas2DFallback(stage);}
+  gl.useProgram(pr);
+
+  var buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+  gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
+  var lp=gl.getAttribLocation(pr,"p");gl.enableVertexAttribArray(lp);gl.vertexAttribPointer(lp,2,gl.FLOAT,false,0,0);
+
+  var uRes=gl.getUniformLocation(pr,"uRes"),
+      uT=gl.getUniformLocation(pr,"uT"),
+      uM=gl.getUniformLocation(pr,"uM"),
+      uMOn=gl.getUniformLocation(pr,"uMOn"),
+      uQual=gl.getUniformLocation(pr,"uQual"),
+      uBLUE=gl.getUniformLocation(pr,"uBLUE"),
+      uPURP=gl.getUniformLocation(pr,"uPURP"),
+      uPINK=gl.getUniformLocation(pr,"uPINK");
+  gl.uniform1i(gl.getUniformLocation(pr,"uMask"),0);
+  // static brand-color uniforms (set once; arrays validated above so no throw)
+  gl.uniform3f(uBLUE,BLUE[0],BLUE[1],BLUE[2]);
+  gl.uniform3f(uPURP,PURP[0],PURP[1],PURP[2]);
+  gl.uniform3f(uPINK,PINK[0],PINK[1],PINK[2]);
+
+  var tex=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,tex);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+
+  gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
+
+  var mouse=[0.5,0.55], mOn=0.0, mTarget=0.0, qual=1.0;
+
+  function size(){
+    var r=stage.getBoundingClientRect(), d=THX.dpr();
+    var w=Math.max(1,Math.floor(r.width*d)), hh=Math.max(1,Math.floor(r.height*d));
+    stage.width=w; stage.height=hh;
+    // quality: drop 2nd caustic layer + normal taps on small/low-DPR canvases (phones)
+    qual = (w*hh > 1300000) ? 1.0 : 0.0;
+    // letters can shimmer at tiny sizes -> bump mask supersample a touch
+    var mscale = (r.width<520) ? Math.min(d+0.5,2.5) : d;
+    var m=THX.textMask(r.width,r.height,mscale);
+    gl.bindTexture(gl.TEXTURE_2D,tex);
+    gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,m.canvas);
+    gl.viewport(0,0,w,hh);
+  }
+  size();
+
+  stage.addEventListener("pointermove",function(e){
+    var r=stage.getBoundingClientRect();
+    mouse[0]=(e.clientX-r.left)/Math.max(r.width,1e-4);
+    mouse[1]=1-(e.clientY-r.top)/Math.max(r.height,1e-4);
+    mTarget=1.0;
+  },{passive:true});
+  stage.addEventListener("pointerleave",function(){ mTarget=0.0; },{passive:true});
+
+  var t0=performance.now();
+  function frame(now){
+    gl.useProgram(pr);
+    mOn+=(mTarget-mOn)*0.06;
+    gl.uniform2f(uRes,stage.width,stage.height);
+    gl.uniform1f(uT,(now-t0)/1000);
+    gl.uniform2f(uM,mouse[0],mouse[1]);
+    gl.uniform1f(uMOn,mOn);
+    gl.uniform1f(uQual,qual);
+    gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,tex);
+    gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+  }
+  return {frame:frame,resize:size};
+};
+})();
+</script>
+<script>
+;(function(){
+THX.FX["plasma"] = function(stage){
+  // ---------------------------------------------------------------------------
+  // THEODYX "Plasma Lightning" — Tesla-coil crackle + plasma-ball filaments,
+  // masked to the THEODYX letters. WebGL1 / GLSL ES 1.00. Mobile-safe.
+  // ---------------------------------------------------------------------------
+
+  // ---- WebGL context (guarded) ----
+  var gl=null;
+  try{ gl=stage.getContext("webgl",{premultipliedAlpha:false,alpha:true,antialias:true,depth:false,stencil:false,preserveDrawingBuffer:false}); }catch(e){}
+  if(!gl){ try{ gl=stage.getContext("experimental-webgl",{premultipliedAlpha:false,alpha:true}); }catch(e2){} }
+  if(!gl){ return THX.canvas2DFallback(stage); }
+
+  // ---- photosensitivity: honor prefers-reduced-motion (feature-detected) ----
+  var CALM=0.0;
+  try{
+    if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) CALM=1.0;
+  }catch(e3){}
+
+  // ---- quality tier (compile-time) ----
+  // Cost is per-pixel: two noise loops + several mask taps. The only lever is
+  // shader iteration counts, so pick a tier up front from DPR + footprint.
+  // LOW keeps weak Android phones smooth; HIGH for desktop / modern phones.
+  function pickQual(){
+    var d=THX.dpr();
+    var r=stage.getBoundingClientRect();
+    var px=Math.max(1,r.width*d)*Math.max(1,r.height*d);
+    var smallSide=Math.min(window.innerWidth||9999, window.innerHeight||9999);
+    var phone=smallSide<760;
+    if(phone || px>2200000 || d<1.25) return 0;
+    return 1;
+  }
+  var QUAL=pickQual();
+  // RIDGED iterations + FBM octaves all scale with the tier.
+  var DEF=(QUAL>0)
+    ? ["#define FBM_OCT 6","#define RIDGED_OCT 5"]
+    : ["#define FBM_OCT 4","#define RIDGED_OCT 4"];
+
+  var VS="attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}";
+
+  var FS=DEF.concat([
+  "precision highp float;",
+  "uniform vec2 uRes;",       // backing-store resolution (px)
+  "uniform float uT;",        // seconds
+  "uniform vec2 uM;",         // pointer in 0..1 (y up)
+  "uniform float uMOn;",      // pointer influence 0..1 (eases in on first move)
+  "uniform float uCalm;",     // 1.0 => reduced-motion: slow & soften the crackle
+  "uniform vec2 uTexel;",     // 1/maskSize for finite-difference edge sampling
+  "uniform sampler2D uMask;", // THEODYX alpha mask
+
+  "vec3 BLUE=vec3(0.471,0.580,0.965);",   // #7894f6
+  "vec3 PURP=vec3(0.659,0.486,1.000);",   // #a87cff
+  "vec3 PINK=vec3(1.000,0.561,0.694);",   // #ff8fb1
+
+  // ---- hashing / value noise ----
+  "float h21(vec2 p){p=fract(p*vec2(123.34,345.45));p+=dot(p,p+34.345);return fract(p.x*p.y);}",
+  "float vn(vec2 p){vec2 i=floor(p),f=fract(p);vec2 u=f*f*(3.-2.*f);",
+  " float a=h21(i),b=h21(i+vec2(1,0)),c=h21(i+vec2(0,1)),d=h21(i+vec2(1,1));",
+  " return mix(mix(a,b,u.x),mix(c,d,u.x),u.y);}",
+
+  "float fbm(vec2 p){float v=0.,a=0.55;mat2 m=mat2(1.6,1.2,-1.2,1.6);",
+  " for(int i=0;i<FBM_OCT;i++){v+=a*vn(p);p=m*p;a*=0.5;}return v;}",
+
+  // ridged multifractal -> sharp electric filaments (constant bound RIDGED_OCT)
+  "float ridged(vec2 p){float v=0.,a=0.55;mat2 m=mat2(1.6,1.2,-1.2,1.6);",
+  " for(int i=0;i<RIDGED_OCT;i++){float n=vn(p);n=1.0-abs(2.0*n-1.0);v+=a*n*n;p=m*p;a*=0.5;}",
+  " return v;}",
+
+  // finite-difference surrogate for distance toward the letter edge.
+  // (true SDF would need a baked distance field; this hugs outlines well enough
+  //  and LINEAR filtering smooths the rest.)
+  "float maskA(vec2 mc){return texture2D(uMask,mc).a;}",
+
+  "void main(){",
+  " vec2 uv=gl_FragCoord.xy/uRes;",                       // 0..1, y up
+  " float asp=uRes.x/max(uRes.y,1.0);",
+  " vec2 sp=vec2((uv.x-0.5)*asp, uv.y-0.5);",             // aspect-correct, centered
+
+  // mask coordinate (texture is not flipped at upload, so flip Y here)
+  " vec2 mc=vec2(uv.x,1.0-uv.y);",
+  " float m=maskA(mc);",
+
+  // ---- finite-difference edge field (gradient magnitude of the mask) ----
+  // bright arcs cling to letter outlines; interior glows softly.
+  " float mx1=maskA(mc+vec2(uTexel.x,0.0));",
+  " float mx0=maskA(mc-vec2(uTexel.x,0.0));",
+  " float my1=maskA(mc+vec2(0.0,uTexel.y));",
+  " float my0=maskA(mc-vec2(0.0,uTexel.y));",
+  " vec2 grad=vec2(mx1-mx0,my1-my0);",
+  " float edge=clamp(length(grad)*2.2,0.0,1.0);",        // ~1 at outline, 0 inside
+
+  // ---- time: reduced-motion slows the fast crackle terms toward calm ----
+  " float speed=mix(1.0,0.28,uCalm);",                   // global animation rate
+  " float t=uT*0.5*speed;",
+  // crackle constants (13Hz / 30Hz) are the Tesla flicker; soften under calm.
+  " float crk1=mix(13.0,3.0,uCalm);",
+  " float crk2=mix(30.0,6.0,uCalm);",
+  " float flickAmp=mix(1.0,0.35,uCalm);",                // reduce flicker depth too
+
+  // pointer warps the discharge field (eased in)
+  " vec2 pm=(uM-0.5);",
+  " vec2 mp=vec2(pm.x*asp,pm.y);",
+  " float warp=uMOn*0.35;",
+
+  // ---------- PLASMA FIELD ----------
+  // domain-warp a coordinate, then carve ridged filaments through it. The warp
+  // drifts forever (alive with no input); the pointer tugs it locally.
+  " vec2 q=sp*2.4;",
+  " float w1=fbm(q*1.2 + vec2(t*0.6, t*0.4));",
+  " float w2=fbm(q*1.2 + vec2(-t*0.5, t*0.55) + w1);",
+  " vec2 warpv=(vec2(w1,w2)-0.5);",
+  " vec2 fp=q + warpv*1.3 + mp*warp*2.0;",
+
+  // primary lightning filaments
+  " float r1=ridged(fp*1.6 + vec2(0.0,t*0.9));",
+  // secondary, faster, finer crackle layer
+  " float r2=ridged(fp*3.1 + vec2(t*1.3, -t*0.7) + r1*0.6);",
+
+  // sharpen ridges into thin bright arcs
+  " float arc1=pow(clamp(r1,0.0,1.0),3.0);",
+  " float arc2=pow(clamp(r2,0.0,1.0),4.0);",
+
+  // Tesla strobe: fast flicker gated so it never fully blacks out.
+  " float strobe=0.62+0.38*flickAmp*sin(t*crk1 + fp.x*3.0);",
+  " strobe*=0.78+0.22*flickAmp*sin(t*crk2 + r1*9.0);",
+  " strobe=clamp(strobe,0.18,1.0);",
+
+  // discharge intensity: filaments concentrated near edges + a softer body glow
+  " float fil=arc1*0.7 + arc2*0.55;",
+  " float intensity=fil*strobe;",
+  " intensity=mix(intensity, intensity*(0.55+edge*1.1), 0.85);", // hug outlines
+  " float bodyGlow=smoothstep(0.35,0.95,r1)*0.30;",              // diffuse interior
+
+  // pointer 'spark': a bright bloom that follows the cursor
+  " float md=length(sp-mp);",
+  " float spark=exp(-md*md*14.0)*uMOn;",
+  " intensity+=spark*0.9;",
+  " intensity=clamp(intensity,0.0,3.0);",
+
+  // ---------- COLOR ----------
+  // cool blue base in the body, electric purple along arcs, hot pink cores.
+  " float hue=clamp(intensity*0.8 + r2*0.25 + uv.y*0.15, 0.0, 1.0);",
+  " vec3 col=mix(BLUE,PURP,smoothstep(0.0,0.55,hue));",
+  " col=mix(col,PINK,smoothstep(0.6,1.0,hue));",
+  // the very hottest filament cores blow toward white-pink (tone-mapped below)
+  " vec3 hotCore=mix(col, vec3(1.0,0.92,0.97), smoothstep(1.2,2.4,intensity));",
+  " col=hotCore;",
+
+  // brightness build: body glow + filament emission. NO additive blend at the
+  // GL stage (we use SRC_ALPHA over) — instead build HDR here and Reinhard it,
+  // so the hottest filaments ROLL OFF to ~white-pink rather than clipping flat.
+  " vec3 emit=col*(bodyGlow + intensity*0.9);",
+  " emit+=PINK*spark*0.5;",                              // warm the cursor spark
+  " emit=emit/(emit+vec3(0.85));",                       // Reinhard tone map (anti-bloom)
+  " emit=pow(clamp(emit,0.0,1.0),vec3(0.85));",          // gentle gamma for glow
+
+  // a faint always-on base tint so empty letter interior reads as 'charged'
+  " vec3 base=mix(BLUE,PURP,0.35)*0.10*(0.7+0.3*sin(t*0.8+sp.x*2.0));",
+  " emit+=base;",
+  " emit=clamp(emit,0.0,1.0);",
+
+  // ---------- MASK + ALPHA ----------
+  " float lum=clamp(intensity*0.9 + bodyGlow*1.4, 0.0, 1.0);",
+  " float baseFill=0.18;",                               // faint letter body, always legible
+  " float a=m*clamp(baseFill+lum,0.0,1.0);",
+
+  // NaN guards
+  " if(!(a==a)) a=0.0;",
+  " if(!(emit.x==emit.x)) emit=vec3(0.0);",
+  " gl_FragColor=vec4(emit, a);",
+  "}"]).join("\n");
+
+  // ---- compile helpers ----
+  function sh(tp,src){
+    var o=gl.createShader(tp); gl.shaderSource(o,src); gl.compileShader(o);
+    if(!gl.getShaderParameter(o,gl.COMPILE_STATUS)){ console.warn("plasma shader:",gl.getShaderInfoLog(o)); return null; }
+    return o;
+  }
+  var vs=sh(gl.VERTEX_SHADER,VS), fs=sh(gl.FRAGMENT_SHADER,FS);
+  if(!vs||!fs){ return THX.canvas2DFallback(stage); }
+  var pr=gl.createProgram(); gl.attachShader(pr,vs); gl.attachShader(pr,fs); gl.linkProgram(pr);
+  if(!gl.getProgramParameter(pr,gl.LINK_STATUS)){ console.warn("plasma link:",gl.getProgramInfoLog(pr)); return THX.canvas2DFallback(stage); }
+  gl.useProgram(pr);
+
+  // ---- fullscreen tri-strip ----
+  var buf=gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+  gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1, 1,-1, -1,1, 1,1]),gl.STATIC_DRAW);
+  var lp=gl.getAttribLocation(pr,"p"); gl.enableVertexAttribArray(lp);
+  gl.vertexAttribPointer(lp,2,gl.FLOAT,false,0,0);
+
+  // ---- uniforms ----
+  var uRes=gl.getUniformLocation(pr,"uRes"),
+      uT=gl.getUniformLocation(pr,"uT"),
+      uM=gl.getUniformLocation(pr,"uM"),
+      uMOn=gl.getUniformLocation(pr,"uMOn"),
+      uCalm=gl.getUniformLocation(pr,"uCalm"),
+      uTexel=gl.getUniformLocation(pr,"uTexel");
+  gl.uniform1i(gl.getUniformLocation(pr,"uMask"),0);
+
+  // ---- mask texture ----
+  var tex=gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D,tex);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+
+  // Standard "source-over" blend onto the dark page. (NOT additive: HDR roll-off
+  // is handled in-shader, so filaments can't clip the framebuffer to flat white.)
+  gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
+
+  // ---- pointer (eased), auto-alive when idle ----
+  var mouse=[0.5,0.5], mOn=0.0, mTarget=0.0;
+  stage.addEventListener("pointermove",function(e){
+    var r=stage.getBoundingClientRect();
+    if(r.width<=0||r.height<=0) return;
+    mouse[0]=(e.clientX-r.left)/r.width;
+    mouse[1]=1-(e.clientY-r.top)/r.height;
+    mTarget=1.0;
+  },{passive:true});
+  stage.addEventListener("pointerleave",function(){ mTarget=0.0; },{passive:true});
+
+  // ---- sizing: backing store via THX.dpr(); uTexel guarded against 0 ----
+  var maskW=1, maskH=1;
+  function size(){
+    var r=stage.getBoundingClientRect(), d=THX.dpr();
+    var w=Math.max(1,Math.floor(r.width*d)), hh=Math.max(1,Math.floor(r.height*d));
+    if(stage.width!==w||stage.height!==hh){ stage.width=w; stage.height=hh; }
+    var mk=THX.textMask(r.width,r.height,d);
+    maskW=Math.max(1, mk.w||mk.canvas.width||1);
+    maskH=Math.max(1, mk.h||mk.canvas.height||1);
+    gl.bindTexture(gl.TEXTURE_2D,tex);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,false);
+    gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,mk.canvas);
+    gl.viewport(0,0,w,hh);
+  }
+  size();
+
+  var t0=performance.now();
+  function frame(now){
+    gl.useProgram(pr);
+    gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+    gl.enableVertexAttribArray(lp);
+    gl.vertexAttribPointer(lp,2,gl.FLOAT,false,0,0);
+    mOn+=(mTarget-mOn)*0.06;
+    gl.uniform2f(uRes,stage.width,stage.height);
+    gl.uniform1f(uT,(now-t0)/1000);
+    gl.uniform2f(uM,mouse[0],mouse[1]);
+    gl.uniform1f(uMOn,mOn);
+    gl.uniform1f(uCalm,CALM);
+    gl.uniform2f(uTexel,1.0/maskW,1.0/maskH);
+    gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D,tex);
+    gl.clearColor(0,0,0,0); gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+  }
+  return {frame:frame,resize:size};
+};
+})();
+</script>
+<script>
+;(function(){
+THX.FX["aurora"] = function(stage){
+  var gl=null;
+  try{ gl=stage.getContext("webgl",{premultipliedAlpha:false,alpha:true,antialias:true,depth:false,stencil:false,preserveDrawingBuffer:false}); }catch(e){}
+  if(!gl){ return THX.canvas2DFallback(stage); }
+
+  var VS="attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}";
+
+  // ---- quality tier (compile-time) ----
+  // Cost scales with canvas PIXELS, not a JS particle count, so the only lever
+  // is shader iteration counts. Pick a tier up front from DPR + the worst-case
+  // footprint; LOW (18 march steps / fbm-5) keeps weak Android footers smooth,
+  // HIGH (26 / fbm-6) for desktop & modern phones. Loop bounds stay CONSTANT
+  // because the preprocessor substitutes these #defines before compile.
+  function pickQual(){
+    var d=THX.dpr();
+    var r=stage.getBoundingClientRect();
+    var px=Math.max(1,r.width*d)*Math.max(1,r.height*d);
+    var smallSide=Math.min(window.innerWidth||9999, window.innerHeight||9999);
+    var phone=smallSide<760;
+    // weak path: phone, OR very large backing store, OR low-DPR (often weak GPU)
+    if(phone || px>2200000 || d<1.25) return 0;
+    return 1;
+  }
+  var QUAL=pickQual();
+  var DEF=(QUAL>0)
+    ? ["#define MARCH 26","#define FBM_OCT 6"]
+    : ["#define MARCH 18","#define FBM_OCT 5"];
+
+  var FS=DEF.concat([
+"precision highp float;",
+"uniform vec2 uRes;",        // backing-store resolution (px)
+"uniform float uT;",         // seconds
+"uniform vec2 uM;",          // pointer in 0..1 (y up)
+"uniform float uMOn;",       // pointer influence 0..1 (eases in on first move)
+"uniform sampler2D uMask;",  // THEODYX alpha mask
+
+"vec3 BLUE=vec3(0.471,0.580,0.965);",   // #7894f6
+"vec3 PURP=vec3(0.659,0.486,1.000);",   // #a87cff
+"vec3 PINK=vec3(1.000,0.561,0.694);",   // #ff8fb1
+"vec3 GREEN=vec3(0.298,1.000,0.667);",  // aurora green
+"vec3 TEAL=vec3(0.290,0.870,0.870);",   // aurora teal
+
+// ---- hashing / value noise ----
+"float h21(vec2 p){p=fract(p*vec2(123.34,345.45));p+=dot(p,p+34.345);return fract(p.x*p.y);}",
+"float vn(vec2 p){vec2 i=floor(p),f=fract(p);vec2 u=f*f*(3.-2.*f);",
+" float a=h21(i),b=h21(i+vec2(1,0)),c=h21(i+vec2(0,1)),d=h21(i+vec2(1,1));",
+" return mix(mix(a,b,u.x),mix(c,d,u.x),u.y);}",
+"float fbm(vec2 p){float v=0.,a=0.55;mat2 m=mat2(1.6,1.2,-1.2,1.6);",
+" for(int i=0;i<FBM_OCT;i++){v+=a*vn(p);p=m*p;a*=0.5;}return v;}",
+
+// ---- starfield (twinkling) ----
+"float stars(vec2 uv){",
+" float s=0.;",
+" for(int k=0;k<3;k++){",
+"   float fk=float(k);",
+"   vec2 g=uv*(60.0+fk*48.0);",
+"   vec2 id=floor(g);vec2 fp=fract(g)-0.5;",
+"   float rnd=h21(id+fk*17.3);",
+"   if(rnd>0.86){",
+"     float tw=0.55+0.45*sin(uT*(1.2+rnd*3.0)+rnd*40.0);",
+"     float d=length(fp);",
+"     float core=smoothstep(0.34,0.0,d)*tw;",
+"     s+=core*(0.5+0.5*fk*0.4);",
+"   }",
+" }",
+" return s;",
+"}",
+
+// curtain profile: how aurora intensity falls with height for a given band base/top
+"float curtainBand(float y, float base, float h){",
+" float top=base+h;",
+" float body=smoothstep(base,base+h*0.32,y)*(1.0-smoothstep(top-h*0.55,top,y));",
+" float foot=smoothstep(base,base+h*0.10,y);",         // bright lower edge (filament foot)
+" foot*= (1.0-smoothstep(base+h*0.05,base+h*0.22,y));",
+" return body+foot*1.4;",
+"}",
+
+"void main(){",
+" vec2 uv=gl_FragCoord.xy/uRes;",                       // 0..1, y up
+" float asp=uRes.x/max(uRes.y,1.0);",
+" vec2 sp=vec2((uv.x-0.5)*asp, uv.y-0.5);",             // aspect-correct, centered
+
+" float t=uT*0.06;",
+// pointer warps the flow field slightly (eased)
+" vec2 pm=(uM-0.5);",
+" float warp=uMOn*0.30;",
+
+// ---------- VOLUMETRIC AURORA: integrate along vertical 'rays' ----------
+// We march upward in screen space, accumulating emission of flowing curtains.
+" vec3 acc=vec3(0.0);",
+" float aMask=0.0;",                                     // accumulated aurora alpha
+" float xw=sp.x;",                                       // horizontal sample coord
+
+// horizontal drift + large-scale fold of the curtain sheet
+" float fold=fbm(vec2(xw*1.1+t*1.6, t*0.7))*1.2;",
+" float curtainX=xw + (fold-0.6)*0.6 + pm.x*warp;",
+
+" const int STEPS=MARCH;",
+" float inv=1.0/float(STEPS);",
+" for(int i=0;i<STEPS;i++){",
+"   float fi=float(i)*inv;",                             // 0..1 up the curtain
+"   float y=fi;",                                        // normalized height
+// flowing vertical filaments: noise scrolls upward & sideways over time
+"   vec2 np=vec2(curtainX*3.2 + sin(y*4.0+t*4.0)*0.25, y*2.4 - t*3.0);",
+"   float fil=fbm(np);",
+// banded ray structure (many thin vertical rays), shifting horizontally
+"   float rays=fbm(vec2(curtainX*9.0 + fil*1.4 + t*2.0, y*1.2 - t*1.5));",
+"   float ray=smoothstep(0.45,0.95,rays);",
+// vertical envelope of two overlapping curtains for depth
+"   float env=curtainBand(y,0.04,0.92)*0.7 + curtainBand(y,0.22,0.66)*0.5;",
+"   float dens=ray*env*(0.55+0.6*fil);",
+"   dens=max(dens,0.0);",
+// COLOR: bottom green->teal, mid blue->purple, crown pink (brand-honoring)
+"   vec3 lowc=mix(GREEN,TEAL,smoothstep(0.0,0.30,y));",
+"   vec3 midc=mix(TEAL,BLUE,smoothstep(0.18,0.50,y));",
+"   vec3 hic =mix(PURP,PINK,smoothstep(0.55,1.0,y));",
+"   vec3 cc=mix(lowc,midc,smoothstep(0.12,0.42,y));",
+"   cc=mix(cc,hic,smoothstep(0.45,0.85,y));",
+// subtle hue breathing over time for life
+"   cc=mix(cc,cc.gbr,0.10*sin(t*2.0+curtainX*2.0)*0.5+0.05);",
+// emission accumulation (front-to-back-ish, simple additive with falloff)
+"   float em=dens*(1.0-fi*0.35);",
+"   acc+=cc*em*0.16;",
+"   aMask+=em*0.16;",
+" }",
+
+// crown shimmer: faint pink rim near the top of curtains
+" float crown=smoothstep(0.62,0.98,uv.y)*fbm(vec2(curtainX*6.0+t*3.0, uv.y*3.0));",
+" acc+=PINK*crown*0.22; aMask+=crown*0.16;",
+
+// ground glow: soft brand wash rising from the bottom
+" float gg=smoothstep(0.36,0.0,uv.y);",
+" vec3 groundc=mix(BLUE,PURP,0.4+0.3*sin(t*1.5+xw*1.5));",
+" acc+=groundc*gg*gg*0.10; aMask+=gg*gg*0.05;",
+
+// starfield behind (only where aurora is thin)
+" float st=stars(vec2(uv.x*asp,uv.y));",
+" float behind=(1.0-clamp(aMask*2.2,0.0,1.0));",
+" acc+=vec3(0.85,0.9,1.0)*st*behind*0.6;",
+" aMask=max(aMask, st*behind*0.5);",
+
+// pointer cool-glow: a soft aurora 'pulse' that follows the cursor
+" vec2 mp=vec2((uM.x-0.5)*asp,(uM.y-0.5));",
+" float md=length(sp-mp);",
+" float pulse=exp(-md*md*9.0)*uMOn;",
+" acc+=mix(TEAL,PINK,uM.y)*pulse*0.5; aMask+=pulse*0.35;",
+
+// tone: gentle filmic-ish lift, keep it calm & premium
+" acc=acc/(acc+vec3(0.9));",                             // soft rolloff
+" acc=pow(max(acc,0.0),vec3(0.86));",                    // slight gamma for glow
+" acc=clamp(acc,0.0,1.0);",
+
+// ---------- MASK TO TEXT ----------
+" float m=texture2D(uMask,vec2(uv.x,1.0-uv.y)).a;",
+// alpha is letter-coverage * aurora-presence; add a tiny base so letters never vanish
+" float lum=clamp(aMask*1.3,0.0,1.0);",
+" float baseFill=0.16;",                                 // faint letter body so it's always legible
+" float a=m*clamp(baseFill+lum,0.0,1.0);",
+// guard against NaN
+" if(!(a==a)) a=0.0;",
+" if(!(acc.x==acc.x)) acc=vec3(0.0);",
+" gl_FragColor=vec4(acc, a);",
+"}"]).join("\n");
+
+  function sh(tp,s){
+    var o=gl.createShader(tp);gl.shaderSource(o,s);gl.compileShader(o);
+    if(!gl.getShaderParameter(o,gl.COMPILE_STATUS)){console.warn("aurora shader:",gl.getShaderInfoLog(o));return null;}
+    return o;
+  }
+  var vs=sh(gl.VERTEX_SHADER,VS), fs=sh(gl.FRAGMENT_SHADER,FS);
+  if(!vs||!fs){ return THX.canvas2DFallback(stage); }
+  var pr=gl.createProgram();gl.attachShader(pr,vs);gl.attachShader(pr,fs);gl.linkProgram(pr);
+  if(!gl.getProgramParameter(pr,gl.LINK_STATUS)){console.warn("aurora link:",gl.getProgramInfoLog(pr));return THX.canvas2DFallback(stage);}
+  gl.useProgram(pr);
+
+  var buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+  gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
+  var lp=gl.getAttribLocation(pr,"p");gl.enableVertexAttribArray(lp);gl.vertexAttribPointer(lp,2,gl.FLOAT,false,0,0);
+
+  var uRes=gl.getUniformLocation(pr,"uRes"),
+      uT=gl.getUniformLocation(pr,"uT"),
+      uM=gl.getUniformLocation(pr,"uM"),
+      uMOn=gl.getUniformLocation(pr,"uMOn");
+  gl.uniform1i(gl.getUniformLocation(pr,"uMask"),0);
+
+  var tex=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,tex);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+
+  gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
+
+  var mouse=[0.5,0.55], mOn=0.0, mTarget=0.0;
+
+  function size(){
+    var r=stage.getBoundingClientRect(), d=THX.dpr();
+    var w=Math.max(1,Math.floor(r.width*d)), hh=Math.max(1,Math.floor(r.height*d));
+    stage.width=w; stage.height=hh;
+    var m=THX.textMask(r.width,r.height,d);
+    gl.bindTexture(gl.TEXTURE_2D,tex);
+    gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,m.canvas);
+    gl.viewport(0,0,w,hh);
+  }
+  size();
+
+  stage.addEventListener("pointermove",function(e){
+    var r=stage.getBoundingClientRect();
+    mouse[0]=(e.clientX-r.left)/Math.max(r.width,1);
+    mouse[1]=1-(e.clientY-r.top)/Math.max(r.height,1);
+    mTarget=1.0;
+  },{passive:true});
+  stage.addEventListener("pointerleave",function(){ mTarget=0.0; },{passive:true});
+
+  var t0=performance.now();
+  function frame(now){
+    gl.useProgram(pr);
+    mOn+=(mTarget-mOn)*0.06;
+    gl.uniform2f(uRes,stage.width,stage.height);
+    gl.uniform1f(uT,(now-t0)/1000);
+    gl.uniform2f(uM,mouse[0],mouse[1]);
+    gl.uniform1f(uMOn,mOn);
+    gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,tex);
+    gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+  }
+  return {frame:frame,resize:size};
+};
+})();
+</script>
+<script>
+;(function(){
+THX.FX["crystal"] = function(stage){
+  var gl=null;
+  try{ gl=stage.getContext("webgl",{premultipliedAlpha:false,alpha:true,antialias:true,depth:false,stencil:false,preserveDrawingBuffer:false})
+            || stage.getContext("experimental-webgl",{premultipliedAlpha:false,alpha:true,antialias:true,depth:false,stencil:false,preserveDrawingBuffer:false}); }catch(e){}
+  if(!gl){ return THX.canvas2DFallback(stage); }
+
+  var VS="attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}";
+
+  // ---- Fragment shader: procedural faceted crystal w/ chromatic dispersion ----
+  var FS=[
+  "precision highp float;",
+  "uniform vec2 uRes;uniform float uT;uniform vec2 uM;uniform sampler2D uMask;",
+  "uniform vec3 uBlue;uniform vec3 uPurp;uniform vec3 uPink;",
+
+  // --- hashes / noise ---
+  "vec2 h2(vec2 p){p=vec2(dot(p,vec2(127.1,311.7)),dot(p,vec2(269.5,183.3)));return fract(sin(p)*43758.5453);}",
+  "float h1(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}",
+  "float vn(vec2 p){vec2 i=floor(p),f=fract(p);vec2 u=f*f*(3.-2.*f);",
+  " return mix(mix(h1(i),h1(i+vec2(1,0)),u.x),mix(h1(i+vec2(0,1)),h1(i+vec2(1,1)),u.x),u.y);}",
+  "float fbm(vec2 p){float v=0.,a=.5;for(int i=0;i<4;i++){v+=a*vn(p);p=p*2.03+1.7;a*=.5;}return v;}",
+
+  // --- Voronoi facets: returns nearest cell point (F1), 2nd dist, and per-cell id ---
+  // F2-F1 gives crisp facet edge lines; cell point seeds a flat facet normal.
+  "vec4 facets(vec2 x){",
+  " vec2 n=floor(x),f=fract(x);",
+  " float f1=8.,f2=8.; vec2 cp=vec2(0.); vec2 cid=vec2(0.);",
+  " for(int j=-1;j<=1;j++){for(int i=-1;i<=1;i++){",
+  "   vec2 g=vec2(float(i),float(j));",
+  "   vec2 o=h2(n+g);",
+  "   o=0.5+0.5*sin(uT*0.55+6.2831*o);",          // slowly drifting facet sites -> living crystal
+  "   vec2 r=g+o-f; float d=dot(r,r);",
+  "   if(d<f1){f2=f1;f1=d;cp=r;cid=n+g;} else if(d<f2){f2=d;}",
+  " }}",
+  " return vec4(cp, sqrt(max(f2,0.0))-sqrt(max(f1,0.0)), h1(cid)); }",  // xy=vec to site, z=edge, w=cellId
+
+  // --- environment: a moody jewel studio with 3 sharp key lights for glints ---
+  "vec3 envcol(vec3 r,vec3 ldir){",
+  " float up=clamp(r.y*0.5+0.5,0.,1.);",
+  " vec3 base=mix(vec3(0.02,0.02,0.035),vec3(0.10,0.12,0.20),up);",
+  " base=mix(base,uPurp*0.25,smoothstep(0.2,1.0,up)*0.6);",
+  // sparkly studio key
+  " float k=pow(max(dot(r,ldir),0.0),48.0);",
+  " float k2=pow(max(dot(r,normalize(ldir+vec3(0.7,0.2,-0.5))),0.0),120.0);",
+  " float k3=pow(max(dot(r,normalize(vec3(-ldir.x,ldir.y,-ldir.z))),0.0),200.0);",
+  " base+=vec3(1.0,0.95,0.9)*k*0.9;",
+  " base+=vec3(0.85,0.9,1.0)*k2*1.6;",
+  " base+=vec3(1.0,0.8,0.95)*k3*2.2;",
+  " return base; }",
+
+  // sample env with a wavelength-shifted refraction vector -> spectral dispersion
+  "vec3 disperse(vec3 nrm,vec3 viewd,vec3 ldir,float spread,float eta){",
+  // refract three wavelengths with slightly different IOR (Abbe-style).
+  // refract() returns vec3(0.0) on total internal reflection; envcol(vec3(0)) is finite, so no NaN.
+  " vec3 rR=refract(viewd,nrm,eta-spread);",
+  " vec3 rG=refract(viewd,nrm,eta);",
+  " vec3 rB=refract(viewd,nrm,eta+spread);",
+  " float cr=envcol(rR,ldir).r;",
+  " float cg=envcol(rG,ldir).g;",
+  " float cb=envcol(rB,ldir).b;",
+  " return vec3(cr,cg,cb); }",
+
+  "void main(){",
+  " vec2 res=max(uRes,vec2(1.0));",
+  " vec2 uv=gl_FragCoord.xy/res;",
+  " float m=texture2D(uMask,vec2(uv.x,1.0-uv.y)).a;",
+  " if(m<0.003){ gl_FragColor=vec4(0.0); return; }",  // early-out outside letters
+
+  " float asp=res.x/res.y;",
+  " vec2 sp=vec2(uv.x*asp,uv.y);",
+
+  // pointer-driven light direction (auto-orbits when idle)
+  " vec2 mm=clamp(uM,vec2(0.0),vec2(1.0))*2.0-1.0;",
+  " float orb=uT*0.25;",
+  " vec3 ldir=normalize(vec3(mm.x*0.9+0.6*cos(orb), mm.y*0.9+0.35, 0.55+0.3*sin(orb)));",
+
+  // --- build a faceted normal map from animated voronoi ---
+  " float sc=11.0;",                               // facet density
+  " vec4 fc=facets(sp*sc);",
+  " vec2 toSite=fc.xy;",
+  " float edge=fc.z;",                             // distance to facet boundary
+  " float cellId=fc.w;",
+
+  // per-facet flat normal: tilt by direction-to-site, jittered per cell -> diamond cut
+  " vec2 tilt=normalize(toSite+vec2(1e-3,1e-3))*0.55;",
+  " float jz=fract(cellId*43.31);",
+  " vec3 fn=normalize(vec3(tilt*(0.6+0.6*jz), 1.0));",
+  // fine sub-facet sparkle relief
+  " float relief=fbm(sp*42.0+cellId*7.0+uT*0.15);",
+  " fn=normalize(fn+vec3((relief-0.5)*0.5,(relief-0.5)*0.5,0.0));",
+  // bevel the facet edges (round the ridge so light catches it)
+  " float ridge=smoothstep(0.0,0.08,edge);",
+  " fn.xy*=mix(2.2,1.0,ridge);",                   // splay normals near edges
+  " fn=normalize(fn);",
+
+  " vec3 V=vec3(0.0,0.0,1.0);",                    // view dir (ortho-ish)
+  " float fres=pow(1.0-max(dot(fn,V),0.0),3.0);",  // edge fresnel for rim fire
+
+  // --- dispersion: spread widens at facet edges (prismatic fire concentrates on edges) ---
+  " float spread=0.018+0.075*(1.0-ridge)+0.03*fres;",
+  " vec3 refr=disperse(fn,-V,ldir,spread,0.86);",
+
+  // internal reflection tint cycling through brand spectrum
+  " vec3 R=reflect(-V,fn);",
+  " vec3 refl=envcol(R,ldir);",
+
+  // brand prismatic ramp keyed by facet orientation + time -> rainbow but on-brand.
+  // atan(y,x) is undefined when x==0 && y==0; fn is normalized with fn.z~1 so fn.xy can be 0.
+  // Bias the x arg away from zero so the angle is always well-defined (no NaN on flat facets).
+  " float ax=fn.x+(fn.x>=0.0?1e-3:-1e-3);",
+  " float huek=fract(cellId + atan(fn.y,ax)*0.159 + uT*0.05);",
+  " vec3 ramp = huek<0.5 ? THXmix(uBlue,uPurp,huek*2.0) : THXmix(uPurp,uPink,(huek-0.5)*2.0);",
+
+  // compose: refracted spectrum + reflection + brand fire
+  " vec3 col = refr*0.9;",
+  " col += refl*0.55;",
+  " col = mix(col, col*ramp*1.8+ramp*0.10, 0.45);",   // prismatic fire wash
+
+  // --- sharp animated specular glints (Blinn) + sparkle field ---
+  " vec3 Hh=normalize(ldir+V);",
+  " float spec=pow(max(dot(fn,Hh),0.0),220.0);",
+  " col += vec3(1.0,0.98,0.95)*spec*2.4;",
+  // twinkling micro-sparkles seeded per cell, animated in/out.
+  // Wrap the time index so floor() stays small even after a long-running page (highp sin precision).
+  " float tph=fract(uT*0.0531)*32.0;",                // 0..32 sawtooth, ~31s period
+  " float tw=h1(vec2(cellId,floor(tph)));",
+  " float twn=h1(vec2(cellId,floor(tph)+1.0));",
+  " float spk=smoothstep(0.93,1.0,mix(tw,twn,fract(tph)));",
+  " float spkShape=pow(max(dot(fn,Hh),0.0),40.0);",
+  " col += vec3(1.0)*spk*spkShape*1.6;",
+
+  // rim fire glow on letter/facet edges
+  " col += ramp*fres*1.1;",
+  " col += vec3(1.0,0.9,1.0)*(1.0-ridge)*fres*0.6;",  // bright dispersion at facet ridges
+
+  // gentle base body so dark facets still read as jewel, not holes
+  " col += uBlue*0.06 + uPurp*0.04;",
+
+  // tone: filmic-ish, lift a touch, keep highlights crunchy
+  " col = col/(col+vec3(0.72));",
+  " col = pow(max(col,vec3(0.0)), vec3(0.85));",
+
+  // subtle vignette across the wordmark for depth
+  " float vig=smoothstep(1.25,0.2,length((uv-0.5)*vec2(asp,1.0)));",
+  " col*=mix(0.82,1.0,vig);",
+
+  // antialiased letter edge via mask alpha
+  " float a=smoothstep(0.0,0.06,m);",
+  // ES 1.00-safe NaN guard: a NaN is the only value not equal to itself.
+  " float nanchk=col.r+col.g+col.b;",
+  " if(!(nanchk<=0.0)&&!(nanchk>0.0)) col=uPurp;",
+  " col=clamp(col,vec3(0.0),vec3(8.0));",
+  " gl_FragColor=vec4(col, a);",
+  "}"].join("\n");
+
+  // inject a GLSL mix helper named THXmix (avoid clobbering builtin mix usage clarity)
+  FS=FS.replace("void main(){",
+    "vec3 THXmix(vec3 a,vec3 b,float t){return a+(b-a)*clamp(t,0.0,1.0);}\nvoid main(){");
+
+  function sh(tp,s){var o=gl.createShader(tp);gl.shaderSource(o,s);gl.compileShader(o);
+    if(!gl.getShaderParameter(o,gl.COMPILE_STATUS)){console.warn("crystal sh:",gl.getShaderInfoLog(o));return null;}return o;}
+  var vs=sh(gl.VERTEX_SHADER,VS), fs=sh(gl.FRAGMENT_SHADER,FS);
+  if(!vs||!fs){ return THX.canvas2DFallback(stage); }
+  var pr=gl.createProgram();gl.attachShader(pr,vs);gl.attachShader(pr,fs);gl.linkProgram(pr);
+  if(!gl.getProgramParameter(pr,gl.LINK_STATUS)){ console.warn("crystal link:",gl.getProgramInfoLog(pr)); return THX.canvas2DFallback(stage); }
+  gl.useProgram(pr);
+
+  var buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+  gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
+  var lp=gl.getAttribLocation(pr,"p");gl.enableVertexAttribArray(lp);gl.vertexAttribPointer(lp,2,gl.FLOAT,false,0,0);
+
+  var uRes=gl.getUniformLocation(pr,"uRes"),uT=gl.getUniformLocation(pr,"uT"),
+      uM=gl.getUniformLocation(pr,"uM");
+  var uBlue=gl.getUniformLocation(pr,"uBlue"),uPurp=gl.getUniformLocation(pr,"uPurp"),uPink=gl.getUniformLocation(pr,"uPink");
+  gl.uniform1i(gl.getUniformLocation(pr,"uMask"),0);
+  gl.uniform3fv(uBlue,new Float32Array(THX.BLUE));
+  gl.uniform3fv(uPurp,new Float32Array(THX.PURP));
+  gl.uniform3fv(uPink,new Float32Array(THX.PINK));
+
+  var tex=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,tex);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+
+  gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
+  gl.disable(gl.DEPTH_TEST);
+
+  var mouse=[0.5,0.62], tgt=[0.5,0.62];
+  function size(){
+    var r=stage.getBoundingClientRect(),d=THX.dpr();
+    var cw=Math.max(1,r.width||1), ch=Math.max(1,r.height||1);
+    var w=Math.max(1,Math.floor(cw*d)), h=Math.max(1,Math.floor(ch*d));
+    stage.width=w; stage.height=h;
+    var mk=THX.textMask(cw,ch,d);
+    gl.bindTexture(gl.TEXTURE_2D,tex);
+    gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,mk.canvas);
+    gl.viewport(0,0,w,h);
+  }
+  size();
+
+  function onMove(e){
+    var r=stage.getBoundingClientRect();
+    var rw=r.width||0, rh=r.height||0;
+    if(rw<=0||rh<=0) return;                         // guard divide-by-zero -> no NaN into uM
+    tgt[0]=(e.clientX-r.left)/rw;
+    tgt[1]=1-(e.clientY-r.top)/rh;
+  }
+  stage.addEventListener("pointermove",onMove);
+
+  var t0=performance.now();
+  function frame(now){
+    var t=(now-t0)/1000;
+    // ease pointer toward target (no per-frame allocations beyond scalars)
+    mouse[0]+=(tgt[0]-mouse[0])*0.06;
+    mouse[1]+=(tgt[1]-mouse[1])*0.06;
+    gl.useProgram(pr);
+    gl.uniform2f(uRes,stage.width,stage.height);
+    gl.uniform1f(uT,t);
+    gl.uniform2f(uM,mouse[0],mouse[1]);
+    gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,tex);
+    gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+  }
+  return {frame:frame,resize:size};
+};
+})();
+</script>
+
+  <!-- RUNNER -->
+  <script>
+  (function(){
+    var THX=window.THX; var insts=[];
+    document.querySelectorAll("canvas[data-fx]").forEach(function(node){
+      var name=node.getAttribute("data-fx"); var inst=null, running=false, raf=0;
+      function ensure(){ if(inst) return; var fn=THX.FX[name];
+        if(!fn){ inst=THX.canvas2DFallback(node); return; }
+        try{ inst=fn(node); }catch(e){ console.warn("fx",name,e); try{inst=THX.canvas2DFallback(node);}catch(_){} } }
+      function loop(now){ if(!running)return; try{ if(inst&&inst.frame)inst.frame(now||performance.now()); }catch(e){} raf=requestAnimationFrame(loop); }
+      var io=new IntersectionObserver(function(es){ es.forEach(function(en){
+        if(en.isIntersecting){ ensure(); if(!running){ running=true; if(!(inst&&inst.css)) raf=requestAnimationFrame(loop); } }
+        else { running=false; if(raf) cancelAnimationFrame(raf); }
+      }); },{threshold:0.06});
+      io.observe(node.closest(".stage")||node);
+      insts.push({resize:function(){ ensure(); if(inst&&inst.resize) try{inst.resize();}catch(e){} }});
+    });
+    var rt; window.addEventListener("resize",function(){ clearTimeout(rt); rt=setTimeout(function(){ insts.forEach(function(x){x.resize();}); },200); });
+  })();
+  </script>
+</body>
+</html>
