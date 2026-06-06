@@ -38,12 +38,13 @@
     <p>Six cinematic, brand-ready treatments. Move your cursor or finger across the letters. Each has a toolbar — <b>⬇ PNG</b> saves a high-res transparent still, <b>⬇ Video</b> records a 6-second loop (WebM) — so you can drop any of these straight into decks, reels, and brand films. Tell me your favorite and I'll set it as the live footer wordmark.</p>
   </header>
 
-  <section class="ver"><div class="tag"><b>01 &middot; Cosmic Nebula</b><em>A volumetric brand-colored nebula breathing inside the THEODYX letters</em></div><div class="stage"><canvas data-fx="nebula"></canvas><div class="tools"><button data-act="png">↓ PNG</button><button data-act="webm">↓ Video</button></div></div><div class="hint">Move your cursor to push the cloud and steer the glowing core; it drifts on its own at rest.</div></section>
-<section class="ver"><div class="tag"><b>02 &middot; Liquid Ink</b><em>Brand-colored dye swirling through living water inside the letters</em></div><div class="stage"><canvas data-fx="fluid"></canvas><div class="tools"><button data-act="png">↓ PNG</button><button data-act="webm">↓ Video</button></div></div><div class="hint">Stir the ink with your pointer — it flows and settles on its own</div></section>
-<section class="ver"><div class="tag"><b>03 &middot; Holographic Foil</b><em>Iridescent thin-film foil that tilts and flashes spectral rainbows across the wordmark</em></div><div class="stage"><canvas data-fx="holo"></canvas><div class="tools"><button data-act="png">↓ PNG</button><button data-act="webm">↓ Video</button></div></div><div class="hint">Move your cursor to tilt the foil; it auto-orbits and shimmers when idle</div></section>
-<section class="ver"><div class="tag"><b>04 &middot; Black Hole</b><em>Gravitational-lensed accretion disk swirling inside the letters</em></div><div class="stage"><canvas data-fx="blackhole"></canvas><div class="tools"><button data-act="png">↓ PNG</button><button data-act="webm">↓ Video</button></div></div><div class="hint">Move the cursor to drag the singularity; it drifts on its own when idle.</div></section>
-<section class="ver"><div class="tag"><b>05 &middot; Volumetric Aurora</b><em>Rippling curtains of light raymarched through the letters</em></div><div class="stage"><canvas data-fx="aurora"></canvas><div class="tools"><button data-act="png">↓ PNG</button><button data-act="webm">↓ Video</button></div></div><div class="hint">Move your pointer to steer the parallax — it drifts on its own when idle.</div></section>
-<section class="ver"><div class="tag"><b>06 &middot; Liquid Glass</b><em>visionOS molten-lens — chromatic dispersion, fresnel rim, internal caustics, masked to the letters</em></div><div class="stage"><canvas data-fx="glass"></canvas><div class="tools"><button data-act="png">↓ PNG</button><button data-act="webm">↓ Video</button></div></div><div class="hint">Move the pointer to press the glass like a liquid lens; it breathes and drifts on its own when idle.</div></section>
+  <section class="ver"><div class="tag"><b>01 &middot; Particle Swarm</b><em>~250,000 GPU particles forming THEODYX — blast them apart, they stream back</em></div><div class="stage" style="height:clamp(180px,38vw,480px)"><canvas data-fx="swarm"></canvas><div class="tools"><button data-act="png">↓ PNG</button><button data-act="webm">↓ Video</button></div></div><div class="hint">Move your cursor through the swarm to explode the particles; they pour back into the letters. A turbulence pulse scatters everything every ~12 seconds.</div></section>
+<section class="ver"><div class="tag"><b>02 &middot; Cosmic Nebula</b><em>A volumetric brand-colored nebula breathing inside the THEODYX letters</em></div><div class="stage"><canvas data-fx="nebula"></canvas><div class="tools"><button data-act="png">↓ PNG</button><button data-act="webm">↓ Video</button></div></div><div class="hint">Move your cursor to push the cloud and steer the glowing core; it drifts on its own at rest.</div></section>
+<section class="ver"><div class="tag"><b>03 &middot; Liquid Ink</b><em>Brand-colored dye swirling through living water inside the letters</em></div><div class="stage"><canvas data-fx="fluid"></canvas><div class="tools"><button data-act="png">↓ PNG</button><button data-act="webm">↓ Video</button></div></div><div class="hint">Stir the ink with your pointer — it flows and settles on its own</div></section>
+<section class="ver"><div class="tag"><b>04 &middot; Holographic Foil</b><em>Iridescent thin-film foil that tilts and flashes spectral rainbows across the wordmark</em></div><div class="stage"><canvas data-fx="holo"></canvas><div class="tools"><button data-act="png">↓ PNG</button><button data-act="webm">↓ Video</button></div></div><div class="hint">Move your cursor to tilt the foil; it auto-orbits and shimmers when idle</div></section>
+<section class="ver"><div class="tag"><b>05 &middot; Black Hole</b><em>Gravitational-lensed accretion disk swirling inside the letters</em></div><div class="stage"><canvas data-fx="blackhole"></canvas><div class="tools"><button data-act="png">↓ PNG</button><button data-act="webm">↓ Video</button></div></div><div class="hint">Move the cursor to drag the singularity; it drifts on its own when idle.</div></section>
+<section class="ver"><div class="tag"><b>06 &middot; Volumetric Aurora</b><em>Rippling curtains of light raymarched through the letters</em></div><div class="stage"><canvas data-fx="aurora"></canvas><div class="tools"><button data-act="png">↓ PNG</button><button data-act="webm">↓ Video</button></div></div><div class="hint">Move your pointer to steer the parallax — it drifts on its own when idle.</div></section>
+<section class="ver"><div class="tag"><b>07 &middot; Liquid Glass</b><em>visionOS molten-lens — chromatic dispersion, fresnel rim, internal caustics, masked to the letters</em></div><div class="stage"><canvas data-fx="glass"></canvas><div class="tools"><button data-act="png">↓ PNG</button><button data-act="webm">↓ Video</button></div></div><div class="hint">Move the pointer to press the glass like a liquid lens; it breathes and drifts on its own when idle.</div></section>
 
   <div class="footnote">Save any of them with the buttons (top-right of each). Then tell me which one becomes the live footer — I'll wire it in, mobile-optimized.</div>
 
@@ -89,6 +90,137 @@
   </script>
 
   <script>
+;(function(){
+THX.FX["swarm"] = function(stage){
+  // ~250k STATELESS GPU particles: each particle's live position is computed in the
+  // vertex shader from its "home" (sampled from the THEODYX mask) + curl-noise flow +
+  // pointer explosion + periodic turbulence. One draw call. No FBOs -> runs everywhere.
+  var gl=null;
+  try{ gl=stage.getContext("webgl",{premultipliedAlpha:false,alpha:true,antialias:true})
+        || stage.getContext("experimental-webgl",{premultipliedAlpha:false,alpha:true,antialias:true}); }
+  catch(e){ gl=null; }
+  if(!gl){ return THX.canvas2DFallback(stage); }
+
+  var VS=[
+   "precision highp float;",
+   "attribute vec2 aHome; attribute float aSeed;",
+   "uniform float uT; uniform vec2 uM; uniform float uAsp; uniform float uTurb; uniform float uPx;",
+   "uniform vec3 uBlue; uniform vec3 uPurp; uniform vec3 uPink;",
+   "varying vec3 vCol; varying float vGlow;",
+   "float hsh(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453123);}",
+   "float nz(vec2 p){vec2 i=floor(p),f=fract(p);vec2 u=f*f*(3.-2.*f);",
+   " return mix(mix(hsh(i),hsh(i+vec2(1.,0.)),u.x),mix(hsh(i+vec2(0.,1.)),hsh(i+vec2(1.,1.)),u.x),u.y);}",
+   "vec2 curl(vec2 p){float e=0.1;float a=nz(p+vec2(0.,e)),b=nz(p-vec2(0.,e)),c=nz(p+vec2(e,0.)),d=nz(p-vec2(e,0.));",
+   " return vec2(a-b,d-c)/(2.0*e);}",
+   "void main(){",
+   "  vec2 home=aHome; float t=uT; float ph=aSeed*6.2831;",
+   // gentle living drift around home (always reads as THEODYX)
+   "  vec2 fl=curl(home*2.2 + vec2(t*0.06,-t*0.05) + aSeed*7.0);",
+   "  vec2 pos=home + fl*0.012*(0.6+0.4*sin(t*0.6+ph));",
+   // periodic turbulence pulse: scatter along the flow field, then reform
+   "  pos += fl*uTurb*0.55*(0.35+0.65*aSeed);",
+   // pointer explosion (aspect-correct distance, push out + swirl)
+   "  vec2 dC=pos-uM; vec2 dS=dC*vec2(uAsp,1.0); float dist=length(dS)+1e-4;",
+   "  float force=exp(-dist*5.0);",
+   "  vec2 dir=dC/(length(dC)+1e-4);",
+   "  pos += dir*force*0.30 + vec2(-dir.y,dir.x)*force*0.16;",
+   "  float energy=force + uTurb*0.7 + length(fl)*0.03;",
+   "  gl_Position=vec4(pos,0.0,1.0);",
+   "  float sz=uPx*(0.45 + aSeed*1.4 + force*5.5 + uTurb*2.2);",
+   "  gl_PointSize=clamp(sz,1.0,16.0);",
+   // color: brand gradient across x, white-hot cores on explosion/turbulence
+   "  float cm=clamp(home.x*0.5+0.5,0.0,1.0);",
+   "  vec3 col=mix(uBlue,uPurp,cm); col=mix(col,uPink,smoothstep(0.5,1.0,cm));",
+   "  col=mix(col,vec3(1.0,0.97,0.92),clamp(force*1.7+uTurb*0.5,0.0,1.0));",
+   "  vCol=col; vGlow=0.4+0.6*aSeed+energy*1.3;",
+   "}"].join("\n");
+
+  var FS=[
+   "precision highp float;",
+   "varying vec3 vCol; varying float vGlow;",
+   "void main(){vec2 c=gl_PointCoord-0.5; float r=dot(c,c); if(r>0.25) discard;",
+   " float a=1.0-r*4.0; a=a*a;",
+   " gl_FragColor=vec4(vCol*vGlow, a*0.85);}"].join("\n");
+
+  function sh(tp,s){var o=gl.createShader(tp);gl.shaderSource(o,s);gl.compileShader(o);
+    if(!gl.getShaderParameter(o,gl.COMPILE_STATUS)){console.warn(gl.getShaderInfoLog(o));return null;}return o;}
+  var vs=sh(gl.VERTEX_SHADER,VS),fs=sh(gl.FRAGMENT_SHADER,FS);
+  if(!vs||!fs){return THX.canvas2DFallback(stage);}
+  var pr=gl.createProgram();gl.attachShader(pr,vs);gl.attachShader(pr,fs);gl.linkProgram(pr);
+  if(!gl.getProgramParameter(pr,gl.LINK_STATUS)){console.warn(gl.getProgramInfoLog(pr));return THX.canvas2DFallback(stage);}
+  gl.useProgram(pr);
+
+  var aHome=gl.getAttribLocation(pr,"aHome"), aSeed=gl.getAttribLocation(pr,"aSeed");
+  var uT=gl.getUniformLocation(pr,"uT"),uM=gl.getUniformLocation(pr,"uM"),uAsp=gl.getUniformLocation(pr,"uAsp"),
+      uTurb=gl.getUniformLocation(pr,"uTurb"),uPx=gl.getUniformLocation(pr,"uPx"),
+      uB=gl.getUniformLocation(pr,"uBlue"),uP=gl.getUniformLocation(pr,"uPurp"),uK=gl.getUniformLocation(pr,"uPink");
+  gl.uniform3f(uB,THX.BLUE[0],THX.BLUE[1],THX.BLUE[2]);
+  gl.uniform3f(uP,THX.PURP[0],THX.PURP[1],THX.PURP[2]);
+  gl.uniform3f(uK,THX.PINK[0],THX.PINK[1],THX.PINK[2]);
+
+  gl.enable(gl.BLEND);
+  gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE, gl.ONE, gl.ONE_MINUS_SRC_ALPHA); // additive glow, builds alpha for export
+
+  var buf=gl.createBuffer(), COUNT=0, pxScale=1.0;
+
+  function build(){
+    var r=stage.getBoundingClientRect(), d=THX.dpr();
+    var cssW=r.width||1, cssH=r.height||1;
+    stage.width=Math.max(1,Math.floor(cssW*d)); stage.height=Math.max(1,Math.floor(cssH*d));
+    var small = cssW<760;
+    var dens = small?0.9:1.55;
+    var mk=THX.textMask(cssW,cssH,dens);
+    var w=mk.w,h=mk.h;
+    var data;
+    try{ data=mk.canvas.getContext("2d").getImageData(0,0,w,h).data; }catch(e){ COUNT=0; return; }
+    var cap = small?90000:300000;
+    var total=0; for(var pp=3;pp<data.length;pp+=4){ if(data[pp]>120) total++; }
+    var step=1; if(total>cap){ step=Math.ceil(total/cap); }
+    var n=Math.min(total,cap);
+    var arr=new Float32Array(n*3); var idx=0, c=0, seen=0;
+    for(var y=0;y<h;y++){ for(var x=0;x<w;x++){
+      if(data[(y*w+x)*4+3]>120){ seen++; if(seen%step!==0) continue; if(c>=n) break;
+        arr[idx++]=(x/(w-1))*2.0-1.0;
+        arr[idx++]=(1.0-(y/(h-1)))*2.0-1.0;
+        arr[idx++]=Math.random();
+        c++;
+      }
+    } if(c>=n) break; }
+    COUNT=c;
+    gl.bindBuffer(gl.ARRAY_BUFFER,buf); gl.bufferData(gl.ARRAY_BUFFER, arr.subarray(0,c*3), gl.STATIC_DRAW);
+    pxScale = stage.height/300.0;
+    gl.viewport(0,0,stage.width,stage.height);
+  }
+  build();
+  if(COUNT===0){ return THX.canvas2DFallback(stage); }
+
+  var ptr=[2.0,2.0], target=[2.0,2.0], hasInput=false;
+  stage.addEventListener("pointermove",function(e){var r=stage.getBoundingClientRect();if(!r.width)return;
+    target=[(e.clientX-r.left)/r.width*2.0-1.0, (1.0-(e.clientY-r.top)/r.height)*2.0-1.0]; hasInput=true;});
+  stage.addEventListener("pointerleave",function(){ target=[2.0,2.0]; });
+
+  var t0=performance.now();
+  function frame(now){
+    var tt=(now-t0)/1000;
+    if(!hasInput){ target=[0.62*Math.sin(tt*0.5), 0.42*Math.cos(tt*0.37)]; }
+    ptr[0]+=(target[0]-ptr[0])*0.08; ptr[1]+=(target[1]-ptr[1])*0.08;
+    var ph=tt%12.0; var turbV = ph<2.4 ? Math.sin((ph/2.4)*3.14159265) : 0.0;
+    var aspect=stage.width/Math.max(1,stage.height);
+    gl.useProgram(pr);
+    gl.uniform1f(uT,tt); gl.uniform2f(uM,ptr[0],ptr[1]); gl.uniform1f(uAsp,aspect);
+    gl.uniform1f(uTurb,turbV); gl.uniform1f(uPx,pxScale);
+    gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+    gl.enableVertexAttribArray(aHome); gl.vertexAttribPointer(aHome,2,gl.FLOAT,false,12,0);
+    gl.enableVertexAttribArray(aSeed); gl.vertexAttribPointer(aSeed,1,gl.FLOAT,false,12,8);
+    gl.clearColor(0,0,0,0); gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.drawArrays(gl.POINTS,0,COUNT);
+  }
+  return {frame:frame,resize:build};
+};
+})();
+
+</script>
+<script>
 ;(function(){THX.FX["nebula"]=function(stage){
  var gl=null;
  try{
