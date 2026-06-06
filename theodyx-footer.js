@@ -1,8 +1,8 @@
 /* theodyx-footer.js — modern, Google Labs-inspired site footer for Theodyx.
  * Loaded site-wide via the registered "nv2footd" loader. Idempotent + self-healing.
- * Restyles the existing <footer class="footer"> markup, injects a CTA band, a giant
- * gradient wordmark, a gradient glow, and circular social buttons. Also keeps the
- * link-fix / cleanup behaviour the old nv2footd provided.
+ * Restyles the existing <footer class="footer"> markup, injects a CTA band, a LIVE
+ * particle-swarm wordmark (Earth edition) with the Theodyx logo O roaming through it,
+ * a gradient glow, and circular social buttons. Keeps the link-fix / cleanup behaviour.
  */
 (function () {
   "use strict";
@@ -27,14 +27,15 @@
     '.footer .footer-h{margin:0 0 16px!important;padding:0!important;font:600 12px/1 "Google Sans Flex","Google Sans",system-ui,sans-serif!important;letter-spacing:.18em!important;text-transform:uppercase!important;color:rgba(245,241,232,.42)!important;background:none!important}',
     '.footer .footer-link{position:relative;display:inline-block!important;width:auto!important;padding:7px 0!important;margin:0!important;color:rgba(245,241,232,.62)!important;font:400 15.5px/1.35 "Google Sans Flex","Google Sans",system-ui,sans-serif!important;text-decoration:none!important;background:none!important;transition:color .2s ease,transform .2s ease}',
     '.footer .footer-link:hover{color:#fff!important;transform:translateX(4px)}',
-    '.thx-fmark{margin:clamp(50px,7vw,98px) auto 0!important;font-family:"Google Sans Flex","Google Sans",system-ui,sans-serif;font-weight:800;font-size:clamp(56px,18.6vw,248px);line-height:.82;letter-spacing:-.04em;text-align:center;white-space:nowrap;background:linear-gradient(108deg,#7894f6,#a87cff 44%,#ff8fb1 80%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;opacity:.95;user-select:none;pointer-events:none}',
+    '.thx-fmark{position:relative;margin:clamp(48px,7vw,96px) auto 0!important;width:100%;max-width:1180px;height:clamp(104px,21vw,250px);user-select:none}',
+    '.thx-fmark canvas{display:block;width:100%;height:100%}',
     '.footer .footer-bottom-1{margin:clamp(30px,4vw,52px) auto 0!important;padding-top:24px!important;border-top:1px solid rgba(245,241,232,.1)!important;display:flex!important;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px}',
     '.footer .footer-bottom-1 .copyright{margin:0!important;color:rgba(245,241,232,.46)!important;font:400 13px/1.55 "Google Sans Flex","Google Sans",system-ui,sans-serif!important}',
     '.thx-fsoc{display:flex;gap:10px}',
     '.thx-fsoc a{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:999px;border:1px solid rgba(245,241,232,.16);color:rgba(245,241,232,.72)!important;text-decoration:none!important;transition:transform .2s,background .2s,border-color .2s,color .2s}',
     '.thx-fsoc a:hover{transform:translateY(-3px);background:rgba(245,241,232,.08);border-color:rgba(245,241,232,.45);color:#fff!important}',
     '.thx-fsoc svg{width:17px;height:17px;display:block;fill:currentColor}',
-    '@media(max-width:600px){.footer{text-align:left}.thx-fcols{gap:30px 40px}.footer .footer-col{min-width:42%}.thx-fbtn{width:100%;justify-content:center}.thx-fcta h2{font-size:clamp(26px,7.5vw,34px)}.thx-fmark{font-size:clamp(46px,19vw,92px)}.footer .footer-bottom-1{justify-content:flex-start}}'
+    '@media(max-width:600px){.footer{text-align:left}.thx-fcols{gap:30px 40px}.footer .footer-col{min-width:42%}.thx-fbtn{width:100%;justify-content:center}.thx-fcta h2{font-size:clamp(26px,7.5vw,34px)}.thx-fmark{height:clamp(82px,29vw,150px)}.footer .footer-bottom-1{justify-content:flex-start}}'
   ].join('');
 
   var ICONS = {
@@ -46,6 +47,202 @@
   };
 
   function el(t, c) { var e = document.createElement(t); if (c) e.className = c; return e; }
+
+  /* ---------------------------------------------------------------------------
+   * SWARM — Earth-edition particle wordmark + Theodyx logo O (verified engine).
+   * ~250k stateless GPU points spell THEODYX (90k on phones). The brand ring &
+   * dot glide around & through the dots; particles ignite/part as it passes.
+   * Single canvas, additive blend, graceful canvas-2D fallback. Runs only while
+   * the footer is on-screen; honours prefers-reduced-motion.
+   * ------------------------------------------------------------------------- */
+  var SW = (function () {
+    var WORD = "THEODYX";
+    var P = [[0.50, 0.30, 0.17], [0.80, 0.52, 0.29], [0.93, 0.78, 0.48], [1.00, 0.95, 0.82]]; // Earth
+    function dpr() { return Math.min(window.devicePixelRatio || 1, 2); }
+    function textMask(cssW, cssH, scale) {
+      scale = scale || 1;
+      var c = document.createElement("canvas");
+      var w = Math.max(2, Math.floor(cssW * scale)), h = Math.max(2, Math.floor(cssH * scale));
+      c.width = w; c.height = h; var x = c.getContext("2d");
+      var target = w * 0.88, fs = h * 0.92, i = 0;
+      x.textAlign = "center"; x.textBaseline = "middle";
+      do { x.font = "900 " + fs + "px 'Google Sans Flex','Arial Black',Arial,system-ui,sans-serif";
+        var mw = x.measureText(WORD).width; if (mw <= target || fs < 8) break; fs *= target / mw; i++; } while (i < 8);
+      x.clearRect(0, 0, w, h); x.fillStyle = "#fff";
+      x.font = "900 " + fs + "px 'Google Sans Flex','Arial Black',Arial,system-ui,sans-serif";
+      x.fillText(WORD, w / 2, h / 2 + fs * 0.02);
+      return { canvas: c, w: w, h: h };
+    }
+    function fallback(stage) {
+      var ctx = stage.getContext("2d");
+      function size() { var r = stage.getBoundingClientRect(), d = dpr(); stage.width = Math.max(2, r.width * d); stage.height = Math.max(2, r.height * d); }
+      size();
+      return { resize: size, frame: function (now) {
+        var w = stage.width, h = stage.height; if (!w) return; ctx.clearRect(0, 0, w, h);
+        var g = ctx.createLinearGradient(0, 0, w, 0);
+        g.addColorStop(0, "#c9a06a"); g.addColorStop(.5, "#ecd6a0"); g.addColorStop(1, "#c9a06a");
+        ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
+        var m = textMask(w / dpr(), h / dpr(), dpr());
+        ctx.globalCompositeOperation = "destination-in"; ctx.drawImage(m.canvas, 0, 0, w, h);
+        ctx.globalCompositeOperation = "source-over";
+      } };
+    }
+    function makeSwarm(stage) {
+      var gl = null;
+      try { gl = stage.getContext("webgl", { premultipliedAlpha: false, alpha: true, antialias: true })
+            || stage.getContext("experimental-webgl", { premultipliedAlpha: false, alpha: true, antialias: true }); }
+      catch (e) { gl = null; }
+      if (!gl) { return fallback(stage); }
+
+      var VS = [
+       "precision highp float;",
+       "attribute vec2 aHome; attribute float aSeed;",
+       "uniform float uT,uPx,uAsp,uOr,uMode;",
+       "uniform vec2 uOc;",
+       "uniform vec3 cA,cB,cC,cD;",
+       "varying vec3 vCol; varying float vGlow;",
+       "float hsh(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453123);}",
+       "float nz(vec2 p){vec2 i=floor(p),f=fract(p);vec2 u=f*f*(3.-2.*f);",
+       " return mix(mix(hsh(i),hsh(i+vec2(1.,0.)),u.x),mix(hsh(i+vec2(0.,1.)),hsh(i+vec2(1.,1.)),u.x),u.y);}",
+       "vec2 curl(vec2 p){float e=0.1;float a=nz(p+vec2(0.,e)),b=nz(p-vec2(0.,e)),c=nz(p+vec2(e,0.)),d=nz(p-vec2(e,0.));",
+       " return vec2(a-b,d-c)/(2.0*e);}",
+       "void main(){",
+       "  float t=uT; float s=aSeed; vec2 pos; vec3 col; float energy;",
+       "  if(uMode<0.5){",
+       "    vec2 home=aHome;",
+       "    pos=home+curl(home*1.6+vec2(0.0,t*0.13))*0.0016;",
+       "    vec2 dc=(home-uOc)*vec2(uAsp,1.0); float drc=length(dc)+1e-4;",
+       "    float ringDist=abs(drc-uOr);",
+       "    float ringBand=exp(-(ringDist*ringDist)/0.0025);",
+       "    vec2 offA=vec2(0.776,-0.628)*(1.8*uOr);",
+       "    vec2 dotC=uOc+vec2(offA.x/uAsp, offA.y);",
+       "    vec2 dd=(home-dotC)*vec2(uAsp,1.0); float ddl=length(dd)+1e-4;",
+       "    float dR=0.34*uOr; float dotBand=exp(-(ddl*ddl)/(dR*dR));",
+       "    float mark=clamp(ringBand+dotBand,0.0,1.0);",
+       "    float sgn = drc>uOr ? 1.0 : -1.0; vec2 rdir=dc/drc;",
+       "    pos+=vec2(rdir.x/uAsp, rdir.y)*ringBand*sgn*0.010;",
+       "    energy=clamp(mark*0.95, 0.0, 2.0);",
+       "    float cm=clamp(home.x*0.5+0.5,0.0,1.0);",
+       "    col = cm<0.5 ? mix(cA,cB,cm*2.0) : mix(cB,cC,(cm-0.5)*2.0);",
+       "    col=mix(col,cD,clamp(energy*0.7,0.0,1.0));",
+       "    gl_PointSize=clamp(uPx*(0.5+s*1.3+energy*2.4),1.0,16.0);",
+       "  } else {",
+       "    vec2 posA=aHome*uOr;",
+       "    pos=uOc+vec2(posA.x/uAsp, posA.y);",
+       "    pos.y+=sin(t*1.4+s*6.2831)*0.0015;",
+       "    energy=1.0;",
+       "    col=mix(cC,cD,0.55);",
+       "    gl_PointSize=clamp(uPx*(1.05+s*0.7),1.5,9.0);",
+       "  }",
+       "  gl_Position=vec4(pos,0.0,1.0);",
+       "  vCol=col; vGlow=0.55+0.6*s+energy;",
+       "}"].join("\n");
+
+      var FS = [
+       "precision highp float;",
+       "varying vec3 vCol; varying float vGlow;",
+       "void main(){vec2 c=gl_PointCoord-0.5;float r=dot(c,c);if(r>0.25)discard;float a=1.0-r*4.0;a=a*a;",
+       " gl_FragColor=vec4(vCol*vGlow,a*0.85);}"].join("\n");
+
+      function sh(tp, x) { var o = gl.createShader(tp); gl.shaderSource(o, x); gl.compileShader(o);
+        if (!gl.getShaderParameter(o, gl.COMPILE_STATUS)) { return null; } return o; }
+      var vs = sh(gl.VERTEX_SHADER, VS), fs = sh(gl.FRAGMENT_SHADER, FS);
+      if (!vs || !fs) { return fallback(stage); }
+      var pr = gl.createProgram(); gl.attachShader(pr, vs); gl.attachShader(pr, fs); gl.linkProgram(pr);
+      if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) { return fallback(stage); }
+      gl.useProgram(pr);
+
+      var aHome = gl.getAttribLocation(pr, "aHome"), aSeed = gl.getAttribLocation(pr, "aSeed");
+      var U = {};["uT", "uPx", "uAsp", "uOr", "uMode", "uOc", "cA", "cB", "cC", "cD"].forEach(function (n) { U[n] = gl.getUniformLocation(pr, n); });
+      gl.uniform3f(U.cA, P[0][0], P[0][1], P[0][2]);
+      gl.uniform3f(U.cB, P[1][0], P[1][1], P[1][2]);
+      gl.uniform3f(U.cC, P[2][0], P[2][1], P[2][2]);
+      gl.uniform3f(U.cD, P[3][0], P[3][1], P[3][2]);
+
+      gl.enable(gl.BLEND);
+      gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+
+      var lbuf = gl.createBuffer(), COUNT_L = 0;
+      (function () {
+        var RING = 5200, DOTN = 900, n = RING + DOTN, a = new Float32Array(n * 3), idx = 0, i;
+        for (i = 0; i < RING; i++) { var th = (i / RING) * 6.2831 + (Math.random() * 2 - 1) * 0.02; var rr = 1.0 + (Math.random() * 2 - 1) * 0.13;
+          a[idx++] = Math.cos(th) * rr; a[idx++] = Math.sin(th) * rr; a[idx++] = Math.random(); }
+        var dox = 1.40, doy = -1.133, ddr = 0.283;
+        for (i = 0; i < DOTN; i++) { var t2 = Math.random() * 6.2831, r2 = Math.sqrt(Math.random()) * ddr;
+          a[idx++] = dox + Math.cos(t2) * r2; a[idx++] = doy + Math.sin(t2) * r2; a[idx++] = Math.random(); }
+        COUNT_L = n; gl.bindBuffer(gl.ARRAY_BUFFER, lbuf); gl.bufferData(gl.ARRAY_BUFFER, a, gl.STATIC_DRAW);
+      })();
+
+      var buf = gl.createBuffer(), COUNT = 0, pxScale = 1.0;
+      function build() {
+        var r = stage.getBoundingClientRect(), d = dpr();
+        var cssW = r.width || 1, cssH = r.height || 1;
+        stage.width = Math.max(1, Math.floor(cssW * d)); stage.height = Math.max(1, Math.floor(cssH * d));
+        var small = cssW < 760, dens = small ? 0.9 : 1.55;
+        var mk = textMask(cssW, cssH, dens), w = mk.w, h = mk.h, data;
+        try { data = mk.canvas.getContext("2d").getImageData(0, 0, w, h).data; } catch (e) { COUNT = 0; return; }
+        var cap = small ? 90000 : 300000, total = 0;
+        for (var pp = 3; pp < data.length; pp += 4) { if (data[pp] > 120) total++; }
+        var step = total > cap ? Math.ceil(total / cap) : 1, n = Math.min(total, cap);
+        var arr = new Float32Array(n * 3), idx = 0, c = 0, seen = 0;
+        for (var y = 0; y < h; y++) { for (var x = 0; x < w; x++) { if (data[(y * w + x) * 4 + 3] > 120) { seen++; if (seen % step !== 0) continue; if (c >= n) break;
+          arr[idx++] = (x / (w - 1)) * 2.0 - 1.0; arr[idx++] = (1.0 - (y / (h - 1))) * 2.0 - 1.0; arr[idx++] = Math.random(); c++; } } if (c >= n) break; }
+        COUNT = c; gl.bindBuffer(gl.ARRAY_BUFFER, buf); gl.bufferData(gl.ARRAY_BUFFER, arr.subarray(0, c * 3), gl.STATIC_DRAW);
+        pxScale = stage.height / 300.0; gl.viewport(0, 0, stage.width, stage.height);
+      }
+      build();
+      if (COUNT === 0) { return fallback(stage); }
+
+      var target = [0, 0], hasInput = false, oc = [0, 0];
+      stage.addEventListener("pointermove", function (e) { var r = stage.getBoundingClientRect(); if (!r.width) return;
+        target = [(e.clientX - r.left) / r.width * 2.0 - 1.0, (1.0 - (e.clientY - r.top) / r.height) * 2.0 - 1.0]; hasInput = true; });
+      stage.addEventListener("pointerleave", function () { hasInput = false; });
+
+      var t0 = performance.now();
+      function frame(now) {
+        var tt = (now - t0) / 1000;
+        var tx, ty;
+        if (hasInput) { tx = target[0]; ty = target[1]; }
+        else { tx = 0.95 * Math.sin(tt * 0.16); ty = 0.42 * Math.sin(tt * 0.23 + 1.0); }
+        oc[0] += (tx - oc[0]) * 0.10; oc[1] += (ty - oc[1]) * 0.10;
+        var orr = 0.22 + 0.02 * Math.sin(tt * 0.8);
+        var asp = stage.width / Math.max(1, stage.height);
+        gl.useProgram(pr);
+        gl.uniform1f(U.uT, tt); gl.uniform1f(U.uPx, pxScale); gl.uniform1f(U.uAsp, asp);
+        gl.uniform2f(U.uOc, oc[0], oc[1]); gl.uniform1f(U.uOr, orr);
+        gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
+        gl.uniform1f(U.uMode, 0.0);
+        gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+        gl.enableVertexAttribArray(aHome); gl.vertexAttribPointer(aHome, 2, gl.FLOAT, false, 12, 0);
+        gl.enableVertexAttribArray(aSeed); gl.vertexAttribPointer(aSeed, 1, gl.FLOAT, false, 12, 8);
+        gl.drawArrays(gl.POINTS, 0, COUNT);
+        gl.uniform1f(U.uMode, 1.0);
+        gl.bindBuffer(gl.ARRAY_BUFFER, lbuf);
+        gl.enableVertexAttribArray(aHome); gl.vertexAttribPointer(aHome, 2, gl.FLOAT, false, 12, 0);
+        gl.enableVertexAttribArray(aSeed); gl.vertexAttribPointer(aSeed, 1, gl.FLOAT, false, 12, 8);
+        gl.drawArrays(gl.POINTS, 0, COUNT_L);
+      }
+      return { frame: frame, resize: build };
+    }
+    function mount(canvas) {
+      var inst = null, running = false, raf = 0, reduce = false;
+      try { reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
+      function ensure() { if (inst) return inst; try { inst = makeSwarm(canvas); } catch (e) { try { inst = fallback(canvas); } catch (_) {} } return inst; }
+      function loop(now) { if (!running) return; try { inst && inst.frame && inst.frame(now || performance.now()); } catch (e) {} raf = requestAnimationFrame(loop); }
+      function start() { ensure(); if (!inst) return; if (reduce) { try { inst.frame(performance.now()); inst.frame(performance.now() + 16); } catch (e) {} return; } if (!running) { running = true; raf = requestAnimationFrame(loop); } }
+      function stop() { running = false; if (raf) cancelAnimationFrame(raf); }
+      try {
+        var io = new IntersectionObserver(function (es) { es.forEach(function (en) { if (en.isIntersecting) start(); else stop(); }); }, { threshold: 0.04 });
+        io.observe(canvas);
+      } catch (e) { start(); }
+      // kick: if the footer is already on-screen once laid out, start without waiting on an IO change event
+      function kick() { try { var r = canvas.getBoundingClientRect(); if (r.height > 0 && r.top < (window.innerHeight || 0) && r.bottom > 0) start(); } catch (e) {} }
+      if (document.readyState === 'complete') setTimeout(kick, 80); else window.addEventListener('load', function () { setTimeout(kick, 80); });
+      document.addEventListener('visibilitychange', function () { if (document.hidden) stop(); });
+      var rt; window.addEventListener('resize', function () { clearTimeout(rt); rt = setTimeout(function () { ensure(); if (inst && inst.resize) try { inst.resize(); } catch (e) {} }, 220); }, { passive: true });
+    }
+    return { mount: mount };
+  })();
 
   function injectCSS() {
     if (document.getElementById('thx-footer-css')) return;
@@ -99,13 +296,15 @@
       social.style.setProperty('display', 'none', 'important');
     }
 
-    var mark = el('div', 'thx-fmark'); mark.setAttribute('aria-hidden', 'true'); mark.textContent = 'THEODYX';
+    var mark = el('div', 'thx-fmark'); mark.setAttribute('role', 'img'); mark.setAttribute('aria-label', 'THEODYX');
+    var cv = el('canvas'); cv.setAttribute('aria-hidden', 'true'); mark.appendChild(cv);
     if (bottom) {
       bottom.parentNode.insertBefore(mark, bottom);
       if (soc.children.length) bottom.appendChild(soc);
     } else {
       f.appendChild(mark); if (soc.children.length) f.appendChild(soc);
     }
+    try { SW.mount(cv); } catch (e) {}
   }
 
   function links() {
