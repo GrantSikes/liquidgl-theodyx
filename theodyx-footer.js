@@ -236,20 +236,26 @@
         if (!running) { running = true; raf = requestAnimationFrame(loop); }
         if (!shown) { shown = true; try { node.style.opacity = '1'; if (grad) grad.style.opacity = '0'; } catch (e) {} }  // crossfade: solid wordmark dissolves into the swarm
       }
+      var io = null;
+      function swap() {
+        // Chrome marks a <canvas> whose WebGL context-creation fails (GPU contended during load)
+        // as PERMANENTLY failed, so retrying the same element is futile. Swap in a fresh canvas.
+        try { var fresh = node.cloneNode(false); if (node.parentNode) node.parentNode.replaceChild(fresh, node); node = fresh; if (io) try { io.observe(node); } catch (e2) {} } catch (e) {}
+      }
       function build() {
         if (done || inst) return;
-        // makeSwarm returns null on any (often transient) WebGL miss WITHOUT tainting the canvas,
-        // so we simply retry the same pristine canvas. The gradient wordmark stays fully visible the
-        // whole time (no blank gap, no permanent 2D lock); the swarm just crossfades in once ready.
+        // makeSwarm returns null on any WebGL miss WITHOUT tainting the canvas as 2D. The gradient
+        // wordmark stays fully visible the whole time (no blank gap); the swarm crossfades in once a
+        // fresh canvas wins a context.
         var s = null; try { s = makeSwarm(node); } catch (e) { s = null; }
         if (s) { inst = s; done = true; node.__thxMode = 'swarm'; show(); return; }
-        if (tries < 60) { tries++; setTimeout(build, 500); return; }   // ~30s of generous retries while the page settles
-        node.__thxMode = 'gradient';                                   // WebGL never came up; the static gradient remains
+        if (tries < 60) { tries++; swap(); setTimeout(build, 500); return; }   // ~30s of retries on fresh canvases while the page settles
+        node.__thxMode = 'gradient';                                           // WebGL never came up; the static gradient remains
       }
       function start() { inView = true; if (inst) { show(); return; } if (started) return; started = true; build(); }
       function stop() { running = false; if (raf) cancelAnimationFrame(raf); }
       try {
-        var io = new IntersectionObserver(function (es) { es.forEach(function (en) { if (en.isIntersecting) start(); else { inView = false; stop(); } }); }, { threshold: 0.04 });
+        io = new IntersectionObserver(function (es) { es.forEach(function (en) { if (en.isIntersecting) start(); else { inView = false; stop(); } }); }, { threshold: 0.04 });
         io.observe(node);
       } catch (e) { inView = true; start(); }
       // kick: if the footer is already on-screen once laid out, start without waiting on an IO change event
