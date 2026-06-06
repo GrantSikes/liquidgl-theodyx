@@ -89,8 +89,8 @@
     }
     function makeSwarm(stage) {
       var gl = null;
-      try { gl = stage.getContext("webgl", { premultipliedAlpha: false, alpha: true, antialias: true })
-            || stage.getContext("experimental-webgl", { premultipliedAlpha: false, alpha: true, antialias: true }); }
+      try { gl = stage.getContext("webgl", { premultipliedAlpha: false, alpha: true, antialias: false })
+            || stage.getContext("experimental-webgl", { premultipliedAlpha: false, alpha: true, antialias: false }); }
       catch (e) { gl = null; }
       if (!gl) { return fallback(stage); }
 
@@ -224,12 +224,22 @@
       }
       return { frame: frame, resize: build };
     }
+    function webglReady() { try { var p = document.createElement('canvas'); return !!(p.getContext('webgl') || p.getContext('experimental-webgl')); } catch (e) { return false; } }
     function mount(canvas) {
-      var inst = null, running = false, raf = 0, reduce = false;
+      var inst = null, running = false, raf = 0, reduce = false, tries = 0, pending = false;
       try { reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
       function ensure() { if (inst) return inst; try { inst = makeSwarm(canvas); } catch (e) { try { inst = fallback(canvas); } catch (_) {} } return inst; }
       function loop(now) { if (!running) return; try { inst && inst.frame && inst.frame(now || performance.now()); } catch (e) {} raf = requestAnimationFrame(loop); }
-      function start() { ensure(); if (!inst) return; if (reduce) { try { inst.frame(performance.now()); inst.frame(performance.now() + 16); } catch (e) {} return; } if (!running) { running = true; raf = requestAnimationFrame(loop); } }
+      function run() { ensure(); if (!inst) return; if (reduce) { try { inst.frame(performance.now()); inst.frame(performance.now() + 16); } catch (e) {} return; } if (!running) { running = true; raf = requestAnimationFrame(loop); } }
+      function start() {
+        if (running || inst) { run(); return; }
+        if (pending) return;
+        // Don't touch the real canvas until WebGL is actually available — a transient failure
+        // (page still loading / GPU contended by the nav + hero) would otherwise lock the canvas
+        // permanently into the 2D fallback. Probe a throwaway canvas and retry first.
+        if (!webglReady() && tries < 10) { pending = true; tries++; setTimeout(function () { pending = false; if (!inst && !running) start(); }, 450); return; }
+        run();
+      }
       function stop() { running = false; if (raf) cancelAnimationFrame(raf); }
       try {
         var io = new IntersectionObserver(function (es) { es.forEach(function (en) { if (en.isIntersecting) start(); else stop(); }); }, { threshold: 0.04 });
@@ -239,7 +249,7 @@
       function kick() { try { var r = canvas.getBoundingClientRect(); if (r.height > 0 && r.top < (window.innerHeight || 0) && r.bottom > 0) start(); } catch (e) {} }
       if (document.readyState === 'complete') setTimeout(kick, 80); else window.addEventListener('load', function () { setTimeout(kick, 80); });
       document.addEventListener('visibilitychange', function () { if (document.hidden) stop(); });
-      var rt; window.addEventListener('resize', function () { clearTimeout(rt); rt = setTimeout(function () { ensure(); if (inst && inst.resize) try { inst.resize(); } catch (e) {} }, 220); }, { passive: true });
+      var rt; window.addEventListener('resize', function () { clearTimeout(rt); rt = setTimeout(function () { if (inst && inst.resize) try { inst.resize(); } catch (e) {} }, 220); }, { passive: true });
     }
     return { mount: mount };
   })();
