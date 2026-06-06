@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#0a0a0c" />
+<title>THEODYX · Wordmark Studio</title>
+<style>
+  :root{--bg:#0a0a0c;--ink:#f5f1e8}
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Google Sans Flex","Google Sans","Helvetica Neue",system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;overflow-x:hidden}
+  .head{padding:clamp(34px,6vw,76px) clamp(20px,5vw,64px) 14px}
+  .head h1{margin:0 0 10px;font-size:clamp(22px,3.4vw,36px);font-weight:800;letter-spacing:-.02em}
+  .head h1 .g{background:linear-gradient(108deg,#7894f6,#a87cff 44%,#ff8fb1 80%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .head p{margin:0;max-width:68ch;color:rgba(245,241,232,.6);font-size:clamp(14px,1.6vw,16px);line-height:1.6}
+  .ver{position:relative;padding:clamp(30px,5vw,60px) clamp(14px,4vw,52px) clamp(36px,5vw,66px);border-top:1px solid rgba(245,241,232,.08)}
+  .tag{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin:0 0 clamp(14px,2vw,20px);padding:0 clamp(4px,2vw,14px)}
+  .tag b{font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:#fff;font-weight:700}
+  .tag em{font-size:13.5px;color:rgba(245,241,232,.52);font-style:normal}
+  .stage{position:relative;width:100%;height:clamp(120px,28vw,330px);display:flex;align-items:center;justify-content:center;overflow:hidden;border-radius:18px;background:#08080a}
+  .stage canvas{display:block;width:100%;height:100%}
+  .tools{position:absolute;top:12px;right:12px;display:flex;gap:8px;z-index:3}
+  .tools button{display:inline-flex;align-items:center;gap:.4em;font:600 12.5px/1 "Google Sans Flex","Google Sans",system-ui,sans-serif;
+    color:#0a0a0c;background:rgba(245,241,232,.92);border:0;border-radius:999px;padding:9px 14px;cursor:pointer;
+    -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);transition:transform .18s,background .18s,opacity .18s;box-shadow:0 6px 18px rgba(0,0,0,.3)}
+  .tools button:hover{transform:translateY(-1px);background:#fff}
+  .tools button.busy{opacity:.7;pointer-events:none}
+  .tools button.rec{background:#ff8fb1;color:#1a0710}
+  .hint{margin:14px clamp(4px,2vw,14px) 0;font-size:12.5px;color:rgba(245,241,232,.4)}
+  .footnote{padding:clamp(28px,5vw,54px) clamp(20px,5vw,64px) clamp(60px,9vw,100px);border-top:1px solid rgba(245,241,232,.08);color:rgba(245,241,232,.55);font-size:14.5px;line-height:1.65}
+</style>
+</head>
+<body>
+  <header class="head"><h1>THEODYX &middot; Particle <span class="g">Gravity</span></h1><p>One ~250,000-particle gravitational swarm in five color editions. Your cursor is a gravity vortex — drag it to pull and orbit the particles. Every few seconds a drifting well drags the whole word into an accretion-disk spiral with a shockwave ripple, then it reforms into THEODYX. Each has &#8595; PNG + &#8595; Video export for brand use.</p></header>
+
+  <section class="ver"><div class="tag"><b>01 &middot; Signature</b><em>Brand blue → purple → pink, pulled into the gravity well</em></div><div class="stage" style="height:clamp(190px,40vw,520px)"><canvas data-fx="swarm-brand"></canvas><div class="tools"><button data-act="png">↓ PNG</button><button data-act="webm">↓ Video</button></div></div><div class="hint">Move your cursor — it is a gravity vortex that pulls and orbits the particles. Every ~9s a drifting well drags the whole word into an accretion spiral with a shockwave ripple, then it reforms.</div></section>
+<section class="ver"><div class="tag"><b>02 &middot; Earth</b><em>Terracotta, sand & ochre — warm and organic</em></div><div class="stage" style="height:clamp(190px,40vw,520px)"><canvas data-fx="swarm-earth"></canvas><div class="tools"><button data-act="png">↓ PNG</button><button data-act="webm">↓ Video</button></div></div><div class="hint">Move your cursor — it is a gravity vortex that pulls and orbits the particles. Every ~9s a drifting well drags the whole word into an accretion spiral with a shockwave ripple, then it reforms.</div></section>
+<section class="ver"><div class="tag"><b>03 &middot; Molten Gold</b><em>White-hot core → gold → crimson — full black-hole accretion</em></div><div class="stage" style="height:clamp(190px,40vw,520px)"><canvas data-fx="swarm-gold"></canvas><div class="tools"><button data-act="png">↓ PNG</button><button data-act="webm">↓ Video</button></div></div><div class="hint">Move your cursor — it is a gravity vortex that pulls and orbits the particles. Every ~9s a drifting well drags the whole word into an accretion spiral with a shockwave ripple, then it reforms.</div></section>
+<section class="ver"><div class="tag"><b>04 &middot; Ice</b><em>Cyan, teal & icy white — a frozen starfield collapsing</em></div><div class="stage" style="height:clamp(190px,40vw,520px)"><canvas data-fx="swarm-ice"></canvas><div class="tools"><button data-act="png">↓ PNG</button><button data-act="webm">↓ Video</button></div></div><div class="hint">Move your cursor — it is a gravity vortex that pulls and orbits the particles. Every ~9s a drifting well drags the whole word into an accretion spiral with a shockwave ripple, then it reforms.</div></section>
+<section class="ver"><div class="tag"><b>05 &middot; Ember</b><em>Fire — red, orange & yellow-white embers</em></div><div class="stage" style="height:clamp(190px,40vw,520px)"><canvas data-fx="swarm-ember"></canvas><div class="tools"><button data-act="png">↓ PNG</button><button data-act="webm">↓ Video</button></div></div><div class="hint">Move your cursor — it is a gravity vortex that pulls and orbits the particles. Every ~9s a drifting well drags the whole word into an accretion spiral with a shockwave ripple, then it reforms.</div></section>
+
+  <div class="footnote">Save any of them with the buttons (top-right of each). Then tell me which one becomes the live footer — I'll wire it in, mobile-optimized.</div>
+
+  <!-- FRAMEWORK -->
+  <script>
+  (function(){
+    var THX = window.THX = {};
+    THX.WORD = "THEODYX";
+    THX.BLUE=[0.47,0.58,0.96]; THX.PURP=[0.66,0.49,1.0]; THX.PINK=[1.0,0.56,0.69];
+    THX._dpr = function(){ return Math.min(window.devicePixelRatio||1, 2); };
+    THX.dpr = function(){ return THX._dpr(); };
+    THX.mixc = function(a,b,t){ return [a[0]+(b[0]-a[0])*t, a[1]+(b[1]-a[1])*t, a[2]+(b[2]-a[2])*t]; };
+    THX.textMask = function(cssW, cssH, scale){
+      scale = scale||1;
+      var c=document.createElement("canvas");
+      var w=Math.max(2,Math.floor(cssW*scale)), h=Math.max(2,Math.floor(cssH*scale));
+      c.width=w; c.height=h; var x=c.getContext("2d");
+      var target=w*0.88, fs=h*0.92, i=0;
+      x.textAlign="center"; x.textBaseline="middle";
+      do{ x.font="900 "+fs+"px 'Google Sans Flex','Arial Black',Arial,system-ui,sans-serif";
+          var mw=x.measureText(THX.WORD).width; if(mw<=target||fs<8) break; fs*= target/mw; i++; }while(i<8);
+      x.clearRect(0,0,w,h); x.fillStyle="#fff";
+      x.font="900 "+fs+"px 'Google Sans Flex','Arial Black',Arial,system-ui,sans-serif";
+      x.fillText(THX.WORD, w/2, h/2 + fs*0.02);
+      return {canvas:c,w:w,h:h,fs:fs};
+    };
+    THX.canvas2DFallback = function(stage){
+      var ctx=stage.getContext("2d");
+      function size(){var r=stage.getBoundingClientRect(),d=THX.dpr();stage.width=Math.max(2,r.width*d);stage.height=Math.max(2,r.height*d);}
+      size();
+      return { resize:size, frame:function(now){
+        var w=stage.width,h=stage.height; if(!w)return; ctx.clearRect(0,0,w,h);
+        var g=ctx.createLinearGradient(0,0,w,0); var s=(Math.sin(now/2400)+1)/2;
+        g.addColorStop(0,"#7894f6"); g.addColorStop(Math.max(.02,Math.min(.98,.4+s*.2)),"#a87cff"); g.addColorStop(1,"#ff8fb1");
+        ctx.fillStyle=g; ctx.fillRect(0,0,w,h);
+        var m=THX.textMask(w/THX.dpr(),h/THX.dpr(),THX.dpr());
+        ctx.globalCompositeOperation="destination-in"; ctx.drawImage(m.canvas,0,0,w,h);
+        ctx.globalCompositeOperation="source-over";
+      }};
+    };
+    THX.FX = {};
+  })();
+  </script>
+
+  <script>
+;(function(){
+  // ---- one ~250k-particle GRAVITATIONAL swarm engine, skinned by a 4-stop palette ----
+  // Stateless GPU points (no FBOs -> runs everywhere). Physics in the vertex shader:
+  //  * a drifting GRAVITY WELL periodically pulls the whole word into an accretion-disk
+  //    spiral (differential rotation) then releases it back into THEODYX,
+  //  * SHOCKWAVE RIPPLES roll outward from the well,
+  //  * the POINTER is a roaming local gravity vortex (pull + orbit).
+  function makeSwarm(P){
+    return function(stage){
+      var gl=null;
+      try{ gl=stage.getContext("webgl",{premultipliedAlpha:false,alpha:true,antialias:true})
+            || stage.getContext("experimental-webgl",{premultipliedAlpha:false,alpha:true,antialias:true}); }
+      catch(e){ gl=null; }
+      if(!gl){ return THX.canvas2DFallback(stage); }
+
+      var VS=[
+       "precision highp float;",
+       "attribute vec2 aHome; attribute float aSeed;",
+       "uniform float uT,uGrav,uPx,uAsp,uPtrOn,uRipR,uRipA;",
+       "uniform vec2 uWell,uPtr;",
+       "uniform vec3 cA,cB,cC,cD;",
+       "varying vec3 vCol; varying float vGlow;",
+       "float hsh(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453123);}",
+       "float nz(vec2 p){vec2 i=floor(p),f=fract(p);vec2 u=f*f*(3.-2.*f);",
+       " return mix(mix(hsh(i),hsh(i+vec2(1.,0.)),u.x),mix(hsh(i+vec2(0.,1.)),hsh(i+vec2(1.,1.)),u.x),u.y);}",
+       "vec2 curl(vec2 p){float e=0.1;float a=nz(p+vec2(0.,e)),b=nz(p-vec2(0.,e)),c=nz(p+vec2(e,0.)),d=nz(p-vec2(e,0.));",
+       " return vec2(a-b,d-c)/(2.0*e);}",
+       "void main(){",
+       "  vec2 home=aHome; float t=uT; float s=aSeed; float energy=0.0;",
+       // living drift around home (always reads as THEODYX between events)
+       "  vec2 fl=curl(home*2.2+vec2(t*0.05,-t*0.04)+s*7.0);",
+       "  vec2 pos=home+fl*0.010*(0.6+0.4*sin(t*0.5+s*6.2831));",
+       // ---- global gravity well -> accretion-disk spiral ----
+       "  vec2 rel=(home-uWell)*vec2(uAsp,1.0); float r0=length(rel)+1e-4; float a0=atan(rel.y,rel.x);",
+       "  float g=uGrav;",
+       "  float r=r0*mix(1.0,0.10,g);",                                   // pulled inward
+       "  float a=a0 + g*(2.4+1.6/(r0+0.22)) + t*0.5*g;",                 // differential rotation
+       "  vec2 gpos=uWell + vec2(cos(a),sin(a))*r/vec2(uAsp,1.0);",
+       "  pos=mix(pos,gpos,g); energy+=g*1.1;",
+       // ---- shockwave ripple rolling out from the well ----
+       "  float ring=sin((r0-uRipR)*16.0)*exp(-pow((r0-uRipR)*5.0,2.0))*uRipA;",
+       "  pos += (rel/(r0*vec2(uAsp,1.0)))*ring*0.07; energy+=abs(ring)*1.6;",
+       // ---- pointer local gravity vortex (pull + orbit) ----
+       "  vec2 pd=(pos-uPtr)*vec2(uAsp,1.0); float pdl=length(pd)+1e-4; float pf=uPtrOn*exp(-pdl*3.4);",
+       "  vec2 pdir=pd/pdl;",
+       "  pos -= pdir/vec2(uAsp,1.0)*pf*0.16;",
+       "  pos += vec2(-pdir.y,pdir.x)/vec2(uAsp,1.0)*pf*0.22; energy+=pf*1.4;",
+       // ---- output ----
+       "  gl_Position=vec4(pos,0.0,1.0);",
+       "  float sz=uPx*(0.5+s*1.3+pf*5.5+g*2.2+abs(ring)*3.5);",
+       "  gl_PointSize=clamp(sz,1.0,16.0);",
+       "  float cm=clamp(home.x*0.5+0.5,0.0,1.0);",
+       "  vec3 col = cm<0.5 ? mix(cA,cB,cm*2.0) : mix(cB,cC,(cm-0.5)*2.0);",
+       "  col=mix(col,cD,clamp(energy*0.6,0.0,1.0));",
+       "  vCol=col; vGlow=0.4+0.6*s+energy;",
+       "}"].join("\n");
+
+      var FS=[
+       "precision highp float;",
+       "varying vec3 vCol; varying float vGlow;",
+       "void main(){vec2 c=gl_PointCoord-0.5;float r=dot(c,c);if(r>0.25)discard;float a=1.0-r*4.0;a=a*a;",
+       " gl_FragColor=vec4(vCol*vGlow,a*0.85);}"].join("\n");
+
+      function sh(tp,x){var o=gl.createShader(tp);gl.shaderSource(o,x);gl.compileShader(o);
+        if(!gl.getShaderParameter(o,gl.COMPILE_STATUS)){console.warn(gl.getShaderInfoLog(o));return null;}return o;}
+      var vs=sh(gl.VERTEX_SHADER,VS),fs=sh(gl.FRAGMENT_SHADER,FS);
+      if(!vs||!fs){return THX.canvas2DFallback(stage);}
+      var pr=gl.createProgram();gl.attachShader(pr,vs);gl.attachShader(pr,fs);gl.linkProgram(pr);
+      if(!gl.getProgramParameter(pr,gl.LINK_STATUS)){console.warn(gl.getProgramInfoLog(pr));return THX.canvas2DFallback(stage);}
+      gl.useProgram(pr);
+
+      var aHome=gl.getAttribLocation(pr,"aHome"),aSeed=gl.getAttribLocation(pr,"aSeed");
+      var U={};["uT","uGrav","uPx","uAsp","uPtrOn","uRipR","uRipA","uWell","uPtr","cA","cB","cC","cD"].forEach(function(n){U[n]=gl.getUniformLocation(pr,n);});
+      gl.uniform3f(U.cA,P[0][0],P[0][1],P[0][2]);
+      gl.uniform3f(U.cB,P[1][0],P[1][1],P[1][2]);
+      gl.uniform3f(U.cC,P[2][0],P[2][1],P[2][2]);
+      gl.uniform3f(U.cD,P[3][0],P[3][1],P[3][2]);
+
+      gl.enable(gl.BLEND);
+      gl.blendFuncSeparate(gl.SRC_ALPHA,gl.ONE,gl.ONE,gl.ONE_MINUS_SRC_ALPHA);
+
+      var buf=gl.createBuffer(), COUNT=0, pxScale=1.0;
+      function build(){
+        var r=stage.getBoundingClientRect(),d=THX.dpr();
+        var cssW=r.width||1,cssH=r.height||1;
+        stage.width=Math.max(1,Math.floor(cssW*d));stage.height=Math.max(1,Math.floor(cssH*d));
+        var small=cssW<760, dens=small?0.9:1.55;
+        var mk=THX.textMask(cssW,cssH,dens),w=mk.w,h=mk.h,data;
+        try{data=mk.canvas.getContext("2d").getImageData(0,0,w,h).data;}catch(e){COUNT=0;return;}
+        var cap=small?90000:300000,total=0;
+        for(var pp=3;pp<data.length;pp+=4){if(data[pp]>120)total++;}
+        var step=total>cap?Math.ceil(total/cap):1, n=Math.min(total,cap);
+        var arr=new Float32Array(n*3),idx=0,c=0,seen=0;
+        for(var y=0;y<h;y++){for(var x=0;x<w;x++){if(data[(y*w+x)*4+3]>120){seen++;if(seen%step!==0)continue;if(c>=n)break;
+          arr[idx++]=(x/(w-1))*2.0-1.0;arr[idx++]=(1.0-(y/(h-1)))*2.0-1.0;arr[idx++]=Math.random();c++;}}if(c>=n)break;}
+        COUNT=c;gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.bufferData(gl.ARRAY_BUFFER,arr.subarray(0,c*3),gl.STATIC_DRAW);
+        pxScale=stage.height/300.0;gl.viewport(0,0,stage.width,stage.height);
+      }
+      build();
+      if(COUNT===0){return THX.canvas2DFallback(stage);}
+
+      var ptr=[0,0],target=[0,0],hasInput=false;
+      stage.addEventListener("pointermove",function(e){var r=stage.getBoundingClientRect();if(!r.width)return;
+        target=[(e.clientX-r.left)/r.width*2.0-1.0,(1.0-(e.clientY-r.top)/r.height)*2.0-1.0];hasInput=true;});
+      stage.addEventListener("pointerleave",function(){hasInput=false;});
+
+      var t0=performance.now();
+      function frame(now){
+        var tt=(now-t0)/1000;
+        // gravity pulse every 9s, ~3s long
+        var cyc=tt%9.0;
+        var g=cyc<3.0?Math.sin((cyc/3.0)*3.14159265):0.0;
+        // well drifts (the roaming black hole)
+        var well=[0.45*Math.sin(tt*0.12),0.30*Math.cos(tt*0.1)];
+        // ripple rolls outward at each pulse
+        var ripR=cyc<3.6?(cyc/3.6)*2.4:99.0;
+        var ripA=cyc<3.6?(1.0-cyc/3.6)*0.95:0.0;
+        // pointer: cursor when present, else a gentle drifting vortex (always alive)
+        if(!hasInput){ target=[0.62*Math.sin(tt*0.43+1.1),0.42*Math.cos(tt*0.31)]; }
+        ptr[0]+=(target[0]-ptr[0])*0.08;ptr[1]+=(target[1]-ptr[1])*0.08;
+        var ptrOn=hasInput?1.0:0.5;
+        var asp=stage.width/Math.max(1,stage.height);
+        gl.useProgram(pr);
+        gl.uniform1f(U.uT,tt);gl.uniform1f(U.uGrav,g);gl.uniform1f(U.uPx,pxScale);gl.uniform1f(U.uAsp,asp);
+        gl.uniform1f(U.uPtrOn,ptrOn);gl.uniform1f(U.uRipR,ripR);gl.uniform1f(U.uRipA,ripA);
+        gl.uniform2f(U.uWell,well[0],well[1]);gl.uniform2f(U.uPtr,ptr[0],ptr[1]);
+        gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+        gl.enableVertexAttribArray(aHome);gl.vertexAttribPointer(aHome,2,gl.FLOAT,false,12,0);
+        gl.enableVertexAttribArray(aSeed);gl.vertexAttribPointer(aSeed,1,gl.FLOAT,false,12,8);
+        gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT);
+        gl.drawArrays(gl.POINTS,0,COUNT);
+      }
+      return {frame:frame,resize:build};
+    };
+  }
+
+  var PAL={
+    "swarm-brand":[[0.30,0.40,0.95],[0.66,0.49,1.00],[1.00,0.56,0.69],[1.00,0.98,0.95]],
+    "swarm-earth":[[0.32,0.20,0.12],[0.72,0.45,0.26],[0.87,0.71,0.43],[1.00,0.94,0.80]],
+    "swarm-gold": [[0.16,0.04,0.00],[0.86,0.28,0.04],[1.00,0.72,0.20],[1.00,0.97,0.86]],
+    "swarm-ice":  [[0.05,0.18,0.42],[0.10,0.66,0.62],[0.55,0.92,1.00],[0.93,1.00,1.00]],
+    "swarm-ember":[[0.12,0.00,0.00],[0.80,0.10,0.05],[1.00,0.55,0.12],[1.00,0.92,0.55]]
+  };
+  for(var k in PAL){ if(PAL.hasOwnProperty(k)) THX.FX[k]=makeSwarm(PAL[k]); }
+})();
+
+</script>
+
+  <!-- RUNNER + EXPORT -->
+  <script>
+  (function(){
+    var THX=window.THX; var insts=[];
+    document.querySelectorAll("canvas[data-fx]").forEach(function(node){
+      var name=node.getAttribute("data-fx"), inst=null, running=false, raf=0;
+      function ensure(){ if(inst) return inst; var fn=THX.FX[name];
+        if(!fn){ inst=THX.canvas2DFallback(node); }
+        else { try{ inst=fn(node); }catch(e){ console.warn("fx",name,e); try{inst=THX.canvas2DFallback(node);}catch(_){} } }
+        node.__inst=inst; return inst; }
+      node.__ensure=ensure;
+      function loop(now){ if(!running)return; try{ if(inst&&inst.frame)inst.frame(now||performance.now()); }catch(e){} raf=requestAnimationFrame(loop); }
+      var io=new IntersectionObserver(function(es){ es.forEach(function(en){
+        if(en.isIntersecting){ ensure(); if(!running){ running=true; if(!(inst&&inst.css)) raf=requestAnimationFrame(loop); } }
+        else { running=false; if(raf) cancelAnimationFrame(raf); }
+      }); },{threshold:0.05});
+      io.observe(node.closest(".stage")||node);
+      insts.push({node:node,resize:function(){ ensure(); if(inst&&inst.resize) try{inst.resize();}catch(e){} }});
+    });
+    var rt; window.addEventListener("resize",function(){ clearTimeout(rt); rt=setTimeout(function(){ insts.forEach(function(x){x.resize();}); },200); });
+
+    // ---------- export helpers ----------
+    function dl(blob, name){ var a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=name;
+      document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); },4000); }
+
+    function exportPNG(node, key, btn){
+      btn.classList.add("busy"); var label=btn.textContent; btn.textContent="…";
+      var inst=node.__ensure(); var real=THX._dpr;
+      var rect=node.getBoundingClientRect();
+      var scale=Math.min(4, Math.max(2, 2800/(rect.width||1)));
+      try{
+        THX._dpr=function(){ return scale; };
+        if(inst&&inst.resize) inst.resize();
+        if(inst&&inst.frame){ inst.frame(performance.now()); inst.frame(performance.now()+16); }
+        var ex=document.createElement("canvas"); ex.width=node.width; ex.height=node.height;
+        ex.getContext("2d").drawImage(node,0,0);
+        ex.toBlob(function(b){ if(b) dl(b,"THEODYX-"+key+"-"+ex.width+"x"+ex.height+".png");
+          THX._dpr=real; if(inst&&inst.resize) inst.resize(); btn.classList.remove("busy"); btn.textContent=label; }, "image/png");
+      }catch(e){ console.warn(e); THX._dpr=real; if(inst&&inst.resize) inst.resize(); btn.classList.remove("busy"); btn.textContent=label; }
+    }
+
+    function pickMime(){ var t=["video/webm;codecs=vp9","video/webm;codecs=vp8","video/webm"];
+      for(var i=0;i<t.length;i++){ try{ if(window.MediaRecorder&&MediaRecorder.isTypeSupported(t[i])) return t[i]; }catch(e){} } return ""; }
+
+    function exportWebM(node, key, btn){
+      if(!window.MediaRecorder || !node.captureStream){ alert("Video capture isn't supported in this browser — try Chrome. (PNG still works.)"); return; }
+      node.__ensure();
+      var mime=pickMime(); var stream=node.captureStream(30);
+      var rec; try{ rec=new MediaRecorder(stream, mime?{mimeType:mime,videoBitsPerSecond:12000000}:undefined); }
+      catch(e){ alert("Couldn't start the recorder in this browser."); return; }
+      var chunks=[]; rec.ondataavailable=function(e){ if(e.data&&e.data.size) chunks.push(e.data); };
+      rec.onstop=function(){ var b=new Blob(chunks,{type:mime||"video/webm"}); dl(b,"THEODYX-"+key+"-6s.webm");
+        btn.classList.remove("rec","busy"); btn.textContent=btn.dataset.label; };
+      btn.dataset.label=btn.textContent; btn.classList.add("rec","busy"); var n=6;
+      btn.textContent="● "+n+"s"; var iv=setInterval(function(){ n--; btn.textContent="● "+n+"s"; if(n<=0) clearInterval(iv); },1000);
+      rec.start(); setTimeout(function(){ try{rec.stop();}catch(e){} }, 6000);
+    }
+
+    document.querySelectorAll(".tools button").forEach(function(btn){
+      btn.addEventListener("click",function(){
+        var stage=btn.closest(".stage"); var node=stage&&stage.querySelector("canvas[data-fx]"); if(!node) return;
+        var key=node.getAttribute("data-fx");
+        if(btn.dataset.act==="png") exportPNG(node,key,btn); else exportWebM(node,key,btn);
+      });
+    });
+  })();
+  </script>
+</body>
+</html>
