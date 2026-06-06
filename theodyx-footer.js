@@ -92,7 +92,7 @@
       try { gl = stage.getContext("webgl", { premultipliedAlpha: false, alpha: true, antialias: false })
             || stage.getContext("experimental-webgl", { premultipliedAlpha: false, alpha: true, antialias: false }); }
       catch (e) { gl = null; }
-      if (!gl) { return fallback(stage); }
+      if (!gl) { return null; }
 
       var VS = [
        "precision highp float;",
@@ -147,9 +147,9 @@
       function sh(tp, x) { var o = gl.createShader(tp); gl.shaderSource(o, x); gl.compileShader(o);
         if (!gl.getShaderParameter(o, gl.COMPILE_STATUS)) { return null; } return o; }
       var vs = sh(gl.VERTEX_SHADER, VS), fs = sh(gl.FRAGMENT_SHADER, FS);
-      if (!vs || !fs) { return fallback(stage); }
+      if (!vs || !fs) { return null; }
       var pr = gl.createProgram(); gl.attachShader(pr, vs); gl.attachShader(pr, fs); gl.linkProgram(pr);
-      if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) { return fallback(stage); }
+      if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) { return null; }
       gl.useProgram(pr);
 
       var aHome = gl.getAttribLocation(pr, "aHome"), aSeed = gl.getAttribLocation(pr, "aSeed");
@@ -191,7 +191,7 @@
         pxScale = stage.height / 300.0; gl.viewport(0, 0, stage.width, stage.height);
       }
       build();
-      if (COUNT === 0) { return fallback(stage); }
+      if (COUNT === 0) { return null; }
 
       var target = [0, 0], hasInput = false, oc = [0, 0];
       stage.addEventListener("pointermove", function (e) { var r = stage.getBoundingClientRect(); if (!r.width) return;
@@ -224,31 +224,35 @@
       }
       return { frame: frame, resize: build };
     }
-    function webglReady() { try { var p = document.createElement('canvas'); return !!(p.getContext('webgl') || p.getContext('experimental-webgl')); } catch (e) { return false; } }
-    function mount(canvas) {
-      var inst = null, running = false, raf = 0, reduce = false, tries = 0, pending = false;
+    function mount(node) {
+      var inst = null, running = false, raf = 0, reduce = false, tries = 0, started = false, inView = false, done = false;
       try { reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
-      function ensure() { if (inst) return inst; try { inst = makeSwarm(canvas); } catch (e) { try { inst = fallback(canvas); } catch (_) {} } return inst; }
+      node.__thxMode = 'init';
       function loop(now) { if (!running) return; try { inst && inst.frame && inst.frame(now || performance.now()); } catch (e) {} raf = requestAnimationFrame(loop); }
-      function run() { ensure(); if (!inst) return; if (reduce) { try { inst.frame(performance.now()); inst.frame(performance.now() + 16); } catch (e) {} return; } if (!running) { running = true; raf = requestAnimationFrame(loop); } }
-      function start() {
-        if (running || inst) { run(); return; }
-        if (pending) return;
-        // Don't touch the real canvas until WebGL is actually available — a transient failure
-        // (page still loading / GPU contended by the nav + hero) would otherwise lock the canvas
-        // permanently into the 2D fallback. Probe a throwaway canvas and retry first.
-        if (!webglReady() && tries < 10) { pending = true; tries++; setTimeout(function () { pending = false; if (!inst && !running) start(); }, 450); return; }
-        run();
+      function animate() { if (!inst || !inView) return; if (reduce) { try { inst.frame(performance.now()); inst.frame(performance.now() + 16); } catch (e) {} return; } if (!running) { running = true; raf = requestAnimationFrame(loop); } }
+      function build() {
+        if (done || inst) return;
+        // makeSwarm returns null on any failure WITHOUT touching the canvas as 2D, so a transient
+        // WebGL miss (GPU still contended by the nav + hero on first paint) leaves the canvas
+        // pristine and we can simply retry it — instead of locking it into the 2D fallback.
+        var s = null; try { s = makeSwarm(node); } catch (e) { s = null; }
+        if (s) { inst = s; done = true; node.__thxMode = 'swarm'; animate(); return; }
+        if (tries < 14) { tries++; setTimeout(build, 500); return; }
+        // last resort (~7s of no WebGL): draw the 2D gradient wordmark on a FRESH canvas
+        try { var fresh = node.cloneNode(false); if (node.parentNode) node.parentNode.replaceChild(fresh, node); try { io && io.observe(fresh); } catch (e2) {} node = fresh; } catch (e) {}
+        try { inst = fallback(node); done = true; node.__thxMode = 'fallback'; animate(); } catch (e) {}
       }
+      function start() { if (inst) { animate(); return; } if (started) return; started = true; build(); }
       function stop() { running = false; if (raf) cancelAnimationFrame(raf); }
+      var io = null;
       try {
-        var io = new IntersectionObserver(function (es) { es.forEach(function (en) { if (en.isIntersecting) start(); else stop(); }); }, { threshold: 0.04 });
-        io.observe(canvas);
-      } catch (e) { start(); }
+        io = new IntersectionObserver(function (es) { es.forEach(function (en) { inView = en.isIntersecting; if (inView) start(); else stop(); }); }, { threshold: 0.04 });
+        io.observe(node);
+      } catch (e) { inView = true; start(); }
       // kick: if the footer is already on-screen once laid out, start without waiting on an IO change event
-      function kick() { try { var r = canvas.getBoundingClientRect(); if (r.height > 0 && r.top < (window.innerHeight || 0) && r.bottom > 0) start(); } catch (e) {} }
+      function kick() { try { var r = node.getBoundingClientRect(); if (r.height > 0 && r.top < (window.innerHeight || 0) && r.bottom > 0) { inView = true; start(); } } catch (e) {} }
       if (document.readyState === 'complete') setTimeout(kick, 80); else window.addEventListener('load', function () { setTimeout(kick, 80); });
-      document.addEventListener('visibilitychange', function () { if (document.hidden) stop(); });
+      document.addEventListener('visibilitychange', function () { if (document.hidden) stop(); else animate(); });
       var rt; window.addEventListener('resize', function () { clearTimeout(rt); rt = setTimeout(function () { if (inst && inst.resize) try { inst.resize(); } catch (e) {} }, 220); }, { passive: true });
     }
     return { mount: mount };
