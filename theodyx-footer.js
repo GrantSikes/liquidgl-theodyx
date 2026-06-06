@@ -27,7 +27,7 @@
     '.footer .footer-h{margin:0 0 16px!important;padding:0!important;font:600 12px/1 "Google Sans Flex","Google Sans",system-ui,sans-serif!important;letter-spacing:.18em!important;text-transform:uppercase!important;color:rgba(245,241,232,.42)!important;background:none!important}',
     '.footer .footer-link{position:relative;display:inline-block!important;width:auto!important;padding:7px 0!important;margin:0!important;color:rgba(245,241,232,.62)!important;font:400 15.5px/1.35 "Google Sans Flex","Google Sans",system-ui,sans-serif!important;text-decoration:none!important;background:none!important;transition:color .2s ease,transform .2s ease}',
     '.footer .footer-link:hover{color:#fff!important;transform:translateX(4px)}',
-    '.thx-fmark{position:relative;margin:clamp(48px,7vw,96px) auto 0!important;width:100%;max-width:1180px;height:clamp(104px,21vw,250px);user-select:none}',
+    '.thx-fmark{position:relative;margin:clamp(48px,7vw,96px) auto 0!important;width:100%;max-width:1180px;height:clamp(104px,21vw,250px);user-select:none;overflow:hidden}',
     '.thx-fmark .thx-grad{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:"Google Sans Flex","Google Sans",system-ui,sans-serif;font-weight:800;font-size:clamp(56px,17.4vw,236px);line-height:1;letter-spacing:-.04em;white-space:nowrap;background:linear-gradient(106deg,#b9854a,#ecd6a0 46%,#c79a5e 82%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;opacity:.96;transition:opacity .7s ease;pointer-events:none}',
     '.thx-fmark canvas{position:absolute;inset:0;display:block;width:100%;height:100%;opacity:0;transition:opacity .7s ease}',
     '.footer .footer-bottom-1{margin:clamp(30px,4vw,52px) auto 0!important;padding-top:24px!important;border-top:1px solid rgba(245,241,232,.1)!important;display:flex!important;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px}',
@@ -36,7 +36,7 @@
     '.thx-fsoc a{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:999px;border:1px solid rgba(245,241,232,.16);color:rgba(245,241,232,.72)!important;text-decoration:none!important;transition:transform .2s,background .2s,border-color .2s,color .2s}',
     '.thx-fsoc a:hover{transform:translateY(-3px);background:rgba(245,241,232,.08);border-color:rgba(245,241,232,.45);color:#fff!important}',
     '.thx-fsoc svg{width:17px;height:17px;display:block;fill:currentColor}',
-    '@media(max-width:600px){.footer{text-align:left}.thx-fcols{gap:30px 40px}.footer .footer-col{min-width:42%}.thx-fbtn{width:100%;justify-content:center}.thx-fcta h2{font-size:clamp(26px,7.5vw,34px)}.thx-fmark{height:clamp(82px,29vw,150px)}.thx-fmark .thx-grad{font-size:clamp(46px,19vw,92px)}.footer .footer-bottom-1{justify-content:flex-start}}'
+    '@media(max-width:600px){.footer{text-align:left}.thx-fcols{gap:30px 40px}.footer .footer-col{min-width:42%}.thx-fbtn{width:100%;justify-content:center}.thx-fcta h2{font-size:clamp(26px,7.5vw,34px)}.thx-fmark{height:clamp(124px,36vw,200px)}.thx-fmark .thx-grad{font-size:clamp(44px,17.6vw,104px)}.footer .footer-bottom-1{justify-content:flex-start}}'
   ].join('');
 
   var ICONS = {
@@ -179,17 +179,20 @@
         var r = stage.getBoundingClientRect(), d = dpr();
         var cssW = r.width || 1, cssH = r.height || 1;
         stage.width = Math.max(1, Math.floor(cssW * d)); stage.height = Math.max(1, Math.floor(cssH * d));
-        var small = cssW < 760, dens = small ? 0.9 : 1.55;
+        var small = cssW < 760, dens = small ? 1.7 : 1.55;   // denser mask on phones so enough particles get sampled
         var mk = textMask(cssW, cssH, dens), w = mk.w, h = mk.h, data;
         try { data = mk.canvas.getContext("2d").getImageData(0, 0, w, h).data; } catch (e) { COUNT = 0; return; }
-        var cap = small ? 90000 : 300000, total = 0;
+        var cap = small ? 64000 : 300000, total = 0;   // lighter on phone GPUs; bigger points (below) keep it lush
         for (var pp = 3; pp < data.length; pp += 4) { if (data[pp] > 120) total++; }
         var step = total > cap ? Math.ceil(total / cap) : 1, n = Math.min(total, cap);
         var arr = new Float32Array(n * 3), idx = 0, c = 0, seen = 0;
         for (var y = 0; y < h; y++) { for (var x = 0; x < w; x++) { if (data[(y * w + x) * 4 + 3] > 120) { seen++; if (seen % step !== 0) continue; if (c >= n) break;
           arr[idx++] = (x / (w - 1)) * 2.0 - 1.0; arr[idx++] = (1.0 - (y / (h - 1))) * 2.0 - 1.0; arr[idx++] = Math.random(); c++; } } if (c >= n) break; }
         COUNT = c; gl.bindBuffer(gl.ARRAY_BUFFER, buf); gl.bufferData(gl.ARRAY_BUFFER, arr.subarray(0, c * 3), gl.STATIC_DRAW);
-        pxScale = stage.height / 300.0; gl.viewport(0, 0, stage.width, stage.height);
+        // point size scales with canvas height, but on a short phone canvas that goes ~1px (dim/sparse),
+        // so floor it on mobile to ~2px device so particles read as a lush, bright wordmark.
+        pxScale = small ? Math.max(stage.height / 300.0, d * 1.2) : stage.height / 300.0;
+        gl.viewport(0, 0, stage.width, stage.height);
       }
       build();
       if (COUNT === 0) { return null; }
