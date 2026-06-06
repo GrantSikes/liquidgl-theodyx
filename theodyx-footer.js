@@ -179,10 +179,10 @@
         var r = stage.getBoundingClientRect(), d = dpr();
         var cssW = r.width || 1, cssH = r.height || 1;
         stage.width = Math.max(1, Math.floor(cssW * d)); stage.height = Math.max(1, Math.floor(cssH * d));
-        var small = cssW < 760, dens = small ? 1.7 : 1.55;   // denser mask on phones so enough particles get sampled
+        var small = cssW < 760, dens = small ? 2.0 : 1.55;   // dense mask on phones for a rich, desktop-like grain
         var mk = textMask(cssW, cssH, dens), w = mk.w, h = mk.h, data;
         try { data = mk.canvas.getContext("2d").getImageData(0, 0, w, h).data; } catch (e) { COUNT = 0; return; }
-        var cap = small ? 64000 : 300000, total = 0;   // lighter on phone GPUs; bigger points (below) keep it lush
+        var cap = small ? 95000 : 300000, total = 0;   // richer particle count on phones (modern devices handle it), finer points below
         for (var pp = 3; pp < data.length; pp += 4) { if (data[pp] > 120) total++; }
         var step = total > cap ? Math.ceil(total / cap) : 1, n = Math.min(total, cap);
         var arr = new Float32Array(n * 3), idx = 0, c = 0, seen = 0;
@@ -191,7 +191,7 @@
         COUNT = c; gl.bindBuffer(gl.ARRAY_BUFFER, buf); gl.bufferData(gl.ARRAY_BUFFER, arr.subarray(0, c * 3), gl.STATIC_DRAW);
         // point size scales with canvas height, but on a short phone canvas that goes ~1px (dim/sparse),
         // so floor it on mobile to ~2px device so particles read as a lush, bright wordmark.
-        pxScale = small ? Math.max(stage.height / 300.0, d * 1.2) : stage.height / 300.0;
+        pxScale = small ? Math.max(stage.height / 300.0, d * 1.05) : stage.height / 300.0;   // finer points (like desktop) now that density is higher, but bright enough
         gl.viewport(0, 0, stage.width, stage.height);
       }
       build();
