@@ -159,7 +159,7 @@
 
     // brand ring + dot "O" — colored (reads on cream AND over dark media), normal alpha
     var oVS = ["precision highp float;", "attribute vec2 aP; attribute float aS;", "uniform float uT,uAsp,uOr,uPx; uniform vec2 uOc;", "varying float vG;", "void main(){vec2 p=uOc+aP*uOr*vec2(1.0/uAsp,1.0); p.y+=sin(uT*1.4+aS*6.2831)*0.0014; gl_Position=vec4(p,0.0,1.0); gl_PointSize=uPx*(0.8+aS*0.6); vG=0.85+0.15*aS;}"].join("\n");
-    var oFS = ["precision highp float;", "varying float vG;", "void main(){vec2 c=gl_PointCoord-0.5;float r=dot(c,c);if(r>0.25)discard;float a=1.0-r*4.0;a*=a;gl_FragColor=vec4(0.92*vG,0.12*vG,0.10*vG,a*0.97);}"].join("\n");
+    var oFS = ["precision highp float;", "varying float vG;", "void main(){vec2 c=gl_PointCoord-0.5;float r=dot(c,c);if(r>0.25)discard;float a=1.0-r*4.0;a*=a;gl_FragColor=vec4(1.0,0.0,0.0,a);}"].join("\n");
     var oV = sh(gl.VERTEX_SHADER, oVS), oF = sh(gl.FRAGMENT_SHADER, oFS); if (!oV || !oF) return null;
     var oPr = gl.createProgram(); gl.attachShader(oPr, oV); gl.attachShader(oPr, oF); gl.linkProgram(oPr);
     var oAP = gl.getAttribLocation(oPr, "aP"), oAS = gl.getAttribLocation(oPr, "aS");
