@@ -21,7 +21,7 @@
   var SS_FORM = 'theodyx_scouting_form_v1';
   var SS_GATES = 'theodyx_scouting_gates_v1';
   var PAGE_URL = (location.origin || 'https://www.theodyx.com') + (location.pathname || '/scouting');
-  var INTRO_PHOTO = 'https://cdn.prod.website-files.com/69fe0aaad9f3034241913693/6a3d6ef7517e5adb1b9c90d0_theodyx-scouting-portrait.jpg';
+  var INTRO_PHOTO = 'https://cdn.prod.website-files.com/69fe0aaad9f3034241913693/6a3d9d26aa451244e57b3244_theodyx-scouting-portrait-m.jpg';
 
   /* Option sets — copied verbatim from shared/schema.ts so the two never drift. */
   var COUNTRIES = ['United States','Afghanistan','Albania','Algeria','Andorra','Angola','Antigua and Barbuda','Argentina','Armenia','Australia','Austria','Azerbaijan','Bahamas','Bahrain','Bangladesh','Barbados','Belarus','Belgium','Belize','Benin','Bhutan','Bolivia','Bosnia and Herzegovina','Botswana','Brazil','Brunei','Bulgaria','Burkina Faso','Burundi','Cambodia','Cameroon','Canada','Cape Verde','Central African Republic','Chad','Chile','China','Colombia','Comoros','Congo','Congo (DRC)','Costa Rica','Côte d’Ivoire','Croatia','Cuba','Cyprus','Czechia','Denmark','Djibouti','Dominica','Dominican Republic','Ecuador','Egypt','El Salvador','Equatorial Guinea','Eritrea','Estonia','Eswatini','Ethiopia','Fiji','Finland','France','Gabon','Gambia','Georgia','Germany','Ghana','Greece','Grenada','Guatemala','Guinea','Guinea-Bissau','Guyana','Haiti','Honduras','Hong Kong','Hungary','Iceland','India','Indonesia','Iran','Iraq','Ireland','Israel','Italy','Jamaica','Japan','Jordan','Kazakhstan','Kenya','Kiribati','Kosovo','Kuwait','Kyrgyzstan','Laos','Latvia','Lebanon','Lesotho','Liberia','Libya','Liechtenstein','Lithuania','Luxembourg','Madagascar','Malawi','Malaysia','Maldives','Mali','Malta','Marshall Islands','Mauritania','Mauritius','Mexico','Micronesia','Moldova','Monaco','Mongolia','Montenegro','Morocco','Mozambique','Myanmar','Namibia','Nauru','Nepal','Netherlands','New Zealand','Nicaragua','Niger','Nigeria','North Korea','North Macedonia','Norway','Oman','Pakistan','Palau','Palestine','Panama','Papua New Guinea','Paraguay','Peru','Philippines','Poland','Portugal','Puerto Rico','Qatar','Romania','Russia','Rwanda','Saint Kitts and Nevis','Saint Lucia','Saint Vincent and the Grenadines','Samoa','San Marino','São Tomé and Príncipe','Saudi Arabia','Senegal','Serbia','Seychelles','Sierra Leone','Singapore','Slovakia','Slovenia','Solomon Islands','Somalia','South Africa','South Korea','South Sudan','Spain','Sri Lanka','Sudan','Suriname','Sweden','Switzerland','Syria','Taiwan','Tajikistan','Tanzania','Thailand','Timor-Leste','Togo','Tonga','Trinidad and Tobago','Tunisia','Türkiye','Turkmenistan','Tuvalu','Uganda','Ukraine','United Arab Emirates','United Kingdom','Uruguay','Uzbekistan','Vanuatu','Vatican City','Venezuela','Vietnam','Yemen','Zambia','Zimbabwe','Other'];
@@ -299,7 +299,7 @@
     var dob = val('sc-dob');
     if (!/^\d{4}-\d{2}-\d{2}$/.test(dob)) { markBad('sc-dob'); errs.push(['sc-dob', 'Enter your date of birth.']); }
     var country = val('sc-country'); if (!country) { markBad('sc-country'); errs.push(['sc-country', 'Select your country.']); }
-    var city = need('sc-city', 'City is required.');
+    var city = val('sc-city'); // optional
     var platform = val('sc-platform'); if (!platform) { markBad('sc-platform'); errs.push(['sc-platform', 'Select your main platform.']); }
     var rep = currentRepresented(); if (rep !== 'yes' && rep !== 'no') { errs.push(['sc-rep', 'Let us know if you’re represented.']); }
     var representedBy = val('sc-representedBy');
@@ -318,7 +318,7 @@
     var payload = {
       email: email, firstName: firstName, lastName: lastName, dob: dob,
       ageConfirmed: true,
-      country: country, city: city,
+      country: country,
       primaryPlatform: platform,
       represented: rep === 'yes',
       consent: true,
@@ -326,6 +326,7 @@
       company: ''
     };
     var state = val('sc-state'); if (state) payload.state = state;
+    if (city) payload.city = city;
     var ig = val('sc-instagram'); if (ig) payload.instagram = ig;
     var tt = val('sc-tiktok'); if (tt) payload.tiktok = tt;
     var yt = val('sc-youtube'); if (yt) payload.youtube = yt;
@@ -507,7 +508,13 @@
       '.sc-photo:hover img{filter:grayscale(0) contrast(1);}',
       '@media(max-width:700px){.sc-photo{align-self:center;margin-top:8px;}}',
       /* QR is "continue on your phone" — pointless on a phone; desktop only */
-      '@media(max-width:767px){.sc-qr-wrap,.sc-qr,#sc-qr,.sc-qr-cap{display:none!important;}}'
+      '@media(max-width:767px){.sc-qr-wrap,.sc-qr,#sc-qr,.sc-qr-cap{display:none!important;}}',
+      /* remove the "Theodyx · Scouting" / "01 — You" / "02 — Work" eyebrow+bar labels */
+      '.sc-eyebrow{display:none!important;}',
+      /* consent text was rendering white on cream */
+      '.sc-consent-text,.sc-consent-text *{color:var(--sc-ink)!important;}',
+      /* success "Return home" button (anchor styled as gate button) */
+      '.sc-home-btn{display:inline-block;text-decoration:none!important;margin-top:clamp(28px,4vw,44px);}'
     ].join('\n');
     var style = document.createElement('style');
     style.id = 'sc-css';
@@ -521,13 +528,13 @@
   var FRAG_FORMS = [
 '<section id="sc-form-you" class="sc-section sc-app-sans" aria-label="About you"><div class="sc-eyebrow">01 — You</div><h2 class="sc-h2">Tell us who you are</h2><form class="sc-form" novalidate><div class="sc-grid"><div class="sc-field sc-full"><label class="sc-label" for="sc-email">Email</label><input id="sc-email" class="sc-input" type="email" autocomplete="email" inputmode="email" placeholder="you@email.com"></div><div class="sc-field"><label class="sc-label" for="sc-firstName">First name</label><input id="sc-firstName" class="sc-input" type="text" autocomplete="given-name"></div><div class="sc-field"><label class="sc-label" for="sc-lastName">Last name</label><input id="sc-lastName" class="sc-input" type="text" autocomplete="family-name"></div><div class="sc-field"><label class="sc-label" for="sc-dob">Date of birth</label><input id="sc-dob" class="sc-input" type="date"></div><div class="sc-field"><label class="sc-label" for="sc-platform">Primary platform</label><select id="sc-platform" class="sc-select"></select></div><div class="sc-field"><label class="sc-label" for="sc-country">Country</label><select id="sc-country" class="sc-select"></select></div><div class="sc-field"><label class="sc-label" for="sc-state">State / Region</label><input id="sc-state" class="sc-input" type="text" autocomplete="address-level1" placeholder="State, province, or region"></div><div class="sc-field"><label class="sc-label" for="sc-city">City</label><input id="sc-city" class="sc-input" type="text" autocomplete="address-level2" placeholder="Where are you based?"></div><div class="sc-field"><label class="sc-label" for="sc-instagram">Instagram handle</label><input id="sc-instagram" class="sc-input" type="text" placeholder="yourhandle"></div><div class="sc-field"><label class="sc-label" for="sc-tiktok">TikTok handle</label><input id="sc-tiktok" class="sc-input" type="text" placeholder="yourhandle"></div><div class="sc-field"><label class="sc-label" for="sc-youtube">YouTube channel</label><input id="sc-youtube" class="sc-input" type="text" placeholder="@channel or URL"></div><div class="sc-field" id="sc-other-wrap"><label class="sc-label" for="sc-otherPlatform">Other platform</label><input id="sc-otherPlatform" class="sc-input" type="text" placeholder="e.g. Substack, Twitch"><label class="sc-label sc-label--stack" for="sc-otherHandle">Handle on that platform</label><input id="sc-otherHandle" class="sc-input" type="text"></div><div class="sc-field sc-full" id="sc-rep"><span class="sc-legend">Are you currently represented? *</span><div class="sc-chips"><button type="button" class="sc-chip" data-val="no" data-on="false" aria-pressed="false">No</button><button type="button" class="sc-chip" data-val="yes" data-on="false" aria-pressed="false">Yes</button></div></div><div class="sc-field sc-full" id="sc-representedBy-wrap"><label class="sc-label" for="sc-representedBy">Represented by</label><input id="sc-representedBy" class="sc-input" type="text" placeholder="Agency / manager"></div><div class="sc-field sc-full"><label class="sc-label" for="sc-notes">Anything else?</label><textarea id="sc-notes" class="sc-textarea" rows="4" placeholder="Anything we should know? (optional)"></textarea></div></div></form></section>',
 '<section id="sc-form-work" class="sc-section sc-app-sans" aria-label="Your work"><div class="sc-eyebrow">02 — Work</div><h2 class="sc-h2">Show us your work</h2><p class="sc-text">Upload the media you’re proudest of — a few links, or a media kit. Optional, but it helps our team get to know you better.</p><form class="sc-form" novalidate><div class="sc-grid3"><div class="sc-field"><label class="sc-label" for="sc-link1">post / video 1</label><input id="sc-link1" class="sc-input" type="url" inputmode="url" placeholder="https://…"></div><div class="sc-field"><label class="sc-label" for="sc-link2">post / video 2</label><input id="sc-link2" class="sc-input" type="url" inputmode="url" placeholder="https://…"></div><div class="sc-field"><label class="sc-label" for="sc-link3">post / video 3</label><input id="sc-link3" class="sc-input" type="url" inputmode="url" placeholder="https://…"></div></div><div class="sc-block"><label class="sc-label">Media kit (PDF) <span class="sc-opt">(optional)</span></label><div id="sc-mediakit" class="sc-drop sc-drop--kit" data-main="+ Upload PDF"></div></div><div class="sc-block--divider"><p class="sc-label">Your pictures</p><p class="sc-text sc-pics-note">Keep these natural — please avoid baggy clothing, make-up, or smiling. The photos you submit shouldn’t be filtered, re-touched, or professionally taken.</p><div class="sc-grid3"><div class="sc-field"><label class="sc-label">Headshot <span class="sc-opt">(optional)</span></label><div id="sc-pic0" class="sc-drop" data-main="+ Add image"></div></div><div class="sc-field"><label class="sc-label">Profile <span class="sc-opt">(optional)</span></label><div id="sc-pic1" class="sc-drop" data-main="+ Add image"></div></div><div class="sc-field"><label class="sc-label">Full length <span class="sc-opt">(optional)</span></label><div id="sc-pic2" class="sc-drop" data-main="+ Add image"></div></div></div></div></form></section>',
-'<section id="sc-form-consent" class="sc-section sc-app-sans" aria-label="Consent and submit"><form class="sc-form" novalidate><label class="sc-consent" for="sc-consent"><input id="sc-consent" class="sc-check" type="checkbox"><span class="sc-consent-text">I agree to Theodyx’s <a href="https://www.theodyx.com/resources/legal/legal" target="_blank" rel="noopener noreferrer">Privacy Policy</a> and consent to be contacted about representation. I understand this is an application, not an offer of representation.</span></label><div class="sc-honey" aria-hidden="true"><label for="sc-company">Company</label><input id="sc-company" name="company" type="text" tabindex="-1" autocomplete="off"></div><div id="sc-turnstile"></div><div id="sc-err" class="sc-err" role="alert"></div><button id="sc-submit" type="button" class="sc-submit">Submit application</button><p class="sc-note">Every application is read. No fees, ever.</p></form></section>',
+'<section id="sc-form-consent" class="sc-section sc-app-sans" aria-label="Consent and submit"><form class="sc-form" novalidate><label class="sc-consent" for="sc-consent"><input id="sc-consent" class="sc-check" type="checkbox"><span class="sc-consent-text">I agree to Theodyx’s <a href="https://www.theodyx.com/resources/legal/legal" target="_blank" rel="noopener noreferrer">Privacy Policy</a> and consent to be contacted about representation. I understand this is an application, not an offer of representation.</span></label><div class="sc-honey" aria-hidden="true"><label for="sc-company">Company</label><input id="sc-company" name="company" type="text" tabindex="-1" autocomplete="off"></div><div id="sc-turnstile"></div><div id="sc-err" class="sc-err" role="alert"></div><button id="sc-submit" type="button" class="sc-submit">Submit application</button></form></section>',
 '<section id="sc-gate-u14" class="sc-section sc-app-sans" aria-label="A note"><div class="sc-eyebrow">A note</div><h2 class="sc-h2">Thank you for your interest in joining Theodyx.</h2><p class="sc-text">We are invested in protecting the privacy of our applicants. For this reason, we are unfortunately unable to accept applications from anyone under 14 at this time. We look forward to receiving your future application.</p></section>'
   ];
   var FRAG_BODY = [
-'<div id="sc-gate-safety" role="dialog" aria-modal="true" aria-label="Safety"><div class="sc-gate-inner"><span class="sc-gate-eyebrow">Theodyx — Safety</span><h2 class="sc-gate-h">Your safety comes first.</h2><p class="sc-gate-body">Safety is our top priority, and protecting aspiring creatives from online predators is of the utmost importance. Please do not respond to anyone claiming to be affiliated with Theodyx without alerting an adult and verifying their identity first. Theodyx never asks for photos in the nude or lingerie and never requires any kind of payment. If something doesn’t feel right, please don’t hesitate to contact us at <a href="mailto:scouting@theodyx.com">scouting@theodyx.com</a>.</p><button id="sc-gate-safety-ok" type="button" class="sc-gate-btn">Acknowledged</button></div></div>',
+'<div id="sc-gate-safety" role="dialog" aria-modal="true" aria-label="Safety"><div class="sc-gate-inner"><span class="sc-gate-eyebrow">Theodyx — Safety</span><h2 class="sc-gate-h">Your safety comes first.</h2><p class="sc-gate-body">Safety is our top priority. Protecting aspiring creatives — including young individuals — from online predators is of the utmost importance. If you would like to confirm an email or communication is from an official Theodyx representative or affiliate, email <a href="mailto:scouting@theodyx.com">scouting@theodyx.com</a> and we will be glad to confirm. Theodyx never asks for photos in the nude or lingerie and never requires any kind of payment. If something doesn’t feel right, please don’t hesitate to contact us at <a href="mailto:scouting@theodyx.com">scouting@theodyx.com</a>.</p><button id="sc-gate-safety-ok" type="button" class="sc-gate-btn">Acknowledged</button></div></div>',
 '<div id="sc-gate-age" role="dialog" aria-modal="true" aria-label="Age"><form class="sc-form sc-gate-inner sc-gate-inner--center" novalidate><span class="sc-gate-eyebrow">One quick question</span><h2 class="sc-gate-h">How old are you?</h2><div class="sc-gate-field"><label class="sc-label" for="sc-age-select">Select your age</label><select id="sc-age-select" class="sc-select"></select></div><button id="sc-gate-age-go" type="button" class="sc-gate-btn" disabled>Continue</button><p class="sc-gate-note">You must be 14 or older to apply directly.</p></form></div>',
-'<div id="sc-success" role="dialog" aria-live="polite" aria-label="Application received"><div class="sc-gate-inner"><span class="sc-gate-eyebrow">Application received</span><h2 class="sc-success-title">Thank you.</h2><p class="sc-serif">We read every one.</p><p class="sc-gate-body">Application received. If it’s a fit, we’ll reach out from @theodyx — keep an eye on your DMs and email inbox. We’ll only ever contact you from official accounts, and we never ask for payment.</p></div></div>'
+'<div id="sc-success" role="dialog" aria-live="polite" aria-label="Application received"><div class="sc-gate-inner"><span class="sc-gate-eyebrow">Application received</span><h2 class="sc-success-title">Thank you.</h2><a href="/" class="sc-gate-btn sc-home-btn">Return home</a></div></div>'
   ];
   function elFromHTML(html) { var t = document.createElement('template'); t.innerHTML = html.trim(); return t.content.firstChild; }
   function ensureDom() {
@@ -555,11 +562,27 @@
     row.appendChild(fig);
   }
 
+  /* Pull the site-wide footer (built on other pages but not on this native page)
+   * from the home page and append it so /scouting has the full website footer. */
+  function ensureFooter() {
+    if (qs('footer.footer') || document.body.dataset.thxFoot) return;
+    document.body.dataset.thxFoot = '1';
+    fetch('/', { credentials: 'same-origin' }).then(function (r) { return r.ok ? r.text() : ''; }).then(function (html) {
+      if (!html || qs('footer.footer')) return;
+      try {
+        var doc = new DOMParser().parseFromString(html, 'text/html');
+        var f = doc.querySelector('footer.footer');
+        if (f) (qs('.sc-page') || document.body).appendChild(document.importNode(f, true));
+      } catch (e) {}
+    }).catch(function () {});
+  }
+
   /* ----------------------------------------------------------------- init */
   function init() {
     injectCSS();
     ensureDom();
     enhanceIntro();
+    ensureFooter();
     fillCountries(); fillPlatforms(); fillAges();
     wireGates();
     wireRepresented(); wirePlatform();
