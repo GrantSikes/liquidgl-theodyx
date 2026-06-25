@@ -470,7 +470,29 @@
       '#sc-age-select option{color:#111;}',
       '#sc-gate-u14{display:none;}',
       '#sc-success .sc-gate-inner{min-height:70vh;display:flex;flex-direction:column;justify-content:center;}',
-      '.sc-success-title{font-family:"Objectivity","Archivo",sans-serif;font-weight:800;font-size:clamp(40px,7vw,96px);line-height:1;margin:0;}'
+      '.sc-success-title{font-family:"Objectivity","Archivo",sans-serif;font-weight:800;font-size:clamp(40px,7vw,96px);line-height:1;margin:0;}',
+      /* ---- v1.2.0 editorial pass: charcoal hero, no ghost, black headings, more air ---- */
+      /* Hero: short charcoal band, thin uppercase wordmark, drop the giant THEODYX ghost */
+      '.sc-hero{background:#262626!important;min-height:0!important;height:auto!important;display:flex!important;align-items:flex-end!important;padding:clamp(80px,11vw,128px) clamp(22px,6vw,72px) clamp(56px,7vw,84px)!important;}',
+      '.sc-hero-ghost{display:none!important;}',
+      '.sc-hero-title{color:#F2F1EC!important;font-family:"Archivo","Objectivity",sans-serif!important;font-weight:300!important;font-size:clamp(46px,9vw,124px)!important;letter-spacing:0.012em!important;line-height:0.96!important;margin:0!important;text-transform:uppercase!important;}',
+      /* Intro: airy, black heading, text left / QR right */
+      '.sc-intro{background:var(--sc-paper)!important;padding:clamp(64px,8vw,108px) clamp(22px,6vw,72px) clamp(48px,6vw,76px)!important;}',
+      '.sc-intro .sc-eyebrow{font-family:"Space Mono","Mono",ui-monospace,monospace!important;font-size:11px!important;letter-spacing:0.22em!important;text-transform:uppercase!important;color:var(--sc-mute)!important;margin-bottom:clamp(28px,4vw,40px)!important;}',
+      '.sc-intro-row{display:flex!important;flex-wrap:wrap;gap:clamp(32px,5vw,64px);align-items:flex-start;justify-content:space-between;}',
+      '.sc-intro-text{font-family:"Objectivity","Archivo",sans-serif!important;font-size:clamp(16px,1.5vw,19px)!important;line-height:1.72!important;color:var(--sc-ink)!important;max-width:44ch;margin:0;}',
+      '.sc-qr-wrap{display:flex;align-items:center;gap:16px;}',
+      '.sc-qr-cap{font-family:"Space Mono","Mono",ui-monospace,monospace!important;font-size:12px!important;line-height:1.5;color:var(--sc-mute)!important;max-width:150px;}',
+      /* Headings everywhere on paper → ink black + lighter, larger, airier (fixes white-on-cream) */
+      '.sc-h2{color:var(--sc-ink)!important;font-family:"Objectivity","Archivo",sans-serif!important;font-weight:400!important;font-size:clamp(32px,4.6vw,56px)!important;letter-spacing:-0.012em!important;line-height:1.08!important;margin-bottom:clamp(18px,2.4vw,28px)!important;}',
+      /* More breathing room in the form sections */
+      '.sc-section{max-width:860px!important;padding:clamp(72px,10vw,132px) clamp(22px,6vw,44px)!important;}',
+      '.sc-eyebrow{margin-bottom:clamp(36px,5vw,52px)!important;}',
+      '.sc-grid{gap:34px 52px!important;}',
+      '.sc-grid3{gap:34px 52px!important;}',
+      '.sc-text{line-height:1.72!important;margin-bottom:clamp(40px,5vw,60px)!important;max-width:58ch;}',
+      '.sc-label{color:var(--sc-ink)!important;}',
+      '.sc-submit{margin-top:clamp(28px,4vw,40px)!important;}'
     ].join('\n');
     var style = document.createElement('style');
     style.id = 'sc-css';
