@@ -21,6 +21,7 @@
   var SS_FORM = 'theodyx_scouting_form_v1';
   var SS_GATES = 'theodyx_scouting_gates_v1';
   var PAGE_URL = (location.origin || 'https://www.theodyx.com') + (location.pathname || '/scouting');
+  var INTRO_PHOTO = 'https://cdn.prod.website-files.com/69fe0aaad9f3034241913693/6a3d6ef7517e5adb1b9c90d0_theodyx-scouting-portrait.jpg';
 
   /* Option sets — copied verbatim from shared/schema.ts so the two never drift. */
   var COUNTRIES = ['United States','Afghanistan','Albania','Algeria','Andorra','Angola','Antigua and Barbuda','Argentina','Armenia','Australia','Austria','Azerbaijan','Bahamas','Bahrain','Bangladesh','Barbados','Belarus','Belgium','Belize','Benin','Bhutan','Bolivia','Bosnia and Herzegovina','Botswana','Brazil','Brunei','Bulgaria','Burkina Faso','Burundi','Cambodia','Cameroon','Canada','Cape Verde','Central African Republic','Chad','Chile','China','Colombia','Comoros','Congo','Congo (DRC)','Costa Rica','Côte d’Ivoire','Croatia','Cuba','Cyprus','Czechia','Denmark','Djibouti','Dominica','Dominican Republic','Ecuador','Egypt','El Salvador','Equatorial Guinea','Eritrea','Estonia','Eswatini','Ethiopia','Fiji','Finland','France','Gabon','Gambia','Georgia','Germany','Ghana','Greece','Grenada','Guatemala','Guinea','Guinea-Bissau','Guyana','Haiti','Honduras','Hong Kong','Hungary','Iceland','India','Indonesia','Iran','Iraq','Ireland','Israel','Italy','Jamaica','Japan','Jordan','Kazakhstan','Kenya','Kiribati','Kosovo','Kuwait','Kyrgyzstan','Laos','Latvia','Lebanon','Lesotho','Liberia','Libya','Liechtenstein','Lithuania','Luxembourg','Madagascar','Malawi','Malaysia','Maldives','Mali','Malta','Marshall Islands','Mauritania','Mauritius','Mexico','Micronesia','Moldova','Monaco','Mongolia','Montenegro','Morocco','Mozambique','Myanmar','Namibia','Nauru','Nepal','Netherlands','New Zealand','Nicaragua','Niger','Nigeria','North Korea','North Macedonia','Norway','Oman','Pakistan','Palau','Palestine','Panama','Papua New Guinea','Paraguay','Peru','Philippines','Poland','Portugal','Puerto Rico','Qatar','Romania','Russia','Rwanda','Saint Kitts and Nevis','Saint Lucia','Saint Vincent and the Grenadines','Samoa','San Marino','São Tomé and Príncipe','Saudi Arabia','Senegal','Serbia','Seychelles','Sierra Leone','Singapore','Slovakia','Slovenia','Solomon Islands','Somalia','South Africa','South Korea','South Sudan','Spain','Sri Lanka','Sudan','Suriname','Sweden','Switzerland','Syria','Taiwan','Tajikistan','Tanzania','Thailand','Timor-Leste','Togo','Tonga','Trinidad and Tobago','Tunisia','Türkiye','Turkmenistan','Tuvalu','Uganda','Ukraine','United Arab Emirates','United Kingdom','Uruguay','Uzbekistan','Vanuatu','Vatican City','Venezuela','Vietnam','Yemen','Zambia','Zimbabwe','Other'];
@@ -492,7 +493,19 @@
       '.sc-grid3{gap:34px 52px!important;}',
       '.sc-text{line-height:1.72!important;margin-bottom:clamp(40px,5vw,60px)!important;max-width:58ch;}',
       '.sc-label{color:var(--sc-ink)!important;}',
-      '.sc-submit{margin-top:clamp(28px,4vw,40px)!important;}'
+      '.sc-submit{margin-top:clamp(28px,4vw,40px)!important;}',
+      /* hide the duplicate native page header — keep the site-wide nav only */
+      '.sc-header{display:none!important;}',
+      /* intro: text + QR on the left, B&W editorial polaroid on the right */
+      '.sc-intro-row{display:flex!important;flex-wrap:wrap;gap:clamp(32px,5vw,72px)!important;align-items:flex-start;justify-content:space-between;}',
+      '.sc-intro-main{flex:1 1 360px;min-width:min(100%,300px);display:flex;flex-direction:column;gap:30px;}',
+      '.sc-photo{flex:0 0 auto;margin:0;background:#fff;padding:14px 14px 46px;box-shadow:0 26px 54px -26px rgba(0,0,0,.55);transform:rotate(2.4deg);position:relative;align-self:flex-start;}',
+      '.sc-photo::before,.sc-photo::after{content:"";position:absolute;inset:0;background:#fbfbf9;box-shadow:0 18px 40px -28px rgba(0,0,0,.55);z-index:-1;}',
+      '.sc-photo::before{transform:rotate(-5.5deg) translateY(8px);}',
+      '.sc-photo::after{transform:rotate(3.5deg) translate(4px,4px);}',
+      '.sc-photo img{display:block;width:clamp(216px,25vw,296px);aspect-ratio:3/4;object-fit:cover;filter:grayscale(1) contrast(1.03);transition:filter .55s ease;}',
+      '.sc-photo:hover img{filter:grayscale(0) contrast(1);}',
+      '@media(max-width:700px){.sc-photo{align-self:center;margin-top:8px;}}'
     ].join('\n');
     var style = document.createElement('style');
     style.id = 'sc-css';
@@ -522,10 +535,29 @@
     FRAG_BODY.forEach(function (h) { var n = elFromHTML(h); if (n) document.body.appendChild(n); });
   }
 
+  /* Enhance the native intro: trim copy to the reference line, lay text+QR on the
+   * left and add a B&W editorial polaroid on the right. Idempotent. */
+  function enhanceIntro() {
+    var intro = qs('.sc-intro'); if (!intro || intro.dataset.thxEnh) return; intro.dataset.thxEnh = '1';
+    var txt = qs('.sc-intro-text', intro);
+    if (txt) { txt.textContent = (txt.textContent || '').replace(/^\s*Interested in Theodyx\?\s*/i, ''); }
+    var row = qs('.sc-intro-row', intro); if (!row) return;
+    if (qs('.sc-photo', intro)) return;
+    var main = document.createElement('div'); main.className = 'sc-intro-main';
+    while (row.firstChild) { main.appendChild(row.firstChild); }
+    row.appendChild(main);
+    var fig = document.createElement('figure'); fig.className = 'sc-photo';
+    var img = document.createElement('img'); img.src = INTRO_PHOTO; img.alt = 'Theodyx — scouting creators'; img.loading = 'lazy';
+    img.onerror = function () { fig.style.display = 'none'; };
+    fig.appendChild(img);
+    row.appendChild(fig);
+  }
+
   /* ----------------------------------------------------------------- init */
   function init() {
     injectCSS();
     ensureDom();
+    enhanceIntro();
     fillCountries(); fillPlatforms(); fillAges();
     wireGates();
     wireRepresented(); wirePlatform();
