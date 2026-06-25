@@ -219,10 +219,25 @@
 '<li>Address: 16192 Coastal Highway, Lewes, DE 19958</li>' +
 '</ul>';
 
+  var ACCESSIBILITY = '' +
+'<p>Theodyx is committed to making our digital experiences accessible to everyone, including people with disabilities. We want every creator, partner, and visitor to be able to use our websites and services with ease.</p>' +
+'<h2>Our Commitment</h2>' +
+'<p>We aim to follow widely recognized accessibility best practices and to design and build our sites so that they work with assistive technologies such as screen readers and keyboard navigation. Accessibility is an ongoing effort, and we continually review and improve our experiences as our sites evolve.</p>' +
+'<h2>Ongoing Improvement</h2>' +
+'<p>Because our content and features change over time, some areas may not yet fully meet every accessibility standard. We treat accessibility as a continuous process rather than a one-time project, and we work to identify and resolve issues as we become aware of them.</p>' +
+'<h2>Need Help or Have Feedback?</h2>' +
+'<p>If you encounter any difficulty accessing content on our sites, need information in an alternative format, or have suggestions for how we can make Theodyx more accessible, please contact us — we will do our best to help and we genuinely welcome your feedback.</p>' +
+'<ul>' +
+'<li>Email: <a href="mailto:contact@theodyx.com">contact@theodyx.com</a></li>' +
+'<li>Phone: +1.938.293.5290</li>' +
+'<li>Address: 16192 Coastal Highway, Lewes, DE 19958</li>' +
+'</ul>';
+
   var DOCS = [
     { id: 'terms-and-conditions', tab: 'Terms & Conditions', title: 'Terms & Conditions', body: TERMS },
     { id: 'privacy-policy', tab: 'Privacy Policy', title: 'Privacy Policy', body: PRIVACY },
-    { id: 'cookie-policy', tab: 'Cookie Policy', title: 'Cookie Policy', body: COOKIES }
+    { id: 'cookie-policy', tab: 'Cookie Policy', title: 'Cookie Policy', body: COOKIES },
+    { id: 'accessibility', tab: 'Accessibility', title: 'Accessibility', body: ACCESSIBILITY }
   ];
   var BY_ID = {}; DOCS.forEach(function (d) { BY_ID[d.id] = d; });
   var ALIAS = { 'cookies': 'cookie-policy', 'cookie': 'cookie-policy', 'privacy': 'privacy-policy', 'terms': 'terms-and-conditions' };
