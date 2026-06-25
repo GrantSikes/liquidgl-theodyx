@@ -505,7 +505,9 @@
       '.sc-photo::after{transform:rotate(3.5deg) translate(4px,4px);}',
       '.sc-photo img{display:block;width:clamp(216px,25vw,296px);aspect-ratio:3/4;object-fit:cover;filter:grayscale(1) contrast(1.03);transition:filter .55s ease;}',
       '.sc-photo:hover img{filter:grayscale(0) contrast(1);}',
-      '@media(max-width:700px){.sc-photo{align-self:center;margin-top:8px;}}'
+      '@media(max-width:700px){.sc-photo{align-self:center;margin-top:8px;}}',
+      /* QR is "continue on your phone" — pointless on a phone; desktop only */
+      '@media(max-width:767px){.sc-qr-wrap,.sc-qr,#sc-qr,.sc-qr-cap{display:none!important;}}'
     ].join('\n');
     var style = document.createElement('style');
     style.id = 'sc-css';
