@@ -477,7 +477,7 @@
       '.sc-success-title{font-family:"Objectivity","Archivo",sans-serif;font-weight:800;font-size:clamp(40px,7vw,96px);line-height:1;margin:0;}',
       /* ---- v1.2.0 editorial pass: charcoal hero, no ghost, black headings, more air ---- */
       /* Hero: short charcoal band, thin uppercase wordmark, drop the giant THEODYX ghost */
-      '.sc-hero{background:#262626!important;min-height:0!important;height:auto!important;display:flex!important;align-items:flex-end!important;padding:clamp(80px,11vw,128px) clamp(22px,6vw,72px) clamp(56px,7vw,84px)!important;}',
+      '.sc-hero{background:#000000!important;min-height:0!important;height:auto!important;display:flex!important;align-items:flex-end!important;padding:clamp(80px,11vw,128px) clamp(22px,6vw,72px) clamp(56px,7vw,84px)!important;}',
       '.sc-hero-ghost{display:none!important;}',
       '.sc-hero-title{color:#F2F1EC!important;font-family:"Archivo","Objectivity",sans-serif!important;font-weight:300!important;font-size:clamp(46px,9vw,124px)!important;letter-spacing:0.012em!important;line-height:0.96!important;margin:0!important;text-transform:uppercase!important;}',
       /* Intro: airy, black heading, text left / QR right */
