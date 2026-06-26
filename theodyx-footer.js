@@ -179,10 +179,10 @@
         var r = stage.getBoundingClientRect(), d = dpr();
         var cssW = r.width || 1, cssH = r.height || 1;
         stage.width = Math.max(1, Math.floor(cssW * d)); stage.height = Math.max(1, Math.floor(cssH * d));
-        var small = cssW < 760, dens = small ? 2.0 : 1.55;   // dense mask on phones for a rich, desktop-like grain
+        var small = cssW < 760, dens = small ? 1.7 : 1.55;   // denser mask on phones so enough particles get sampled
         var mk = textMask(cssW, cssH, dens), w = mk.w, h = mk.h, data;
         try { data = mk.canvas.getContext("2d").getImageData(0, 0, w, h).data; } catch (e) { COUNT = 0; return; }
-        var cap = small ? 95000 : 300000, total = 0;   // richer particle count on phones (modern devices handle it), finer points below
+        var cap = small ? 64000 : 300000, total = 0;   // lighter on phone GPUs; bigger points (below) keep it lush
         for (var pp = 3; pp < data.length; pp += 4) { if (data[pp] > 120) total++; }
         var step = total > cap ? Math.ceil(total / cap) : 1, n = Math.min(total, cap);
         var arr = new Float32Array(n * 3), idx = 0, c = 0, seen = 0;
@@ -191,7 +191,7 @@
         COUNT = c; gl.bindBuffer(gl.ARRAY_BUFFER, buf); gl.bufferData(gl.ARRAY_BUFFER, arr.subarray(0, c * 3), gl.STATIC_DRAW);
         // point size scales with canvas height, but on a short phone canvas that goes ~1px (dim/sparse),
         // so floor it on mobile to ~2px device so particles read as a lush, bright wordmark.
-        pxScale = small ? Math.max(stage.height / 300.0, d * 1.05) : stage.height / 300.0;   // finer points (like desktop) now that density is higher, but bright enough
+        pxScale = small ? Math.max(stage.height / 300.0, d * 1.2) : stage.height / 300.0;
         gl.viewport(0, 0, stage.width, stage.height);
       }
       build();
@@ -344,10 +344,10 @@
       ['About', '/resources/company-pages/about'],
       ['Our thinking', '/company/global/thinking-overview'],
       ['Connect', '/company/global/contact'],
-      ['Privacy', '/resources/company-pages/terms-conditions'],
-      ['Terms', '/resources/company-pages/terms-conditions'],
-      ['Cookies', '/resources/company-pages/terms-conditions'],
-      ['Accessibility', '/resources/company-pages/terms-conditions']
+      ['Privacy', '/resources/legal/legal#privacy-policy'],
+      ['Terms', '/resources/legal/legal#terms-and-conditions'],
+      ['Cookies', '/resources/legal/legal#cookie-policy'],
+      ['Accessibility', '/resources/legal/legal#accessibility']
     ];
     [].slice.call(f.querySelectorAll('a.footer-link')).forEach(function (a) {
       var t = (a.textContent || '').replace(/\s+/g, ' ').trim();
@@ -356,7 +356,7 @@
       }
       if (/@theodyx\.com/i.test(t)) { a.setAttribute('href', 'mailto:contact@theodyx.com'); return; }
       if (/^\+?[\d.\s()-]{7,}$/.test(t)) { a.setAttribute('href', 'tel:+19382935290'); return; }
-      if (/coastal highway/i.test(t)) { a.setAttribute('href', 'https://www.google.com/maps/search/?api=1&query=16192+Coastal+Highway+Lewes+DE+19958'); a.setAttribute('target', '_blank'); a.setAttribute('rel', 'noopener'); return; }
+      if (/coastal highway/i.test(t)) { a.setAttribute('href', 'https://www.google.com/maps/search/?api=1&query=16192+Coastal+Highway+Lewes+DE+19958'); a.setAttribute('target', '_blank'); a.setAttribute('rel', 'noopener'); if (!/theodyx inc/i.test(t)) a.textContent = 'Theodyx Inc., ' + t.replace(/\s+/g, ' ').trim(); return; }
     });
   }
 
@@ -394,11 +394,34 @@
   var lqt = setInterval(function () { lqBind(); if (lqB) clearInterval(lqt); }, 500);
   setTimeout(function () { clearInterval(lqt); }, 20000);
 
+  /* Pages without the Webflow footer markup (e.g. the legal hub) ship an empty or
+   * missing <footer>. Clone the homepage's raw footer onto them so EVERY page has
+   * the identical footer, then enhance it exactly as on the homepage. */
+  function ensureFooter() {
+    if (window.__thxFootClone) return; window.__thxFootClone = 1;
+    try {
+      fetch('/', { credentials: 'omit' }).then(function (r) { return r.text(); }).then(function (html) {
+        try {
+          var doc = new DOMParser().parseFromString(html, 'text/html');
+          var src = doc.querySelector('.footer');
+          if (!src || !src.querySelector('.footer-col')) { window.__thxFootClone = 0; return; }
+          var clone = src.cloneNode(true);
+          [].forEach.call(clone.querySelectorAll('.thx-glow,.thx-top,.thx-fcta,.thx-fmark,.thx-fsoc,#thx-skip'), function (x) { x.remove(); });
+          clone.classList.add('footer'); clone.removeAttribute('style'); clone.__thxV2 = 0;
+          var cur = document.querySelector('footer, .footer');
+          if (cur && cur.parentNode) { cur.parentNode.replaceChild(clone, cur); } else { document.body.appendChild(clone); }
+          build(clone); links(); cleanup();
+        } catch (e) { window.__thxFootClone = 0; }
+      }).catch(function () { window.__thxFootClone = 0; });
+    } catch (e) { window.__thxFootClone = 0; }
+  }
+
   function run() {
     injectCSS();
-    var f = document.querySelector('.footer'); if (!f) return false;
-    build(f); links(); cleanup();
-    return true;
+    var f = document.querySelector('.footer');
+    if (f && f.querySelector('.footer-col')) { build(f); links(); cleanup(); return true; }
+    ensureFooter();
+    return false;
   }
 
   document.addEventListener('click', function (e) {
