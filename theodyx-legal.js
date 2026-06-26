@@ -602,7 +602,9 @@
       '.tc-doc ul{margin:0 0 20px!important;padding-left:22px!important;list-style:disc!important;}',
       '.tc-doc li{font-size:16px!important;line-height:1.7!important;margin:0 0 9px!important;color:rgba(14,14,15,.84)!important;}',
       '.tc-doc a{color:#0E0E0F!important;text-decoration:underline!important;text-underline-offset:2px;}',
-      '.tc-doc strong{font-weight:600!important;color:#0E0E0F!important;}'
+      '.tc-doc strong{font-weight:600!important;color:#0E0E0F!important;}',
+      // Phones: even 2-column tab grid with comfortable (~44px) tap targets instead of a ragged wrap.
+      '@media (max-width:600px){.tc-wrap{padding-left:20px;padding-right:20px;}.tc-tabs{gap:0;}.tc-tab{margin-right:0!important;width:50%;box-sizing:border-box;padding:14px 2px!important;font-size:11.5px!important;letter-spacing:.1em!important;text-align:left;}.tc-doc h1.tc-title{font-size:clamp(30px,8vw,40px)!important;}}'
     ].join('\n');
     var s = document.createElement('style'); s.id = 'tc-css'; s.textContent = css; document.head.appendChild(s);
   }
