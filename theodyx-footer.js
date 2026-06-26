@@ -400,7 +400,7 @@
   function ensureFooter() {
     if (window.__thxFootClone) return; window.__thxFootClone = 1;
     try {
-      fetch('/', { credentials: 'omit' }).then(function (r) { return r.text(); }).then(function (html) {
+      fetch('/').then(function (r) { return r.ok ? r.text() : Promise.reject(r.status); }).then(function (html) {
         try {
           var doc = new DOMParser().parseFromString(html, 'text/html');
           var src = doc.querySelector('.footer');
