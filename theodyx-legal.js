@@ -1,246 +1,587 @@
-/*! theodyx-legal.js — Theodyx legal hub. Replaces the stock Lorem on the legal
- * page with three deep-linkable policies (Terms / Privacy / Cookies) in a clean
- * tabbed layout. Anchors: #terms-and-conditions, #privacy-policy, #cookie-policy.
- * Applied via the legal page footer freeform code. Supersedes theodyx-terms.js. */
+/*! theodyx-legal.js — Theodyx legal hub. Replaces the stock page content with
+ * the full set of deep-linkable policies in a clean tabbed layout. Anchors:
+ * #terms-and-conditions #privacy-policy #notice-at-collection #cookie-policy
+ * #do-not-sell #dmca-policy #accessibility #safety. Applied via the legal page
+ * footer freeform code. Built by build-legal.js from legal-content/. */
 (function () {
   'use strict';
   if (window.__thxLegal) return;
   window.__thxLegal = true;
 
-  var EFF = 'Effective date: June 25, 2026';
+  var EFF = 'Effective date: June 26, 2026';
 
-  var TERMS = '' +
-'<p>Welcome to Theodyx. These Terms &amp; Conditions ("Terms") govern your access to and use of the websites, applications, and services operated by Theodyx Inc. ("Theodyx," "we," "us," or "our"). Please read them carefully. By using our Services, you agree to be bound by these Terms.</p>' +
-'<h2>Introduction &amp; Acceptance of Terms</h2>' +
-'<p>Theodyx Inc. is a Delaware C-Corporation operating as a media and technology and talent-management company that builds, operates, and owns ventures alongside creators, brands, and institutions in the creator economy. Our work is guided by a simple idea: Media That Moves. Intelligence That Matters.</p>' +
-'<p>These Terms form a binding agreement between you and Theodyx. They apply to your use of www.theodyx.com and our related properties, including theodyx.net, theodyx.store, theodyx.xyz, theodyx.me, and theodyx.info (collectively, the "Site"), together with any content, features, tools, and offerings we make available (collectively, the "Services").</p>' +
-'<p>By accessing or using the Services, you confirm that you have read, understood, and agree to be bound by these Terms and by any policies referenced here, including our <a href="#privacy-policy">Privacy Policy</a>. If you do not agree, please do not use the Services.</p>' +
-'<h2>Definitions</h2>' +
-'<ul>' +
-'<li><strong>"Theodyx"</strong> means Theodyx Inc., a Delaware C-Corporation, together with its affiliates where the context applies.</li>' +
-'<li><strong>"Services"</strong> means the Site and all websites, applications, content, features, tools, communications, and offerings that Theodyx makes available, including our creator scouting application.</li>' +
-'<li><strong>"User," "you," or "your"</strong> means any person who accesses or uses the Services.</li>' +
-'<li><strong>"Applicant"</strong> means a User who submits an application to be considered for representation through Theodyx’s scouting program, "Our Scouting."</li>' +
-'<li><strong>"Content"</strong> means any text, images, photographs, video, audio, files, links, or other materials that are submitted, uploaded, posted, or otherwise made available through the Services, whether by you or by Theodyx.</li>' +
-'</ul>' +
-'<h2>Eligibility</h2>' +
-'<p>To use the Services generally, you must be capable of forming a binding contract under applicable law and must use the Services only for lawful purposes and in accordance with these Terms. If you use the Services on behalf of an organization, you represent that you are authorized to bind that organization to these Terms.</p>' +
-'<p>Where you are below the age of legal majority in your jurisdiction, you may use the Services only with the involvement and consent of a parent or legal guardian, who agrees to be responsible for your use.</p>' +
-'<h3>Age requirement for scouting applications</h3>' +
-'<p>To apply directly through Our Scouting, you must be at least 14 years of age. If you are under 18, we strongly encourage you to involve a parent or legal guardian in the application process. By submitting an application, you confirm that you meet this age requirement and that the information you provide is accurate.</p>' +
-'<h2>The Services</h2>' +
-'<p>Theodyx provides a range of offerings across media, talent management, and technology and ventures. These are described here in general terms, and the specific scope of any engagement may be governed by a separate written agreement.</p>' +
-'<ul>' +
-'<li><strong>Media.</strong> We create, produce, and distribute media and creative work alongside creators, brands, and institutions.</li>' +
-'<li><strong>Talent management.</strong> We work with creators on representation, development, and related services, including through our scouting program described below.</li>' +
-'<li><strong>Technology and ventures.</strong> We build and operate technology, platforms, and ventures that support creators and partners in the creator economy.</li>' +
-'</ul>' +
-'<p>The Services may change over time as we add, modify, or discontinue features. Nothing on the Site constitutes an offer, commitment, or guarantee of any particular service, outcome, or result unless set out in a separate signed agreement.</p>' +
-'<h2>Scouting Applications &amp; Representation</h2>' +
-'<p>Through Our Scouting, available at <a href="/scouting">/scouting</a>, individuals may apply to be considered for representation by Theodyx. The following rules apply to all applications, and we encourage every Applicant to read them carefully.</p>' +
-'<ul>' +
-'<li><strong>An application is not an offer.</strong> Submitting an application means you are asking to be considered. It is not an offer, promise, or guarantee of representation, a contract, employment, or any engagement with Theodyx. We review applications at our discretion and are under no obligation to respond to, accept, or act on any application.</li>' +
-'<li><strong>We never charge a fee to apply.</strong> Applying through Our Scouting is free. Theodyx does not charge, and will never ask you to pay, any fee to apply or to be considered for representation.</li>' +
-'<li><strong>Age requirement.</strong> You must be at least 14 years old to apply directly, as described under Eligibility above.</li>' +
-'<li><strong>How we contact you.</strong> Theodyx will only contact Applicants from official @theodyx accounts and email addresses. We will never ask you for payment, and we will never request nude, lingerie, or otherwise sexualized or inappropriate photos. If you receive a message claiming to be from Theodyx that asks for any of these things, it is not from us; please disregard it and report it to us at <a href="mailto:scouting@theodyx.com">scouting@theodyx.com</a>.</li>' +
-'<li><strong>How submitted materials are used.</strong> Any media, photos, or other materials you submit through an application are used solely to evaluate your application. We describe the license you grant for this purpose in User Content &amp; Submissions below and how we handle your information in our <a href="#privacy-policy">Privacy Policy</a>.</li>' +
-'</ul>' +
-'<p>If we decide to move forward together, any representation relationship will be governed by a separate written agreement signed by you (and, where applicable, your parent or legal guardian) and Theodyx. These Terms do not create any such relationship on their own.</p>' +
-'<h2>User Accounts &amp; Communications</h2>' +
-'<p>Some parts of the Services may allow or require you to create an account or to submit information through a form. Where that is the case, you agree to provide accurate, current, and complete information and to keep it up to date. You are responsible for maintaining the confidentiality of any credentials and for activity that occurs under your account.</p>' +
-'<p>By contacting us or submitting information through the Services, you agree that we may communicate with you electronically, including by email, in connection with your inquiry or application. Communications related to scouting will come only from official @theodyx accounts, as described above. You may opt out of non-essential communications at any time by following the instructions in those messages or by contacting us.</p>' +
-'<h2>User Content &amp; Submissions</h2>' +
-'<p>You retain ownership of the Content you submit through the Services. By submitting Content, including any media or photos you provide with a scouting application, you grant Theodyx a non-exclusive, royalty-free, worldwide license to host, store, reproduce, and use that Content for the purpose of operating the Services and, in the case of an application, evaluating it. This license exists only to let us provide and assess what you have asked us to consider, and it does not transfer ownership of your Content to us.</p>' +
-'<p>You represent and warrant that you own or have all necessary rights to the Content you submit, that it does not infringe or violate the rights of any third party, and that your submission complies with these Terms and applicable law. Where your Content includes the likeness of another person, you confirm you have the right to share it.</p>' +
-'<p>We may, but are not obligated to, review, screen, or remove Content. We reserve the right to remove or decline to use any Content at our discretion, including Content we believe violates these Terms or is otherwise objectionable, without notice and without liability to you.</p>' +
-'<h2>Intellectual Property</h2>' +
-'<p>The Services, including the Site’s design, text, graphics, logos, the Theodyx name and marks, the tagline "Media That Moves. Intelligence That Matters.", and all related content, are owned by Theodyx or its licensors and are protected by intellectual property and other laws. All rights not expressly granted are reserved.</p>' +
-'<p>Subject to your compliance with these Terms, Theodyx grants you a limited, non-exclusive, non-transferable, revocable license to access and use the Site for your personal, non-commercial use. You may not copy, reproduce, distribute, modify, create derivative works from, publicly display, or otherwise exploit any part of the Services without our prior written permission, except as expressly permitted by these Terms or applicable law. You may not use any Theodyx name, mark, or branding in a way that suggests sponsorship or endorsement without our consent.</p>' +
-'<h2>Acceptable Use / Prohibited Conduct</h2>' +
-'<p>You agree to use the Services responsibly and lawfully. You may not:</p>' +
-'<ul>' +
-'<li>Use the Services in violation of any applicable law, regulation, or these Terms;</li>' +
-'<li>Submit Content that is false, misleading, unlawful, infringing, defamatory, harassing, abusive, hateful, or sexually explicit, or that depicts a minor in any inappropriate manner;</li>' +
-'<li>Impersonate any person or entity, including Theodyx or its representatives, or misrepresent your affiliation with any person or entity;</li>' +
-'<li>Attempt to gain unauthorized access to the Services, other users’ accounts, or any systems or networks connected to the Services;</li>' +
-'<li>Introduce malware, viruses, or any code of a destructive or disruptive nature, or interfere with the proper functioning of the Services;</li>' +
-'<li>Use automated means to scrape, harvest, or collect data from the Services without our permission;</li>' +
-'<li>Use the Services to send unsolicited communications, or to defraud, exploit, or harm others.</li>' +
-'</ul>' +
-'<p>We may investigate and take appropriate action, including removing Content and suspending or terminating access, against anyone who violates this section.</p>' +
-'<h2>Third-Party Links &amp; Services</h2>' +
-'<p>The Services may contain links to third-party websites, products, or services that are not owned or controlled by Theodyx. We provide these links for convenience only and do not endorse and are not responsible for the content, policies, or practices of any third party. Your use of any third-party website or service is at your own risk and may be governed by that third party’s terms and privacy practices. We encourage you to review them.</p>' +
-'<h2>Privacy</h2>' +
-'<p>Your privacy matters to us. Our collection and use of personal information in connection with the Services, including information submitted through scouting applications, is described in our <a href="#privacy-policy">Privacy Policy</a>. By using the Services, you acknowledge that you have reviewed the Privacy Policy and understand how we handle your information. Where there is a conflict between these Terms and the Privacy Policy regarding the handling of personal information, the Privacy Policy controls.</p>' +
-'<h2>Disclaimers</h2>' +
-'<p>The Services are provided on an "as is" and "as available" basis. To the fullest extent permitted by law, Theodyx disclaims all warranties of any kind, whether express, implied, or statutory, including any implied warranties of merchantability, fitness for a particular purpose, title, and non-infringement.</p>' +
-'<p>We do not warrant that the Services will be uninterrupted, secure, error-free, or free of harmful components, or that any Content or information obtained through the Services will be accurate or reliable. No advice or information, whether oral or written, obtained from Theodyx or through the Services creates any warranty not expressly stated in these Terms. Submitting an application creates no warranty or assurance of representation, response, or any outcome.</p>' +
-'<h2>Limitation of Liability</h2>' +
-'<p>To the fullest extent permitted by law, Theodyx and its officers, directors, employees, and agents will not be liable for any indirect, incidental, special, consequential, exemplary, or punitive damages, or for any loss of profits, revenue, data, goodwill, or other intangible losses, arising out of or relating to your use of, or inability to use, the Services, whether based on warranty, contract, tort, or any other legal theory, even if we have been advised of the possibility of such damages.</p>' +
-'<p>To the fullest extent permitted by law, the total aggregate liability of Theodyx arising out of or relating to these Terms or the Services will not exceed one hundred U.S. dollars (USD $100). Some jurisdictions do not allow certain limitations of liability, so some of the above may not apply to you; in such cases, our liability is limited to the greatest extent permitted by law.</p>' +
-'<h2>Indemnification</h2>' +
-'<p>You agree to indemnify, defend, and hold harmless Theodyx and its officers, directors, employees, and agents from and against any claims, liabilities, damages, losses, and expenses, including reasonable legal fees, arising out of or related to your use of the Services, your Content, your violation of these Terms, or your violation of any law or the rights of any third party.</p>' +
-'<h2>Modifications to the Terms and to the Services</h2>' +
-'<p>We may update these Terms from time to time. When we do, we will revise the "Effective date" above and post the updated Terms. Material changes will take effect when posted, and your continued use of the Services after the changes become effective means you accept the revised Terms. If you do not agree to the updated Terms, please stop using the Services.</p>' +
-'<p>We may also add, change, suspend, or discontinue any part of the Services at any time, with or without notice. We are not liable to you or any third party for any modification, suspension, or discontinuation of the Services.</p>' +
-'<h2>Termination</h2>' +
-'<p>You may stop using the Services at any time. We may suspend or terminate your access to the Services, in whole or in part, at any time and for any reason, including if we believe you have violated these Terms, without notice and without liability. Provisions that by their nature should survive termination, including ownership, disclaimers, limitation of liability, indemnification, and governing law, will survive.</p>' +
-'<h2>Governing Law &amp; Dispute Resolution</h2>' +
-'<p>These Terms and any dispute arising out of or relating to them or the Services are governed by the laws of the State of Delaware, USA, without regard to its conflict-of-laws principles.</p>' +
-'<p>Before initiating any formal action, you agree to first contact us at <a href="mailto:contact@theodyx.com">contact@theodyx.com</a> and attempt in good faith to resolve the dispute informally. Many concerns can be resolved quickly this way. If we are unable to resolve a dispute within a reasonable period, the dispute will be subject to the exclusive jurisdiction of the state and federal courts located in the State of Delaware, and you consent to the personal jurisdiction and venue of those courts, except where applicable law provides otherwise.</p>' +
-'<h2>Miscellaneous</h2>' +
-'<p>These Terms, together with any policies referenced here, including the Privacy Policy, and any separate written agreement you enter into with Theodyx, constitute the entire agreement between you and Theodyx regarding the Services and supersede any prior understandings on that subject. If any provision of these Terms is found to be unenforceable, that provision will be limited or removed to the minimum extent necessary, and the remaining provisions will remain in full force and effect. Theodyx may assign or transfer these Terms, in whole or in part, without restriction; you may not assign your rights or obligations under these Terms without our prior written consent. Our failure to enforce any provision is not a waiver of our right to do so later. The section headings are for convenience only and do not affect interpretation.</p>' +
-'<h2>Contact Us</h2>' +
-'<p>If you have any questions about these Terms or the Services, please contact us:</p>' +
-'<ul>' +
-'<li><strong>Theodyx Inc.</strong></li>' +
-'<li>Email: <a href="mailto:contact@theodyx.com">contact@theodyx.com</a></li>' +
-'<li>Scouting and applications: <a href="mailto:scouting@theodyx.com">scouting@theodyx.com</a></li>' +
-'<li>Phone: +1.938.293.5290</li>' +
-'<li>Address: 16192 Coastal Highway, Lewes, DE 19958, USA</li>' +
-'<li>Web: www.theodyx.com</li>' +
-'</ul>';
+  var TERMS_AND_CONDITIONS = `<p>Welcome to Theodyx. These Terms &amp; Conditions (the &ldquo;Terms&rdquo;) are a binding agreement between you and Theodyx Inc., a Delaware corporation (&ldquo;Theodyx,&rdquo; &ldquo;we,&rdquo; &ldquo;us,&rdquo; or &ldquo;our&rdquo;), and they govern your access to and use of our websites at www.theodyx.com and our related domains (theodyx.net, theodyx.store, theodyx.xyz, theodyx.me, and theodyx.info), together with the &ldquo;Our Scouting&rdquo; creator-application flow and any other features, content, or services we offer (collectively, the &ldquo;Services&rdquo; or the &ldquo;Site&rdquo;). Theodyx is a media, talent-management, and technology &amp; ventures company in the creator economy &mdash; <strong>Media That Moves. Intelligence That Matters.</strong></p>
 
-  var PRIVACY = '' +
-'<p>This Privacy Policy explains how Theodyx Inc. ("Theodyx," "we," "us," or "our") collects, uses, shares, and protects personal information when you visit our websites or use our services, including our "Our Scouting" creator application available at <a href="/scouting">/scouting</a> (collectively, the "Services"). Theodyx is a media and technology and talent-management company in the creator economy, guided by our commitment that "Media That Moves. Intelligence That Matters." We encourage you to read this Policy carefully to understand our practices regarding your personal information.</p>' +
-'<h2>Introduction</h2>' +
-'<p>Theodyx Inc. is a Delaware C-Corporation that operates www.theodyx.com along with related domains, including theodyx.net, theodyx.store, theodyx.xyz, theodyx.me, and theodyx.info. This Policy applies to personal information we collect through these websites and through the Services, most notably the information submitted by creators who apply through our "Our Scouting" application.</p>' +
-'<p>By using our Services or submitting an application, you acknowledge that you have read and understood this Privacy Policy. If you do not agree with our practices, please do not use the Services or submit personal information to us.</p>' +
-'<h2>Information We Collect</h2>' +
-'<p>We collect personal information primarily when you choose to submit a creator application through our "Our Scouting" application at <a href="/scouting">/scouting</a>. The categories of information we collect include the following.</p>' +
-'<h3>Identity and Contact Information</h3>' +
-'<p>When you apply, we collect your first name, last name, email address, and date of birth.</p>' +
-'<h3>Location Information</h3>' +
-'<p>We collect your country and, optionally, your state or region and your city.</p>' +
-'<h3>Creator Profile Information</h3>' +
-'<p>We collect details about your work as a creator, including your primary platform; your social handles (such as Instagram, TikTok, YouTube, and/or others); whether you are currently represented and, if so, by whom; and links to your work.</p>' +
-'<h3>Submitted Media</h3>' +
-'<p>You may optionally upload a media-kit PDF and optional photos (for example, a headshot, a profile photo, or a full-length photo) so that we can evaluate your application.</p>' +
-'<h3>Free-Text Notes</h3>' +
-'<p>We collect any additional free-text notes that you choose to provide as part of your application.</p>' +
-'<h3>Consent and Security Verification</h3>' +
-'<p>We collect your consent confirmation and a security verification token generated by Cloudflare Turnstile.</p>' +
-'<h3>Technical and Anti-Abuse Data</h3>' +
-'<p>To help prevent spam and abuse, we use Cloudflare Turnstile and rate-limiting. We do not store your raw IP address; instead, we store only a one-way hashed value derived from it, which we use for rate-limiting purposes. In addition, standard server logs may be processed by our infrastructure providers as part of operating the Services.</p>' +
-'<h3>Website Analytics</h3>' +
-'<p>Our website may collect standard usage analytics to help us understand how visitors interact with our Services.</p>' +
-'<h2>How We Use Your Information</h2>' +
-'<p>We use the personal information we collect for the following purposes:</p>' +
-'<ul>' +
-'<li>To review and evaluate scouting applications submitted through the "Our Scouting" application;</li>' +
-'<li>To contact applicants about possible representation. Any such outreach will come only from official @theodyx accounts;</li>' +
-'<li>To operate, secure, and improve the Services;</li>' +
-'<li>To prevent fraud and abuse; and</li>' +
-'<li>To comply with applicable law.</li>' +
-'</ul>' +
-'<p>We use your information only for the purposes described in this Policy and consistent with the context in which you provided it.</p>' +
-'<h2>Legal Bases</h2>' +
-'<p>Where required by applicable law, we rely on one or more legal bases to process your personal information, depending on the specific context in which we collect and use it. These legal bases generally include the following:</p>' +
-'<ul>' +
-'<li><strong>Consent:</strong> where you have given us your consent to process your information, such as when you confirm your consent in the application and submit your details for evaluation;</li>' +
-'<li><strong>Legitimate interests:</strong> where processing is necessary for our legitimate interests, such as operating, securing, and improving the Services and preventing fraud and abuse, provided those interests are not overridden by your rights;</li>' +
-'<li><strong>Contract:</strong> where processing is necessary to take steps at your request and to evaluate a potential relationship with you; and</li>' +
-'<li><strong>Legal obligation:</strong> where processing is necessary to comply with a legal obligation to which we are subject.</li>' +
-'</ul>' +
-'<h2>How We Share Information</h2>' +
-'<p>We do not sell personal information. We share personal information only as described in this Policy.</p>' +
-'<p>We share information with service providers and processors that help us run the Services. These notably include Cloudflare, which provides hosting, security and Turnstile services, and storage of application data and uploads, as well as our email-delivery provider. Our service providers act on our instructions and process personal information on our behalf in connection with the services they provide to us.</p>' +
-'<p>We may also disclose information if required by law, or where we believe disclosure is necessary to protect our rights, property, or safety, or the rights, property, or safety of others.</p>' +
-'<h2>Cookies and Tracking Technologies</h2>' +
-'<p>Our Site uses cookies and similar technologies to operate and improve the Services and to collect standard usage analytics. For more detailed information about the cookies and similar technologies we use and the choices available to you, please see our <a href="#cookie-policy">Cookie Policy</a>.</p>' +
-'<h2>Data Storage and Security</h2>' +
-'<p>Application data and uploads are stored with our cloud infrastructure provider, Cloudflare. We use reasonable technical and organizational safeguards designed to protect personal information against unauthorized access, loss, misuse, or alteration. However, please be aware that no method of transmission over the Internet or method of electronic storage is 100% secure, and we cannot guarantee the absolute security of your information.</p>' +
-'<h2>Data Retention</h2>' +
-'<p>We keep personal information for as long as necessary to evaluate applications and operate the Services, and as required by applicable law. Applicants may request deletion of their personal information by contacting us using the details provided in the "Contact Us" section below.</p>' +
-'<h2>International Data Transfers</h2>' +
-'<p>Theodyx scouts globally. As a result, your information may be processed and stored in the United States and in other countries, which may have data-protection laws that differ from those in your country of residence. By using the Services or submitting your information, you understand that your information may be transferred to and processed in these locations.</p>' +
-'<h2>Your Privacy Rights and Choices</h2>' +
-'<p>You may request access to, correction of, or deletion of your personal information, and you may opt out of non-essential communications. To exercise these rights or choices, please contact us at <a href="mailto:scouting@theodyx.com">scouting@theodyx.com</a> or <a href="mailto:contact@theodyx.com">contact@theodyx.com</a>.</p>' +
-'<p>Depending on where you live (for example, in the European Economic Area, the United Kingdom, or California), you may have additional rights under applicable data-protection laws. We honor applicable rights and will respond to your request in accordance with the law that applies to you.</p>' +
-'<h2>Children’s Privacy</h2>' +
-'<p>The scouting application requires applicants to be at least 14 years of age. We do not knowingly accept applications from anyone under 14, and we do not knowingly collect personal information from children under 14. If you believe that a child under 14 has provided us with personal information, please contact us so that we can take appropriate action.</p>' +
-'<h2>Third-Party Links</h2>' +
-'<p>Our Services may contain links to third-party websites, platforms, or services that are not operated or controlled by Theodyx. This Privacy Policy does not apply to those third-party properties, and we are not responsible for their privacy practices. We encourage you to review the privacy policies of any third-party sites or services you visit.</p>' +
-'<h2>Changes to This Policy</h2>' +
-'<p>We may update this Privacy Policy from time to time to reflect changes in our practices or for other operational, legal, or regulatory reasons. When we make changes, we will revise the effective date shown at the top of this Policy. We encourage you to review this Policy periodically to stay informed about how we protect your information.</p>' +
-'<h2>Contact Us</h2>' +
-'<p>If you have any questions, concerns, or requests regarding this Privacy Policy or our handling of your personal information, please contact us:</p>' +
-'<ul>' +
-'<li><strong>Theodyx Inc.</strong></li>' +
-'<li>Email: <a href="mailto:contact@theodyx.com">contact@theodyx.com</a></li>' +
-'<li>Scouting inquiries: <a href="mailto:scouting@theodyx.com">scouting@theodyx.com</a></li>' +
-'<li>Phone: +1.938.293.5290</li>' +
-'<li>Address: 16192 Coastal Highway, Lewes, DE 19958</li>' +
-'</ul>' +
-'<p>This Privacy Policy is governed by the laws of the State of Delaware, United States, without regard to its conflict-of-laws principles.</p>';
+<p><strong>Please read these Terms carefully.</strong> They include a binding individual arbitration agreement, a class-action waiver, and a limitation of liability that affect your legal rights. They also include a carve-out for certain sexual-assault and sexual-harassment claims, a 30-day right to opt out of arbitration, and other important provisions. Nothing in these Terms waives any right that cannot be waived under applicable law.</p>
 
-  var COOKIES = '' +
-'<h2>Introduction</h2>' +
-'<p>This Cookie Policy explains how Theodyx Inc. ("Theodyx," "we," "us," or "our") uses cookies and similar technologies when you visit our websites, including www.theodyx.com and our related domains (theodyx.net, theodyx.store, theodyx.xyz, theodyx.me, and theodyx.info) (collectively, the "Site"). It describes what these technologies are, why we use them, and the choices available to you. Theodyx Inc. is a Delaware C-Corporation operating in the media, technology, and talent-management space within the creator economy.</p>' +
-'<p>This policy should be read together with our <a href="#privacy-policy">Privacy Policy</a>, which provides more detail about how we handle personal information. By continuing to use the Site, you agree to the use of cookies and similar technologies as described here, except where your consent is separately required by law.</p>' +
-'<h2>What Are Cookies?</h2>' +
-'<p>Cookies are small text files that a website places on your device (such as your computer, tablet, or phone) when you visit. They are widely used to make websites work, to improve performance and security, and to remember information about your visit. Cookies set by the website you are visiting are often called "first-party" cookies, while cookies set by other organizations are called "third-party" cookies.</p>' +
-'<p>Alongside cookies, we and our service providers may use similar technologies, including:</p>' +
-'<ul>' +
-'<li><strong>Local storage and session storage</strong> — small amounts of data your browser stores on your device. Session storage is cleared automatically when your browsing session ends, while local storage may persist until it is cleared.</li>' +
-'<li><strong>Pixels</strong> (also called tags or beacons) — tiny image or code elements that can help us understand whether content or a page has been viewed or loaded.</li>' +
-'</ul>' +
-'<p>In this policy, we use the word "cookies" broadly to refer to these and similar technologies unless we say otherwise.</p>' +
-'<h2>How We Use Cookies</h2>' +
-'<p>Our Site is built on the Webflow website platform and uses Cloudflare for security and performance. As a result, certain cookies and similar technologies are used to deliver and protect the Site, to remember your preferences, and to help us understand how the Site is used so we can improve it.</p>' +
-'<p>We use cookies to keep the Site functioning and secure, to support specific features (such as our scouting application), and to gather general, aggregated insight into Site usage. We do <strong>not</strong> use cookies to sell your personal data.</p>' +
-'<h2>Types of Cookies We Use</h2>' +
-'<p>We group the cookies and similar technologies we use into the categories described below.</p>' +
-'<h3>Strictly Necessary</h3>' +
-'<p>These technologies are required for the Site to function properly and to keep it secure. They include Cloudflare’s security and anti-bot technology, such as Cloudflare Turnstile, which is used on our scouting application to help confirm that visitors are genuine and to protect against abuse, as well as basic Webflow platform cookies needed to serve and operate the Site. Because the Site cannot work correctly without them, these technologies cannot be switched off through our Site.</p>' +
-'<h3>Functional / Preferences</h3>' +
-'<p>These technologies help the Site remember choices you make, such as your preferred language, so we can provide a more personalized experience. In addition, our scouting application uses your browser’s session storage to temporarily save your in-progress application form on your own device, so you do not lose your entries while completing it. This information is held only on your device, is cleared when your session ends, and is not used for tracking.</p>' +
-'<h3>Analytics / Performance</h3>' +
-'<p>These technologies help us understand how visitors find and use the Site — for example, which pages are viewed and how the Site performs — using standard website usage analytics. We use this information in an aggregated way to maintain, troubleshoot, and improve the Site. They are not essential for the Site to function.</p>' +
-'<h2>Third-Party Cookies</h2>' +
-'<p>Some cookies and similar technologies on our Site are set by the third-party services we rely on to operate it. These include:</p>' +
-'<ul>' +
-'<li><strong>Cloudflare</strong> — provides security and performance services for the Site, including the anti-bot protection used on our scouting application.</li>' +
-'<li><strong>Webflow</strong> — the website platform on which the Site is built and hosted.</li>' +
-'</ul>' +
-'<p>These providers may set their own cookies in accordance with their respective policies. The specific cookies used can change as these services are updated, so we describe them in general terms here rather than listing individual cookies.</p>' +
-'<h2>Managing Your Cookie Preferences</h2>' +
-'<p>You can control and manage cookies in several ways. Most web browsers let you view, block, or delete cookies through their settings, and allow you to be notified before a cookie is stored. The steps differ from browser to browser, so please check your browser’s help resources for details.</p>' +
-'<p>Please note that if you block or delete cookies, some parts of the Site may not work as intended. In particular, strictly necessary technologies cannot be switched off without affecting core functionality and security, and turning off functional technologies may mean the Site no longer remembers your preferences.</p>' +
-'<p>Many browsers and operating systems also offer broader privacy controls, such as a "Do Not Track" signal or other global privacy controls. Support for these signals varies, and where we are required by applicable law to honor a recognized control, we will do so. You can also clear data stored in your browser’s local and session storage through your browser settings.</p>' +
-'<h2>Changes to This Cookie Policy</h2>' +
-'<p>We may update this Cookie Policy from time to time to reflect changes in the technologies we use, our practices, or applicable legal requirements. When we make changes, we will revise the effective date shown at the top of this policy. We encourage you to review this page periodically to stay informed about how we use cookies and similar technologies.</p>' +
-'<h2>Contact Us</h2>' +
-'<p>If you have any questions about this Cookie Policy or how we use cookies and similar technologies, please contact us:</p>' +
-'<ul>' +
-'<li><strong>Theodyx Inc.</strong></li>' +
-'<li>Email: <a href="mailto:contact@theodyx.com">contact@theodyx.com</a></li>' +
-'<li>Phone: +1.938.293.5290</li>' +
-'<li>Address: 16192 Coastal Highway, Lewes, DE 19958</li>' +
-'</ul>';
+<h2>1. Acceptance of these Terms</h2>
 
-  var ACCESSIBILITY = '' +
-'<p>Theodyx is committed to making our digital experiences accessible to everyone, including people with disabilities. We want every creator, partner, and visitor to be able to use our websites and services with ease.</p>' +
-'<h2>Our Commitment</h2>' +
-'<p>We aim to follow widely recognized accessibility best practices and to design and build our sites so that they work with assistive technologies such as screen readers and keyboard navigation. Accessibility is an ongoing effort, and we continually review and improve our experiences as our sites evolve.</p>' +
-'<h2>Ongoing Improvement</h2>' +
-'<p>Because our content and features change over time, some areas may not yet fully meet every accessibility standard. We treat accessibility as a continuous process rather than a one-time project, and we work to identify and resolve issues as we become aware of them.</p>' +
-'<h2>Need Help or Have Feedback?</h2>' +
-'<p>If you encounter any difficulty accessing content on our sites, need information in an alternative format, or have suggestions for how we can make Theodyx more accessible, please contact us — we will do our best to help and we genuinely welcome your feedback.</p>' +
-'<ul>' +
-'<li>Email: <a href="mailto:contact@theodyx.com">contact@theodyx.com</a></li>' +
-'<li>Phone: +1.938.293.5290</li>' +
-'<li>Address: 16192 Coastal Highway, Lewes, DE 19958</li>' +
-'</ul>';
+<p>By accessing or using the Services &mdash; including by browsing the Site, by clicking a box or button indicating your acceptance, or by submitting an application through <a href="/scouting">Our Scouting</a> &mdash; you agree to be bound by these Terms and by our <a href="#privacy-policy">Privacy Policy</a>, which is incorporated here by reference. If you do not agree, please do not use the Services.</p>
+
+<p><strong>If you are under the age of 18</strong>, you may use the Services and apply through Our Scouting only with the knowledge and involvement of a parent or legal guardian. We ask that a parent or guardian review these Terms and the <a href="#privacy-policy">Privacy Policy</a> with you and co-agree to them on your behalf. By allowing a minor to use the Services or submit an application, a parent or guardian agrees to these Terms for themselves and for the minor.</p>
+
+<h2>2. Definitions</h2>
+
+<ul>
+<li><strong>&ldquo;Services&rdquo;</strong> means the Site, the Our Scouting application flow, and all related features, content, tools, and communications that we provide.</li>
+<li><strong>&ldquo;You&rdquo;</strong> or <strong>&ldquo;user&rdquo;</strong> means the individual accessing or using the Services, and, where the individual is a minor, also that individual&rsquo;s parent or legal guardian.</li>
+<li><strong>&ldquo;Applicant&rdquo;</strong> means a person who submits an application through Our Scouting.</li>
+<li><strong>&ldquo;User Content&rdquo;</strong> means any information, text, links, photographs, images, media kits, files, or other materials you submit, upload, or transmit through the Services.</li>
+<li><strong>&ldquo;Affiliate&rdquo;</strong> means any entity that controls, is controlled by, or is under common control with Theodyx.</li>
+</ul>
+
+<h2>3. Eligibility</h2>
+
+<p>The Services are offered for use in the United States and are intended for a general audience there. To use the Services and to apply through Our Scouting, <strong>you must be at least 14 years old.</strong> We do not knowingly permit children under 13 to use the Services or submit an application, consistent with the U.S. Children&rsquo;s Online Privacy Protection Act (COPPA).</p>
+
+<p>Age is enforced on the server: the date of birth you provide is re-derived server-side, not merely checked as a box, and applications that do not meet the minimum age are blocked. If you are between 14 and 17, you represent that a parent or legal guardian has reviewed and agreed to these Terms with you. You also represent that the information you provide is accurate and that your use of the Services does not violate any law that applies to you.</p>
+
+<h2>4. Our Scouting Applications</h2>
+
+<p>Our Scouting lets creators apply to be considered for possible representation or collaboration with Theodyx. <strong>Submitting an application is not an offer, a contract, an acceptance, a promise, or any guarantee of representation, employment, compensation, response, or any particular outcome.</strong> Whether to extend any opportunity is entirely within Theodyx&rsquo;s discretion. Any future relationship would be set out in a separate written agreement signed by both parties. Nothing here makes Theodyx a licensed talent agency, and nothing here creates an agency, partnership, employment, or joint-venture relationship.</p>
+
+<p>When you apply, you provide information directly to us &mdash; such as your name, email, date of birth, location, primary platform and social handles, your best links, optional notes, and uploaded media (for example, a media-kit PDF and a few sample images). How we handle that information is described in our <a href="#privacy-policy">Privacy Policy</a>.</p>
+
+<p><strong>Your safety matters to us.</strong> Please remember our scouting practices:</p>
+
+<ul>
+<li>Theodyx will contact applicants <strong>only from official @theodyx email addresses.</strong></li>
+<li>Theodyx <strong>never charges a fee to apply</strong> and never asks for payment or financial information as part of scouting.</li>
+<li>Theodyx <strong>never requests nude, lingerie, or otherwise sexualized or inappropriate photos.</strong></li>
+</ul>
+
+<p>If anyone contacts you claiming to be from Theodyx and does any of these things, it is not us. Please report suspected impersonation to <a href="mailto:scouting@theodyx.com">scouting@theodyx.com</a>. You can read more in our <a href="#safety">safety notice</a>.</p>
+
+<h2>5. User Content &amp; License</h2>
+
+<p><strong>You keep ownership of your User Content.</strong> We do not claim ownership of your applications, media kits, photos, links, or other materials. By submitting User Content, you grant Theodyx and its Affiliates and service providers a non-exclusive, royalty-free, worldwide license to host, store, reproduce, process, and display that User Content solely for the limited purposes of operating the Services, reviewing and evaluating your application, and communicating with you about it. This license exists only to let us run and assess the Services; it ends when we no longer need your User Content for those purposes, except for copies kept in routine backups or as required by law.</p>
+
+<p>You represent that you have the rights necessary to submit your User Content and to grant this license, and that your User Content does not infringe anyone&rsquo;s rights or violate any law. You are responsible for the User Content you submit. Where your User Content includes images of a minor, those are treated as sensitive information and given heightened protection, as described in our <a href="#privacy-policy">Privacy Policy</a>.</p>
+
+<h2>6. Intellectual Property</h2>
+
+<p>The Services &mdash; including the Site&rsquo;s design, text, graphics, logos, the Theodyx name and marks, and all related software and content (other than User Content) &mdash; are owned by Theodyx or its licensors and are protected by intellectual-property laws. We grant you a limited, personal, non-exclusive, non-transferable, revocable license to access and use the Services for their intended purpose. You may not copy, modify, distribute, sell, frame, scrape, or create derivative works from the Services except as expressly permitted. All rights not expressly granted are reserved.</p>
+
+<h2>7. Acceptable Use</h2>
+
+<p>You agree not to misuse the Services. Among other things, you agree not to:</p>
+
+<ul>
+<li>Provide false, misleading, or impersonating information, or apply on behalf of someone else without authority;</li>
+<li>Upload content that is unlawful, infringing, defamatory, harassing, or sexually explicit, or that depicts a minor in a sexualized way;</li>
+<li>Attempt to circumvent age verification, security measures, the web-application firewall, bot protection, rate limiting, or the Turnstile challenge;</li>
+<li>Introduce malware, attempt to gain unauthorized access, probe or scan the Services, or interfere with their operation;</li>
+<li>Scrape, harvest, or collect data from the Services by automated means without our written permission; or</li>
+<li>Use the Services in any way that violates applicable law or these Terms.</li>
+</ul>
+
+<p>We may investigate and respond to suspected violations, including by removing content, limiting access, or suspending or terminating use of the Services.</p>
+
+<h2>8. Copyright &amp; DMCA</h2>
+
+<p>Theodyx respects the intellectual-property rights of others and expects users to do the same. If you believe content on the Services infringes your copyright, you may submit a notice, and affected users may submit a counter-notice, as described in our <a href="#dmca-policy">DMCA Policy</a>. Theodyx maintains a policy of terminating, in appropriate circumstances, the access of users who are repeat infringers.</p>
+
+<h2>9. Disclaimer of Warranties</h2>
+
+<p>To the fullest extent permitted by law, the Services are provided <strong>&ldquo;as is&rdquo; and &ldquo;as available,&rdquo;</strong> without warranties of any kind, whether express, implied, or statutory, including any implied warranties of merchantability, fitness for a particular purpose, title, and non-infringement. We do not warrant that the Services will be uninterrupted, secure, error-free, or that any application will lead to any particular result. Some jurisdictions do not allow certain warranty exclusions, so some of these exclusions may not apply to you.</p>
+
+<h2>10. Limitation of Liability</h2>
+
+<p>To the fullest extent permitted by law, Theodyx and its Affiliates, and our and their officers, employees, and service providers, will not be liable for any indirect, incidental, special, consequential, exemplary, or punitive damages, or for any loss of profits, data, goodwill, or opportunity, arising out of or relating to the Services or these Terms, even if advised of the possibility of such damages. To the fullest extent permitted by law, our total liability for all claims relating to the Services will not exceed one hundred U.S. dollars (US$100). Some jurisdictions do not allow certain limitations, so some of these limitations may not apply to you. Nothing in these Terms limits liability that cannot be limited under applicable law.</p>
+
+<h2>11. Indemnification</h2>
+
+<p>To the extent permitted by law, you agree to indemnify and hold harmless Theodyx and its Affiliates from third-party claims, losses, and reasonable expenses arising out of your User Content, your use of the Services, or your violation of these Terms or of applicable law. We may assume the exclusive defense of any matter subject to indemnification, and you agree to cooperate. This section does not apply to the extent a claim arises from our own conduct.</p>
+
+<h2>12. Informal Dispute Resolution</h2>
+
+<p>We want to resolve concerns without formal proceedings. Before starting an arbitration or any other proceeding, you agree to first give us a chance to resolve the dispute. Send a written notice describing the dispute and the relief you seek to <a href="mailto:contact@theodyx.com">contact@theodyx.com</a>, and we will do the same to you. <strong>For at least 30 days after notice is sent, the parties will try in good faith to resolve the dispute informally.</strong> This informal step is required before either party may begin arbitration; any deadline to bring a claim is paused while the parties work through it.</p>
+
+<h2>13. Binding Arbitration</h2>
+
+<p>Please read this section carefully &mdash; it affects how disputes between you and Theodyx are resolved.</p>
+
+<p>Except for the matters described in the &ldquo;Exceptions&rdquo; and the &ldquo;EFAA Carve-Out&rdquo; below, <strong>you and Theodyx agree that any dispute, claim, or controversy arising out of or relating to these Terms or the Services will be resolved by binding arbitration on an individual basis, and not in court.</strong> The arbitration will be administered by the American Arbitration Association (AAA) under its Consumer Arbitration Rules then in effect, as modified by these Terms. This arbitration agreement is governed by the Federal Arbitration Act (FAA). The arbitrator may award the same individual relief that a court could, and the arbitrator&rsquo;s award may be entered as a judgment in any court of competent jurisdiction.</p>
+
+<h3>Delegation</h3>
+
+<p><strong>The arbitrator, and not any court, has the exclusive authority to resolve threshold questions of arbitrability</strong> &mdash; including the existence, scope, validity, enforceability, and interpretation of this arbitration agreement, and any claim that all or part of it is void or voidable. This includes, for example, any contention that a party may disaffirm this agreement on the basis of age or capacity; that question is for the arbitrator to decide.</p>
+
+<h3>Class &amp; Representative Action Waiver</h3>
+
+<p><strong>You and Theodyx agree to bring claims against each other only in an individual capacity, and not as a plaintiff or class member in any purported class, collective, consolidated, or representative proceeding.</strong> The arbitrator may not consolidate more than one person&rsquo;s claims and may not preside over any form of a class or representative proceeding. If this waiver is found unenforceable as to a particular claim, that claim &mdash; and only that claim &mdash; will be severed and may proceed in court, while all other claims continue in arbitration.</p>
+
+<h3>EFAA Carve-Out for Sexual Assault &amp; Sexual Harassment</h3>
+
+<p><strong>Consistent with the Ending Forced Arbitration of Sexual Assault and Sexual Harassment Act of 2022 (EFAA), if you assert a claim that relates to an alleged sexual assault or sexual harassment dispute, that claim is excluded from mandatory arbitration and from the class and representative action waiver, at your election.</strong> You may choose to bring such a claim in court, and the arbitration agreement and waiver above will not apply to that claim to the extent the law so provides.</p>
+
+<h3>30-Day Right to Opt Out of Arbitration</h3>
+
+<p><strong>You may opt out of this arbitration agreement</strong> by sending written notice within 30 days after you first accept these Terms. Send your name and a clear statement that you wish to opt out of arbitration to <a href="mailto:contact@theodyx.com">contact@theodyx.com</a>. Opting out of arbitration will not affect any other part of these Terms, and it will not affect your relationship with Theodyx.</p>
+
+<h3>Exceptions</h3>
+
+<p>Either party may bring an individual claim in small-claims court if it qualifies, and either party may seek injunctive or other equitable relief in court to protect intellectual-property rights. Nothing in this section requires arbitration of a claim that, by law, cannot be required to be arbitrated.</p>
+
+<h2>14. Time Limit to Bring Claims</h2>
+
+<p>To the extent permitted by law, any claim arising out of or relating to the Services or these Terms must be filed within <strong>one (1) year</strong> after the claim arose; otherwise, the claim is permanently barred. This limitation does not apply to the extent it is prohibited by applicable law, including for any claim that cannot lawfully be shortened in this way.</p>
+
+<h2>15. Governing Law</h2>
+
+<p>These Terms and any dispute between you and Theodyx are governed by the laws of the <strong>State of Delaware</strong>, the state of our incorporation, without regard to its conflict-of-laws rules. For any matter that proceeds in arbitration, the Federal Arbitration Act governs the arbitration agreement. This choice of law does not deprive you of the protection of any mandatory consumer-protection rule of the place where you live that cannot be overridden by agreement.</p>
+
+<h2>16. Your Non-Waivable Rights</h2>
+
+<p>Nothing in these Terms waives, limits, or requires you to give up any right or protection that cannot be waived under applicable law. This includes, without limitation, your rights under the California Consumer Privacy Act, as amended by the California Privacy Rights Act (see Cal. Civ. Code section 1798.192), and any non-waivable protections that apply to minors. To the extent any provision of these Terms conflicts with such a non-waivable right, that right controls.</p>
+
+<h2>17. Changes, Termination &amp; General Terms</h2>
+
+<p><strong>Changes to these Terms.</strong> We may update these Terms from time to time. When we make material changes, we will update the effective date above and provide notice through the Services or by other reasonable means. Changes apply going forward; your continued use of the Services after changes take effect means you accept the updated Terms. If you do not agree, please stop using the Services.</p>
+
+<p><strong>Suspension &amp; termination.</strong> We may suspend or terminate access to the Services, in whole or in part, at any time, including for a violation of these Terms. Provisions that by their nature should survive &mdash; such as User Content licenses already granted, intellectual property, disclaimers, limitation of liability, indemnification, arbitration, and governing law &mdash; will survive termination.</p>
+
+<p><strong>Severability.</strong> If any provision of these Terms is found unenforceable, that provision will be limited or removed to the minimum extent necessary, and the remaining provisions will stay in full force and effect.</p>
+
+<p><strong>No waiver.</strong> Our failure to enforce any provision is not a waiver of our right to do so later.</p>
+
+<p><strong>Entire agreement.</strong> These Terms, together with the <a href="#privacy-policy">Privacy Policy</a> and any policies referenced here, are the entire agreement between you and Theodyx about the Services and supersede prior understandings on that subject.</p>
+
+<p><strong>Assignment.</strong> You may not assign or transfer these Terms without our written consent. We may assign these Terms to an Affiliate or in connection with a merger, acquisition, reorganization, or sale of assets.</p>
+
+<p><strong>Electronic communications.</strong> You consent to receive communications from us electronically &mdash; such as by email or through the Services &mdash; and you agree that electronic communications, agreements, and notices satisfy any legal requirement that they be in writing.</p>
+
+<h2>18. Contact Us</h2>
+
+<p>If you have questions about these Terms, please reach us at:</p>
+
+<ul>
+<li><strong>Theodyx Inc.</strong></li>
+<li>16192 Coastal Highway, Lewes, DE 19958</li>
+<li>Email: <a href="mailto:contact@theodyx.com">contact@theodyx.com</a></li>
+<li>Phone: +1.938.293.5290</li>
+<li>Scouting &amp; safety reports: <a href="mailto:scouting@theodyx.com">scouting@theodyx.com</a></li>
+</ul>`;
+
+  var PRIVACY_POLICY = `<p>This Privacy Policy explains how Theodyx Inc. (&ldquo;Theodyx,&rdquo; &ldquo;we,&rdquo; &ldquo;us,&rdquo; or &ldquo;our&rdquo;) collects, uses, discloses, and protects personal information. We are a media, talent-management, and technology/ventures company in the creator economy, organized as a Delaware C-Corporation.</p>
+
+<p>This Policy applies to www.theodyx.com and our related sites theodyx.net, theodyx.store, theodyx.xyz, theodyx.me, and theodyx.info (together, the &ldquo;Site&rdquo;), and to the &ldquo;Our Scouting&rdquo; creator-application flow available at <a href="/scouting">our scouting page</a>. A short, plain-language summary of what we collect and why is available in our <a href="#notice-at-collection">Notice at Collection</a>. This Policy works alongside our <a href="#terms-and-conditions">Terms &amp; Conditions</a>; please also see our <a href="#cookie-policy">Cookie Policy</a>.</p>
+
+<h2>Who we are &amp; scope</h2>
+
+<p>Theodyx provides a marketing website and a creator-application experience. This Policy covers personal information we handle through the Site and the scouting flow. It does not cover the practices of third parties we do not control. We have written this Policy to meet a high-water mark drawn from the California Consumer Privacy Act, as amended by the California Privacy Rights Act (together, the &ldquo;CCPA&rdquo;), and from Virginia-model comprehensive privacy laws, so that we can offer strong, consistent protections to everyone.</p>
+
+<h2>Personal information we collect</h2>
+
+<p>We collect the following categories of personal information, described using CCPA categories together with the specific, real fields involved. We collect only what we need to operate the Site and to evaluate creator applications.</p>
+
+<ul>
+<li><strong>Identifiers.</strong> Your first and last name and your email address.</li>
+<li><strong>Age information.</strong> Your date of birth, which we use to confirm eligibility. We re-derive your age on the server (see <a href="#notice-at-collection">Notice at Collection</a> and the Minors section below).</li>
+<li><strong>Geolocation (coarse).</strong> The city, state, and country you type into your application. We also derive a coarse, country-level location from your network connection; we do not collect precise GPS location.</li>
+<li><strong>Internet or other electronic network activity.</strong> Cookieless, first-party analytics &mdash; such as page views and scroll depth &mdash; and a salted hash of your IP address. We never store a raw IP address; we store only a one-way salted hash, together with minimal request metadata, for security and abuse-prevention.</li>
+<li><strong>Professional or creator information.</strong> Your primary platform, your social handles (for example, Instagram, TikTok, YouTube, or other), your &ldquo;best links&rdquo; (URLs), and audience or creator details you choose to share.</li>
+<li><strong>Audio-visual information.</strong> Media you upload &mdash; a media-kit PDF and up to a few sample images or photos &mdash; plus any optional notes you add.</li>
+<li><strong>Inferences.</strong> Limited inferences we may draw from the above to evaluate a possible fit for representation. We do not use these to build advertising or cross-context tracking profiles.</li>
+</ul>
+
+<h2>Sources of personal information</h2>
+
+<p>We obtain personal information from two sources:</p>
+
+<ul>
+<li><strong>Directly from you</strong> &mdash; the information you type into the scouting application and the media you upload, including your age confirmation (14+) and your consent.</li>
+<li><strong>Automatically from your device and use of the Site</strong> &mdash; cookieless analytics signals (page views, scroll depth), the coarse country derived from your connection, and the salted IP hash and minimal request metadata generated by our security tools.</li>
+</ul>
+
+<h2>Why we use personal information</h2>
+
+<p>We use personal information for the following purposes:</p>
+
+<ul>
+<li><strong>To provide and operate the Site</strong> &mdash; to deliver pages, run the scouting flow, and measure basic, privacy-preserving usage.</li>
+<li><strong>To evaluate scouting applications</strong> &mdash; to review submissions and consider whether to reach out about possible representation. Applicant data may be routed into our internal creator-data system for this evaluation.</li>
+<li><strong>To communicate with you</strong> &mdash; to respond to applications, questions, and requests. We contact applicants only from official @theodyx email addresses.</li>
+<li><strong>For security and fraud-prevention</strong> &mdash; to protect the Site against abuse, bots, and unauthorized access, using tools such as a privacy-preserving CAPTCHA-alternative, a web-application firewall, rate limiting, and a privacy-safe audit log of salted hashes.</li>
+<li><strong>To comply with law</strong> &mdash; to meet legal obligations and to establish, exercise, or defend legal claims.</li>
+</ul>
+
+<h2>Sensitive personal information</h2>
+
+<p>Photos and full-length images of minors are treated as <strong>sensitive personal information</strong>. We use sensitive personal information only for limited, permitted purposes &mdash; to provide the service, to evaluate applications, and for security &mdash; and never to infer characteristics about a person and never for advertising. You may ask us to limit the use of your sensitive personal information; see <a href="#do-not-sell">Limit the Use of My Sensitive Personal Information</a>. Because we restrict sensitive personal information to these permitted purposes, the right to limit has, in practice, little additional effect, but we honor every request.</p>
+
+<h2>How we disclose personal information</h2>
+
+<p>We do not sell your personal information. We disclose it only as follows:</p>
+
+<ul>
+<li><strong>To service providers and processors</strong> &mdash; including our cloud hosting, security, and storage provider, our website platform, and our email provider &mdash; under contracts that limit them to performing services for Theodyx and that prohibit using the information for their own purposes.</li>
+<li><strong>To affiliates</strong> under common control with Theodyx.</li>
+<li><strong>For legal and safety reasons</strong> &mdash; to comply with law, respond to lawful requests, enforce our <a href="#terms-and-conditions">Terms &amp; Conditions</a>, and protect the rights, safety, and security of applicants, the public, and Theodyx.</li>
+<li><strong>In a corporate transaction</strong> &mdash; in connection with a merger, financing, acquisition, or sale of assets, subject to appropriate protections.</li>
+</ul>
+
+<h2>We do not sell or share your personal information</h2>
+
+<p>Theodyx does not &ldquo;sell&rdquo; personal information and does not &ldquo;share&rdquo; it for cross-context behavioral advertising, as those terms are defined under the CCPA. We do not use third-party advertising cookies or ad pixels, and we do not engage in cross-site or cross-context tracking, nor do we work with data brokers.</p>
+
+<p>We honor <strong>Global Privacy Control (GPC)</strong> browser signals as a valid opt-out preference signal. Because we do not sell or share personal information, a GPC signal does not change how your information is handled, but we recognize and respect it. You may also use <a href="#do-not-sell">Do Not Sell or Share My Personal Information</a> to record your preference.</p>
+
+<h2>Minors</h2>
+
+<p>You must be at least 14 years old to apply through the scouting flow, and this minimum is enforced on the server (your date of birth is re-derived on the server, not merely accepted as a checkbox). We block applicants under 13 entirely, consistent with a conservative reading of the Children&rsquo;s Online Privacy Protection Act (COPPA).</p>
+
+<p>We do not sell or share the personal information of consumers we know to be under 16 years of age without the affirmative authorization (opt-in) required by California Civil Code section 1798.120(c). Because we do not sell or share personal information at all, no such authorization is sought.</p>
+
+<p>A parent or guardian may contact us to exercise rights on behalf of an eligible minor, including to access, correct, or delete the minor&rsquo;s information. Please email <a href="mailto:contact@theodyx.com">contact@theodyx.com</a>. To report impersonation or a safety concern involving a minor, contact <a href="mailto:scouting@theodyx.com">scouting@theodyx.com</a> and see our <a href="#safety">Safety</a> information.</p>
+
+<h2>Retention</h2>
+
+<p>We keep personal information only for as long as necessary to fulfill the purposes described in this Policy, unless a longer retention period is required or permitted by law. We determine retention based on criteria such as: how long we need the information to evaluate an application and any resulting relationship; whether you ask us to delete it; and our legal, security, and recordkeeping obligations.</p>
+
+<p>Telemetry is minimized and automatically purged on a schedule. Our security audit log stores only salted hashes &mdash; never a raw IP address, user-agent string, or email &mdash; and is similarly retained only as long as needed for abuse-prevention.</p>
+
+<h2>Your rights</h2>
+
+<p>Depending on where you live and applicable law, you may have the following rights (drawn from the California and Virginia-model frameworks):</p>
+
+<ul>
+<li><strong>Know and access</strong> &mdash; to learn what personal information we collect, use, and disclose, and to obtain a copy.</li>
+<li><strong>Delete</strong> &mdash; to ask us to delete personal information we hold about you.</li>
+<li><strong>Correct</strong> &mdash; to ask us to correct inaccurate personal information.</li>
+<li><strong>Data portability</strong> &mdash; to receive your information in a portable, readily usable format where applicable.</li>
+<li><strong>Opt out of sale or sharing, and of targeted advertising and certain profiling</strong> &mdash; though, as explained above, we do none of these.</li>
+<li><strong>Limit the use of sensitive personal information</strong> &mdash; see <a href="#do-not-sell">Limit the Use of My Sensitive Personal Information</a>.</li>
+<li><strong>Non-discrimination and no retaliation</strong> &mdash; we will not discriminate or retaliate against you for exercising any of these rights.</li>
+<li><strong>Appeal</strong> &mdash; if we deny your request, you may appeal our decision (Virginia-model). We will respond to your appeal within the time the law allows and explain our reasoning.</li>
+</ul>
+
+<h3>How to exercise your rights</h3>
+
+<p>To make a request, email <a href="mailto:contact@theodyx.com">contact@theodyx.com</a>. We will take reasonable steps to <strong>verify your identity</strong> before acting, which may include confirming information you previously provided. You may use an <strong>authorized agent</strong> to submit a request on your behalf; we may ask the agent for proof of authorization and may ask you to verify your identity directly. We aim to respond within the timelines required by applicable law, and we will let you know if we need additional time. We also honor <strong>Global Privacy Control (GPC)</strong> signals as described above.</p>
+
+<h2>Cookies</h2>
+
+<p>We use a cookieless, first-party approach to analytics. We do not use advertising cookies or third-party ad pixels. For details on the limited, privacy-preserving technologies we use &mdash; including a per-tab session token stored in your browser&rsquo;s sessionStorage (not a cookie) that is cleared when you close the tab &mdash; please see our <a href="#cookie-policy">Cookie Policy</a>.</p>
+
+<h2>Data security</h2>
+
+<p>We use reasonable administrative, technical, and organizational safeguards designed to protect personal information. These include one-way salted hashing of IP addresses, encryption of data in transit, access controls, and abuse-prevention tooling such as a privacy-preserving CAPTCHA-alternative and a web-application firewall. No method of transmission or storage is perfectly secure, and we cannot guarantee absolute security; we encourage you to share only what you are comfortable providing.</p>
+
+<h2>International</h2>
+
+<p>Theodyx is based in the United States, and we process and store personal information in the United States. Our launch is US-only. We do not currently target or monitor individuals in the European Union, the United Kingdom, Canada, Brazil, or China, and the corresponding regional privacy modules are dormant. If that changes, additional regional rights and representative arrangements would apply, and we would update this Policy accordingly.</p>
+
+<h2>Changes to this Policy &amp; how to contact us</h2>
+
+<p>We may update this Policy from time to time. When we do, we will revise the effective date shown with this Policy and, where appropriate, provide additional notice. Your continued use of the Site after an update means you accept the revised Policy.</p>
+
+<p>If you have questions about this Policy or our privacy practices, contact us at <a href="mailto:contact@theodyx.com">contact@theodyx.com</a>, by phone at +1.938.293.5290, or by mail at Theodyx Inc., 16192 Coastal Highway, Lewes, DE 19958. For scouting safety or impersonation reports, email <a href="mailto:scouting@theodyx.com">scouting@theodyx.com</a>.</p>`;
+
+  var NOTICE_AT_COLLECTION = `<p>This Notice at Collection summarizes, at or before the point of collection, the categories of personal information Theodyx Inc. (&ldquo;Theodyx,&rdquo; &ldquo;we,&rdquo; &ldquo;us&rdquo;) collects, why we collect it, and your choices. For the complete picture, please read our full <a href="#privacy-policy">Privacy Policy</a>.</p>
+
+<h2>What we collect</h2>
+<p>Depending on how you use the Site and whether you submit a creator application through <a href="/scouting">Our Scouting</a>, we may collect the following categories of personal information:</p>
+<ul>
+<li><strong>Identifiers</strong> &mdash; such as your first and last name and email address.</li>
+<li><strong>Age &amp; date of birth</strong> &mdash; collected to confirm you meet our minimum age requirement.</li>
+<li><strong>Coarse location</strong> &mdash; the city, state, and country you provide.</li>
+<li><strong>Internet &amp; usage information</strong> &mdash; privacy-preserving, cookieless analytics (page views and scroll depth), plus minimal request metadata and a <strong>salted hash of your IP address</strong> (we never store your raw IP).</li>
+<li><strong>Professional &amp; creator information</strong> &mdash; your primary platform, social handles, links, and any notes you choose to share.</li>
+<li><strong>Audio-visual information</strong> &mdash; media you upload, such as a media-kit PDF and sample images or photos.</li>
+</ul>
+<p>Some images of minors are treated as <strong>sensitive personal information</strong>. We apply heightened protections to this information, including restricted access and data minimization.</p>
+
+<h2>Why we collect it</h2>
+<p>We use these categories of personal information to operate and secure the Site; to evaluate scouting applications and consider possible representation; to communicate with you; to protect against fraud, abuse, and security threats; and to comply with our legal obligations.</p>
+
+<h2>No sale or sharing</h2>
+<p>Theodyx does <strong>not</strong> sell your personal information and does <strong>not</strong> &ldquo;share&rdquo; it for cross-context behavioral advertising, as those terms are defined under California law. We do <strong>not</strong> use sensitive personal information to infer characteristics about you or for advertising. To learn more, see <a href="#do-not-sell">Do Not Sell or Share My Personal Information</a>.</p>
+
+<h2>How long we keep it</h2>
+<p>We retain personal information only for as long as needed for the purposes described above or as required by law. Usage telemetry is minimized and automatically purged on a routine basis.</p>
+
+<p>For full details about our privacy practices and your rights, please read our <a href="#privacy-policy">Privacy Policy</a> and <a href="#do-not-sell">Do Not Sell or Share My Personal Information</a> notice.</p>`;
+
+  var COOKIE_POLICY = `<p>This Cookie &amp; Tracking-Technologies Policy explains the small number of technologies we use across our websites at www.theodyx.com and our related domains (together, the &ldquo;Site&rdquo;), and the ones we deliberately do <strong>not</strong> use. Theodyx is built to be privacy-first and largely cookieless, and this policy is meant to describe that approach plainly. It works alongside our <a href="#privacy-policy">Privacy Policy</a>, which describes how we handle personal information more generally.</p>
+
+<h2>A quick word on what these technologies are</h2>
+
+<p>&ldquo;Cookies&rdquo; are small text files a website can store in your browser. &ldquo;Local storage&rdquo; and &ldquo;session storage&rdquo; are related browser features that let a site keep small pieces of information on your device. &ldquo;Similar technologies&rdquo; can include things like pixels, tags, and software development kits. Many sites use these tools to recognize you across visits, build advertising profiles, or follow you from one site to another. That is not how we operate.</p>
+
+<h2>Our approach: no ad tracking, no cross-site tracking</h2>
+
+<p>We want to be clear about what we avoid by design:</p>
+
+<ul>
+<li>We do <strong>not</strong> use advertising, marketing, or retargeting cookies.</li>
+<li>We do <strong>not</strong> use cross-site or cross-context tracking technologies.</li>
+<li>We do <strong>not</strong> allow third-party advertising pixels or trackers on the Site.</li>
+<li>We do <strong>not</strong> share information with data brokers, and we do not sell your personal information.</li>
+</ul>
+
+<p>Because of this, you will not see a typical advertising cookie banner on our Site, since there are no advertising or cross-context tracking cookies to consent to.</p>
+
+<h2>What we actually use</h2>
+
+<p>We rely on two narrow categories of technology: strictly necessary (essential) technologies that keep the Site working and secure, and a single cookieless, first-party analytics signal that helps us understand site usage in aggregate. The lists below describe each one.</p>
+
+<h3>Essential (strictly necessary)</h3>
+
+<ul>
+<li><strong>Purpose:</strong> To deliver the Site securely and reliably, protect against abuse and fraud, and support core functions such as our creator-application flow at <a href="/scouting">/scouting</a>. These technologies are required for the Site to operate and are not used for advertising.</li>
+<li><strong>Examples:</strong> A privacy-preserving anti-abuse check (Cloudflare Turnstile) used in place of a traditional CAPTCHA; security, bot-protection, web-application-firewall, and content-delivery protections that may set short-lived technical tokens to verify requests and keep the Site available.</li>
+<li><strong>Can you turn these off?</strong> Because they are necessary for security and basic operation, they are not optional while you use the Site; we keep them minimal and limited to these purposes.</li>
+</ul>
+
+<h3>Analytics (cookieless, first-party)</h3>
+
+<ul>
+<li><strong>Purpose:</strong> To understand how the Site is used in aggregate &mdash; for example, which pages are viewed and how far visitors scroll &mdash; so we can improve content and layout. This is first-party only and is not used to advertise to you or to track you across other sites.</li>
+<li><strong>How it works:</strong> We use a per-<strong>tab</strong> token stored in your browser&rsquo;s sessionStorage. This is <strong>not</strong> a cookie. It exists only for the current browser tab and is cleared automatically when you close that tab, so it does not follow you between visits or across sites. It powers a lightweight, privacy-preserving usage beacon.</li>
+<li><strong>What it is not:</strong> No advertising cookies, no third-party ad pixels, no cross-site or cross-context tracking, and no data brokers are involved.</li>
+</ul>
+
+<h2>We honor Global Privacy Control (GPC)</h2>
+
+<p>We honor the <strong>Global Privacy Control (GPC)</strong> signal. If your browser or extension sends a GPC signal, we treat it as a valid request not to sell or share your personal information &mdash; which aligns with how we already operate, since we do not sell or share personal information for cross-context behavioral advertising. You can learn more about how we treat these signals in our <a href="#privacy-policy">Privacy Policy</a>.</p>
+
+<h2>How you stay in control</h2>
+
+<p>You have several straightforward ways to manage these technologies:</p>
+
+<ul>
+<li><strong>Browser settings:</strong> Most browsers let you block or limit cookies, local storage, and session storage, and to review or clear what a site has stored.</li>
+<li><strong>Clear site data:</strong> You can clear the Site&rsquo;s stored data (including any session token) at any time through your browser&rsquo;s privacy or site-settings controls; closing the browser tab already clears our per-tab analytics token.</li>
+<li><strong>Enable GPC:</strong> You can turn on a Global Privacy Control signal in a supported browser or extension, and we will honor it.</li>
+<li><strong>Decline non-essential where offered:</strong> Where we offer a choice for any non-essential technology, you can decline it. Note that essential, strictly necessary technologies cannot be switched off while you use the Site, because the Site needs them to function and stay secure.</li>
+</ul>
+
+<h2>Changes to this policy</h2>
+
+<p>We may update this Cookie &amp; Tracking-Technologies Policy from time to time to reflect changes in our practices or for legal and operational reasons. When we make material changes, we will update the effective date shown above and post the revised version on the Site.</p>
+
+<h2>Contact us</h2>
+
+<p>If you have questions about this policy or how we use these technologies, please reach out to us at <a href="mailto:contact@theodyx.com">contact@theodyx.com</a>, or by mail at Theodyx Inc., 16192 Coastal Highway, Lewes, DE 19958.</p>`;
+
+  var DO_NOT_SELL = `<p>This page brings together your California privacy choices in one place. It serves both the &ldquo;Do Not Sell or Share My Personal Information&rdquo; choice and the &ldquo;Limit the Use of My Sensitive Personal Information&rdquo; choice. It explains how Theodyx Inc. (&ldquo;Theodyx,&rdquo; &ldquo;we,&rdquo; &ldquo;us&rdquo;) treats your personal information and how you can exercise these choices. For the full picture of how we handle personal information, please read our <a href="#privacy-policy">Privacy Policy</a>.</p>
+
+<h2>Do Not Sell or Share My Personal Information</h2>
+
+<p>Theodyx does <strong>not</strong> &ldquo;sell&rdquo; your personal information for money or other valuable consideration, and we do <strong>not</strong> &ldquo;share&rdquo; it for cross-context behavioral advertising, as the California Consumer Privacy Act (as amended by the CPRA) defines those terms. We do not exchange personal information with data brokers, and we do not allow third parties to use it to target advertising to you across other sites or services.</p>
+
+<p>Because we do not engage in that kind of selling or sharing, there is, in practical terms, nothing of that nature for you to opt out of. We nonetheless honor opt-out requests, and we want you to be able to record your preference clearly. We also recognize a <strong>Global Privacy Control (GPC)</strong> signal sent by your browser or a browser extension as a valid request to opt out of any sale or sharing of personal information from that browser. If you would like to submit an opt-out request directly, you may do so using the steps under <strong>How to Submit a Request</strong> below.</p>
+
+<h2>Limit the Use of My Sensitive Personal Information</h2>
+
+<p>Some of the information we collect through the scouting application &mdash; for example, photos and full-length images, precise account identifiers, and information about minors &mdash; may qualify as <strong>sensitive personal information</strong>. We already limit our use of this information to the purposes the law permits without a further opt-out, and only to what is reasonably necessary to:</p>
+
+<ul>
+<li>provide and operate the Service and our <a href="/scouting">scouting application</a>;</li>
+<li>review and evaluate applications and consider possible representation; and</li>
+<li>keep the Service secure and prevent fraud and abuse.</li>
+</ul>
+
+<p>We do <strong>not</strong> use sensitive personal information to infer characteristics about you, and we do <strong>not</strong> use it for advertising or for any purpose that would require offering a &ldquo;Limit the Use of My Sensitive Personal Information&rdquo; choice under California law. You may still ask us to confirm this and to limit our use of your sensitive personal information to these permitted purposes, and we will honor that request.</p>
+
+<h2>Minors</h2>
+
+<p>The personal information of applicants who are minors is never sold and never shared, and photos and full-length images of minors are treated as sensitive personal information. Access to this information is restricted, and we minimize what we collect and retain. You can read more about how we protect minors in our <a href="#privacy-policy">Privacy Policy</a>.</p>
+
+<h2>How to Submit a Request</h2>
+
+<p>To exercise either choice on this page &mdash; to opt out of any sale or sharing, or to ask us to limit the use of sensitive personal information &mdash; email us at <a href="mailto:contact@theodyx.com">contact@theodyx.com</a> and tell us what you are requesting. It helps if you include the email address and any social handles you used in your application so we can locate your information.</p>
+
+<p><strong>How we verify your request.</strong> To protect your privacy and security, we take reasonable steps to verify your identity before acting on a request, usually by matching the details you provide against the information already in our records and by corresponding with you at the email address associated with your application. We may ask for additional information if we cannot verify you from what you have given us. We use information provided in a request only to verify and respond to it.</p>
+
+<p><strong>Authorized agents.</strong> You may use an authorized agent to submit a request on your behalf. We may ask the agent for proof that you gave them permission to act for you, and we may still ask you to verify your own identity directly with us.</p>
+
+<p><strong>No discrimination or retaliation.</strong> We will not discriminate or retaliate against you for exercising any of these privacy choices. Exercising a choice will not affect how your scouting application is evaluated, and you will receive the same quality of service.</p>
+
+<p>If you have questions about your privacy choices or this page, please contact us at <a href="mailto:contact@theodyx.com">contact@theodyx.com</a>.</p>`;
+
+  var DMCA_POLICY = `<p>Theodyx Inc. (&ldquo;Theodyx,&rdquo; &ldquo;we,&rdquo; &ldquo;us,&rdquo; or &ldquo;our&rdquo;) respects the intellectual property rights of others, and we ask everyone who uses the Site and our services to do the same. This DMCA &amp; Copyright Policy explains how copyright owners (or their authorized agents) can notify us about material they believe infringes their copyright, how someone whose material was removed can respond, and how we handle repeat infringers. It works alongside our <a href="#terms-and-conditions">Terms &amp; Conditions</a> and <a href="#privacy-policy">Privacy Policy</a>.</p>
+
+<p>This policy follows the notice-and-takedown procedures of the Digital Millennium Copyright Act (&ldquo;DMCA&rdquo;), 17 U.S.C. &sect; 512.</p>
+
+<h2>Our Commitment to Intellectual Property</h2>
+
+<p>We take copyright seriously. If you submit content to Theodyx &mdash; including media you upload through our <a href="/scouting">Our Scouting</a> application, such as a media kit, photos, sample images, or links to your work &mdash; you should only submit material that you own or that you otherwise have the right to share with us. Do not upload or send us anyone else&rsquo;s copyrighted work without permission.</p>
+
+<p>When we receive a complete and valid notice that material on the Site infringes a copyright, we will act on it. We may remove or disable access to the material that is claimed to be infringing, and we may take other steps we consider appropriate.</p>
+
+<h2>Repeat Infringers</h2>
+
+<p>Theodyx has adopted a policy of terminating, in appropriate circumstances and at our discretion, the accounts or access of users who are determined to be repeat infringers of copyright. We may also limit access to the Site or our services for anyone who infringes the intellectual property rights of others, whether or not there is a repeat offense.</p>
+
+<h2>Designated Copyright Agent</h2>
+
+<p>Theodyx has designated an agent to receive notifications of claimed copyright infringement. You can reach our Designated Copyright Agent at:</p>
+
+<ul>
+<li><strong>Copyright Agent</strong></li>
+<li>Theodyx Inc.</li>
+<li>16192 Coastal Highway</li>
+<li>Lewes, DE 19958</li>
+<li>Email: <a href="mailto:contact@theodyx.com?subject=DMCA%20Notice">contact@theodyx.com</a> (subject line: &ldquo;DMCA Notice&rdquo;)</li>
+</ul>
+
+<p>Please note that the contact information above is for copyright notices only. Inquiries that are not related to the DMCA may not receive a response through this channel.</p>
+
+<h2>How to File a Copyright Infringement Notice</h2>
+
+<p>If you believe that your copyrighted work has been copied and is accessible on the Site in a way that constitutes copyright infringement, you may send a written notification to our Designated Copyright Agent at the address above. To be effective under 17 U.S.C. &sect; 512(c)(3), your notice must include substantially all of the following:</p>
+
+<ul>
+<li>A physical or electronic signature of the person authorized to act on behalf of the owner of the copyright that is allegedly infringed.</li>
+<li>Identification of the copyrighted work claimed to have been infringed, or, if multiple copyrighted works at a single online site are covered by a single notification, a representative list of those works.</li>
+<li>Identification of the material that is claimed to be infringing or to be the subject of infringing activity and that is to be removed or to which access is to be disabled, along with information reasonably sufficient to let us locate the material (for example, the URL or a clear description of where it appears).</li>
+<li>Information reasonably sufficient to let us contact you, such as your name, mailing address, telephone number, and, if available, an email address.</li>
+<li>A statement that you have a good-faith belief that use of the material in the manner complained of is not authorized by the copyright owner, its agent, or the law.</li>
+<li>A statement that the information in the notification is accurate, and &mdash; under penalty of perjury &mdash; that you are authorized to act on behalf of the owner of the copyright that is allegedly infringed.</li>
+</ul>
+
+<p>Please be aware that under 17 U.S.C. &sect; 512(f), any person who knowingly materially misrepresents that material is infringing may be liable for damages. If you are not sure whether the material is protected by copyright law or whether your use is authorized, you may wish to consult an attorney before sending a notice.</p>
+
+<h2>Counter-Notification</h2>
+
+<p>If you believe that material you posted or submitted was removed or disabled by mistake or misidentification, you may send a written counter-notification to our Designated Copyright Agent at the address above. To be effective under 17 U.S.C. &sect; 512(g)(3), your counter-notification must include substantially all of the following:</p>
+
+<ul>
+<li>Your physical or electronic signature.</li>
+<li>Identification of the material that has been removed or to which access has been disabled, and the location at which the material appeared before it was removed or access to it was disabled.</li>
+<li>A statement, under penalty of perjury, that you have a good-faith belief that the material was removed or disabled as a result of mistake or misidentification of the material to be removed or disabled.</li>
+<li>Your name, mailing address, and telephone number, together with a statement that you consent to the jurisdiction of the Federal District Court for the judicial district in which your address is located (or, if your address is outside the United States, for any judicial district in which Theodyx may be found), and that you will accept service of process from the person who provided the original notification of claimed infringement or an agent of that person.</li>
+</ul>
+
+<p>After we receive a valid counter-notification, we may forward it to the party who submitted the original takedown notice. If that party does not notify us within ten (10) business days that they have filed a court action seeking to restrain the allegedly infringing activity, we may, in our discretion, restore the removed material or cease disabling access to it. As with takedown notices, under 17 U.S.C. &sect; 512(f) any person who knowingly materially misrepresents that material was removed or disabled by mistake or misidentification may be liable for damages.</p>
+
+<h2>Changes to This Policy</h2>
+
+<p>We may update this DMCA &amp; Copyright Policy from time to time. When we do, we will revise the effective date shown above. If you have questions about this policy, you can contact us at <a href="mailto:contact@theodyx.com">contact@theodyx.com</a>. For concerns about safety or impersonation, please see our <a href="#safety">Safety</a> information.</p>`;
+
+  var ACCESSIBILITY = `<p>Theodyx Inc. (&ldquo;Theodyx,&rdquo; &ldquo;we,&rdquo; &ldquo;us,&rdquo; or &ldquo;our&rdquo;) is committed to making our websites and our &ldquo;Our Scouting&rdquo; creator-application flow usable by as many people as possible, including people who rely on assistive technologies. We believe that everyone should be able to learn about Theodyx and apply to be scouted, regardless of ability, and we treat accessibility as an ongoing part of how we build and maintain the Site.</p>
+
+<p>This statement explains the standard we aim for, the measures we take, the limitations we are still working through, and how you can reach us if something does not work for you.</p>
+
+<h2>Our commitment</h2>
+
+<p>Accessibility is not a one-time project for us. We work to improve the experience of our digital properties on a continuing basis, and we factor accessibility into the design, build, and review of new pages and features &mdash; including the <a href="/scouting">scouting application</a> &mdash; rather than treating it as an afterthought.</p>
+
+<h2>Conformance target</h2>
+
+<p>We aim to conform to the <strong>Web Content Accessibility Guidelines (WCAG) 2.1 at Level AA</strong>, which is a widely recognized standard for making web content more accessible to people with a broad range of disabilities. We are also working toward the more recent <strong>WCAG 2.2 Level AA</strong> success criteria as we update our pages and components.</p>
+
+<p>&ldquo;Aim to conform&rdquo; means we use these guidelines as our target and measure our work against them. It does not mean every part of the Site fully meets every criterion at all times. Where we fall short, we treat it as something to fix.</p>
+
+<h2>Measures we take</h2>
+
+<p>To work toward our conformance target, we take measures that include the following:</p>
+
+<ul>
+<li>Using <strong>semantic HTML</strong> and a logical heading and landmark structure, so that assistive technologies can interpret page content and navigation in a meaningful order.</li>
+<li>Supporting <strong>keyboard operability</strong>, so that interactive elements &mdash; links, buttons, and form fields, including those in the scouting application &mdash; can be reached and used without a mouse, with a visible focus indicator.</li>
+<li>Working toward <strong>sufficient color contrast</strong> between text and its background so that content is easier to read for people with low vision.</li>
+<li>Providing <strong>text alternatives</strong> for meaningful images and other non-text content, and labeling form fields so their purpose is clear.</li>
+<li>Respecting the operating-system &ldquo;<strong>reduced motion</strong>&rdquo; preference, so that animations and motion effects are minimized for people who have asked their device to limit them.</li>
+<li>Carrying out <strong>ongoing automated and manual testing</strong>, including review with keyboard navigation and assistive technology, and folding accessibility checks into how we ship changes.</li>
+</ul>
+
+<h2>Known limitations and ongoing remediation</h2>
+
+<p>Despite our efforts, some content on the Site may not yet fully conform to WCAG 2.1 Level AA. Accessibility can be affected by third-party components, embedded media, documents, and content that changes over time. We are not aware of barriers that prevent the core experience from being used, but we know there is more to do.</p>
+
+<p>When we identify an accessibility issue &mdash; whether through our own testing or through feedback &mdash; we work to fix it as part of our ongoing remediation, and we prioritize problems that affect people&rsquo;s ability to use core features such as the scouting application.</p>
+
+<h2>Feedback and contacting us</h2>
+
+<p>We welcome your feedback on the accessibility of Theodyx. If you encounter a barrier, find something that is hard to use, or would like content provided in an alternative format, please tell us &mdash; your input helps us improve.</p>
+
+<p>You can reach us in any of these ways:</p>
+
+<ul>
+<li><strong>Email:</strong> <a href="mailto:contact@theodyx.com">contact@theodyx.com</a></li>
+<li><strong>Phone:</strong> <a href="tel:+19382935290">+1.938.293.5290</a></li>
+<li><strong>Mail:</strong> Theodyx Inc., 16192 Coastal Highway, Lewes, DE 19958</li>
+</ul>
+
+<p>When you contact us, it helps to include the page or feature involved, a description of the problem, and the browser or assistive technology you were using, if you know it. We will do our best to <strong>acknowledge your message and respond within a reasonable time, generally a few business days</strong>, and to provide the information or assistance you need in a way that works for you.</p>
+
+<h2>Assessment approach and date</h2>
+
+<p>We assess the accessibility of the Site using a combination of automated tools and manual review, including keyboard-only navigation and testing with assistive technology, carried out by our own team as we build and update pages. We review this approach periodically and as the Site changes.</p>
+
+<p>This Accessibility Statement reflects our practices as of the effective date shown above. As we continue our work, we will update this statement to keep it accurate. For related information, see our <a href="#privacy-policy">Privacy Policy</a> and <a href="#terms-and-conditions">Terms &amp; Conditions</a>.</p>`;
+
+  var SAFETY = `<p>Your safety matters to us. Many people who apply to Our <a href="/scouting">Scouting</a> program are between the ages of 14 and 17, and applicants share photos and personal details as part of an application. Because of that, we want to be completely clear about how Theodyx really operates, how to recognize and avoid impersonation and scams, and how to reach us if anything ever feels wrong. Please read this notice carefully, and if you are a parent or guardian, please read it alongside the young person applying.</p>
+
+<h2>How Theodyx really operates</h2>
+<p>Knowing how we work makes it much easier to spot anyone pretending to be us. These are firm rules we hold ourselves to, every time:</p>
+<ul>
+<li><strong>We contact applicants only from official @theodyx email addresses.</strong> Genuine messages from us come from an address ending in @theodyx.com (for example, our scouting team writes from <a href="mailto:scouting@theodyx.com">scouting@theodyx.com</a>). If a message claims to be from Theodyx but comes from a personal email, a free webmail account, or any address that does not end in @theodyx.com, it is not from us.</li>
+<li><strong>We never charge a fee to apply.</strong> Applying to Our Scouting is free. There is no application fee, no registration fee, and no &ldquo;processing&rdquo; cost of any kind.</li>
+<li><strong>We never ask for payment, banking, or financial information.</strong> We will not ask you to send money, buy gift cards, pay for a &ldquo;portfolio&rdquo; or &ldquo;training,&rdquo; or share bank details, card numbers, or other financial information as part of applying or being considered.</li>
+<li><strong>We never request nude, lingerie, or otherwise sexualized or inappropriate photos.</strong> The only images we ask for are ordinary sample photos and an optional media kit, submitted through the application form. Anyone asking for revealing, suggestive, or inappropriate images is not Theodyx, and you should stop and report it.</li>
+<li><strong>We do not move minors to private or off-platform chats, and we do not ask for personal contact details.</strong> We will not ask a young person to continue a conversation in a private direct message, a personal messaging app, or a personal phone number, and we will not pressure anyone to keep communications secret from a parent or guardian.</li>
+</ul>
+
+<h2>For parents and guardians</h2>
+<p>If the person applying is a minor, we strongly encourage you to be involved. We welcome a parent or guardian taking part in the application and in any communications that follow. A good rule of thumb: a young person should never be asked to handle money, share financial details, send private images, or move a conversation off official channels &mdash; and if any of that happens, a trusted adult should be looped in right away.</p>
+<p>We also encourage families to talk through this notice together before applying, so everyone knows what a real message from us looks like and what a scam looks like.</p>
+
+<h2>Red flags of impersonation and scams</h2>
+<p>Scammers sometimes pose as talent scouts or agencies to pressure young people or take their money. Treat any of the following as a warning sign that a message is not genuinely from Theodyx:</p>
+<ul>
+<li>A request to send money, pay a fee, buy gift cards, or share bank or card details.</li>
+<li>A request for nude, lingerie, suggestive, or otherwise inappropriate photos &mdash; or for images beyond ordinary sample photos.</li>
+<li>A push to move the conversation to a private or off-platform chat, a personal phone number, or a personal messaging app.</li>
+<li>A request for personal contact details, or pressure to keep the conversation secret from a parent or guardian.</li>
+<li>Messages from an email address that does not end in @theodyx.com, or that imitate our name with a slightly different spelling or domain.</li>
+<li>A sense of urgency or pressure &mdash; &ldquo;act now,&rdquo; &ldquo;this offer expires today,&rdquo; or threats that an opportunity will be lost unless you respond immediately.</li>
+<li>Promises that sound too good to be true, such as guaranteed fame, guaranteed payment, or a contract before any genuine review.</li>
+</ul>
+<p>If you see one or more of these signs, do not send money, images, or personal information. Pause, and verify before you respond.</p>
+
+<h2>How to verify a message is really from Theodyx</h2>
+<p>If you receive a message that claims to be from us and you are not sure, here is how to check:</p>
+<ul>
+<li><strong>Check the sender&rsquo;s full email address,</strong> not just the display name. It should end in @theodyx.com. Look carefully for misspellings or look-alike domains.</li>
+<li><strong>Remember our firm rules.</strong> We never charge a fee, never ask for payment or financial information, and never request inappropriate photos. Any message that does is not from us.</li>
+<li><strong>When in doubt, ask us directly.</strong> Email <a href="mailto:scouting@theodyx.com">scouting@theodyx.com</a> and we will confirm whether a message genuinely came from Theodyx before you take any action.</li>
+</ul>
+
+<h2>How to report impersonation or anything that feels wrong</h2>
+<p>If someone is impersonating Theodyx, or if any message or request makes you uncomfortable, please tell us. Email <a href="mailto:scouting@theodyx.com">scouting@theodyx.com</a> with as much detail as you can &mdash; the sender&rsquo;s email address, screenshots, and what they asked for. Your report helps us protect you and other applicants. If you ever feel you are in immediate danger, contact your local emergency services first.</p>
+
+<h2>How we protect minors&rsquo; information</h2>
+<p>We take particular care with information about young people. Photos and full-length images of minors are treated as sensitive personal information: we minimize what we collect, restrict who can access it, and never sell or share it for cross-context behavioral advertising. You can read more about how we handle and protect personal information &mdash; including the special protections for minors &mdash; in our <a href="#privacy-policy">Privacy Policy</a>.</p>
+
+<p>For more about the program and how applications work, see Our <a href="/scouting">Scouting</a> page. If anything in this notice is unclear, or you simply want to check that a message is really from us, reach out any time at <a href="mailto:scouting@theodyx.com">scouting@theodyx.com</a>.</p>`;
 
   var DOCS = [
-    { id: 'terms-and-conditions', tab: 'Terms & Conditions', title: 'Terms & Conditions', body: TERMS },
-    { id: 'privacy-policy', tab: 'Privacy Policy', title: 'Privacy Policy', body: PRIVACY },
-    { id: 'cookie-policy', tab: 'Cookie Policy', title: 'Cookie Policy', body: COOKIES },
-    { id: 'accessibility', tab: 'Accessibility', title: 'Accessibility', body: ACCESSIBILITY }
+    { id: 'terms-and-conditions', tab: 'Terms & Conditions', title: 'Terms & Conditions', body: TERMS_AND_CONDITIONS },
+    { id: 'privacy-policy', tab: 'Privacy Policy', title: 'Privacy Policy', body: PRIVACY_POLICY },
+    { id: 'notice-at-collection', tab: 'Notice at Collection', title: 'Notice at Collection', body: NOTICE_AT_COLLECTION },
+    { id: 'cookie-policy', tab: 'Cookie Policy', title: 'Cookie Policy', body: COOKIE_POLICY },
+    { id: 'do-not-sell', tab: 'Your Privacy Choices', title: 'Your Privacy Choices', body: DO_NOT_SELL },
+    { id: 'dmca-policy', tab: 'DMCA & Copyright', title: 'DMCA & Copyright Policy', body: DMCA_POLICY },
+    { id: 'accessibility', tab: 'Accessibility', title: 'Accessibility Statement', body: ACCESSIBILITY },
+    { id: 'safety', tab: 'Safety', title: 'Scouting Safety & Anti-Impersonation', body: SAFETY }
   ];
   var BY_ID = {}; DOCS.forEach(function (d) { BY_ID[d.id] = d; });
-  var ALIAS = { 'cookies': 'cookie-policy', 'cookie': 'cookie-policy', 'privacy': 'privacy-policy', 'terms': 'terms-and-conditions' };
+  var ALIAS = {
+    'cookies': 'cookie-policy', 'cookie': 'cookie-policy',
+    'privacy': 'privacy-policy', 'privacy-policy-': 'privacy-policy',
+    'terms': 'terms-and-conditions', 'terms-and-conditions-': 'terms-and-conditions',
+    'notice': 'notice-at-collection', 'notice-at-collection-': 'notice-at-collection',
+    'do-not-sell-or-share': 'do-not-sell', 'donotsell': 'do-not-sell',
+    'privacy-choices': 'do-not-sell', 'your-privacy-choices': 'do-not-sell',
+    'limit-sensitive': 'do-not-sell', 'limit': 'do-not-sell',
+    'dmca': 'dmca-policy', 'copyright': 'dmca-policy',
+    'scouting-safety': 'safety', 'anti-impersonation': 'safety',
+    'accessibility-statement': 'accessibility'
+  };
 
   function injectCSS() {
     if (document.getElementById('tc-css')) return;
@@ -303,15 +644,12 @@
     html += '</div>';
     sec.innerHTML = html;
 
-    // hide any sibling stock sections
     var sibs = document.querySelectorAll('.top-section');
     for (var i = 0; i < sibs.length; i++) { if (sibs[i] !== sec) sibs[i].style.display = 'none'; }
 
-    // wire tabs
     Array.prototype.forEach.call(document.querySelectorAll('.tc-tab'), function (b) {
       b.addEventListener('click', function () { select(b.getAttribute('data-doc'), true); window.scrollTo({ top: Math.max(0, sec.getBoundingClientRect().top + window.pageYOffset - 90), behavior: 'smooth' }); });
     });
-    // intercept in-content cross-links (#privacy-policy etc.)
     sec.addEventListener('click', function (e) {
       var a = e.target.closest && e.target.closest('a[href^="#"]');
       if (!a) return;
