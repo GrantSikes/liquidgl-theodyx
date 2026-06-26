@@ -1,16 +1,9 @@
-/*! theodyx-scouting.js — client logic for the native Webflow Scouting page (/scouting)
- * Wires the natively-built form + gates to the get-scouted Cloudflare Worker.
- * Source of truth mirrored from ~/CLAUDE/theodyx-get-scouted (React app + shared/schema.ts).
- * Defensive + idempotent: every DOM lookup is guarded, so attaching this to a
- * partially-built page (or running twice) is a no-op rather than an error.
- * Host: jsDelivr GrantSikes/liquidgl-theodyx ; applied to page 6a3d4a65f73ca09cba112c93.
- */
 (function () {
   'use strict';
   if (window.__thxScouting) return;
   window.__thxScouting = true;
 
-  /* ---------------------------------------------------------------- config */
+  /* config */
   var API_BASE = 'https://theodyx-scouting-api.theodyx.workers.dev';
   var TURNSTILE_SITE_KEY = '0x4AAAAAADp3wmr_gUgr_SNb';
   var TURNSTILE_SRC = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
@@ -47,6 +40,7 @@
   function val(id) { var e = $(id); return e ? String(e.value || '').trim() : ''; }
   function isEmail(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
   function isUrl(v) { try { var u = new URL(v); return u.protocol === 'http:' || u.protocol === 'https:'; } catch (e) { return false; } }
+  function ageFromDob(s) { var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s); if (!m) return null; var d = new Date(+m[1], +m[2] - 1, +m[3]); if (isNaN(d.getTime())) return null; var t = new Date(), a = t.getFullYear() - d.getFullYear(), mo = t.getMonth() - d.getMonth(); if (mo < 0 || (mo === 0 && t.getDate() < d.getDate())) a--; return a; }
   function loadJSON(key) { try { return JSON.parse(sessionStorage.getItem(key) || 'null'); } catch (e) { return null; } }
   function saveJSON(key, obj) { try { sessionStorage.setItem(key, JSON.stringify(obj)); } catch (e) {} }
 
@@ -103,7 +97,6 @@
     sel.appendChild(opt('', 'Select your age…', true, true));
     sel.appendChild(opt('under', 'Under ' + MIN_AGE));
     for (var a = MIN_AGE; a <= 80; a++) sel.appendChild(opt(String(a), String(a)));
-    sel.appendChild(opt('prefer', 'Prefer not to say'));
   }
 
   /* --------------------------------------------------------------- gates */
@@ -131,7 +124,9 @@
       var c = sel.value;
       if (c === 'under' || c === 'prefer') { gates.eligible = false; gates.age = null; }
       else { var age = parseInt(c, 10); gates.age = age; gates.eligible = age >= MIN_AGE; }
-      gates.ageResolved = true; persistGates(); applyGateState();
+      gates.ageResolved = true; persistGates();
+      if (window.__thxTrack) window.__thxTrack(gates.eligible ? 'age_eligible' : 'age_ineligible', null, true);
+      applyGateState();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     });
     var sel = $('sc-age-select');
@@ -215,12 +210,15 @@
   function wireDrop(dropId, accept, onKey) {
     var drop = $(dropId); if (!drop || drop.dataset.thxWired) return;
     drop.dataset.thxWired = '1';
+    drop.setAttribute('role', 'button'); drop.setAttribute('tabindex', '0');
+    drop.setAttribute('aria-label', (drop.getAttribute('data-main') || 'Upload') + ' — file upload');
     if (!drop.innerHTML.trim()) setDropState(drop, idleDropHTML(drop));
     var input = document.createElement('input');
     input.type = 'file'; input.accept = accept; input.style.display = 'none';
     drop.appendChild(input);
     function reset() { drop.classList.remove('is-done'); setDropState(drop, idleDropHTML(drop)); drop.appendChild(input); onKey(undefined); }
     on(drop, 'click', function (e) { if (e.target && e.target.getAttribute && e.target.getAttribute('data-remove') === '1') { e.stopPropagation(); reset(); return; } input.click(); });
+    on(drop, 'keydown', function (e) { if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') { if (e.target && e.target.getAttribute && e.target.getAttribute('data-remove') === '1') return; e.preventDefault(); input.click(); } });
     on(input, 'change', function () {
       var file = input.files && input.files[0]; if (!file) return;
       if (file.size > MAX_UPLOAD_BYTES) { drop.classList.add('is-error'); setDropState(drop, '<span class="sc-drop-main" style="color:#8A1F1B">Files must be 10 MB or smaller.</span><span class="sc-drop-sub">Tap to try another</span>'); return; }
@@ -278,13 +276,13 @@
   }
 
   /* -------------------------------------------------------------- errors */
-  function clearErr() { var box = $('sc-err'); if (box) { box.style.display = 'none'; box.textContent = ''; } qsa('.sc-input--error').forEach(function (e) { e.classList.remove('sc-input--error'); }); }
+  function clearErr() { var box = $('sc-err'); if (box) { box.style.display = 'none'; box.textContent = ''; } qsa('.sc-input--error').forEach(function (e) { e.classList.remove('sc-input--error'); e.removeAttribute('aria-invalid'); }); }
   function showErr(msg, firstBadId) {
     var box = $('sc-err');
     if (box) { box.textContent = msg; box.style.display = 'block'; }
     if (firstBadId) { var e = $(firstBadId); if (e) { e.scrollIntoView({ behavior: 'smooth', block: 'center' }); try { e.focus(); } catch (x) {} } }
   }
-  function markBad(id) { var e = $(id); if (e) e.classList.add('sc-input--error'); }
+  function markBad(id) { var e = $(id); if (e) { e.classList.add('sc-input--error'); e.setAttribute('aria-invalid', 'true'); } }
 
   /* -------------------------------------------------------------- submit */
   function collectAndValidate() {
@@ -298,6 +296,10 @@
     var lastName = need('sc-lastName', 'Last name is required.');
     var dob = val('sc-dob');
     if (!/^\d{4}-\d{2}-\d{2}$/.test(dob)) { markBad('sc-dob'); errs.push(['sc-dob', 'Enter your date of birth.']); }
+    else { var dobAge = ageFromDob(dob);
+      if (dobAge != null && dobAge < MIN_AGE) { markBad('sc-dob'); errs.push(['sc-dob', 'You must be ' + MIN_AGE + ' or older to apply.']); }
+      else if (dobAge != null && gates.age != null && Math.abs(dobAge - gates.age) > 1) { markBad('sc-dob'); errs.push(['sc-dob', 'Your date of birth doesn’t match the age you gave earlier.']); }
+    }
     var country = val('sc-country'); if (!country) { markBad('sc-country'); errs.push(['sc-country', 'Select your country.']); }
     var city = val('sc-city'); // optional
     var platform = val('sc-platform'); if (!platform) { markBad('sc-platform'); errs.push(['sc-platform', 'Select your main platform.']); }
@@ -382,7 +384,7 @@
     try { sessionStorage.removeItem(SS_FORM); } catch (e) {}
     showApp(false);
     var success = $('sc-success');
-    if (success) { show(success, 'flex'); }
+    if (success) { show(success, 'flex'); var hh = qs('.sc-success-title', success); if (hh) { try { hh.focus(); } catch (e) {} } }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -526,15 +528,15 @@
   /* If the native elements aren't on the page, inject them. If they already
    * exist (native Designer build), this is a no-op and we just wire them. */
   var FRAG_FORMS = [
-'<section id="sc-form-you" class="sc-section sc-app-sans" aria-label="About you"><div class="sc-eyebrow">01 — You</div><h2 class="sc-h2">Tell us who you are</h2><form class="sc-form" novalidate><div class="sc-grid"><div class="sc-field sc-full"><label class="sc-label" for="sc-email">Email</label><input id="sc-email" class="sc-input" type="email" autocomplete="email" inputmode="email" placeholder="you@email.com"></div><div class="sc-field"><label class="sc-label" for="sc-firstName">First name</label><input id="sc-firstName" class="sc-input" type="text" autocomplete="given-name"></div><div class="sc-field"><label class="sc-label" for="sc-lastName">Last name</label><input id="sc-lastName" class="sc-input" type="text" autocomplete="family-name"></div><div class="sc-field"><label class="sc-label" for="sc-dob">Date of birth</label><input id="sc-dob" class="sc-input" type="date"></div><div class="sc-field"><label class="sc-label" for="sc-platform">Primary platform</label><select id="sc-platform" class="sc-select"></select></div><div class="sc-field"><label class="sc-label" for="sc-country">Country</label><select id="sc-country" class="sc-select"></select></div><div class="sc-field"><label class="sc-label" for="sc-state">State / Region</label><input id="sc-state" class="sc-input" type="text" autocomplete="address-level1" placeholder="State, province, or region"></div><div class="sc-field"><label class="sc-label" for="sc-city">City</label><input id="sc-city" class="sc-input" type="text" autocomplete="address-level2" placeholder="Where are you based?"></div><div class="sc-field"><label class="sc-label" for="sc-instagram">Instagram handle</label><input id="sc-instagram" class="sc-input" type="text" placeholder="yourhandle"></div><div class="sc-field"><label class="sc-label" for="sc-tiktok">TikTok handle</label><input id="sc-tiktok" class="sc-input" type="text" placeholder="yourhandle"></div><div class="sc-field"><label class="sc-label" for="sc-youtube">YouTube channel</label><input id="sc-youtube" class="sc-input" type="text" placeholder="@channel or URL"></div><div class="sc-field" id="sc-other-wrap"><label class="sc-label" for="sc-otherPlatform">Other platform</label><input id="sc-otherPlatform" class="sc-input" type="text" placeholder="e.g. Substack, Twitch"><label class="sc-label sc-label--stack" for="sc-otherHandle">Handle on that platform</label><input id="sc-otherHandle" class="sc-input" type="text"></div><div class="sc-field sc-full" id="sc-rep"><span class="sc-legend">Are you currently represented? *</span><div class="sc-chips"><button type="button" class="sc-chip" data-val="no" data-on="false" aria-pressed="false">No</button><button type="button" class="sc-chip" data-val="yes" data-on="false" aria-pressed="false">Yes</button></div></div><div class="sc-field sc-full" id="sc-representedBy-wrap"><label class="sc-label" for="sc-representedBy">Represented by</label><input id="sc-representedBy" class="sc-input" type="text" placeholder="Agency / manager"></div><div class="sc-field sc-full"><label class="sc-label" for="sc-notes">Anything else?</label><textarea id="sc-notes" class="sc-textarea" rows="4" placeholder="Anything we should know? (optional)"></textarea></div></div></form></section>',
+'<section id="sc-form-you" class="sc-section sc-app-sans" aria-label="About you"><div class="sc-eyebrow">01 — You</div><h2 class="sc-h2">Tell us who you are</h2><form class="sc-form" novalidate><div class="sc-grid"><div class="sc-field sc-full"><label class="sc-label" for="sc-email">Email</label><input id="sc-email" class="sc-input" type="email" autocomplete="email" inputmode="email" placeholder="you@email.com"></div><div class="sc-field"><label class="sc-label" for="sc-firstName">First name</label><input id="sc-firstName" class="sc-input" type="text" autocomplete="given-name"></div><div class="sc-field"><label class="sc-label" for="sc-lastName">Last name</label><input id="sc-lastName" class="sc-input" type="text" autocomplete="family-name"></div><div class="sc-field"><label class="sc-label" for="sc-dob">Date of birth</label><input id="sc-dob" class="sc-input" type="date"></div><div class="sc-field"><label class="sc-label" for="sc-platform">Primary platform</label><select id="sc-platform" class="sc-select"></select></div><div class="sc-field"><label class="sc-label" for="sc-country">Country</label><select id="sc-country" class="sc-select"></select></div><div class="sc-field"><label class="sc-label" for="sc-state">State / Region</label><input id="sc-state" class="sc-input" type="text" autocomplete="address-level1" placeholder="State, province, or region"></div><div class="sc-field"><label class="sc-label" for="sc-city">City</label><input id="sc-city" class="sc-input" type="text" autocomplete="address-level2" placeholder="Where are you based?"></div><div class="sc-field"><label class="sc-label" for="sc-instagram">Instagram handle</label><input id="sc-instagram" class="sc-input" type="text" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="yourhandle"></div><div class="sc-field"><label class="sc-label" for="sc-tiktok">TikTok handle</label><input id="sc-tiktok" class="sc-input" type="text" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="yourhandle"></div><div class="sc-field"><label class="sc-label" for="sc-youtube">YouTube channel</label><input id="sc-youtube" class="sc-input" type="text" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="@channel or URL"></div><div class="sc-field" id="sc-other-wrap"><label class="sc-label" for="sc-otherPlatform">Other platform</label><input id="sc-otherPlatform" class="sc-input" type="text" placeholder="e.g. Substack, Twitch"><label class="sc-label sc-label--stack" for="sc-otherHandle">Handle on that platform</label><input id="sc-otherHandle" class="sc-input" type="text"></div><div class="sc-field sc-full" id="sc-rep"><span class="sc-legend">Are you currently represented? *</span><div class="sc-chips"><button type="button" class="sc-chip" data-val="no" data-on="false" aria-pressed="false">No</button><button type="button" class="sc-chip" data-val="yes" data-on="false" aria-pressed="false">Yes</button></div></div><div class="sc-field sc-full" id="sc-representedBy-wrap"><label class="sc-label" for="sc-representedBy">Represented by</label><input id="sc-representedBy" class="sc-input" type="text" placeholder="Agency / manager"></div><div class="sc-field sc-full"><label class="sc-label" for="sc-notes">Anything else?</label><textarea id="sc-notes" class="sc-textarea" rows="4" placeholder="Anything we should know? (optional)"></textarea></div></div></form></section>',
 '<section id="sc-form-work" class="sc-section sc-app-sans" aria-label="Your work"><div class="sc-eyebrow">02 — Work</div><h2 class="sc-h2">Show us your work</h2><p class="sc-text">Upload the media you’re proudest of — a few links, or a media kit. Optional, but it helps our team get to know you better.</p><form class="sc-form" novalidate><div class="sc-grid3"><div class="sc-field"><label class="sc-label" for="sc-link1">post / video 1</label><input id="sc-link1" class="sc-input" type="url" inputmode="url" placeholder="https://…"></div><div class="sc-field"><label class="sc-label" for="sc-link2">post / video 2</label><input id="sc-link2" class="sc-input" type="url" inputmode="url" placeholder="https://…"></div><div class="sc-field"><label class="sc-label" for="sc-link3">post / video 3</label><input id="sc-link3" class="sc-input" type="url" inputmode="url" placeholder="https://…"></div></div><div class="sc-block"><label class="sc-label">Media kit (PDF) <span class="sc-opt">(optional)</span></label><div id="sc-mediakit" class="sc-drop sc-drop--kit" data-main="+ Upload PDF"></div></div><div class="sc-block--divider"><p class="sc-label">Your pictures</p><p class="sc-text sc-pics-note">Keep these natural — please avoid baggy clothing, make-up, or smiling. The photos you submit shouldn’t be filtered, re-touched, or professionally taken.</p><div class="sc-grid3"><div class="sc-field"><label class="sc-label">Headshot <span class="sc-opt">(optional)</span></label><div id="sc-pic0" class="sc-drop" data-main="+ Add image"></div></div><div class="sc-field"><label class="sc-label">Profile <span class="sc-opt">(optional)</span></label><div id="sc-pic1" class="sc-drop" data-main="+ Add image"></div></div><div class="sc-field"><label class="sc-label">Full length <span class="sc-opt">(optional)</span></label><div id="sc-pic2" class="sc-drop" data-main="+ Add image"></div></div></div></div></form></section>',
-'<section id="sc-form-consent" class="sc-section sc-app-sans" aria-label="Consent and submit"><form class="sc-form" novalidate><label class="sc-consent" for="sc-consent"><input id="sc-consent" class="sc-check" type="checkbox"><span class="sc-consent-text">I agree to Theodyx’s <a href="https://www.theodyx.com/resources/legal/legal" target="_blank" rel="noopener noreferrer">Privacy Policy</a> and consent to be contacted about representation. I understand this is an application, not an offer of representation.</span></label><div class="sc-honey" aria-hidden="true"><label for="sc-company">Company</label><input id="sc-company" name="company" type="text" tabindex="-1" autocomplete="off"></div><div id="sc-turnstile"></div><div id="sc-err" class="sc-err" role="alert"></div><button id="sc-submit" type="button" class="sc-submit">Submit application</button></form></section>',
+'<section id="sc-form-consent" class="sc-section sc-app-sans" aria-label="Consent and submit"><form class="sc-form" novalidate><label class="sc-consent" for="sc-consent"><input id="sc-consent" class="sc-check" type="checkbox"><span class="sc-consent-text">I agree to Theodyx’s <a href="https://www.theodyx.com/resources/legal/legal#privacy-policy" target="_blank" rel="noopener noreferrer">Privacy Policy</a> and consent to be contacted about representation. I understand this is an application, not an offer of representation.</span></label><div class="sc-honey" aria-hidden="true"><label for="sc-company">Company</label><input id="sc-company" name="company" type="text" tabindex="-1" autocomplete="off"></div><div id="sc-turnstile"></div><div id="sc-err" class="sc-err" role="alert"></div><button id="sc-submit" type="button" class="sc-submit">Submit application</button></form></section>',
 '<section id="sc-gate-u14" class="sc-section sc-app-sans" aria-label="A note"><div class="sc-eyebrow">A note</div><h2 class="sc-h2">Thank you for your interest in joining Theodyx.</h2><p class="sc-text">We are invested in protecting the privacy of our applicants. For this reason, we are unfortunately unable to accept applications from anyone under 14 at this time. We look forward to receiving your future application.</p></section>'
   ];
   var FRAG_BODY = [
 '<div id="sc-gate-safety" role="dialog" aria-modal="true" aria-label="Safety"><div class="sc-gate-inner"><span class="sc-gate-eyebrow">Theodyx — Safety</span><h2 class="sc-gate-h">Your safety comes first.</h2><p class="sc-gate-body">Safety is our top priority. Protecting aspiring creatives — including young individuals — from online predators is of the utmost importance. If you would like to confirm an email or communication is from an official Theodyx representative or affiliate, email <a href="mailto:scouting@theodyx.com">scouting@theodyx.com</a> and we will be glad to confirm. Theodyx never asks for photos in the nude or lingerie and never requires any kind of payment. If something doesn’t feel right, please don’t hesitate to contact us at <a href="mailto:scouting@theodyx.com">scouting@theodyx.com</a>.</p><button id="sc-gate-safety-ok" type="button" class="sc-gate-btn">Acknowledged</button></div></div>',
 '<div id="sc-gate-age" role="dialog" aria-modal="true" aria-label="Age"><form class="sc-form sc-gate-inner sc-gate-inner--center" novalidate><span class="sc-gate-eyebrow">One quick question</span><h2 class="sc-gate-h">How old are you?</h2><div class="sc-gate-field"><label class="sc-label" for="sc-age-select">Select your age</label><select id="sc-age-select" class="sc-select"></select></div><button id="sc-gate-age-go" type="button" class="sc-gate-btn" disabled>Continue</button><p class="sc-gate-note">You must be 14 or older to apply directly.</p></form></div>',
-'<div id="sc-success" role="dialog" aria-live="polite" aria-label="Application received"><div class="sc-gate-inner"><span class="sc-gate-eyebrow">Application received</span><h2 class="sc-success-title">Thank you.</h2><a href="/" class="sc-gate-btn sc-home-btn">Return home</a></div></div>'
+'<div id="sc-success" role="dialog" aria-live="polite" aria-label="Application received"><div class="sc-gate-inner"><span class="sc-gate-eyebrow">Application received</span><h2 class="sc-success-title" tabindex="-1">Thank you.</h2><p class="sc-gate-body">Your application is in. A member of our team reads every one — if it’s a fit, we’ll reach out from an official <b>@theodyx.com</b> address. There’s nothing to pay, ever, and we’ll never ask for photos in the nude or lingerie. Questions? Email <a href="mailto:scouting@theodyx.com">scouting@theodyx.com</a>.</p><a href="/" class="sc-gate-btn sc-home-btn">Return home</a></div></div>'
   ];
   function elFromHTML(html) { var t = document.createElement('template'); t.innerHTML = html.trim(); return t.content.firstChild; }
   function ensureDom() {
@@ -584,6 +586,7 @@
     enhanceIntro();
     ensureFooter();
     fillCountries(); fillPlatforms(); fillAges();
+    var dobIn = $('sc-dob'); if (dobIn && !dobIn.max) { var ty = new Date(); dobIn.max = (ty.getFullYear() - MIN_AGE) + '-' + String(ty.getMonth() + 1).padStart(2, '0') + '-' + String(ty.getDate()).padStart(2, '0'); dobIn.min = (ty.getFullYear() - 100) + '-01-01'; }
     wireGates();
     wireRepresented(); wirePlatform();
     wireUploads();
