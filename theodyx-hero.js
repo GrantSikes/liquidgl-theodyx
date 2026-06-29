@@ -93,6 +93,36 @@
           mb.innerHTML = muted ? I_MUTE : I_ON;
           mb.setAttribute("aria-label", muted ? "Unmute video" : "Mute video");
         };
+        /* AUTO-UNMUTE on the first real user interaction anywhere on the page.
+           Browsers block sound-on autoplay until a genuine user gesture (a synthetic
+           click does NOT count), so this fires sound the instant the visitor
+           clicks/taps/keys — every time, automatically. Same unmute the button does. */
+        function setOn() {
+          muted = false;
+          p.muted = false;
+          try { p.volume = 1; } catch (er) {}
+          mb.innerHTML = I_ON;
+          mb.setAttribute("aria-label", "Mute video");
+        }
+        var GEVT = ["pointerdown", "touchstart", "keydown", "click"];
+        function cleanG() {
+          GEVT.forEach(function (n) {
+            document.removeEventListener(n, firstGesture, true);
+          });
+        }
+        function firstGesture(ev) {
+          try {
+            if (ev && ev.target && ev.target.closest && ev.target.closest(".hero-ctrls")) {
+              cleanG();
+              return;
+            }
+          } catch (er) {}
+          if (muted) setOn();
+          cleanG();
+        }
+        GEVT.forEach(function (n) {
+          document.addEventListener(n, firstGesture, { capture: true, passive: true });
+        });
       } catch (e) {}
     };
     document.head.appendChild(sdk);
