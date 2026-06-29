@@ -355,7 +355,7 @@
         if (t === ov[i][0]) { a.setAttribute('href', ov[i][1]); a.removeAttribute('target'); a.removeAttribute('rel'); return; }
       }
       if (/@theodyx\.com/i.test(t)) { a.setAttribute('href', 'mailto:contact@theodyx.com'); return; }
-      if (/^\+?[\d.\s()-]{7,}$/.test(t)) { a.setAttribute('href', 'tel:+19382935290'); return; }
+      if (/^\+?[\d.\s()-]{7,}$/.test(t)) { a.remove(); return; }
       if (/coastal highway/i.test(t)) { a.setAttribute('href', 'https://www.google.com/maps/search/?api=1&query=16192+Coastal+Highway+Lewes+DE+19958'); a.setAttribute('target', '_blank'); a.setAttribute('rel', 'noopener'); if (!/theodyx inc/i.test(t)) a.textContent = 'Theodyx Inc., ' + t.replace(/\s+/g, ' ').trim(); return; }
     });
   }
