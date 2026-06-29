@@ -180,3 +180,14 @@ if(document.body)imo();if(document.readyState!=='loading')imo();else document.ad
   if(document.readyState!=='loading') boot(); else document.addEventListener('DOMContentLoaded',boot);
 })();
 ;(function(){try{var d=document.querySelectorAll('.thx-prism');for(var i=0;i<d.length;i++)d[i].remove();}catch(e){}})();
+;(function(){try{
+function findBtn(){var btn=null;[].forEach.call(document.querySelectorAll('.hero-ctrls button'),function(b){var l=(b.getAttribute('aria-label')||'').toLowerCase();if(l.indexOf('mute')>=0)btn=b;});return btn;}
+function setLbl(btn,m){btn.setAttribute('aria-label',m?'Unmute video':'Mute video');}
+function repoint(v){var btn=findBtn();if(!btn||btn.__thxRP)return;btn.__thxRP=1;setLbl(btn,v.muted);btn.onclick=function(e){e.preventDefault();e.stopImmediatePropagation();v.muted=!v.muted;if(!v.muted){v.volume=1;try{v.play();}catch(_){}}setLbl(btn,v.muted);};}
+var armed=true,E=['pointerdown','touchstart','keydown','click'];
+function go(){if(!armed)return;var v=document.querySelector('.hero-media video');if(!v)return;armed=false;try{v.muted=false;v.volume=1;var p=v.play();if(p&&p.catch)p.catch(function(){});}catch(e){}repoint(v);clean();}
+function onG(e){try{if(e&&e.target&&e.target.closest&&e.target.closest('.hero-ctrls'))return;}catch(_){}go();}
+function clean(){E.forEach(function(n){document.removeEventListener(n,onG,true);});}
+function init(){var v=document.querySelector('.hero-media video');if(v)repoint(v);E.forEach(function(n){document.addEventListener(n,onG,{capture:true,passive:true});});}
+var t=0,iv=setInterval(function(){if(document.querySelector('.hero-media video')||++t>24){clearInterval(iv);init();}},300);
+}catch(e){}})();
