@@ -49,7 +49,7 @@
     /* the Cloudflare Stream player */
     var f = el("iframe");
     f.id = "heroStream";
-    f.src = SRC;
+    var _hv = b.getAttribute("data-hero-video"); if (_hv && _hv.trim()) { _hv = _hv.trim(); f.src = (_hv.indexOf("://") > -1) ? _hv : SRC.replace("14bda26fa85f184020082b5fb2ed76a7", _hv); } else { f.src = SRC; }
     f.title = "Theodyx hero film";
     f.setAttribute(
       "allow",
