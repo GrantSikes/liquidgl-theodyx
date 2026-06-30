@@ -1,6 +1,6 @@
 (function(){
   function L(u){var s=document.createElement('script');s.src=u;s.async=true;(document.body||document.documentElement).appendChild(s);}
-  L('https://cdn.jsdelivr.net/gh/GrantSikes/liquidgl-theodyx@391afa2bd59d7ea3b9b7e48cace94bda7aefa259/theodyx-footer.js');
+  L('https://cdn.jsdelivr.net/gh/GrantSikes/liquidgl-theodyx@5c0deb0716c160cc1d60efd3ebd4237362214d16/theodyx-footer.js');
   L('https://cdn.jsdelivr.net/gh/GrantSikes/liquidgl-theodyx@0c9e2a358efb3e7f05006534d3cf47cb88d2b484/theodyx-mosaic.js');
   var HUB='https://www.theodyx.com/resources/legal/legal';
   function fixLinks(){
