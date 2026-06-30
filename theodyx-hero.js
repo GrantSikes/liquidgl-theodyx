@@ -40,7 +40,7 @@
     fr.insertBefore(row, b);
     row.appendChild(b);
     var lab = el("div", "hero-vlabel");
-    "THEODYX".split("").forEach(function (ch) {
+    (b.getAttribute("data-hero-word") || "THEODYX").split("").forEach(function (ch) {
       var s = el("span");
       s.textContent = ch;
       lab.appendChild(s);
