@@ -228,7 +228,7 @@
       }
       return { frame: frame, resize: build };
     }
-    function mount(node, grad) {
+    function mount(node, grad, word) { if (word && typeof word === 'string') WORD = word;
       var inst = null, running = false, raf = 0, reduce = false, tries = 0, started = false, inView = false, done = false, shown = false;
       try { reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
       node.__thxMode = 'init';
@@ -286,13 +286,14 @@
     var glow = el('div', 'thx-glow'); var top = el('div', 'thx-top');
     f.insertBefore(glow, f.firstChild); f.insertBefore(top, f.firstChild);
 
+    var fcfg = function (k, d) { var v = f.getAttribute(k); return (v != null && v.trim() !== '') ? v.trim() : d; };
     var cta = el('div', 'thx-fcta');
     var left = el('div');
-    var ey = el('p', 'ey'); ey.textContent = 'Let’s build';
-    var h2 = el('h2'); h2.textContent = 'Ready to build what only you can?';
+    var ey = el('p', 'ey'); ey.textContent = fcfg('data-foot-eyebrow', 'Let’s build');
+    var h2 = el('h2'); h2.textContent = fcfg('data-foot-head', 'Ready to build what only you can?');
     left.appendChild(ey); left.appendChild(h2);
-    var btn = el('a', 'thx-fbtn'); btn.setAttribute('href', '/company/global/contact');
-    btn.innerHTML = 'Get in touch <span class="ar">→</span>';
+    var btn = el('a', 'thx-fbtn'); btn.setAttribute('href', fcfg('data-foot-cta-href', '/company/global/contact'));
+    btn.textContent = fcfg('data-foot-cta', 'Get in touch') + ' '; var ar = el('span', 'ar'); ar.textContent = '→'; btn.appendChild(ar);
     cta.appendChild(left); cta.appendChild(btn);
 
     var social = null, keep = [];
@@ -322,8 +323,9 @@
       social.style.setProperty('display', 'none', 'important');
     }
 
-    var mark = el('div', 'thx-fmark'); mark.setAttribute('role', 'img'); mark.setAttribute('aria-label', 'THEODYX');
-    var grad = el('div', 'thx-grad'); grad.setAttribute('aria-hidden', 'true'); grad.textContent = 'THEODYX';
+    var fword = fcfg('data-foot-word', 'THEODYX');
+    var mark = el('div', 'thx-fmark'); mark.setAttribute('role', 'img'); mark.setAttribute('aria-label', fword);
+    var grad = el('div', 'thx-grad'); grad.setAttribute('aria-hidden', 'true'); grad.textContent = fword;
     var cv = el('canvas'); cv.setAttribute('aria-hidden', 'true');
     mark.appendChild(grad); mark.appendChild(cv);
     if (bottom) {
@@ -332,7 +334,7 @@
     } else {
       f.appendChild(mark); if (soc.children.length) f.appendChild(soc);
     }
-    try { SW.mount(cv, grad); } catch (e) {}
+    try { SW.mount(cv, grad, fword); } catch (e) {}
   }
 
   function links() {
