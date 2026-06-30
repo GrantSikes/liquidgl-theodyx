@@ -244,7 +244,7 @@
   function run() {
     if (done) return true;
     var img = findImg(); if (!img) return false;
-    try { var _fxh = document.querySelector(".fx-hero"); if (_fxh) { var _mw = _fxh.getAttribute("data-mosaic-word"); if (_mw && _mw.trim()) WORD = _mw.trim(); } } catch (e) {}
+    try { var _fxh = document.querySelector(".fx-hero"); if (_fxh) { var _mw = _fxh.getAttribute("data-mosaic-word"); if (_mw && _mw.trim()) WORD = _mw.trim(); var _mm = _fxh.getAttribute("data-mosaic-media"); if (_mm && _mm.trim()) { var _ml = _mm.split(",").map(function (u) { return u.trim(); }).filter(Boolean); if (_ml.length) MEDIA = _ml; } } } catch (e) {}
     if (img.closest('.thx-hero-panel')) { done = true; return true; }
     done = true;
     injectCSS();
