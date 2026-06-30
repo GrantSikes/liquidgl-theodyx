@@ -342,7 +342,7 @@
       ['Clients', '/company/global/clients'],
       ['Capabilities', '/company/global/our-capabilities'],
       ['About', '/resources/company-pages/about'],
-      ['Our thinking', '/company/global/thinking-overview'],
+      ['Our thinking', '/company/events/thinking-overview'],
       ['Connect', '/company/global/contact'],
       ['Privacy', '/resources/legal/legal#privacy-policy'],
       ['Terms', '/resources/legal/legal#terms-and-conditions'],
@@ -352,7 +352,7 @@
     [].slice.call(f.querySelectorAll('a.footer-link')).forEach(function (a) {
       var t = (a.textContent || '').replace(/\s+/g, ' ').trim();
       for (var i = 0; i < ov.length; i++) {
-        if (t === ov[i][0]) { a.setAttribute('href', ov[i][1]); a.removeAttribute('target'); a.removeAttribute('rel'); return; }
+        if (t === ov[i][0]) { var c0=(a.getAttribute('href')||'').trim(); var ph0=!c0||c0==='#'||c0==='/'; var wp=(t==='Partners'&&/\/clients(\/|#|$)/.test(c0)); if(!a.hasAttribute('data-keep')&&(ph0||wp)){ a.setAttribute('href', ov[i][1]); a.removeAttribute('target'); a.removeAttribute('rel'); } return; }
       }
       if (/@theodyx\.com/i.test(t)) { a.setAttribute('href', 'mailto:contact@theodyx.com'); return; }
       if (/^\+?[\d.\s()-]{7,}$/.test(t)) { a.remove(); return; }
