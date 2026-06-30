@@ -635,6 +635,7 @@
     var sec = (rt && rt.closest('section')) || document.querySelector('.top-section.v2') || document.querySelector('.top-section');
     if (!sec) return;
     injectCSS();
+    var _le = document.querySelector('[data-legal-eff]'); if (_le) { var _lv = _le.getAttribute('data-legal-eff'); if (_lv && _lv.trim()) EFF = _lv.trim(); }
 
     var html = '<div class="tc-wrap"><p class="tc-kicker">Theodyx · Legal</p>';
     html += '<nav class="tc-tabs" aria-label="Legal documents">';
