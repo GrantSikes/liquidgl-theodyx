@@ -239,7 +239,12 @@
     var hv = document.querySelector('[data-thx-anim="hero-video"]');
     if (!hv || hv.__thxFxMounted) return; hv.__thxFxMounted = true;
     var v = hv.querySelector('video'); if (!v) return;
-    v.muted = true; try { v.play().catch(function () {}); } catch (e) {}
+    v.muted = true;
+    function tryPlay() { if (v.paused) { try { v.play().catch(function () {}); } catch (e) {} } }
+    tryPlay();
+    v.addEventListener('loadeddata', tryPlay);
+    v.addEventListener('canplay', tryPlay);
+    [300, 1000, 2500, 5000].forEach(function (t) { setTimeout(tryPlay, t); });
     var fs = hv.querySelector('[data-hero-fs]');
     var mu = hv.querySelector('[data-hero-mute]');
     function icons(muted) {
