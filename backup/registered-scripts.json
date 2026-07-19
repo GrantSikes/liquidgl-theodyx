@@ -1,0 +1,87 @@
+[
+ {
+  "src": "https://cdn.prod.website-files.com/69fe0aaad9f3034241913693%2F689e5ba67671442434f3ca35%2F6a1823c266332b82c54e265e%2Fnv2poscssv2-1.0.0-1780033902246.js",
+  "placement": "head",
+  "source": "webflow-hosted"
+ },
+ {
+  "src": "https://cdn.prod.website-files.com/69fe0aaad9f3034241913693%2F689e5ba67671442434f3ca35%2F6a18eaf86465b0445ba7964d%2Fnv2mount-1.0.0-1780018242275.js",
+  "placement": "head",
+  "source": "webflow-hosted"
+ },
+ {
+  "src": "https://cdn.prod.website-files.com/69fe0aaad9f3034241913693%2F689e5ba67671442434f3ca35%2F6a19bf97a8c8c388154a2867%2Fnv2edge-1.0.0-1780074042481.js",
+  "placement": "head",
+  "source": "webflow-hosted"
+ },
+ {
+  "src": "https://cdn.prod.website-files.com/69fe0aaad9f3034241913693%2F689e5ba67671442434f3ca35%2F6a1be203ce69d1a88d28b420%2Ftheodyxsitefontpolish-1.0.0-1780212603598.js",
+  "placement": "head",
+  "source": "webflow-hosted"
+ },
+ {
+  "src": "https://cdn.prod.website-files.com/69fe0aaad9f3034241913693%2F689e5ba67671442434f3ca35%2F6a1c8b77177d09763aaaafb1%2Fnv2fit-1.0.0-1780343893413.js",
+  "placement": "head",
+  "source": "webflow-hosted"
+ },
+ {
+  "src": "https://cdn.prod.website-files.com/69fe0aaad9f3034241913693%2F689e5ba67671442434f3ca35%2F6a1c8b77892e87c0a63afe78%2Fnv2glasscss-1.0.0-1780285828205.js",
+  "placement": "head",
+  "source": "webflow-hosted"
+ },
+ {
+  "src": "https://cdn.jsdelivr.net/gh/GrantSikes/liquidgl-theodyx@2a3b31cc9c547dd1f124de5e97eccca5a634db93/nv2pagesf.js",
+  "placement": "head",
+  "source": "jsdelivr"
+ },
+ {
+  "src": "https://cdn.prod.website-files.com/69fe0aaad9f3034241913693%2F689e5ba67671442434f3ca35%2F6a22fe5c68f15c1ac5ea5277%2Fnv2heromob-1.0.0-1780682052867.js",
+  "placement": "head",
+  "source": "webflow-hosted"
+ },
+ {
+  "src": "https://cdn.prod.website-files.com/69fe0aaad9f3034241913693%2F689e5ba67671442434f3ca35%2F6a18944fff0f73268bf759e7%2Fnv2colors-1.0.0-1780630554487.js",
+  "placement": "footer",
+  "source": "webflow-hosted"
+ },
+ {
+  "src": "https://cdn.prod.website-files.com/69fe0aaad9f3034241913693%2F689e5ba67671442434f3ca35%2F6a189e2953a1c2f00be0b3df%2Fnv2navfix-1.0.0-1780255607406.js",
+  "placement": "footer",
+  "source": "webflow-hosted"
+ },
+ {
+  "src": "https://cdn.prod.website-files.com/69fe0aaad9f3034241913693%2F689e5ba67671442434f3ca35%2F6a4309a5d9327fb258a3d5f3%2Fnv2tone2-1.0.0.js",
+  "placement": "footer",
+  "source": "webflow-hosted"
+ },
+ {
+  "src": "https://cdn.jsdelivr.net/gh/GrantSikes/liquidgl-theodyx@acce5d6dd2d1fa610566811563d3428c865f4b28/nv2footd.js",
+  "placement": "footer",
+  "source": "jsdelivr"
+ },
+ {
+  "src": "https://cdn.jsdelivr.net/gh/GrantSikes/liquidgl-theodyx@45ae325fb2d2b7e6fe9707e3485708b33ed6f42b/theodyx-hero.js",
+  "placement": "footer",
+  "source": "jsdelivr"
+ },
+ {
+  "src": "https://cdn.prod.website-files.com/69fe0aaad9f3034241913693%2F689e5ba67671442434f3ca35%2F6a2236d2740aee7775d45e05%2Fnv2vid-1.0.0-1780629329258.js",
+  "placement": "footer",
+  "source": "webflow-hosted"
+ },
+ {
+  "src": "https://cdn.prod.website-files.com/69fe0aaad9f3034241913693%2F689e5ba67671442434f3ca35%2F6a225c46edb41efba9046700%2Fnv2glassvid-1.0.0-1780676222034.js",
+  "placement": "footer",
+  "source": "webflow-hosted"
+ },
+ {
+  "src": "https://cdn.prod.website-files.com/69fe0aaad9f3034241913693%2F689e5ba67671442434f3ca35%2F6a22689ab21e20d33c149e8f%2Fnv2twcss-1.0.0-1780640289216.js",
+  "placement": "footer",
+  "source": "webflow-hosted"
+ },
+ {
+  "src": "https://cdn.prod.website-files.com/69fe0aaad9f3034241913693%2F689e5ba67671442434f3ca35%2F6a22689a5ff31a2e341d3a5c%2Fnv2twjs-1.0.0-1780676222179.js",
+  "placement": "footer",
+  "source": "webflow-hosted"
+ }
+]
