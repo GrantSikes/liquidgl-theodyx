@@ -1,7 +1,8 @@
-/*! theodyx-article-fx v1.0.2 — Theodyx publication template reading chrome.
+/*! theodyx-article-fx v1.0.3 — Theodyx publication template reading chrome.
    CONTRACT: enhancement-only. All content is native Webflow DOM; this script only
    (1) links existing <sup>N</sup> footnote markers to the "Notes & sources" list,
    (2) injects an "In this report" TOC derived from body h2s (3+ sections),
+   (2b) rewrites .thx-rel-card hrefs from their bound .thx-rel-slug carriers (article + index pages),
    (3) renders a reading-progress hairline,
    (4) hides the current article from the Keep-reading band,
    (5) tags "Sources:" paragraphs with .thx-srcline for styling.
@@ -10,6 +11,30 @@
   if (window.__thxArtFx) return; window.__thxArtFx = 1;
   var ready = function (f) { document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', f) : f(); };
   ready(function () {
+    try {
+      /* cards — runs on every page carrying .thx-rel-card (articles + the index grid) */
+      var PUB = '/company/global/publication';
+      document.querySelectorAll('a.thx-rel-card').forEach(function (a3) {
+        var sl = a3.querySelector('.thx-rel-slug');
+        if (sl && sl.textContent.trim()) a3.setAttribute('href', PUB + '/' + sl.textContent.trim());
+      });
+      var here = location.pathname.replace(/\/$/, '');
+      document.querySelectorAll('a.thx-rel-card').forEach(function (a3) {
+        try {
+          var u = new URL(a3.getAttribute('href'), location.origin);
+          if (u.pathname.replace(/\/$/, '') === here) {
+            var it = a3.closest('.w-dyn-item') || a3;
+            it.style.display = 'none';
+          }
+        } catch (e) {}
+      });
+      var rel = document.querySelector('.thx-rel-sec');
+      if (rel) {
+        var its = rel.querySelectorAll('.w-dyn-item');
+        var vis = [].filter.call(its, function (it) { return it.style.display !== 'none'; });
+        if (its.length && !vis.length) rel.style.display = 'none';
+      }
+    } catch (e) {}
     try {
       var body = document.querySelector('.thx-read-body');
       if (!body) return;
@@ -89,31 +114,6 @@
         addEventListener('scroll', upd, { passive: true });
         addEventListener('resize', upd, { passive: true });
         upd();
-      }
-
-      /* 4 — keep-reading: real item URLs from slug carriers, then hide the article you're on */
-      var here = location.pathname.replace(/\/$/, '');
-      var pubBase = here.replace(/\/[^/]+$/, '');
-      document.querySelectorAll('.thx-rel-sec a.thx-rel-card').forEach(function (a3) {
-        var sl = a3.querySelector('.thx-rel-slug');
-        if (sl && sl.textContent.trim()) a3.setAttribute('href', pubBase + '/' + sl.textContent.trim());
-      });
-      document.querySelectorAll('.thx-rel-sec a.thx-rel-card').forEach(function (a3) {
-        try {
-          var u = new URL(a3.getAttribute('href'), location.origin);
-          if (u.pathname.replace(/\/$/, '') === here) {
-            var it = a3.closest('.w-dyn-item') || a3;
-            it.style.display = 'none';
-          }
-        } catch (e) {}
-      });
-
-      /* 4b — hide the whole band if no cards remain visible */
-      var rel = document.querySelector('.thx-rel-sec');
-      if (rel) {
-        var its = rel.querySelectorAll('.w-dyn-item');
-        var vis = [].filter.call(its, function (it) { return it.style.display !== 'none'; });
-        if (its.length && !vis.length) rel.style.display = 'none';
       }
 
       /* 5 — stray source lines */
