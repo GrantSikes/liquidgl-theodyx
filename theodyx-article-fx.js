@@ -1,4 +1,4 @@
-/*! theodyx-article-fx v1.0.0 — Theodyx publication template reading chrome.
+/*! theodyx-article-fx v1.0.1 — Theodyx publication template reading chrome.
    CONTRACT: enhancement-only. All content is native Webflow DOM; this script only
    (1) links existing <sup>N</sup> footnote markers to the "Notes & sources" list,
    (2) injects an "In this report" TOC derived from body h2s (3+ sections),
@@ -102,6 +102,14 @@
           }
         } catch (e) {}
       });
+
+      /* 4b — hide the whole band if no cards remain visible */
+      var rel = document.querySelector('.thx-rel-sec');
+      if (rel) {
+        var its = rel.querySelectorAll('.w-dyn-item');
+        var vis = [].filter.call(its, function (it) { return it.style.display !== 'none'; });
+        if (its.length && !vis.length) rel.style.display = 'none';
+      }
 
       /* 5 — stray source lines */
       body.querySelectorAll('p').forEach(function (p) {
