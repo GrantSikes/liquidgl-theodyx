@@ -1,6 +1,6 @@
-/*! theodyx-article-fx v1.0.3 — Theodyx publication template reading chrome.
+/*! theodyx-article-fx v1.1.0 — Theodyx publication template reading chrome.
    CONTRACT: enhancement-only. All content is native Webflow DOM; this script only
-   (1) links existing <sup>N</sup> footnote markers to the "Notes & sources" list,
+   (1) links existing <sup>N</sup> footnote markers to the Notes & sources list (dedicated .art-notes section, or legacy in-body h6+ol),
    (2) injects an "In this report" TOC derived from body h2s (3+ sections),
    (2b) rewrites .thx-rel-card hrefs from their bound .thx-rel-slug carriers (article + index pages),
    (3) renders a reading-progress hairline,
@@ -13,7 +13,7 @@
   ready(function () {
     try {
       /* cards — runs on every page carrying .thx-rel-card (articles + the index grid) */
-      var PUB = '/company/global/publication';
+      var PUB = '/our-thinking';
       document.querySelectorAll('a.thx-rel-card').forEach(function (a3) {
         var sl = a3.querySelector('.thx-rel-slug');
         if (sl && sl.textContent.trim()) a3.setAttribute('href', PUB + '/' + sl.textContent.trim());
@@ -39,13 +39,15 @@
       var body = document.querySelector('.thx-read-body');
       if (!body) return;
 
-      /* 1 — footnotes */
-      var notes = null;
-      var h6 = body.querySelector('h6');
-      if (h6) {
-        h6.classList.add('thx-notes-h');
-        var sib = h6.nextElementSibling;
-        if (sib && sib.tagName === 'OL') { notes = sib; notes.classList.add('thx-notes'); }
+      /* 1 — footnotes: dedicated notes section first, legacy in-body h6+ol fallback */
+      var notes = document.querySelector('.art-notes-list ol');
+      if (!notes) {
+        var h6 = body.querySelector('h6');
+        if (h6) {
+          h6.classList.add('thx-notes-h');
+          var sib = h6.nextElementSibling;
+          if (sib && sib.tagName === 'OL') { notes = sib; notes.classList.add('thx-notes'); }
+        }
       }
       if (notes) {
         var lis = notes.children, i;
@@ -116,7 +118,24 @@
         upd();
       }
 
-      /* 5 — stray source lines */
+      /* 5 — breadcrumb: link the Section crumb to its landing page */
+      var SEC = { 'Report': '/our-thinking/reports', 'News': '/our-thinking/news', 'Briefing': '/our-thinking/briefings', 'Resource': '/our-thinking/resources' };
+      var crumb = document.querySelector('.thx-crumb');
+      if (crumb) {
+        var ps = crumb.querySelectorAll('p:not(.thx-dot):not(.thx-crumb-t)');
+        ps.forEach(function (p) {
+          var t = (p.textContent || '').trim();
+          if (SEC[t] && !p.querySelector('a')) {
+            var a4 = document.createElement('a');
+            a4.href = SEC[t];
+            a4.textContent = t;
+            p.textContent = '';
+            p.appendChild(a4);
+          }
+        });
+      }
+
+      /* 6 — stray source lines */
       body.querySelectorAll('p').forEach(function (p) {
         if (/^Sources?:/.test((p.textContent || '').trim())) p.classList.add('thx-srcline');
       });
