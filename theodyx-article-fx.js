@@ -1,4 +1,4 @@
-/*! theodyx-article-fx v1.0.1 — Theodyx publication template reading chrome.
+/*! theodyx-article-fx v1.0.2 — Theodyx publication template reading chrome.
    CONTRACT: enhancement-only. All content is native Webflow DOM; this script only
    (1) links existing <sup>N</sup> footnote markers to the "Notes & sources" list,
    (2) injects an "In this report" TOC derived from body h2s (3+ sections),
@@ -91,8 +91,13 @@
         upd();
       }
 
-      /* 4 — keep-reading: hide the article you're on */
+      /* 4 — keep-reading: real item URLs from slug carriers, then hide the article you're on */
       var here = location.pathname.replace(/\/$/, '');
+      var pubBase = here.replace(/\/[^/]+$/, '');
+      document.querySelectorAll('.thx-rel-sec a.thx-rel-card').forEach(function (a3) {
+        var sl = a3.querySelector('.thx-rel-slug');
+        if (sl && sl.textContent.trim()) a3.setAttribute('href', pubBase + '/' + sl.textContent.trim());
+      });
       document.querySelectorAll('.thx-rel-sec a.thx-rel-card').forEach(function (a3) {
         try {
           var u = new URL(a3.getAttribute('href'), location.origin);
