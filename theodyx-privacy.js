@@ -25,7 +25,7 @@ var CSS=`.thx-pol{--ink:#0b0b0c;--ink-60:rgba(11,11,12,.60);--ink-44:rgba(11,11,
 .thx-pol .pol-body{max-width:var(--measure);min-width:0;padding-bottom:120px;counter-reset:sec}
 .thx-pol .pol-section{padding:30px 0 4px;border-top:1px solid var(--rule-4);counter-increment:sec}
 .thx-pol .pol-section:first-child{border-top:0;padding-top:4px}
-.thx-pol .pol-section h2{font-size:clamp(22px,2.6vw,28px);line-height:1.22;font-weight:560;letter-spacing:-.01em;margin:0 0 16px;color:var(--ink)!important;scroll-margin-top:104px}
+.thx-pol .pol-section h2{font-size:clamp(22px,2.6vw,28px);line-height:1.22;font-weight:560;letter-spacing:-.01em;margin:0 0 16px;color:var(--ink)!important;scroll-margin-top:112px}
 .thx-pol .pol-section h2::before{content:counter(sec) ". ";color:var(--ink-44);font-weight:500}
 .thx-pol .pol-body h3{font-size:18px;font-weight:600;margin:28px 0 8px;color:var(--ink)!important}
 .thx-pol .pol-body p{margin:0 0 18px;color:var(--ink)!important}
@@ -212,13 +212,13 @@ var root=document.getElementById('thx-pol-root');
     if(sideOl){var li1=document.createElement('li');var a1=mk();li1.appendChild(a1);sideOl.appendChild(li1);links.push(a1);}
     if(mOl){var li2=document.createElement('li');var a2=mk();li2.appendChild(a2);mOl.appendChild(li2);links.push(a2);}
   });
-  var NAV=104;
+  var NAV=112;
   root.addEventListener('click',function(e){
     var a=e.target.closest?e.target.closest('a[data-toc]'):null; if(!a)return;
     var id=a.getAttribute('data-toc'),sec=document.getElementById(id); if(!sec)return;
     e.preventDefault();
-    var y=window.pageYOffset+sec.getBoundingClientRect().top-NAV;
-    window.scrollTo({top:y,behavior:'smooth'});
+    var y=Math.max(0,window.pageYOffset+sec.getBoundingClientRect().top-NAV);
+    window.scrollTo(0,y);
     if(history.replaceState)history.replaceState(null,'',location.pathname+'#'+id);
     var m=root.querySelector('.pol-mtoc'); if(m)m.classList.remove('open');
   });
@@ -238,5 +238,5 @@ var root=document.getElementById('thx-pol-root');
   addEventListener('scroll',onScroll,{passive:true});
   addEventListener('resize',onScroll,{passive:true});
   spy();
-  if(location.hash){var el=document.getElementById(location.hash.slice(1));if(el){setTimeout(function(){window.scrollTo({top:window.pageYOffset+el.getBoundingClientRect().top-NAV});spy();},80);}}
+  if(location.hash){var el=document.getElementById(location.hash.slice(1));if(el){setTimeout(function(){window.scrollTo(0,Math.max(0,window.pageYOffset+el.getBoundingClientRect().top-NAV));spy();},80);}}
 })();
