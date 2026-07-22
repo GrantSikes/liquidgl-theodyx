@@ -221,6 +221,7 @@ var root=document.getElementById('thx-pol-root');
     window.scrollTo(0,y);
     if(history.replaceState)history.replaceState(null,'',location.pathname+'#'+id);
     var m=root.querySelector('.pol-mtoc'); if(m)m.classList.remove('open');
+    requestAnimationFrame(spy);
   });
   var mbtn=root.querySelector('.pol-mtoc-btn'),mtoc=root.querySelector('.pol-mtoc');
   if(mbtn&&mtoc)mbtn.addEventListener('click',function(){var o=mtoc.classList.toggle('open');mbtn.setAttribute('aria-expanded',o?'true':'false');});
