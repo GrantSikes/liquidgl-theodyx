@@ -1,4 +1,5 @@
 (function(){
+if(!/^\/policies\/privacy-policy\/?$/.test(location.pathname))return;
 if(document.getElementById("thx-pol-root"))return;
 /* Remove any pre-existing native policy embed (raw HtmlEmbed) so only this version renders */
 try{var _ex=document.querySelectorAll(".thx-pol");for(var _i=0;_i<_ex.length;_i++){var _el=_ex[_i];if(_el.id==="thx-pol-root")continue;var _w=(_el.closest&&_el.closest(".w-embed"))||_el.parentElement||_el;if(_w&&_w.parentNode)_w.parentNode.removeChild(_w);else if(_el.parentNode)_el.parentNode.removeChild(_el);}}catch(e){}
