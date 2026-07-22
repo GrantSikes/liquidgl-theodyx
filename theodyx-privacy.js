@@ -23,7 +23,7 @@ var CSS=`.thx-pol{--ink:#0b0b0c;--ink-60:rgba(11,11,12,.60);--ink-44:rgba(11,11,
 .thx-pol .pol-side a.active{color:var(--ink)!important;border-left-color:var(--ink);font-weight:560}
 .thx-pol .pol-side a.active::before{color:var(--ink)}
 .thx-pol .pol-body{max-width:var(--measure);min-width:0;padding-bottom:120px;counter-reset:sec}
-.thx-pol .pol-section{padding:30px 0 4px;border-top:1px solid var(--rule-4);counter-increment:sec}
+.thx-pol .pol-section{padding:30px 0 4px;border-top:1px solid var(--rule-4);counter-increment:sec;scroll-margin-top:112px}
 .thx-pol .pol-section:first-child{border-top:0;padding-top:4px}
 .thx-pol .pol-section h2{font-size:clamp(22px,2.6vw,28px);line-height:1.22;font-weight:560;letter-spacing:-.01em;margin:0 0 16px;color:var(--ink)!important;scroll-margin-top:112px}
 .thx-pol .pol-section h2::before{content:counter(sec) ". ";color:var(--ink-44);font-weight:500}
@@ -213,16 +213,17 @@ var root=document.getElementById('thx-pol-root');
     if(mOl){var li2=document.createElement('li');var a2=mk();li2.appendChild(a2);mOl.appendChild(li2);links.push(a2);}
   });
   var NAV=112;
+  function setActive(id){for(var _j=0;_j<links.length;_j++){links[_j].classList.toggle('active',links[_j].getAttribute('data-toc')===id);}}
   root.addEventListener('click',function(e){
     var a=e.target.closest?e.target.closest('a[data-toc]'):null; if(!a)return;
     var id=a.getAttribute('data-toc'),sec=document.getElementById(id); if(!sec)return;
-    e.preventDefault();
+    e.preventDefault(); e.stopPropagation();
     var y=Math.max(0,window.pageYOffset+sec.getBoundingClientRect().top-NAV);
     window.scrollTo(0,y);
+    setActive(id);
     if(history.replaceState)history.replaceState(null,'',location.pathname+'#'+id);
     var m=root.querySelector('.pol-mtoc'); if(m)m.classList.remove('open');
-    requestAnimationFrame(spy);
-  });
+  },true);
   var mbtn=root.querySelector('.pol-mtoc-btn'),mtoc=root.querySelector('.pol-mtoc');
   if(mbtn&&mtoc)mbtn.addEventListener('click',function(){var o=mtoc.classList.toggle('open');mbtn.setAttribute('aria-expanded',o?'true':'false');});
   var ticking=false;
