@@ -231,8 +231,8 @@ var root=document.getElementById('thx-pol-root');
     for(var i=0;i<secs.length;i++){if(secs[i].getBoundingClientRect().top<=limit)cur=secs[i];else break;}
     var id=cur&&cur.id;
     for(var j=0;j<links.length;j++){links[j].classList.toggle('active',links[j].getAttribute('data-toc')===id);}
-    var act=root.querySelector('.pol-side a.active');
-    if(act&&act.parentNode){var side=root.querySelector('.pol-side');if(side){var r=act.getBoundingClientRect(),sr=side.getBoundingClientRect();if(r.top<sr.top||r.bottom>sr.bottom)act.scrollIntoView({block:'nearest'});}}
+    var act=root.querySelector('.pol-side a.active'),side=root.querySelector('.pol-side');
+    if(act&&side&&side.scrollHeight>side.clientHeight+2){var ot=act.offsetTop,oh=act.offsetHeight;if(ot<side.scrollTop)side.scrollTop=Math.max(0,ot-8);else if(ot+oh>side.scrollTop+side.clientHeight)side.scrollTop=ot+oh-side.clientHeight+8;}
   }
   function onScroll(){if(!ticking){ticking=true;requestAnimationFrame(spy);}}
   addEventListener('scroll',onScroll,{passive:true});
