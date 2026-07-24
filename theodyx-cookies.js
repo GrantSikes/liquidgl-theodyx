@@ -1,4 +1,4 @@
-/* Theodyx Cookie Preferences — banner + settings modal, GPC-aware. v1.1.0 */
+/* Theodyx Cookie Preferences — banner + settings modal, GPC-aware. v1.2.0 */
 (function(){
 if(window.__thxCookiesInit)return;window.__thxCookiesInit=1;
 var KEY='thx_consent';
@@ -102,16 +102,18 @@ function banner(show){
 if(!stored){
   var shown=false;
   function reveal(){if(shown||read())return;shown=true;banner(true);}
-  setTimeout(reveal,120000);
+  setTimeout(reveal,90000);
   setTimeout(function(){
     var onDown=function(){document.removeEventListener('pointerdown',onDown,true);setTimeout(reveal,450);};
     document.addEventListener('pointerdown',onDown,true);
-  },6000);
+    var onScr=function(){if(window.pageYOffset>500){window.removeEventListener('scroll',onScr);setTimeout(reveal,600);}};
+    window.addEventListener('scroll',onScr,{passive:true});
+  },2500);
 }
 
 /* Footer "Cookie Preferences" link — appended into the Terms & Policies column, idempotent */
 function footLink(){
-  if(document.querySelector('a[data-thx-cookie-prefs]'))return true;
+  if(document.querySelector('a[data-thx-cookie-prefs]')||document.querySelector('footer a[href="#cookie-preferences"], .footer a[href="#cookie-preferences"]'))return true;
   var anchors=[].slice.call(document.querySelectorAll('footer a, .footer a'));
   var target=null;
   for(var i=0;i<anchors.length;i++){
