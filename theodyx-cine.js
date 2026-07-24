@@ -1,4 +1,4 @@
-/* Theodyx Cine v4.1.0 — homepage cinematic. Library-free. Modules removable via CFG.
+/* Theodyx Cine v4.1.1 — homepage cinematic. Library-free. Modules removable via CFG.
    Intro: typed line -> word constellation builds center-screen -> family spotlight ->
    gravitational collapse -> "what it means to be Human." -> video emerges. No blur anywhere. */
 (function(){
@@ -291,15 +291,20 @@ function init(){
         document.addEventListener('visibilitychange',vis);
       }else begin();
       var skip=function(e){
-        if(e&&e.type==='scroll'&&window.pageYOffset<=2)return;
+        /* only genuine user intent skips: sustained scroll, real wheel delta, or touch drag */
+        if(e&&e.type==='scroll'&&window.pageYOffset<=40)return;
+        if(e&&e.type==='wheel'&&Math.abs(e.deltaY||0)<=4)return;
         window.removeEventListener('wheel',skip);
         window.removeEventListener('touchmove',skip);
         window.removeEventListener('scroll',skip);
         if(!introDone)finish();
       };
-      window.addEventListener('wheel',skip,{passive:true});
-      window.addEventListener('touchmove',skip,{passive:true});
-      window.addEventListener('scroll',skip,{passive:true});
+      /* arm after load turbulence settles */
+      setTimeout(function(){
+        window.addEventListener('wheel',skip,{passive:true});
+        window.addEventListener('touchmove',skip,{passive:true});
+        window.addEventListener('scroll',skip,{passive:true});
+      },700);
     }catch(e){introDone=true;try{if(typeof ov!=='undefined'&&ov&&ov.parentNode)ov.parentNode.removeChild(ov);document.documentElement.style.overflow='';media.style.opacity='';media.style.transform='';if(video)video.style.filter='';h1.style.opacity='';h1.style.transform='';}catch(e2){}showNav();}
   }
 
