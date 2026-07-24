@@ -1,4 +1,4 @@
-/* Theodyx Cine v4.1.2 — homepage cinematic. Library-free. Modules removable via CFG.
+/* Theodyx Cine v5.0.0 — homepage cinematic. Library-free. Modules removable via CFG.
    Intro: typed line -> word constellation builds center-screen -> family spotlight ->
    gravitational collapse -> "what it means to be Human." -> video emerges. No blur anywhere. */
 (function(){
@@ -7,12 +7,12 @@ if(window.__thxCineInit)return;window.__thxCineInit=1;
 
 var CFG={
   eagerImages:true,
-  heroIntro:true,
+  heroIntro:false,    // page loads straight into the video (constellation kept behind this flag)
   autoSound:true,
-  scrollZoom:true,    // desktop only — phones keep the rounded frame
+  scrollZoom:false,   // no intro -> hero stays in its native designed state
   reveals:true,
   parallax:true,
-  pressBand:true
+  pressBand:false     // replaced by the native From Our Thinking section
 };
 
 var reduced=false;
