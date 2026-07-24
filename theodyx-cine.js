@@ -1,4 +1,4 @@
-/* Theodyx Cine v3.1.0 — homepage cinematic. Library-free. Modules removable via CFG. */
+/* Theodyx Cine v3.1.1 — homepage cinematic. Library-free. Modules removable via CFG. */
 (function(){
 if(location.pathname!=='/'&&location.pathname!=='')return;
 if(window.__thxCineInit)return;window.__thxCineInit=1;
@@ -195,7 +195,9 @@ function init(){
         var vis=function(){if(!document.hidden){document.removeEventListener('visibilitychange',vis);begin();}};
         document.addEventListener('visibilitychange',vis);
       }else begin();
-      var skip=function(){
+      var skip=function(e){
+        /* a scroll event at y<=2 is browser scroll-restoration noise, not user intent */
+        if(e&&e.type==='scroll'&&window.pageYOffset<=2)return;
         window.removeEventListener('wheel',skip);
         window.removeEventListener('touchmove',skip);
         window.removeEventListener('scroll',skip);
