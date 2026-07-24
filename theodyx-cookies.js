@@ -1,4 +1,4 @@
-/* Theodyx Cookie Preferences — banner + settings modal, GPC-aware. v1.0.0 */
+/* Theodyx Cookie Preferences — banner + settings modal, GPC-aware. v1.1.0 */
 (function(){
 if(window.__thxCookiesInit)return;window.__thxCookiesInit=1;
 var KEY='thx_consent';
@@ -12,7 +12,7 @@ if(stored){window.__thxConsent=stored;window.__thxAnalyticsOptOut=!stored.analyt
 else{window.__thxAnalyticsOptOut=GPC;}
 
 var CSS=''+
-'.thxck-banner{position:fixed;left:18px;bottom:18px;z-index:9990;max-width:400px;background:#0d0d0e;border:1px solid rgba(250,248,242,.16);border-radius:16px;padding:20px 22px;color:#faf8f2;font-size:14px;line-height:1.55;box-shadow:0 18px 50px rgba(0,0,0,.55);font-family:inherit}'+
+'.thxck-banner{position:fixed;left:18px;bottom:18px;z-index:9990;max-width:380px;background:#0c0c0d;border:1px solid rgba(250,248,242,.14);border-radius:18px;padding:18px 20px;color:#faf8f2;font-size:13.5px;line-height:1.55;letter-spacing:normal;box-shadow:0 20px 60px rgba(0,0,0,.6);font-family:"Google Sans Flex","Google Sans",system-ui,sans-serif}.thxck-banner *,.thxck-modal *{font-family:inherit;letter-spacing:normal}'+
 '.thxck-banner h4{margin:0 0 6px;font-size:15px;font-weight:600;color:#faf8f2}'+
 '.thxck-banner p{margin:0 0 14px;color:rgba(250,248,242,.72)}'+
 '.thxck-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}'+
@@ -22,8 +22,8 @@ var CSS=''+
 '.thxck-link{cursor:pointer;background:none;border:0;color:rgba(250,248,242,.62);font-size:13px;text-decoration:underline;text-underline-offset:3px;padding:9px 2px;font-family:inherit}'+
 '.thxck-link:hover{color:#faf8f2}'+
 '.thxck-overlay{position:fixed;inset:0;z-index:9991;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:20px}'+
-'.thxck-modal{width:100%;max-width:560px;max-height:88vh;overflow:auto;background:#0d0d0e;border:1px solid rgba(250,248,242,.16);border-radius:20px;padding:30px 30px 24px;color:#faf8f2;font-size:15px;line-height:1.6;font-family:inherit}'+
-'.thxck-modal h2{margin:0 0 10px;font-size:22px;font-weight:600;letter-spacing:-.01em;color:#faf8f2}'+
+'.thxck-modal{width:100%;max-width:540px;max-height:88vh;overflow:auto;background:#0c0c0d;border:1px solid rgba(250,248,242,.14);border-radius:20px;padding:28px 28px 22px;color:#faf8f2;font-size:14.5px;line-height:1.6;letter-spacing:normal;font-family:"Google Sans Flex","Google Sans",system-ui,sans-serif}'+
+'.thxck-modal h2{margin:0 0 10px;font-size:20px;font-weight:600;letter-spacing:-.01em;color:#faf8f2}'+
 '.thxck-modal .thxck-intro{margin:0 0 20px;color:rgba(250,248,242,.72);font-size:14px}'+
 '.thxck-modal .thxck-intro a{color:#faf8f2;text-decoration:underline;text-underline-offset:3px}'+
 '.thxck-cat{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;padding:16px 0;border-top:1px solid rgba(250,248,242,.1)}'+
@@ -48,7 +48,7 @@ function modal(){
   var ov=el('div','thxck-overlay');
   var m=el('div','thxck-modal');m.setAttribute('role','dialog');m.setAttribute('aria-modal','true');m.setAttribute('aria-label','Cookie Settings');
   m.appendChild(el('h2',null,'Cookie Settings'));
-  m.appendChild(el('p','thxck-intro','Cookies and similar identifiers keep small pieces of information on your device. Theodyx keeps this to a minimum: no advertising cookies, no cross-site tracking, and analytics that are cookieless by design. Decide below what we may use — your choice is saved on this device and you can change it anytime. <a href="/policies/cookie-policy">Learn more</a>.'));
+  m.appendChild(el('p','thxck-intro','Cookies and similar identifiers keep small pieces of information on your device. We keep this to a minimum: no advertising cookies, no cross-site tracking, and analytics that are cookieless by design. Decide below what we may use — your choice is saved on this device and you can change it anytime. <a href="/policies/cookie-policy">Learn more</a>.'));
   function cat(title,desc,key){
     var c=el('div','thxck-cat');
     var t=el('div',null);t.appendChild(el('h3',null,title));t.appendChild(el('p',null,desc));
@@ -63,7 +63,7 @@ function modal(){
   }
   m.appendChild(cat('Necessary','Security, bot protection, and the core features of the Site — the basics that keep pages, forms, and applications working. The Site can’t run without these.',null));
   m.appendChild(cat('Analytics','First-party, cookieless measurement of how the Site performs — page views and scroll depth. Never a raw IP address, never cross-site tracking.','analytics'));
-  m.appendChild(cat('Marketing','Would allow personalization and measurement of Theodyx marketing on other platforms. We don’t use these today — the switch is here so the choice is always yours.','marketing'));
+  m.appendChild(cat('Marketing','Would allow personalization and measurement of our marketing on other platforms. We don’t use these today — the switch is here so the choice is always yours.','marketing'));
   var foot=el('div','thxck-foot');
   var save=el('button','thxck-btn thxck-primary','Save preferences');
   var all=el('button','thxck-btn','Accept all');
@@ -86,8 +86,8 @@ function banner(show){
   if(!show){if(bannerEl){bannerEl.remove();bannerEl=null;}return;}
   if(bannerEl||read())return;
   bannerEl=el('div','thxck-banner');
-  bannerEl.appendChild(el('h4',null,'Privacy, handled properly'));
-  bannerEl.appendChild(el('p',null,'Theodyx runs a privacy-first, largely cookieless site. Choose what we may measure — you can change this anytime.'));
+  bannerEl.appendChild(el('h4',null,'Your privacy, handled properly'));
+  bannerEl.appendChild(el('p',null,'We run a privacy-first, largely cookieless site. Choose what we may measure — you can change this anytime.'));
   var row=el('div','thxck-row');
   var all=el('button','thxck-btn thxck-primary','Accept all');
   var nec=el('button','thxck-btn','Necessary only');
@@ -99,7 +99,15 @@ function banner(show){
   bannerEl.appendChild(row);
   document.body.appendChild(bannerEl);
 }
-if(!stored)banner(true);
+if(!stored){
+  var shown=false;
+  function reveal(){if(shown||read())return;shown=true;banner(true);}
+  setTimeout(reveal,120000);
+  setTimeout(function(){
+    var onDown=function(){document.removeEventListener('pointerdown',onDown,true);setTimeout(reveal,450);};
+    document.addEventListener('pointerdown',onDown,true);
+  },6000);
+}
 
 /* Footer "Cookie Preferences" link — appended into the Terms & Policies column, idempotent */
 function footLink(){
