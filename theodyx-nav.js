@@ -1,4 +1,4 @@
-/*! theodyx-nav.js v3.1.0 (2026-09-02) — behaviours for the clear liquid-glass nav (#thx-nav).
+/*! theodyx-nav.js v3.1.1 (2026-09-02) — behaviours for the clear liquid-glass nav (#thx-nav).
  * Per-element ink (each word, the logo and the burger pick pure white or pure black from what is behind THEM),
  * edge lensing map + chromatic aberration (Chromium, capability + frame-budget gated), pointer highlight with a
  * spring, scroll condense, accessible mobile sheet (focus trap, Escape, inert, iOS-safe scroll lock), skip link
@@ -8,7 +8,7 @@
   if (window.__thxNav) return;
   var nav = document.getElementById('thx-nav');
   if (!nav) return;
-  var API = window.__thxNav = { v: '3.1.0' };
+  var API = window.__thxNav = { v: '3.1.1' };
   var doc = document.documentElement, body = document.body;
   var glass = nav.querySelector('.thx-nav-glass');
   var rim = nav.querySelector('.thx-nav-rim');
