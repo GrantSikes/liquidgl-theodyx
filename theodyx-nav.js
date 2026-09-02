@@ -1,4 +1,4 @@
-/*! theodyx-nav.js v2.0.0 (2026-09-02) — behaviours for the native glass nav (#thx-nav).
+/*! theodyx-nav.js v2.0.1 (2026-09-02) — behaviours for the native glass nav (#thx-nav).
  * Adaptive tint (data-nav-tone sections + live backdrop luminance), scroll condense,
  * edge refraction (Chromium, capability + frame-budget gated), pointer lensing with a spring,
  * accessible mobile panel (focus trap, Escape, inert, iOS-safe scroll lock), skip link target,
@@ -8,7 +8,7 @@
   if (window.__thxNav) return;
   var nav = document.getElementById('thx-nav');
   if (!nav) return;
-  var API = window.__thxNav = { v: '2.0.0' };
+  var API = window.__thxNav = { v: '2.0.1' };
   var doc = document.documentElement, body = document.body;
   var glass = nav.querySelector('.thx-nav-glass');
   var burger = nav.querySelector('.thx-nav-burger');
@@ -41,7 +41,7 @@
     var m = document.querySelector('main');
     if (!m) {
       var first = null, n = body.firstElementChild;
-      while (n) { if (!nav.contains(n) && n !== nav && !/^(SCRIPT|STYLE|LINK|NOSCRIPT|A|SVG)$/.test(n.tagName) && !n.classList.contains('thx-skip')) { first = n; break; } n = n.nextElementSibling; }
+      while (n) { if (!nav.contains(n) && n !== nav && !n.contains(nav) && !/^(SCRIPT|STYLE|LINK|NOSCRIPT|A|SVG|TEXTAREA)$/.test(n.tagName) && !n.classList.contains('thx-skip')) { first = n; break; } n = n.nextElementSibling; }
       m = first;
     }
     if (m) { if (!m.id) m.id = 'thx-main'; else { var a = document.querySelector('.thx-skip'); if (a) a.setAttribute('href', '#' + m.id); } if (!m.hasAttribute('tabindex')) m.setAttribute('tabindex', '-1'); }
@@ -117,7 +117,7 @@
       var els = document.elementsFromPoint(x, y);
       for (var i = 0; i < els.length; i++) {
         var el = els[i];
-        if (el === nav || nav.contains(el) || el.classList.contains('thx-skip')) continue;
+        if (el === nav || nav.contains(el) || el.contains(nav) || el.classList.contains('thx-skip')) continue;
         var tagged = el.closest('[data-nav-tone]');
         if (tagged) { forced = tagged.getAttribute('data-nav-tone'); break; }
         lums.push(effLum(el));
@@ -252,7 +252,7 @@
     if (on) {
       inerted = [];
       var n = body.firstElementChild;
-      while (n) { if (n !== nav && !nav.contains(n) && !n.classList.contains('thx-skip') && !/^(SCRIPT|STYLE|LINK)$/.test(n.tagName)) { if (!n.hasAttribute('inert')) { n.setAttribute('inert', ''); inerted.push(n); } } n = n.nextElementSibling; }
+      while (n) { if (n !== nav && !nav.contains(n) && !n.contains(nav) && !n.classList.contains('thx-skip') && !/^(SCRIPT|STYLE|LINK)$/.test(n.tagName)) { if (!n.hasAttribute('inert')) { n.setAttribute('inert', ''); inerted.push(n); } } n = n.nextElementSibling; }
     } else { inerted.forEach(function (n) { n.removeAttribute('inert'); }); inerted = []; }
   }
   function open() {
