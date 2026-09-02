@@ -92,7 +92,7 @@ if(document.body)imo();if(document.readyState!=='loading')imo();else document.ad
   }
 
   var label;
-  function updateBtn(){ if(label) label.textContent = cur.toUpperCase(); }
+  function updateBtn(){ if(label){ label.textContent = cur.toUpperCase(); var lb=label.closest('button'); if(lb) lb.setAttribute('aria-label','Language: '+cur.toUpperCase()); } }
   function apply(lang){
     cur=lang; try{localStorage.setItem(KEY,lang);}catch(e){}
     try{document.documentElement.lang=lang;}catch(e){}
@@ -104,7 +104,7 @@ if(document.body)imo();if(document.readyState!=='loading')imo();else document.ad
     var li=document.createElement('li'); li.id='thx-langsel'; li.setAttribute('data-thx-noi18n','1');
     li.style.cssText='position:relative;list-style:none;display:flex;align-items:center';
     var btn=document.createElement('button'); btn.type='button';
-    btn.setAttribute('aria-haspopup','listbox'); btn.setAttribute('aria-label','Language');
+    btn.setAttribute('aria-haspopup','listbox'); btn.setAttribute('aria-label','Language: EN');
     btn.style.cssText='display:inline-flex;align-items:center;gap:6px;background:transparent;border:1px solid currentColor;opacity:.85;color:inherit;border-radius:999px;padding:5px 11px;font:inherit;font-size:12px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;line-height:1';
     btn.innerHTML='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.5 2.7 2.5 15.3 0 18M12 3c-2.5 2.7-2.5 15.3 0 18"/></svg><span class="thx-lang-code">EN</span>';
     label=btn.querySelector('.thx-lang-code');
