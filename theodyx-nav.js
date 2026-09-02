@@ -1,4 +1,4 @@
-/*! theodyx-nav.js v3.0.4 (2026-09-02) — behaviours for the clear liquid-glass nav (#thx-nav).
+/*! theodyx-nav.js v3.0.5 (2026-09-02) — behaviours for the clear liquid-glass nav (#thx-nav).
  * Per-element ink (each word, the logo and the burger pick pure white or pure black from what is behind THEM),
  * edge lensing map + chromatic aberration (Chromium, capability + frame-budget gated), pointer highlight with a
  * spring, scroll condense, accessible mobile sheet (focus trap, Escape, inert, iOS-safe scroll lock), skip link
@@ -8,7 +8,7 @@
   if (window.__thxNav) return;
   var nav = document.getElementById('thx-nav');
   if (!nav) return;
-  var API = window.__thxNav = { v: '3.0.4' };
+  var API = window.__thxNav = { v: '3.0.5' };
   var doc = document.documentElement, body = document.body;
   var glass = nav.querySelector('.thx-nav-glass');
   var rim = nav.querySelector('.thx-nav-rim');
@@ -138,7 +138,7 @@
         if (el.readyState >= 2 && !el.__thxVideoTainted) {
           var sm = smallCopy(el, el.videoWidth, el.videoHeight, false);
           if (sm === 'tainted') el.__thxVideoTainted = true;
-          else if (sm) { if (!drawRegion(sm.c, sm.w, sm.h, mr, r, fit)) return null; return readPixels(); }
+          else if (sm) { if (!drawRegion(sm.c, sm.w, sm.h, mr, r, fit)) return null; var stv = readPixels(); stv.sd = Math.max(stv.sd, 0.22); return stv; } /* live video: frames change, so always wear the stronger halo */
         }
         /* frames unavailable (no CORS on the media, or not loaded yet): use the poster as a stand-in for the scene */
         var ps = el.poster || el.getAttribute('poster'); if (!ps) return null;
