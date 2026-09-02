@@ -1,4 +1,4 @@
-/*! theodyx-article-fx v1.2.0 — Theodyx publication template reading chrome.
+/*! theodyx-article-fx v1.3.0 — Theodyx publication template reading chrome.
    CONTRACT: enhancement-only. All content is native Webflow DOM; this script only
    (1) links existing <sup>N</sup> footnote markers to the Notes & sources list (dedicated .art-notes section, or legacy in-body h6+ol),
    (2) injects an "In this report" TOC derived from body h2s (3+ sections),
@@ -6,7 +6,7 @@
    (3) renders a reading-progress hairline,
    (4) hides the current article from the Keep-reading band,
    (5) tags "Sources:" paragraphs with .thx-srcline for styling,
-   (7) injects Article + BreadcrumbList JSON-LD built from the live DOM (Webflow's
+   (7) injects WebSite + Article + BreadcrumbList JSON-LD (Person @id reuse, TZ-safe dates, wordCount) built from the live DOM (Webflow's
        server-side {{wf}} bindings render empty in structured data, so we build it here
        from CMS-accurate rendered content; Google executes JS and reads it).
    Removing this script degrades gracefully; content stays fully Designer-editable. */
@@ -175,7 +175,7 @@
           var ml = document.querySelector('.thx-art-metaline');
           if (ml) {
             var m = txt(ml).match(/([A-Z][a-z]+ \d{1,2},\s*\d{4})/);
-            if (m) { var dObj = new Date(m[1]); if (!isNaN(dObj)) iso = dObj.toISOString().slice(0, 10); }
+            if (m) { var MO = {january:1,february:2,march:3,april:4,may:5,june:6,july:7,august:8,september:9,october:10,november:11,december:12}; var dm = m[1].match(/([A-Za-z]+) (\d{1,2}),\s*(\d{4})/); if (dm && MO[dm[1].toLowerCase()]) { var mo = MO[dm[1].toLowerCase()], dd = parseInt(dm[2], 10); iso = dm[3] + '-' + (mo < 10 ? '0' : '') + mo + '-' + (dd < 10 ? '0' : '') + dd; } }
           }
 
           var article = { '@type': 'Article', 'headline': title, 'inLanguage': 'en' };
@@ -183,14 +183,16 @@
           if (image) article.image = [image];
           if (iso) { article.datePublished = iso; article.dateModified = iso; }
           if (section) article.articleSection = section;
-          article.author = author ? { '@type': 'Person', 'name': author } : { '@type': 'Organization', 'name': 'Theodyx', '@id': ORG };
+          var PID = /grant\s+sikes/i.test(author) ? origin + '/#grant-sikes' : (/lisa\s+sikes/i.test(author) ? origin + '/#lisa-sikes' : '');
+          article.author = author ? (PID ? { '@type': 'Person', '@id': PID, 'name': author } : { '@type': 'Person', 'name': author }) : { '@type': 'Organization', 'name': 'Theodyx', '@id': ORG };
+          try { var bodyEl = document.querySelector('.thx-read-body, main.thx-read'); if (bodyEl) { var wc = (bodyEl.innerText || '').trim().split(/\s+/).filter(Boolean).length; if (wc > 50) article.wordCount = wc; } } catch (e) {}
           article.publisher = { '@type': 'Organization', 'name': 'Theodyx', '@id': ORG, 'logo': { '@type': 'ImageObject', 'url': LOGO } };
           article.isPartOf = { '@id': WEB };
           article.mainEntityOfPage = { '@type': 'WebPage', '@id': url };
 
           var graph = {
             '@context': 'https://schema.org',
-            '@graph': [article, {
+            '@graph': [{ '@type': 'WebSite', '@id': WEB, 'url': origin + '/', 'name': 'Theodyx', 'publisher': { '@id': ORG } }, article, {
               '@type': 'BreadcrumbList',
               'itemListElement': [
                 { '@type': 'ListItem', 'position': 1, 'name': 'Home', 'item': origin + '/' },
