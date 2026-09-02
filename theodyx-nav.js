@@ -1,4 +1,4 @@
-/*! theodyx-nav.js v2.0.1 (2026-09-02) — behaviours for the native glass nav (#thx-nav).
+/*! theodyx-nav.js v2.0.2 (2026-09-02) — behaviours for the native glass nav (#thx-nav).
  * Adaptive tint (data-nav-tone sections + live backdrop luminance), scroll condense,
  * edge refraction (Chromium, capability + frame-budget gated), pointer lensing with a spring,
  * accessible mobile panel (focus trap, Escape, inert, iOS-safe scroll lock), skip link target,
@@ -8,7 +8,7 @@
   if (window.__thxNav) return;
   var nav = document.getElementById('thx-nav');
   if (!nav) return;
-  var API = window.__thxNav = { v: '2.0.1' };
+  var API = window.__thxNav = { v: '2.0.2' };
   var doc = document.documentElement, body = document.body;
   var glass = nav.querySelector('.thx-nav-glass');
   var burger = nav.querySelector('.thx-nav-burger');
@@ -50,7 +50,8 @@
   /* ---------- 2. first-section clearance (was nv2mount's inline bump) ---------- */
   (function clearance() {
     if (document.querySelector('.rebuild-root, .hero-v1, [data-thx-noclear]')) return;
-    var sec = document.querySelector('.page-wrapper section, main, body section, section');
+    var sec = document.querySelector('.page-wrapper section, main section, body section, section');
+    if (sec && sec.tagName === 'MAIN') sec = null; /* never pad the main wrapper itself (it is black on the thxo pages) */
     if (!sec) return;
     var r = sec.getBoundingClientRect();
     if (r.top + window.scrollY < 40 && !sec.hasAttribute('data-thx-cleared')) {
@@ -257,6 +258,7 @@
   }
   function open() {
     if (nav.getAttribute('data-open') === 'true') return;
+    if (getComputedStyle(burger).display === 'none') return; /* desktop: panel is display:none, nothing to open */
     lastFocus = document.activeElement;
     var inner = panel.firstElementChild;
     nav.style.setProperty('--thx-panel-h', (inner ? inner.offsetHeight : panel.scrollHeight) + 'px');
