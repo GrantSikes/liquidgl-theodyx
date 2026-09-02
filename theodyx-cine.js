@@ -1,4 +1,4 @@
-/* Theodyx Cine v5.0.0 — homepage cinematic. Library-free. Modules removable via CFG.
+/* Theodyx Cine v5.0.1 — homepage cinematic. Library-free. Modules removable via CFG.
    Intro: typed line -> word constellation builds center-screen -> family spotlight ->
    gravitational collapse -> "what it means to be Human." -> video emerges. No blur anywhere. */
 (function(){
@@ -46,7 +46,7 @@ function init(){
   var media=document.querySelector('.hero-media');
   var h1=document.querySelector('.hero-h1');
   var vlabel=document.querySelector('.hero-vlabel');
-  var navEl=document.querySelector('.site-navbar');
+  var navEl=document.querySelector('.site-navbar,#thx-nav');
   var SETTLE={scale:0.9,radius:28};
   var flags={};
   var settleT=0;
@@ -361,7 +361,7 @@ function init(){
         imgs.forEach(function(el){els.push({el:el,k:'thx-rvI'});});
         els=els.filter(function(o){
           var el=o.el;
-          if(el.closest('.site-navbar')||el.closest('footer')||el.closest('.footer')||el.closest('.hero'))return false;
+          if(el.closest('.site-navbar,.thx-nav')||el.closest('footer')||el.closest('.footer')||el.closest('.hero'))return false;
           var r=el.getBoundingClientRect();
           if(r.height<8)return false;
           return r.top>vh*0.9;

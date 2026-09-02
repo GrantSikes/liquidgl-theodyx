@@ -133,7 +133,7 @@ if(document.body)imo();if(document.readyState!=='loading')imo();else document.ad
   //  
 
   function tick(){
-    var menu=document.querySelector('.tdx-menu'); if(menu) buildSelector(menu);
+    var menu=document.getElementById('thx-lang-slot')||document.querySelector('.tdx-menu'); if(menu) buildSelector(menu);
     
     
     if(cur!=='en') sweep(cur);

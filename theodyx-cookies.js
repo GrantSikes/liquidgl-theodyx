@@ -1,4 +1,4 @@
-/* Theodyx Cookie Preferences — banner + settings modal, GPC-aware. v1.2.0 */
+/* Theodyx Cookie Preferences — banner + settings modal, GPC-aware. v1.3.0 (focus management: focus-in, trap, inert background, restore) */
 (function(){
 if(window.__thxCookiesInit)return;window.__thxCookiesInit=1;
 var KEY='thx_consent';
@@ -73,11 +73,15 @@ function modal(){
   m.appendChild(foot);
   m.appendChild(el('p','thxck-gpc','We honor Global Privacy Control. When your browser sends a GPC signal, analytics and marketing default to off.'+(GPC?' — a GPC signal is active in this browser.':'')));
   ov.appendChild(m);
-  function close(){ov.remove();document.removeEventListener('keydown',esc);banner(false);}
+  var prevFocus=document.activeElement, inerted=[];
+  function close(){ov.remove();document.removeEventListener('keydown',esc);inerted.forEach(function(c){c.removeAttribute('inert');});inerted=[];banner(false);try{if(prevFocus&&prevFocus.focus&&document.contains(prevFocus))prevFocus.focus();}catch(e){}}
+  m.addEventListener('keydown',function(e){if(e.key!=='Tab')return;var f=Array.prototype.filter.call(m.querySelectorAll('button,[href],[tabindex]:not([tabindex="-1"])'),function(x){return x.offsetParent!==null;});if(!f.length)return;var first=f[0],last=f[f.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}});
   function esc(e){if(e.key==='Escape')close();}
   ov.addEventListener('click',function(e){if(e.target===ov)close();});
   document.addEventListener('keydown',esc);
   document.body.appendChild(ov);
+  Array.prototype.forEach.call(document.body.children,function(c){if(c!==ov&&!c.hasAttribute('inert')&&!/^(SCRIPT|STYLE|LINK)$/.test(c.tagName)){c.setAttribute('inert','');inerted.push(c);}});
+  m.setAttribute('tabindex','-1');var ff=m.querySelector('button');setTimeout(function(){try{(ff||m).focus();}catch(e){}},30);
 }
 window.__thxOpenCookiePrefs=modal;
 
@@ -102,18 +106,16 @@ function banner(show){
 if(!stored){
   var shown=false;
   function reveal(){if(shown||read())return;shown=true;banner(true);}
-  setTimeout(reveal,90000);
+  setTimeout(reveal,120000);
   setTimeout(function(){
     var onDown=function(){document.removeEventListener('pointerdown',onDown,true);setTimeout(reveal,450);};
     document.addEventListener('pointerdown',onDown,true);
-    var onScr=function(){if(window.pageYOffset>500){window.removeEventListener('scroll',onScr);setTimeout(reveal,600);}};
-    window.addEventListener('scroll',onScr,{passive:true});
-  },2500);
+  },6000);
 }
 
 /* Footer "Cookie Preferences" link — appended into the Terms & Policies column, idempotent */
 function footLink(){
-  if(document.querySelector('a[data-thx-cookie-prefs]')||document.querySelector('footer a[href="#cookie-preferences"], .footer a[href="#cookie-preferences"]'))return true;
+  if(document.querySelector('a[data-thx-cookie-prefs]'))return true;
   var anchors=[].slice.call(document.querySelectorAll('footer a, .footer a'));
   var target=null;
   for(var i=0;i<anchors.length;i++){

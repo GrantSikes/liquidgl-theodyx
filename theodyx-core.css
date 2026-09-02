@@ -1,0 +1,80 @@
+/* ==========================================================================
+   Theodyx core — v1.0.0 (2026-09-02)
+   Site-wide tokens, fluid type scale, 4px spacing scale, typography hygiene,
+   device fixes and accessibility baselines. Lives in the site <head> so it is
+   part of the critical CSS. Enhancement layer: it fills gaps in the Webflow
+   stylesheet and never fights Designer classes on layout.
+   ========================================================================== */
+:root{
+  /* type scale — 1.2 minor third near body, widening toward display */
+  --step--1:clamp(.833rem,.80rem + .17vw,.938rem);
+  --step-0:clamp(1rem,.95rem + .25vw,1.125rem);
+  --step-1:clamp(1.2rem,1.11rem + .44vw,1.424rem);
+  --step-2:clamp(1.44rem,1.29rem + .75vw,1.802rem);
+  --step-3:clamp(1.728rem,1.49rem + 1.19vw,2.281rem);
+  --step-4:clamp(2.074rem,1.71rem + 1.82vw,2.887rem);
+  --step-5:clamp(2.488rem,1.95rem + 2.69vw,3.653rem);
+  --step-6:clamp(2.986rem,2.20rem + 3.93vw,4.624rem);
+  /* spacing — 4px base */
+  --space-3xs:.25rem;--space-2xs:.5rem;--space-xs:.75rem;--space-s:1rem;--space-m:1.5rem;--space-l:2rem;--space-xl:3rem;--space-2xl:4rem;--space-3xl:6rem;--space-4xl:8rem;
+  --space-section:clamp(var(--space-2xl),8vw,var(--space-4xl));
+  --measure:68ch;
+  --thx-font:"Google Sans Flex","Google Sans","Theodyx Sans Fallback",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  color-scheme:light dark;
+}
+/* Metric-matched fallback for the brand face: measured against Arial (fontTools 4.64, GSF VF opsz 18) — removes font-swap layout shift */
+@font-face{font-family:"Theodyx Sans Fallback";src:local("Arial"),local("ArialMT");size-adjust:104.58%;ascent-override:92.37%;descent-override:27.35%;line-gap-override:0%}
+@font-face{font-family:"Theodyx Sans Fallback";src:local("Helvetica Neue"),local("HelveticaNeue");size-adjust:103.11%;ascent-override:93.69%;descent-override:27.74%;line-gap-override:0%;unicode-range:U+0000-00FF}
+
+/* One typeface, no leaks: form controls and inline code do not inherit fonts by default */
+html{font-family:var(--thx-font);-webkit-text-size-adjust:100%;text-size-adjust:100%;overflow-x:clip}
+body{overflow-x:clip;font-family:var(--thx-font)}
+input,button,select,textarea,optgroup,option,label,legend,fieldset,summary{font-family:inherit}
+code,kbd,samp,pre{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+input,select,textarea{font-size:max(16px,1em)}
+h1,h2,h3,h4,h5,h6{text-wrap:balance;overflow-wrap:break-word}
+p,li,blockquote,figcaption,dd{text-wrap:pretty;overflow-wrap:break-word}
+table,.thx-tabular,[data-tabular]{font-variant-numeric:tabular-nums}
+strong,b{font-weight:600}
+em,i{font-variation-settings:"slnt" -10}
+
+/* Focus, touch, motion baselines */
+:where(a,button,input,select,textarea,summary,[tabindex]):focus-visible{outline:2px solid currentColor;outline-offset:3px}
+:where(a,button,[role="button"]){-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}}
+
+/* Safe areas on fixed chrome */
+.thxck-banner{padding-bottom:calc(16px + env(safe-area-inset-bottom,0px))!important}
+
+/* Modern viewport units where the Webflow stylesheet still uses bare 100vh */
+.page-wrapper.full-height-page{min-height:100svh}
+.polx-root,.thx-read{min-height:100svh}
+.thx-hu{min-height:100svh!important}
+
+/* Editorial hygiene — reading measure, paragraph rhythm owned by margin-block-start only */
+.w-richtext>p{max-width:var(--measure);margin-block:0;text-wrap:pretty}
+.w-richtext>p+p{margin-block-start:1em}
+.w-richtext>h2,.w-richtext>h3,.w-richtext>h4{margin-block:2em 0 !important;line-height:1.2}
+.w-richtext>h2+p,.w-richtext>h3+p,.w-richtext>h4+p{margin-block-start:.6em}
+.w-richtext figure{margin-block:var(--space-l)}
+.w-richtext figcaption{font-size:var(--step--1);color:rgba(0,0,0,.62);margin-block-start:.5em}
+.w-richtext hr{border:0;border-top:1px solid rgba(0,0,0,.14);margin-block:var(--space-xl)}
+.w-richtext table{border-collapse:collapse;width:100%;font-size:var(--step--1)}
+.w-richtext td,.w-richtext th{padding:.6em .8em;border-bottom:1px solid rgba(0,0,0,.14);text-align:left;vertical-align:top}
+.w-richtext pre{overflow-x:auto;padding:1em;border-radius:8px;background:rgba(0,0,0,.05);font-size:.9em}
+.w-richtext a{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:.15em}
+.w-richtext a:hover{text-decoration-thickness:2px}
+.w-richtext ul,.w-richtext ol{padding-inline-start:1.4em}
+.w-richtext li+li{margin-block-start:.35em}
+
+/* Footer: contain the social row on 320px viewports */
+.footer-social-row{flex-wrap:wrap;max-width:100%}
+
+/* Language control in the footer (moved out of the nav) */
+.footer-lang{display:flex;align-items:center;gap:.6rem;margin-block-start:var(--space-m)}
+.footer-lang-label{font-size:var(--step--1);letter-spacing:.06em;text-transform:uppercase;opacity:.7}
+#thx-lang-slot{list-style:none;margin:0;padding:0;position:relative}
+#thx-lang-slot>button{font:inherit;min-height:44px;padding:0 .9rem;border-radius:999px;border:1px solid currentColor;background:transparent;color:inherit;cursor:pointer}
+#thx-lang-slot ul[role="listbox"]{position:absolute;top:auto!important;bottom:calc(100% + 8px);right:auto!important;left:0;min-width:200px;max-height:60vh;overflow:auto;margin:0;padding:6px;list-style:none;border-radius:14px;background:#0d0b12;color:#fff;box-shadow:0 18px 40px rgba(0,0,0,.4);z-index:50}
+#thx-lang-slot [role="option"]{display:block;width:100%;padding:10px 12px;border-radius:8px;text-align:left;background:none;border:0;color:inherit;font:inherit;cursor:pointer}
+#thx-lang-slot [role="option"]:hover,#thx-lang-slot [role="option"][aria-selected="true"]{background:rgba(255,255,255,.12)}

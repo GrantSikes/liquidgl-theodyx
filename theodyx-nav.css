@@ -1,0 +1,150 @@
+/* ==========================================================================
+   Theodyx glass navigation — v2.0.0 (2026-09-02)
+   Original CSS/SVG implementation of a liquid-glass surface: backdrop blur +
+   saturation lift, edge refraction (SVG displacement, Chromium, capability
+   gated), specular rim, adaptive tint (data-tone set by theodyx-nav.js),
+   depth + contact shadows, scroll condense, pointer lensing, orchestrated
+   mobile panel. Honours prefers-reduced-transparency / -motion, forced-colors,
+   and no-backdrop-filter engines. Text contrast is guaranteed by the tint
+   alphas below: dark glass over pure white ≥ 5.6:1, light glass over pure
+   black ≥ 8:1 (see build/nav/contrast-proof.md).
+   ========================================================================== */
+:root{
+  --thx-nav-w:min(1180px,calc(100% - 2rem));
+  --thx-nav-top:max(12px,env(safe-area-inset-top,0px));
+  --thx-nav-h:56px;
+  --thx-nav-r:999px;
+  --thx-nav-blur:28px;
+  --thx-nav-fg:#faf8f2;
+  --thx-nav-fg-muted:rgba(250,248,242,.82);
+  --thx-nav-tint:rgba(12,10,16,.62);
+  --thx-nav-tint-2:rgba(12,10,16,.74);
+  --thx-nav-rim:rgba(255,255,255,.16);
+  --thx-nav-spec-top:rgba(255,255,255,.58);
+  --thx-nav-spec-bot:rgba(255,255,255,.08);
+  --thx-nav-gloss:rgba(255,255,255,.34);
+  --thx-nav-hover:rgba(255,255,255,.11);
+  --thx-nav-shadow:0 1px 2px rgba(0,0,0,.10),0 12px 40px rgba(0,0,0,.20);
+  --thx-nav-shadow-2:0 1px 2px rgba(0,0,0,.12),0 18px 52px rgba(0,0,0,.28);
+  --thx-nav-ease:cubic-bezier(.22,1,.36,1);
+  --thx-nav-font:"Google Sans Flex","Google Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --thx-sbw:0px;
+}
+.thx-nav[data-tone="light"]{
+  --thx-nav-fg:#0c0a10;
+  --thx-nav-fg-muted:rgba(12,10,16,.74);
+  --thx-nav-tint:rgba(255,255,255,.68);
+  --thx-nav-tint-2:rgba(255,255,255,.82);
+  --thx-nav-rim:rgba(12,10,16,.10);
+  --thx-nav-spec-top:rgba(255,255,255,.96);
+  --thx-nav-spec-bot:rgba(255,255,255,.40);
+  --thx-nav-gloss:rgba(255,255,255,.55);
+  --thx-nav-hover:rgba(12,10,16,.07);
+  --thx-nav-shadow:0 1px 2px rgba(0,0,0,.06),0 12px 40px rgba(0,0,0,.10);
+  --thx-nav-shadow-2:0 1px 2px rgba(0,0,0,.08),0 18px 52px rgba(0,0,0,.14);
+}
+html{scroll-padding-top:calc(var(--thx-nav-h) + var(--thx-nav-top) + 16px)}
+
+/* Skip link — first focusable element on every page */
+.thx-skip{position:fixed;inset-block-start:var(--thx-nav-top);inset-inline-start:1rem;z-index:1001;padding:.6rem .9rem;border-radius:999px;background:#0c0a10;color:#fff;font:600 14px/1 var(--thx-nav-font);text-decoration:none;transform:translateY(-200%);transition:transform 200ms var(--thx-nav-ease)}
+.thx-skip:focus-visible{transform:none;outline:2px solid #fff;outline-offset:2px}
+
+/* Shell */
+.thx-nav{position:fixed;inset-block-start:var(--thx-nav-top);inset-inline:0;margin-inline:auto;width:var(--thx-nav-w);z-index:900;isolation:isolate;border-radius:var(--thx-nav-r);color:var(--thx-nav-fg);font-family:var(--thx-nav-font);display:grid;grid-template-rows:auto 0px;transform-origin:50% 0;will-change:transform;-webkit-tap-highlight-color:transparent;transition:color 320ms var(--thx-nav-ease),border-radius 420ms var(--thx-nav-ease),grid-template-rows 420ms var(--thx-nav-ease),transform 420ms var(--thx-nav-ease)}
+.thx-nav,.thx-nav *{box-sizing:border-box}
+.thx-nav-glass{position:absolute;inset:0;border-radius:inherit;background:var(--thx-nav-tint);box-shadow:inset 0 1px 0 0 var(--thx-nav-spec-top),inset 0 0 0 1px var(--thx-nav-rim),inset 0 -1px 0 0 var(--thx-nav-spec-bot),var(--thx-nav-shadow);-webkit-backdrop-filter:blur(var(--thx-nav-blur)) saturate(180%) brightness(1.06);backdrop-filter:blur(var(--thx-nav-blur)) saturate(180%) brightness(1.06);pointer-events:none;z-index:0;transition:background-color 320ms var(--thx-nav-ease),box-shadow 320ms var(--thx-nav-ease);overflow:hidden}
+/* Edge refraction — Chromium only (Safari drops the url() declaration and keeps the plain blur above) */
+.thx-nav.is-refract .thx-nav-glass{backdrop-filter:url(#thx-refract) blur(var(--thx-nav-blur)) saturate(180%) brightness(1.06)}
+/* Specular gloss: a lit rim from above + a faint lens highlight that follows the pointer */
+.thx-nav-glass::before{content:"";position:absolute;inset:0;border-radius:inherit;background:radial-gradient(120% 90% at 20% -30%,var(--thx-nav-gloss) 0%,transparent 55%),radial-gradient(60% 120% at 92% 120%,rgba(255,255,255,.10) 0%,transparent 60%);mix-blend-mode:screen;opacity:.9;pointer-events:none}
+.thx-nav-glass::after{content:"";position:absolute;inset:-40%;border-radius:inherit;background:radial-gradient(28% 60% at var(--thx-mx,50%) var(--thx-my,50%),rgba(255,255,255,.22),transparent 70%);mix-blend-mode:screen;opacity:0;transition:opacity 320ms var(--thx-nav-ease);pointer-events:none}
+.thx-nav.is-lens .thx-nav-glass::after{opacity:1}
+
+/* Bar */
+.thx-nav-bar{position:relative;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:1rem;min-height:var(--thx-nav-h);padding:6px 6px 6px 22px}
+.thx-nav-logo{display:inline-flex;align-items:center;height:44px;padding:0 4px;color:inherit;text-decoration:none;border-radius:999px;transition:transform 300ms var(--thx-nav-ease),opacity 200ms}
+.thx-nav-logo svg{height:22px;width:auto;display:block}
+.thx-nav-logo:hover{transform:scale(1.03)}
+.thx-nav-logo:active{transform:scale(.985)}
+.thx-nav-menu{display:flex;align-items:center;gap:2px;list-style:none;margin:0;padding:0}
+.thx-nav-menu a{display:inline-flex;align-items:center;min-height:44px;padding:0 16px;color:var(--thx-nav-fg-muted);text-decoration:none;font-size:14.5px;font-weight:500;letter-spacing:.005em;line-height:1;border-radius:999px;white-space:nowrap;transition:background-color 200ms,color 200ms}
+.thx-nav-menu a:hover,.thx-nav-menu a[aria-current="page"]{background:var(--thx-nav-hover);color:var(--thx-nav-fg)}
+.thx-nav-menu a:active{transform:scale(.985)}
+.thx-nav a:focus-visible,.thx-nav button:focus-visible{outline:2px solid currentColor;outline-offset:2px;border-radius:999px}
+.thx-nav-burger{display:none;width:44px;height:44px;border:0;border-radius:999px;background:transparent;color:inherit;cursor:pointer;padding:0;align-items:center;justify-content:center;flex-direction:column;gap:5px;transition:background-color 200ms}
+.thx-nav-burger:hover{background:var(--thx-nav-hover)}
+.thx-nav-burger span{display:block;width:20px;height:2px;border-radius:2px;background:currentColor;transition:transform 320ms var(--thx-nav-ease),opacity 200ms}
+.thx-nav[data-open="true"] .thx-nav-burger span:first-child{transform:translateY(3.5px) rotate(45deg)}
+.thx-nav[data-open="true"] .thx-nav-burger span:last-child{transform:translateY(-3.5px) rotate(-45deg)}
+
+/* Mobile panel — expands out of the pill's own geometry, one motion */
+.thx-nav-panel{position:relative;z-index:2;min-height:0;overflow:hidden;visibility:hidden;transition:visibility 0s linear 420ms}
+.thx-nav-panel-in{padding:6px 14px 18px}
+.thx-nav-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+.thx-nav-list a{display:flex;align-items:center;min-height:48px;padding:0 14px;color:var(--thx-nav-fg);text-decoration:none;font-size:17px;font-weight:500;border-radius:14px;transition:background-color 200ms;opacity:0;transform:translateY(8px);transition:opacity 320ms var(--thx-nav-ease),transform 420ms var(--thx-nav-ease),background-color 200ms}
+.thx-nav-list a:hover{background:var(--thx-nav-hover)}
+.thx-nav-cta{display:flex;align-items:center;justify-content:center;min-height:48px;margin-top:10px;padding:0 18px;border-radius:14px;background:var(--thx-nav-fg);color:var(--thx-nav-tint);text-decoration:none;font-size:16px;font-weight:600;opacity:0;transform:translateY(8px);transition:opacity 320ms var(--thx-nav-ease),transform 420ms var(--thx-nav-ease)}
+.thx-nav[data-tone="light"] .thx-nav-cta{color:#fff;background:#0c0a10}
+.thx-nav:not([data-tone="light"]) .thx-nav-cta{color:#0c0a10;background:#faf8f2}
+.thx-nav[data-open="true"]{grid-template-rows:auto var(--thx-panel-h,auto);border-radius:28px}
+.thx-nav[data-open="true"] .thx-nav-panel{visibility:visible;transition-delay:0s}
+.thx-nav[data-open="true"] .thx-nav-list a,.thx-nav[data-open="true"] .thx-nav-cta{opacity:1;transform:none}
+.thx-nav[data-open="true"] .thx-nav-list li:nth-child(2) a{transition-delay:40ms}
+.thx-nav[data-open="true"] .thx-nav-list li:nth-child(3) a{transition-delay:80ms}
+.thx-nav[data-open="true"] .thx-nav-list li:nth-child(4) a{transition-delay:120ms}
+.thx-nav[data-open="true"] .thx-nav-list li:nth-child(5) a{transition-delay:160ms}
+.thx-nav[data-open="true"] .thx-nav-cta{transition-delay:200ms}
+.thx-nav[data-open="true"] .thx-nav-glass{background:var(--thx-nav-tint-2);box-shadow:inset 0 1px 0 0 var(--thx-nav-spec-top),inset 0 0 0 1px var(--thx-nav-rim),inset 0 -1px 0 0 var(--thx-nav-spec-bot),var(--thx-nav-shadow-2)}
+html.thx-nav-lock{overflow:hidden;padding-inline-end:var(--thx-sbw)}
+html.thx-nav-lock body{overflow:hidden}
+
+/* Scroll response: contract + deepen past ~80px (scroll-driven where supported, class fallback elsewhere) */
+.thx-nav.is-scrolled{transform:scale(.985)}
+.thx-nav.is-scrolled .thx-nav-glass{background:var(--thx-nav-tint-2);box-shadow:inset 0 1px 0 0 var(--thx-nav-spec-top),inset 0 0 0 1px var(--thx-nav-rim),inset 0 -1px 0 0 var(--thx-nav-spec-bot),var(--thx-nav-shadow-2)}
+@supports (animation-timeline:scroll()){
+  @media (prefers-reduced-motion:no-preference){
+    .thx-nav.has-sda:not([data-open="true"]){animation:thx-nav-condense linear both;animation-timeline:scroll(root);animation-range:0 120px;transition:color 320ms var(--thx-nav-ease),border-radius 420ms var(--thx-nav-ease),grid-template-rows 420ms var(--thx-nav-ease)}
+    .thx-nav.has-sda .thx-nav-glass{animation:thx-nav-condense-glass linear both;animation-timeline:scroll(root);animation-range:0 120px}
+    .thx-nav.has-sda.is-scrolled{transform:none}
+  }
+}
+@keyframes thx-nav-condense{from{transform:scale(1)}to{transform:scale(.985)}}
+@keyframes thx-nav-condense-glass{from{background-color:var(--thx-nav-tint);box-shadow:inset 0 1px 0 0 var(--thx-nav-spec-top),inset 0 0 0 1px var(--thx-nav-rim),inset 0 -1px 0 0 var(--thx-nav-spec-bot),var(--thx-nav-shadow)}to{background-color:var(--thx-nav-tint-2);box-shadow:inset 0 1px 0 0 var(--thx-nav-spec-top),inset 0 0 0 1px var(--thx-nav-rim),inset 0 -1px 0 0 var(--thx-nav-spec-bot),var(--thx-nav-shadow-2)}}
+
+/* Breakpoint derived from content: logo + 5 items + burger need ~860px inside the pill */
+@media (max-width:899px){
+  :root{--thx-nav-h:52px}
+  .thx-nav{width:min(720px,calc(100% - 1.5rem))}
+  .thx-nav-bar{padding:4px 4px 4px 16px}
+  .thx-nav-menu{display:none}
+  .thx-nav-burger{display:inline-flex}
+}
+@media (min-width:900px){.thx-nav-panel{display:none}}
+
+/* Hover-only affordances gated to real pointers */
+@media (hover:none){.thx-nav-menu a:hover{background:transparent}.thx-nav-logo:hover{transform:none}}
+
+/* Mandatory fallbacks */
+@media (prefers-reduced-transparency:reduce){
+  .thx-nav-glass,.thx-nav.is-refract .thx-nav-glass{-webkit-backdrop-filter:none;backdrop-filter:none;background:#0c0a10;box-shadow:0 1px 0 0 rgba(0,0,0,.08),0 8px 24px rgba(0,0,0,.18)}
+  .thx-nav[data-tone="light"] .thx-nav-glass{background:#fff}
+  .thx-nav-glass::before,.thx-nav-glass::after{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  .thx-nav,.thx-nav *,.thx-nav *::before,.thx-nav *::after{transition:none!important;animation:none!important}
+  .thx-nav-glass::after{display:none}
+  .thx-nav.is-scrolled{transform:none}
+}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  .thx-nav-glass{background:rgba(12,10,16,.94)}
+  .thx-nav[data-tone="light"] .thx-nav-glass{background:rgba(255,255,255,.96)}
+}
+@media (forced-colors:active){
+  .thx-nav-glass{background:Canvas;-webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:none;border:1px solid CanvasText}
+  .thx-nav{color:CanvasText}
+  .thx-nav-glass::before,.thx-nav-glass::after{display:none}
+  .thx-nav-menu a,.thx-nav-list a{color:LinkText}
+  .thx-nav-cta{background:ButtonFace;color:ButtonText;border:1px solid ButtonText}
+}
+/* Legacy hooks kept for scripts/styles that still reference the old nav class names */
+.hero-v1{padding-top:72px!important}
