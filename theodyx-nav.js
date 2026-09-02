@@ -1,4 +1,4 @@
-/*! theodyx-nav.js v3.0.2 (2026-09-02) — behaviours for the clear liquid-glass nav (#thx-nav).
+/*! theodyx-nav.js v3.0.3 (2026-09-02) — behaviours for the clear liquid-glass nav (#thx-nav).
  * Per-element ink (each word, the logo and the burger pick pure white or pure black from what is behind THEM),
  * edge lensing map + chromatic aberration (Chromium, capability + frame-budget gated), pointer highlight with a
  * spring, scroll condense, accessible mobile sheet (focus trap, Escape, inert, iOS-safe scroll lock), skip link
@@ -8,7 +8,7 @@
   if (window.__thxNav) return;
   var nav = document.getElementById('thx-nav');
   if (!nav) return;
-  var API = window.__thxNav = { v: '3.0.2' };
+  var API = window.__thxNav = { v: '3.0.3' };
   var doc = document.documentElement, body = document.body;
   var glass = nav.querySelector('.thx-nav-glass');
   var rim = nav.querySelector('.thx-nav-rim');
@@ -113,6 +113,21 @@
     sctx.drawImage(src, sx, sy, sw, sh, 0, 0, 24, 6);
     return true;
   }
+  var SMALL_W = 192;
+  function smallCopy(src, iw, ih, persistent) {
+    /* one downscaled copy per source per tick (videos) or per source for good (images): reading regions from it is cheap */
+    var store = persistent ? src : null;
+    if (persistent && src.__thxSmall) return src.__thxSmall;
+    var per = tickCache.get(src); if (!persistent && per && per.__small) return per.__small;
+    var w = SMALL_W, h = Math.max(4, Math.round(ih / iw * SMALL_W));
+    var c = document.createElement('canvas'); c.width = w; c.height = h;
+    var cx = c.getContext('2d', { willReadFrequently: true }); if (!cx) return null;
+    cx.drawImage(src, 0, 0, w, h);
+    try { cx.getImageData(0, 0, 1, 1); } catch (e) { return 'tainted'; }
+    var out = { c: c, w: w, h: h };
+    if (persistent) src.__thxSmall = out; else { if (!per) { per = {}; tickCache.set(src, per); } per.__small = out; }
+    return out;
+  }
   function mediaStats(el, r) {
     if (!sctx || el.__thxTainted) return null;
     var tag = el.tagName;
@@ -121,15 +136,16 @@
     try {
       if (tag === 'VIDEO') {
         if (el.readyState >= 2 && !el.__thxVideoTainted) {
-          try { if (!drawRegion(el, el.videoWidth, el.videoHeight, mr, r, fit)) return null; return readPixels(); }
-          catch (e) { el.__thxVideoTainted = true; }
+          var sm = smallCopy(el, el.videoWidth, el.videoHeight, false);
+          if (sm === 'tainted') el.__thxVideoTainted = true;
+          else if (sm) { if (!drawRegion(sm.c, sm.w, sm.h, mr, r, fit)) return null; return readPixels(); }
         }
         /* frames unavailable (no CORS on the media, or not loaded yet): use the poster as a stand-in for the scene */
         var ps = el.poster || el.getAttribute('poster'); if (!ps) return null;
         var pim = corsImgs[ps];
         if (!pim) { pim = new Image(); pim.crossOrigin = 'anonymous'; pim.decoding = 'async'; pim.src = ps; corsImgs[ps] = pim; pim.onload = function () { reink(); }; pim.onerror = function () { pim.__thxFail = true; }; }
         if (pim.__thxFail || !pim.complete || !pim.naturalWidth) return null;
-        try { if (!drawRegion(pim, pim.naturalWidth, pim.naturalHeight, mr, r, fit)) return null; var st = readPixels(); st.sd = Math.max(st.sd, 0.12); return st; } catch (e) { return null; }
+        try { var smp = smallCopy(pim, pim.naturalWidth, pim.naturalHeight, true); if (!smp || smp === 'tainted') return null; if (!drawRegion(smp.c, smp.w, smp.h, mr, r, fit)) return null; var st = readPixels(); st.sd = Math.max(st.sd, 0.12); return st; } catch (e) { return null; }
       }
       if (tag === 'CANVAS') {
         if (!drawRegion(el, el.width, el.height, mr, r, fit)) return null;
@@ -143,7 +159,9 @@
           if (!im) { im = new Image(); im.crossOrigin = 'anonymous'; im.decoding = 'async'; im.src = src; corsImgs[src] = im; im.onload = function () { reink(); }; im.onerror = function () { im.__thxFail = true; }; }
           if (im.__thxFail || !im.complete || !im.naturalWidth) return null;
         } else if (!el.complete || !el.naturalWidth) return null;
-        if (!drawRegion(im, im.naturalWidth, im.naturalHeight, mr, r, fit)) return null;
+        var smi = smallCopy(im, im.naturalWidth, im.naturalHeight, true);
+        if (smi === 'tainted' || !smi) { el.__thxTainted = true; return null; }
+        if (!drawRegion(smi.c, smi.w, smi.h, mr, r, fit)) return null;
         return readPixels();
       }
     } catch (e) { el.__thxTainted = true; }
@@ -159,7 +177,7 @@
     var per = tickCache.get(el); if (!per) { per = {}; tickCache.set(el, per); }
     if (key in per) return per[key];
     var st = null;
-    try { var fit = /contain/.test(cs.backgroundSize) ? 'contain' : 'cover'; if (drawRegion(im, im.naturalWidth, im.naturalHeight, el.getBoundingClientRect(), r, fit)) st = readPixels(); } catch (e) { el.__thxTainted = true; }
+    try { var fit = /contain/.test(cs.backgroundSize) ? 'contain' : 'cover'; var smb = smallCopy(im, im.naturalWidth, im.naturalHeight, true); if (smb && smb !== 'tainted' && drawRegion(smb.c, smb.w, smb.h, el.getBoundingClientRect(), r, fit)) st = readPixels(); else if (smb === 'tainted') el.__thxTainted = true; } catch (e) { el.__thxTainted = true; }
     per[key] = st; return st;
   }
   var gcan = document.createElement('canvas'); var gctx = null; try { gctx = gcan.getContext('2d', { willReadFrequently: true }); } catch (e) { gctx = null; }
@@ -280,7 +298,7 @@
   nav.querySelectorAll('.thx-nav-menu a').forEach(function (a) { inkEls.push(a); });
   if (burger) inkEls.push(burger);
   var inkState = inkEls.map(function (el) { return { el: el, ink: 'light', mixed: false, t: 0, L: null }; });
-  var tone = 'dark', anyMedia = false, lastTickMs = 0, inkTimer = 0, inkInterval = 450;
+  var tone = 'dark', anyMedia = false, lastTickMs = 0, inkTimer = 0, inkInterval = 320;
   function contrast(L, ink) { return ink === 'light' ? 1.05 / (L + 0.05) : (L + 0.05) / 0.05; }
   function decide(cur, L, tNow, since) {
     L = Math.min(1, L * 1.3 + 0.01);           /* calibrated against rendered pixels through the glass: sampler underreads ~12% and the glass lifts the backdrop ~15% */
@@ -342,7 +360,7 @@
   function schedMedia() {
     clearTimeout(inkTimer);
     if (!anyMedia || document.hidden) return;
-    inkInterval = lastTickMs > 4 ? Math.min(1500, inkInterval * 1.5) : Math.max(450, inkInterval * 0.8);
+    inkInterval = lastTickMs > 6 ? Math.min(900, inkInterval * 1.4) : Math.max(320, inkInterval * 0.8);
     inkTimer = setTimeout(reink, inkInterval);
   }
   document.addEventListener('visibilitychange', function () { if (!document.hidden) reink(); });
