@@ -94,7 +94,7 @@ em,i{font-variation-settings:"slnt" -10}
 .w-richtext li+li{margin-block-start:.35em}
 
 /* Footer: contain the social row on 320px viewports */
-html .ethx-prose .w-richtext h6,html .ethx-prose h6{color:rgba(13,13,13,.74)}.footer-social-row{flex-wrap:wrap;max-width:100%}
+html .ethx-prose .w-richtext h6,html .ethx-prose h6{color:rgba(13,13,13,.86)}.footer-social-row{flex-wrap:wrap;max-width:100%}
 
 /* Language control in the footer (moved out of the nav) */
 .footer-lang{display:flex;align-items:center;gap:.6rem;margin-block-start:var(--space-m)}
