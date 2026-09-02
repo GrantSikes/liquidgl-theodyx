@@ -1,4 +1,4 @@
-/*! theodyx-nav.js v3.0.0 (2026-09-02) — behaviours for the clear liquid-glass nav (#thx-nav).
+/*! theodyx-nav.js v3.0.1 (2026-09-02) — behaviours for the clear liquid-glass nav (#thx-nav).
  * Per-element ink (each word, the logo and the burger pick pure white or pure black from what is behind THEM),
  * edge lensing map + chromatic aberration (Chromium, capability + frame-budget gated), pointer highlight with a
  * spring, scroll condense, accessible mobile sheet (focus trap, Escape, inert, iOS-safe scroll lock), skip link
@@ -8,7 +8,7 @@
   if (window.__thxNav) return;
   var nav = document.getElementById('thx-nav');
   if (!nav) return;
-  var API = window.__thxNav = { v: '3.0.0' };
+  var API = window.__thxNav = { v: '3.0.1' };
   var doc = document.documentElement, body = document.body;
   var glass = nav.querySelector('.thx-nav-glass');
   var rim = nav.querySelector('.thx-nav-rim');
@@ -120,9 +120,16 @@
     var mr = el.getBoundingClientRect(), fit = (getComputedStyle(el).objectFit || 'fill');
     try {
       if (tag === 'VIDEO') {
-        if (el.readyState < 2) return null;
-        if (!drawRegion(el, el.videoWidth, el.videoHeight, mr, r, fit)) return null;
-        return readPixels();
+        if (el.readyState >= 2 && !el.__thxVideoTainted) {
+          try { if (!drawRegion(el, el.videoWidth, el.videoHeight, mr, r, fit)) return null; return readPixels(); }
+          catch (e) { el.__thxVideoTainted = true; }
+        }
+        /* frames unavailable (no CORS on the media, or not loaded yet): use the poster as a stand-in for the scene */
+        var ps = el.poster || el.getAttribute('poster'); if (!ps) return null;
+        var pim = corsImgs[ps];
+        if (!pim) { pim = new Image(); pim.crossOrigin = 'anonymous'; pim.decoding = 'async'; pim.src = ps; corsImgs[ps] = pim; pim.onload = function () { reink(); }; pim.onerror = function () { pim.__thxFail = true; }; }
+        if (pim.__thxFail || !pim.complete || !pim.naturalWidth) return null;
+        try { if (!drawRegion(pim, pim.naturalWidth, pim.naturalHeight, mr, r, fit)) return null; var st = readPixels(); st.sd = Math.max(st.sd, 0.12); return st; } catch (e) { return null; }
       }
       if (tag === 'CANVAS') {
         if (!drawRegion(el, el.width, el.height, mr, r, fit)) return null;
