@@ -1,4 +1,4 @@
-/*! theodyx-nav.js v3.0.1 (2026-09-02) — behaviours for the clear liquid-glass nav (#thx-nav).
+/*! theodyx-nav.js v3.0.2 (2026-09-02) — behaviours for the clear liquid-glass nav (#thx-nav).
  * Per-element ink (each word, the logo and the burger pick pure white or pure black from what is behind THEM),
  * edge lensing map + chromatic aberration (Chromium, capability + frame-budget gated), pointer highlight with a
  * spring, scroll condense, accessible mobile sheet (focus trap, Escape, inert, iOS-safe scroll lock), skip link
@@ -8,7 +8,7 @@
   if (window.__thxNav) return;
   var nav = document.getElementById('thx-nav');
   if (!nav) return;
-  var API = window.__thxNav = { v: '3.0.1' };
+  var API = window.__thxNav = { v: '3.0.2' };
   var doc = document.documentElement, body = document.body;
   var glass = nav.querySelector('.thx-nav-glass');
   var rim = nav.querySelector('.thx-nav-rim');
@@ -230,46 +230,50 @@
     var b = parseBg(getComputedStyle(body)); if (b !== null) return b;
     var h = parseBg(getComputedStyle(doc)); return h !== null ? h : 1;
   }
+  function hasDirectText(el) {
+    for (var c = el.firstChild; c; c = c.nextSibling) if (c.nodeType === 3 && /\S/.test(c.data)) return true;
+    return false;
+  }
   function pointStats(x, y, r) {
+    /* composite the stack of elements under (x,y) top-down: translucent colours, glyphs, gradients, images/video (opaque) */
     x = Math.min(Math.max(x, 0), window.innerWidth - 1); y = Math.min(Math.max(y, 0), window.innerHeight - 1);
     var els = document.elementsFromPoint(x, y);
-    for (var i = 0; i < els.length; i++) {
+    var acc = 0, rem = 1, sdMax = 0, media = false, key = Math.round(r.left) + ':' + Math.round(r.width);
+    for (var i = 0; i < els.length && rem > 0.02; i++) {
       var el = els[i];
       if (el === nav || nav.contains(el) || el.contains(nav) || el.classList.contains('thx-skip')) continue;
       var tagged = el.closest('[data-nav-tone]');
       if (tagged) return { forced: tagged.getAttribute('data-nav-tone') };
+      if (el.hasAttribute('data-nav-lum')) { acc += rem * parseFloat(el.getAttribute('data-nav-lum')); rem = 0; break; }
+      var per = tickCache.get(el); if (!per) { per = {}; tickCache.set(el, per); }
       if (MEDIA.test(el.tagName)) {
-        var key = Math.round(r.left) + ':' + Math.round(r.width);
-        var per = tickCache.get(el); if (!per) { per = {}; tickCache.set(el, per); }
         if (!(key in per)) per[key] = mediaStats(el, r);
-        var st = per[key];
-        if (st) return { L: st.L, sd: st.sd, media: true };
-        var cs = getComputedStyle(el); var pb = parseBg(cs);
-        return { L: el.hasAttribute('data-nav-lum') ? parseFloat(el.getAttribute('data-nav-lum')) : (pb !== null ? pb : 0.2), sd: 0.25, media: true };
+        var st = per[key]; media = true;
+        if (st) { sdMax = Math.max(sdMax, st.sd); acc += rem * st.L; }
+        else { var cs0 = getComputedStyle(el), pb = parseBg(cs0); acc += rem * (pb !== null ? pb : 0.2); sdMax = Math.max(sdMax, 0.25); }
+        rem = 0; break;
       }
-      var cs2 = getComputedStyle(el);
-      var bgi = cs2.backgroundImage && cs2.backgroundImage !== 'none' ? cs2.backgroundImage : '';
-      if (bgi && bgi.indexOf('url(') === 0 && parseBg(cs2) === null) {
-        var st2 = bgStats(el, cs2, bgi, r);
-        if (st2) return { L: st2.L, sd: st2.sd, media: true };
-        return { L: 0.22, sd: 0.25, media: true };
+      var cs = getComputedStyle(el);
+      if (hasDirectText(el)) {
+        var gk = 'g' + key; if (!(gk in per)) per[gk] = glyphCoverage(el, r);
+        var g = per[gk];
+        if (g > 0.01) { var tm = (cs.color || '').match(/rgba?\(([^)]+)\)/); if (tm) { var tc = tm[1].split(/[\s,\/]+/).map(parseFloat); var Lt = lum(tc[0], tc[1], tc[2]); acc += rem * g * Lt; rem *= (1 - g); sdMax = Math.max(sdMax, Math.min(1, g * 2) * 0.5); } }
       }
-      if (parseBg(cs2) === null && !bgi && el.tagName !== 'BODY' && el.tagName !== 'HTML' && !(el.textContent || '').trim()) continue; /* transparent wrappers: look deeper */
-      var Lbg = chainLum(el, x, y);
-      if (parseBg(cs2) === null && (el.textContent || '').trim()) {
-        /* text under the nav: rasterise the letters that overlap this element's box and blend by their real coverage */
-        var per2 = tickCache.get(el); if (!per2) { per2 = {}; tickCache.set(el, per2); }
-        var gk = 'g' + Math.round(r.left) + ':' + Math.round(r.width);
-        if (!(gk in per2)) per2[gk] = glyphCoverage(el, r);
-        var g = per2[gk];
-        if (g > 0.01) {
-          var tm = (cs2.color || '').match(/rgba?\(([^)]+)\)/);
-          if (tm) { var tc = tm[1].split(/[\s,\/]+/).map(parseFloat); var Lt = lum(tc[0], tc[1], tc[2]); return { L: Lt * g + Lbg * (1 - g), sd: Math.abs(Lt - Lbg) * Math.min(1, g * 2), media: false }; }
+      var bgi = cs.backgroundImage && cs.backgroundImage !== 'none' ? cs.backgroundImage : '';
+      if (bgi) {
+        if (bgi.indexOf('url(') === 0) {
+          var st2 = bgStats(el, cs, bgi, r); media = true;
+          if (st2) { sdMax = Math.max(sdMax, st2.sd); acc += rem * st2.L; } else { acc += rem * 0.22; sdMax = Math.max(sdMax, 0.25); }
+          rem = 0; break;
         }
+        var gl = gradientLum(bgi, el, x, y);
+        if (gl !== null) { acc += rem * gl; rem = 0; break; }
       }
-      return { L: Lbg, sd: 0, media: false };
+      var bm = (cs.backgroundColor || '').match(/rgba?\(([^)]+)\)/);
+      if (bm) { var bc = bm[1].split(/[\s,\/]+/).map(parseFloat); var ba = bc.length > 3 ? bc[3] : 1; if (ba > 0.01) { acc += rem * ba * lum(bc[0], bc[1], bc[2]); rem *= (1 - ba); } }
     }
-    return { L: chainLum(body), sd: 0, media: false };
+    if (rem > 0.02) { var lb = parseBg(getComputedStyle(body)); if (lb === null) lb = parseBg(getComputedStyle(doc)); acc += rem * (lb === null ? 1 : lb); }
+    return { L: acc, sd: sdMax, media: media };
   }
   var inkEls = [];
   if (logo) inkEls.push(logo);
