@@ -1,0 +1,8 @@
+# Verification tools (run from this directory with Playwright + Lighthouse installed: `npm i playwright lighthouse puppeteer-core`)
+
+- `verify-site.js <origin> [--json=out.json] [--quick]` — 70-check suite: static sweep of every sitemap URL (nav in HTML, skip link, legacy scripts gone, one h1/canonical, main landmark), rendered checks on 8 pages (fonts, console errors, JSON-LD, overflow, input size), nav acceptance on 3 pages, Publications/Ethos mobile-scroll regression. Reads `../sitemap-urls.txt`.
+- `test-nav.js <url> [--engine=chromium|webkit] [--json=out.json] [--override=path/to/theodyx-nav.js]` — 16-check acceptance for the clear liquid-glass nav: per-word contrast through the glass every 50px (best-ink ≥97%, floor 2.5:1 unmixed; AA informational), keyboard order, scroll condense, frame budget, reduced motion, mobile sheet (focus, Tab trap, Escape, inert). `--override` injects a local build in place of the CDN one (rewrites the document to drop SRI).
+- `overlap-sweep.js <origin>` — every sitemap page at scrollY=0: any text under the bar? nav version + lens state + per-word inks.
+- `lh-run-env.mjs` (`LH_BASE`, `LH_OUT`, `LH_PAGES`, `FORCE=1`) — Lighthouse mobile+desktop runs; `lh-exp.mjs <url> [variant]` blocks resources to attribute cost; `lh-a11y.mjs <url...>` accessibility-only.
+
+Gotchas: Cloudflare's managed challenge 403s the second same-origin navigation of an automated session — use one browser context per navigation (these tools do). Staging (nhq.webflow.io) is not behind Cloudflare, so mobile Lighthouse numbers there are not comparable with production. Playwright's Chromium has no `window.chrome`; nav.js detects Blink by UA. Pause videos before measuring: the Home fx script resumes autoplay on scroll.
