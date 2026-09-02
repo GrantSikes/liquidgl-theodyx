@@ -1,4 +1,4 @@
-/*! theodyx-nav.js v3.0.3 (2026-09-02) — behaviours for the clear liquid-glass nav (#thx-nav).
+/*! theodyx-nav.js v3.0.4 (2026-09-02) — behaviours for the clear liquid-glass nav (#thx-nav).
  * Per-element ink (each word, the logo and the burger pick pure white or pure black from what is behind THEM),
  * edge lensing map + chromatic aberration (Chromium, capability + frame-budget gated), pointer highlight with a
  * spring, scroll condense, accessible mobile sheet (focus trap, Escape, inert, iOS-safe scroll lock), skip link
@@ -8,7 +8,7 @@
   if (window.__thxNav) return;
   var nav = document.getElementById('thx-nav');
   if (!nav) return;
-  var API = window.__thxNav = { v: '3.0.3' };
+  var API = window.__thxNav = { v: '3.0.4' };
   var doc = document.documentElement, body = document.body;
   var glass = nav.querySelector('.thx-nav-glass');
   var rim = nav.querySelector('.thx-nav-rim');
@@ -214,39 +214,43 @@
       return on / n;
     } catch (e) { return 0; }
   }
-  function gradientLum(bgi, el, x, y) {
-    /* luminance of a CSS gradient at the point: linear gradients are evaluated along their axis; others use the stop average */
+  function gradientAt(bgi, el, x, y) {
+    /* colour + alpha of a CSS gradient at the point: linear gradients along their axis, others = stop average */
     var cols = []; var re = /(rgba?\([^)]+\))(?:\s+([\d.]+)%)?/g, mm;
-    while ((mm = re.exec(bgi))) { var c = mm[1].match(/rgba?\(([^)]+)\)/)[1].split(/[\s,\/]+/).map(parseFloat); var a = c.length > 3 ? c[3] : 1; if (a < 0.3) continue; cols.push({ L: lum(c[0], c[1], c[2]), p: mm[2] !== undefined ? parseFloat(mm[2]) / 100 : null }); }
+    while ((mm = re.exec(bgi))) { var c = mm[1].match(/rgba?\(([^)]+)\)/)[1].split(/[\s,\/]+/).map(parseFloat); cols.push({ L: lum(c[0], c[1], c[2]), a: c.length > 3 ? c[3] : 1, p: mm[2] !== undefined ? parseFloat(mm[2]) / 100 : null }); }
     if (!cols.length) return null;
     for (var i = 0; i < cols.length; i++) if (cols[i].p === null) cols[i].p = cols.length === 1 ? 0 : i / (cols.length - 1);
     var lin = bgi.indexOf('linear-gradient(') !== -1 && el && x !== undefined;
-    if (!lin) { var s = 0; for (var j = 0; j < cols.length; j++) s += cols[j].L; return s / cols.length; }
-    var r = el.getBoundingClientRect(); if (!r.width || !r.height) return cols[0].L;
+    if (!lin) { var sL = 0, sA = 0; for (var j = 0; j < cols.length; j++) { sL += cols[j].L * cols[j].a; sA += cols[j].a; } return { L: sA ? sL / sA : 0, a: sA / cols.length }; }
+    var r = el.getBoundingClientRect(); if (!r.width || !r.height) return { L: cols[0].L, a: cols[0].a };
     var ang = 180; var am = bgi.match(/linear-gradient\(\s*(-?[\d.]+)deg/); var tm = bgi.match(/linear-gradient\(\s*to ([a-z ]+)/);
     if (am) ang = parseFloat(am[1]); else if (tm) { var dirs = { 'top': 0, 'right': 90, 'bottom': 180, 'left': 270, 'top right': 45, 'right top': 45, 'bottom right': 135, 'right bottom': 135, 'bottom left': 225, 'left bottom': 225, 'top left': 315, 'left top': 315 }; ang = dirs[tm[1].trim()] !== undefined ? dirs[tm[1].trim()] : 180; }
     var th = ang * Math.PI / 180, dx = Math.sin(th), dy = -Math.cos(th);
     var len = Math.abs(r.width * dx) + Math.abs(r.height * dy);
     var px = (x - (r.left + r.width / 2)) * dx + (y - (r.top + r.height / 2)) * dy;
     var t = Math.min(1, Math.max(0, px / len + 0.5));
-    for (var k = 1; k < cols.length; k++) { if (t <= cols[k].p) { var a0 = cols[k - 1], b0 = cols[k]; var u = (b0.p === a0.p) ? 0 : (t - a0.p) / (b0.p - a0.p); return a0.L + (b0.L - a0.L) * u; } }
-    return cols[cols.length - 1].L;
+    for (var k = 1; k < cols.length; k++) { if (t <= cols[k].p) { var a0 = cols[k - 1], b0 = cols[k]; var u = (b0.p === a0.p) ? 0 : (t - a0.p) / (b0.p - a0.p); var aa = a0.a + (b0.a - a0.a) * u; var LL = (a0.L * a0.a * (1 - u) + b0.L * b0.a * u) / (aa || 1); return { L: LL, a: aa }; } }
+    return { L: cols[cols.length - 1].L, a: cols[cols.length - 1].a };
   }
-  function chainLum(el, x, y) {
-    var node = el;
-    while (node && node !== doc) {
-      if (node.hasAttribute('data-nav-lum')) return parseFloat(node.getAttribute('data-nav-lum'));
-      var cs = getComputedStyle(node);
-      var L = parseBg(cs);
-      if (L !== null) return L;
-      if (cs.backgroundImage && cs.backgroundImage !== 'none') {
-        if (cs.backgroundImage.indexOf('gradient') !== -1) { var gl = gradientLum(cs.backgroundImage, node, arguments[1], arguments[2]); if (gl !== null) return gl; }
-        else return 0.22;
-      }
-      node = node.parentElement;
-    }
-    var b = parseBg(getComputedStyle(body)); if (b !== null) return b;
-    var h = parseBg(getComputedStyle(doc)); return h !== null ? h : 1;
+  function gradientLum(bgi, el, x, y) { var g = gradientAt(bgi, el, x, y); return g ? g.L : null; }
+  function paintLayers(cs, el, x, y) {
+    /* the translucent paint of one box (or pseudo-element) at the point: gradient(s) then background colour; opaque url() images are handled by the caller */
+    var out = [], op = parseFloat(cs.opacity); if (isNaN(op)) op = 1; if (op <= 0) return out;
+    var bgi = cs.backgroundImage && cs.backgroundImage !== 'none' ? cs.backgroundImage : '';
+    if (bgi && bgi.indexOf('gradient') !== -1 && bgi.indexOf('url(') === -1) { var g = gradientAt(bgi, el, x, y); if (g && g.a > 0.01) out.push({ L: g.L, a: Math.min(1, g.a * op) }); }
+    var bm = (cs.backgroundColor || '').match(/rgba?\(([^)]+)\)/);
+    if (bm) { var bc = bm[1].split(/[\s,\/]+/).map(parseFloat); var ba = bc.length > 3 ? bc[3] : 1; if (ba > 0.01) out.push({ L: lum(bc[0], bc[1], bc[2]), a: Math.min(1, ba * op) }); }
+    return out;
+  }
+  function pseudoLayers(el, which, x, y) {
+    /* ::before/::after overlays (scrims, ink-guards, vignettes) never appear in elementsFromPoint; assume a positioned pseudo covers its box */
+    try {
+      var cs = getComputedStyle(el, which);
+      if (!cs || cs.content === 'none' || cs.content === 'normal' || cs.display === 'none') return [];
+      if (cs.position !== 'absolute' && cs.position !== 'fixed') return [];
+      var r = el.getBoundingClientRect(); if (x < r.left || x > r.right || y < r.top || y > r.bottom) return [];
+      return paintLayers(cs, el, x, y);
+    } catch (e) { return []; }
   }
   function hasDirectText(el) {
     for (var c = el.firstChild; c; c = c.nextSibling) if (c.nodeType === 3 && /\S/.test(c.data)) return true;
@@ -257,6 +261,7 @@
     x = Math.min(Math.max(x, 0), window.innerWidth - 1); y = Math.min(Math.max(y, 0), window.innerHeight - 1);
     var els = document.elementsFromPoint(x, y);
     var acc = 0, rem = 1, sdMax = 0, media = false, key = Math.round(r.left) + ':' + Math.round(r.width);
+    var G = function (L) { return Math.pow(Math.max(0, Math.min(1, L)), 1 / 2.2); }; /* blending happens on sRGB-encoded values, so accumulate in gamma space */
     for (var i = 0; i < els.length && rem > 0.02; i++) {
       var el = els[i];
       if (el === nav || nav.contains(el) || el.contains(nav) || el.classList.contains('thx-skip')) continue;
@@ -267,31 +272,33 @@
       if (MEDIA.test(el.tagName)) {
         if (!(key in per)) per[key] = mediaStats(el, r);
         var st = per[key]; media = true;
-        if (st) { sdMax = Math.max(sdMax, st.sd); acc += rem * st.L; }
-        else { var cs0 = getComputedStyle(el), pb = parseBg(cs0); acc += rem * (pb !== null ? pb : 0.2); sdMax = Math.max(sdMax, 0.25); }
+        if (st) { sdMax = Math.max(sdMax, st.sd); acc += rem * G(st.L); }
+        else { var cs0 = getComputedStyle(el), pb = parseBg(cs0); acc += rem * G(pb !== null ? pb : 0.2); sdMax = Math.max(sdMax, 0.25); }
         rem = 0; break;
       }
       var cs = getComputedStyle(el);
+      var after = pseudoLayers(el, '::after', x, y);
+      for (var q = 0; q < after.length && rem > 0.02; q++) { acc += rem * after[q].a * G(after[q].L); rem *= (1 - after[q].a); }
       if (hasDirectText(el)) {
         var gk = 'g' + key; if (!(gk in per)) per[gk] = glyphCoverage(el, r);
         var g = per[gk];
-        if (g > 0.01) { var tm = (cs.color || '').match(/rgba?\(([^)]+)\)/); if (tm) { var tc = tm[1].split(/[\s,\/]+/).map(parseFloat); var Lt = lum(tc[0], tc[1], tc[2]); acc += rem * g * Lt; rem *= (1 - g); sdMax = Math.max(sdMax, Math.min(1, g * 2) * 0.5); } }
+        if (g > 0.01) { var tm = (cs.color || '').match(/rgba?\(([^)]+)\)/); if (tm) { var tc = tm[1].split(/[\s,\/]+/).map(parseFloat); var Lt = lum(tc[0], tc[1], tc[2]); acc += rem * g * G(Lt); rem *= (1 - g); sdMax = Math.max(sdMax, Math.min(1, g * 2) * 0.5); } }
       }
       var bgi = cs.backgroundImage && cs.backgroundImage !== 'none' ? cs.backgroundImage : '';
       if (bgi) {
         if (bgi.indexOf('url(') === 0) {
           var st2 = bgStats(el, cs, bgi, r); media = true;
-          if (st2) { sdMax = Math.max(sdMax, st2.sd); acc += rem * st2.L; } else { acc += rem * 0.22; sdMax = Math.max(sdMax, 0.25); }
+          if (st2) { sdMax = Math.max(sdMax, st2.sd); acc += rem * G(st2.L); } else { acc += rem * G(0.22); sdMax = Math.max(sdMax, 0.25); }
           rem = 0; break;
         }
-        var gl = gradientLum(bgi, el, x, y);
-        if (gl !== null) { acc += rem * gl; rem = 0; break; }
       }
-      var bm = (cs.backgroundColor || '').match(/rgba?\(([^)]+)\)/);
-      if (bm) { var bc = bm[1].split(/[\s,\/]+/).map(parseFloat); var ba = bc.length > 3 ? bc[3] : 1; if (ba > 0.01) { acc += rem * ba * lum(bc[0], bc[1], bc[2]); rem *= (1 - ba); } }
+      var before = pseudoLayers(el, '::before', x, y);
+      for (var q2 = 0; q2 < before.length && rem > 0.02; q2++) { acc += rem * before[q2].a * G(before[q2].L); rem *= (1 - before[q2].a); }
+      var own = paintLayers(cs, el, x, y);
+      for (var q3 = 0; q3 < own.length && rem > 0.02; q3++) { acc += rem * own[q3].a * G(own[q3].L); rem *= (1 - own[q3].a); }
     }
-    if (rem > 0.02) { var lb = parseBg(getComputedStyle(body)); if (lb === null) lb = parseBg(getComputedStyle(doc)); acc += rem * (lb === null ? 1 : lb); }
-    return { L: acc, sd: sdMax, media: media };
+    if (rem > 0.02) { var lb = parseBg(getComputedStyle(body)); if (lb === null) lb = parseBg(getComputedStyle(doc)); acc += rem * G(lb === null ? 1 : lb); }
+    return { L: Math.pow(acc, 2.2), sd: sdMax, media: media };
   }
   var inkEls = [];
   if (logo) inkEls.push(logo);
