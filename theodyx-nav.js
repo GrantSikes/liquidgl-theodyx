@@ -1,4 +1,4 @@
-/*! theodyx-nav.js v4.0.0 (2026-09-03) — behaviours for the clear liquid-glass nav (#thx-nav).
+/*! theodyx-nav.js v4.1.0 (2026-09-03) — behaviours for the clear liquid-glass nav (#thx-nav).
  * One unanimous ink (every word, the logo and the burger flip together between pure white and pure black, chosen
  * from what is behind all of them), whole-surface lens (continuous refraction profile from the pill geometry, per-
  * channel dispersion, geometry-lit specular rim, colour bleed; Chromium, capability + frame-budget gated), pointer
@@ -9,7 +9,7 @@
   if (window.__thxNav) return;
   var nav = document.getElementById('thx-nav');
   if (!nav) return;
-  var API = window.__thxNav = { v: '4.0.0' };
+  var API = window.__thxNav = { v: '4.1.0' };
   var doc = document.documentElement, body = document.body;
   var glass = nav.querySelector('.thx-nav-glass');
   var rim = nav.querySelector('.thx-nav-rim');
@@ -273,9 +273,10 @@
       if (MEDIA.test(el.tagName)) {
         if (!(key in per)) per[key] = mediaStats(el, r);
         var st = per[key]; media = true;
-        if (st) { sdMax = Math.max(sdMax, st.sd); acc += rem * G(st.L); }
-        else { var cs0 = getComputedStyle(el), pb = parseBg(cs0); acc += rem * G(pb !== null ? pb : 0.2); sdMax = Math.max(sdMax, 0.25); }
-        rem = 0; break;
+        if (st) { sdMax = Math.max(sdMax, st.sd); acc += rem * G(st.L); rem = 0; break; }
+        var cs0 = getComputedStyle(el), pb = parseBg(cs0);
+        if (pb !== null) { acc += rem * G(pb); rem = 0; break; }
+        sdMax = Math.max(sdMax, 0.25); continue; /* no frames yet and no colour of its own (a video still loading): what is painted beneath it is what the eye sees */
       }
       var cs = getComputedStyle(el);
       var after = pseudoLayers(el, '::after', x, y);
@@ -289,8 +290,8 @@
       if (bgi) {
         if (bgi.indexOf('url(') === 0) {
           var st2 = bgStats(el, cs, bgi, r); media = true;
-          if (st2) { sdMax = Math.max(sdMax, st2.sd); acc += rem * G(st2.L); } else { acc += rem * G(0.22); sdMax = Math.max(sdMax, 0.25); }
-          rem = 0; break;
+          if (st2) { sdMax = Math.max(sdMax, st2.sd); acc += rem * G(st2.L); rem = 0; break; }
+          sdMax = Math.max(sdMax, 0.25); /* unreadable image: fall through to the element's own colour layers and whatever is beneath */
         }
       }
       var before = pseudoLayers(el, '::before', x, y);
@@ -403,7 +404,7 @@
   /* Tunables (live: __thxNav.lens({scale:70,...})). Profile T(d) over distance d from the rounded edge: a rim term
    * (smoothstep^rimK over the outer rimW*h, the bevel) plus a body term that runs all the way to the centre line
    * (sign < 0 = the centre magnifies like a thick slab), so the whole surface bends — no flat inset panel. */
-  var LENS = { scale: 84, rim: 0.8, rimW: 0.5, rimK: 1.3, body: -0.4, bodyK: 1.6, disp: 0.06, sat: 1.4, blur: 0.5, spec: 1, light: [-0.55, -0.83], light2: [0.55, 0.83] };
+  var LENS = { scale: 84, rim: 0.8, rimW: 0.5, rimK: 1.3, body: -0.4, bodyK: 1.6, disp: 0.16, sat: 1.55, blur: 0.5, spec: 0.7, specW: 0.3, bleed: 0.6, bleedBlur: 30, light: [-0.55, -0.83], light2: [0.55, 0.83] };
   var mapW = 0, mapH = 0, mapURL = '', mapRetry = 0;
   var svgNS = 'http://www.w3.org/2000/svg';
   function fe(name, attrs) { var e = document.createElementNS(svgNS, name); for (var k in attrs) e.setAttribute(k, attrs[k]); return e; }
@@ -447,8 +448,13 @@
      * so the glass is enlarged by `pad` on every side (and clipped back to the pill with clip-path). The map covers
      * the enlarged box; the pill geometry sits centred in it. */
     var pad = Math.ceil(LENS.scale / 2) + 4;
-    nav.style.setProperty('--thx-lens-pad', pad + 'px');
-    var W = w + 2 * pad, Hh = h + 2 * pad;
+    /* The capture box must never leave the viewport: Chromium clips a backdrop-filter to the visible area and then stretches
+     * the map over what is left, which shifts the whole lens. The top pad is therefore capped at the bar's own offset, and
+     * upward samples are clamped to the viewport edge (see below). */
+    var padT = Math.max(2, Math.min(pad, Math.floor(nr.top) - 1));
+    nav.style.setProperty('--thx-lens-pad', pad + 'px'); nav.style.setProperty('--thx-lens-pad-t', padT + 'px');
+    nav.style.setProperty('--thx-nav-bleed', String(LENS.bleed)); nav.style.setProperty('--thx-nav-bleed-blur', LENS.bleedBlur + 'px');
+    var W = w + 2 * pad, Hh = h + pad + padT;
     var R = Math.min(h / 2, parseFloat(getComputedStyle(nav).borderTopLeftRadius) || h / 2);
     var H = h / 2, Rb = Math.max(12, h * LENS.rimW);
     var L1 = LENS.light, L2 = LENS.light2;
@@ -472,12 +478,13 @@
     var sx = W / cw, sy = Hh / ch;
     for (var y = 0; y < ch; y++) {
       for (var x = 0; x < cw; x++) {
-        var g = geo((x + 0.5) * sx - pad, (y + 0.5) * sy - pad), dist = g[0];
+        var g = geo((x + 0.5) * sx - pad, (y + 0.5) * sy - padT), dist = g[0];
         var i = (y * cw + x) * 4, T = 0;
         if (dist > 0) {
           var tr = Math.max(0, Math.min(1, 1 - dist / Rb)); tr = tr * tr * (3 - 2 * tr); tr = Math.pow(tr, LENS.rimK);
           var tb = Math.max(0, Math.min(1, 1 - dist / H)); tb = Math.pow(tb, LENS.bodyK);
           T = Math.max(-1, Math.min(1, tr * LENS.rim + tb * LENS.body));
+          if (T > 0 && g[2] < 0) { var reach = 2 * (padT + dist) / (LENS.scale * (1 + LENS.disp) * -g[2]); if (T > reach) T = reach; } /* an upward sample may not go above the viewport */
         }
         d[i] = Math.round(128 + g[1] * T * 127); d[i + 1] = Math.round(128 + g[2] * T * 127); d[i + 2] = 128; d[i + 3] = 255;
       }
@@ -492,7 +499,7 @@
       for (var y2 = 0; y2 < ch2; y2++) {
         for (var x2 = 0; x2 < cw2; x2++) {
           var g2 = geo((x2 + 0.5) * sx2, (y2 + 0.5) * sy2), d2 = Math.max(0, g2[0]), nx = g2[1], ny = g2[2];
-          var t2 = Math.max(0, Math.min(1, 1 - d2 / Rb)); t2 = t2 * t2 * (3 - 2 * t2); t2 = Math.pow(t2, LENS.rimK);
+          var t2 = Math.max(0, Math.min(1, 1 - d2 / Math.max(8, h * LENS.specW))); t2 = t2 * t2 * (3 - 2 * t2); t2 = Math.pow(t2, LENS.rimK); /* the highlight lives on a narrower band than the lens, so a dark page stays dark through the body */
           var s1 = Math.max(0, nx * L1[0] + ny * L1[1]), s2 = Math.max(0, nx * L2[0] + ny * L2[1]);
           var spec = (Math.pow(s1, 2.4) * 1.0 + Math.pow(s2, 2.4) * 0.42) * Math.pow(t2, 0.85) * LENS.spec;
           var edge = d2 < 1.2 ? 0.55 : 0;
