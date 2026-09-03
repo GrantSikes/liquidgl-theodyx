@@ -43,7 +43,8 @@ async function textContrast(page, sel) {
     const mean = lums.reduce((a, b) => a + b, 0) / lums.length;
     const cr = (l) => { const [x, y] = [tl, l].sort((p, q) => q - p); return (x + 0.05) / (y + 0.05); };
     const best = Math.max((1.05) / (mean + 0.05), (mean + 0.05) / 0.05);
-    return { worst10: +cr(worst).toFixed(2), mean: +cr(mean).toFixed(2), best: +best.toFixed(2), color: info.color };
+    const other = tl > 0.5 ? (mean + 0.05) / 0.05 : 1.05 / (mean + 0.05); /* what the OTHER ink would score on this backdrop */
+    return { worst10: +cr(worst).toFixed(2), mean: +cr(mean).toFixed(2), best: +best.toFixed(2), other: +other.toFixed(2), Lmean: +mean.toFixed(3), color: info.color };
   });
 }
 (async () => {
@@ -75,26 +76,36 @@ async function textContrast(page, sel) {
     await page.evaluate(() => { document.querySelectorAll('video').forEach(v => { try { v.pause(); } catch (e) {} }); }); /* page scripts resume autoplay on scroll; hold the frame while this step is measured */
     await page.evaluate(() => window.__thxNav && (window.__thxNav.reink || window.__thxNav.retone)()); await sleep(380);
     const tone = await page.evaluate(() => document.getElementById('thx-nav').dataset.tone);
-    const inks = await page.evaluate(() => [...document.querySelectorAll('#thx-nav .thx-nav-logo, #thx-nav .thx-nav-menu a')].map(e => e.dataset.ink || 'n/a'));
-    const mixedFlags = await page.evaluate(() => [...document.querySelectorAll('#thx-nav .thx-nav-logo, #thx-nav .thx-nav-menu a')].map(e => e.dataset.inkMixed === '1'));
+    const inks = await page.evaluate(() => { const n = document.getElementById('thx-nav'); const root = n.dataset.ink; return [...document.querySelectorAll('#thx-nav .thx-nav-logo, #thx-nav .thx-nav-menu a')].map(e => e.dataset.ink || root || 'n/a'); });
+    const scrim = await page.evaluate(() => document.getElementById('thx-nav').dataset.scrim || '');
+    const mixedFlags = await page.evaluate(() => { const N = window.__thxNav; const viaApi = N && N.inks ? N.inks() : null; return [...document.querySelectorAll('#thx-nav .thx-nav-logo, #thx-nav .thx-nav-menu a')].map((e, i) => e.dataset.inkMixed === '1' || !!(viaApi && viaApi[i] && viaApi[i].mixed)); });
     inks.forEach(i => inkSet.add(i));
     const per = [];
-    for (const sel of INK_ELS) { const m = await textContrast(page, sel); if (m) per.push({ sel, worst10: m.worst10, mean: m.mean, best: m.best }); }
+    for (const sel of INK_ELS) { const m = await textContrast(page, sel); if (m) per.push({ sel, worst10: m.worst10, mean: m.mean, best: m.best, other: m.other, L: m.Lmean }); }
     const jsL = await page.evaluate(() => (window.__thxNav && window.__thxNav.inks) ? window.__thxNav.inks().map(i => i.L === null ? null : +i.L.toFixed(3)) : null);
-    if (per.length) { const w = Math.min(...per.map(p => p.worst10)), mn = Math.min(...per.map(p => p.mean)); const worstEl = per.reduce((a, b) => a.worst10 < b.worst10 ? a : b); const wrong = per.filter(p => p.mean < 0.85 * p.best && p.mean < 4.5).map(p => p.sel); const unmixedMeans = per.filter((p, i) => !mixedFlags[i]).map(p => p.mean); const mnU = unmixedMeans.length ? Math.min(...unmixedMeans) : 99; sweep.push({ y, tone, inks: inks.join(''), mixed: mixedFlags.map(m => m ? 1 : 0).join(''), worst10: w, mean: mn, meanUnmixed: mnU, worstEl: worstEl.sel, per: per.map(p => [p.mean, p.worst10, p.best]), jsL, wrong }); minWorst = Math.min(minWorst, w); minMean = Math.min(minMean, mnU); }
+    if (per.length) {
+      const w = Math.min(...per.map(p => p.worst10)), mn = Math.min(...per.map(p => p.mean));
+      const worstEl = per.reduce((a, b) => a.worst10 < b.worst10 ? a : b);
+      const altWorst = Math.min(...per.map(p => p.other));            /* maximin: the other ink's worst word at this step */
+      const disagree = per.some(p => p.other > p.mean * 1.15) && per.some(p => p.mean > p.other * 1.15); /* the words genuinely prefer different inks */
+      const unanimous = new Set(inks).size === 1;
+      const maximinOK = mn >= 0.85 * altWorst || mn >= 4.5;          /* chosen ink's worst word is (near) the best achievable worst word */
+      sweep.push({ y, tone, inks: inks.join(''), scrim, unanimous, disagree, maximinOK, altWorst, worst10: w, mean: mn, worstEl: worstEl.sel, per: per.map(p => [p.mean, p.worst10, p.other]), jsL });
+      minWorst = Math.min(minWorst, w); if (!disagree) minMean = Math.min(minMean, mn);
+    }
   }
   results.sweep = sweep;
-  const wrongSteps = sweep.filter(s => s.wrong && s.wrong.length);
-  const elementSteps = sweep.reduce((n, s) => n + s.per.length, 0), wrongCount = wrongSteps.reduce((n, s) => n + s.wrong.length, 0);
-  check('≥97% of word/logo samples wear the better ink for their own backdrop (≥85% of the best achievable contrast)', wrongCount <= 0.03 * elementSteps, { wrong: wrongCount, of: elementSteps, sample: wrongSteps.slice(0, 5).map(s => [s.y, s.wrong.join(','), s.per.map(p => p[0] + '/' + p[2]).join(' ')]) });
-  check('no unmixed word/logo below 2.5:1 mean contrast at any 50px step (legibility floor; mixed-backdrop samples carry a halo and are reported separately)', minMean >= 2.5, { minMean, steps: sweep.length, low: sweep.filter(s => s.meanUnmixed < 2.5).slice(0, 5).map(s => [s.y, s.inks, s.meanUnmixed, s.worstEl]), mixedBelow25: sweep.filter(s => s.mean < 2.5 && s.meanUnmixed >= 2.5).length });
+  const notUnanimous = sweep.filter(s => !s.unanimous), notMaximin = sweep.filter(s => !s.maximinOK);
+  check('ONE ink for every word + logo at every 50px step (unanimous black or white)', notUnanimous.length === 0, { steps: sweep.length, offenders: notUnanimous.slice(0, 5).map(s => [s.y, s.inks]) });
+  check('≥95% of steps wear the maximin ink (the colour whose worst word still reads best, ≥85% of the alternative)', notMaximin.length <= Math.ceil(0.05 * sweep.length), { off: notMaximin.length, of: sweep.length, sample: notMaximin.slice(0, 5).map(s => [s.y, s.inks, s.mean, s.altWorst]) });
+  check('no word/logo below 2.5:1 mean contrast at any step whose backdrop does not disagree with itself (legibility floor; disagreeing steps carry the scrim and are reported separately)', minMean >= 2.5, { minMean, steps: sweep.length, disagreeSteps: sweep.filter(s => s.disagree).length, scrimSteps: sweep.filter(s => s.scrim).length, low: sweep.filter(s => !s.disagree && s.mean < 2.5).slice(0, 5).map(s => [s.y, s.inks, s.mean, s.worstEl]) });
   results.floorInfo = { stepsBelow4: sweep.filter(s => s.mean < 4).length };
   console.log((results.floorInfo.stepsBelow4 === 0 ? 'PASS ' : 'WARN ') + 'every word ≥ 4:1 mean at every step — ' + JSON.stringify(results.floorInfo));
   results.aaInfo = { stepsBelow45: sweep.filter(s => s.mean < 4.5).length, steps: sweep.length, minMean };
   console.log((results.aaInfo.stepsBelow45 === 0 ? 'PASS ' : 'WARN ') + 'AA (4.5:1 mean) for every word at every step — ' + JSON.stringify(results.aaInfo) + ' (clear glass over mid-tone photos caps both inks near 4.4:1)');
   results.worst10Info = { minWorst, worstSteps: sweep.filter(s => s.worst10 < 3).slice(0, 6) };
   console.log((minWorst >= 3 ? 'PASS ' : 'WARN ') + 'worst-10% pixels ≥ 3:1 for every word + logo (informational on clear glass; halos are not measured) — ' + JSON.stringify(results.worst10Info).slice(0, 260));
-  check('ink adapts per element (both black and white observed) when the page has both backdrops', (inkSet.has('light') && inkSet.has('dark')) || maxY < 400, [...inkSet]);
+  check('ink adapts (both black and white observed) when the page has both backdrops', (inkSet.has('light') && inkSet.has('dark')) || maxY < 400, [...inkSet]);
   // scroll condense
   await page.evaluate(() => window.scrollTo(0, 400)); await sleep(500);
   const cond = await page.evaluate(() => { const n = document.getElementById('thx-nav'); return { scrolledClass: n.classList.contains('is-scrolled'), transform: getComputedStyle(n).transform, glassBg: getComputedStyle(n.querySelector('.thx-nav-glass')).backgroundColor }; });

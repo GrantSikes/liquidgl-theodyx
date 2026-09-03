@@ -1,14 +1,15 @@
-/*! theodyx-nav.js v3.1.1 (2026-09-02) — behaviours for the clear liquid-glass nav (#thx-nav).
- * Per-element ink (each word, the logo and the burger pick pure white or pure black from what is behind THEM),
- * edge lensing map + chromatic aberration (Chromium, capability + frame-budget gated), pointer highlight with a
- * spring, scroll condense, accessible mobile sheet (focus trap, Escape, inert, iOS-safe scroll lock), skip link
+/*! theodyx-nav.js v4.0.0 (2026-09-03) — behaviours for the clear liquid-glass nav (#thx-nav).
+ * One unanimous ink (every word, the logo and the burger flip together between pure white and pure black, chosen
+ * from what is behind all of them), whole-surface lens (continuous refraction profile from the pill geometry, per-
+ * channel dispersion, geometry-lit specular rim, colour bleed; Chromium, capability + frame-budget gated), pointer
+ * highlight with a spring, scroll condense, accessible mobile sheet (focus trap, Escape, inert, iOS-safe scroll lock), skip link
  * target, legacy first-section clearance, conversion hooks. No dependencies. */
 (function () {
   'use strict';
   if (window.__thxNav) return;
   var nav = document.getElementById('thx-nav');
   if (!nav) return;
-  var API = window.__thxNav = { v: '3.1.1' };
+  var API = window.__thxNav = { v: '4.0.0' };
   var doc = document.documentElement, body = document.body;
   var glass = nav.querySelector('.thx-nav-glass');
   var rim = nav.querySelector('.thx-nav-rim');
@@ -304,19 +305,11 @@
   if (logo) inkEls.push(logo);
   nav.querySelectorAll('.thx-nav-menu a').forEach(function (a) { inkEls.push(a); });
   if (burger) inkEls.push(burger);
-  var inkState = inkEls.map(function (el) { return { el: el, ink: 'light', mixed: false, t: 0, L: null }; });
-  var tone = 'dark', anyMedia = false, lastTickMs = 0, inkTimer = 0, inkInterval = 320;
-  function contrast(L, ink) { return ink === 'light' ? 1.05 / (L + 0.05) : (L + 0.05) / 0.05; }
-  function decide(cur, L, tNow, since) {
-    L = Math.min(1, L * 1.3 + 0.01);           /* calibrated against rendered pixels through the glass: sampler underreads ~12% and the glass lifts the backdrop ~15% */
-    var cw = 1.05 / (L + 0.05), cb = (L + 0.05) / 0.05;
-    var want = cb > cw ? 'dark' : 'light';
-    if (want === cur) return cur;
-    var better = want === 'dark' ? cb / cw : cw / cb;
-    if (better < 1.15) return cur;             /* hysteresis */
-    if (tNow - since < 300) return cur;        /* dwell */
-    return want;
-  }
+  var inkState = inkEls.map(function (el) { return { el: el, L: null, mixed: false }; });
+  var ink = 'light', inkT = 0, scrim = '', tone = 'dark', anyMedia = false, lastTickMs = 0, inkTimer = 0, inkInterval = 320;
+  var cal = function (L) { return Math.min(1, L * 1.3 + 0.01); }; /* calibrated against rendered pixels through the glass: sampler underreads ~12% and the glass lifts the backdrop ~15% */
+  function contrast(L, which) { return which === 'light' ? 1.05 / (L + 0.05) : (L + 0.05) / 0.05; }
+  nav.setAttribute('data-ink', ink);
   function reink() {
     if (nav.getAttribute('data-open') === 'true') return;
     var t0 = now();
@@ -325,35 +318,52 @@
     try { reinkInner(t0); } finally { nav.style.pointerEvents = pe; }
   }
   function reinkInner(t0) {
-    var sumL = 0, n = 0;
+    /* 1. sample every inked element (9-point grid each), 2. decide ONE ink for all of them: the ink whose worst word
+     * still reads best (maximin contrast), mean luminance breaking ties, with hysteresis + dwell so it never flickers. */
+    var forced = null, worstD = Infinity, worstL = Infinity, sumL = 0, n = 0, prefD = 0, prefL = 0, anyMixed = false, wsum = 0, wL = 0;
     for (var i = 0; i < inkState.length; i++) {
       var s = inkState[i], el = s.el;
       if (!el.offsetParent) continue;
       var r = el.getBoundingClientRect(); if (!r.width) continue;
       var pts = [[0.15, 0.18], [0.5, 0.18], [0.85, 0.18], [0.15, 0.5], [0.5, 0.5], [0.85, 0.5], [0.15, 0.84], [0.5, 0.84], [0.85, 0.84]];
-      var Ls = [], sds = [], forced = null;
+      var Ls = [], sds = [];
       for (var p = 0; p < pts.length; p++) {
         var st; try { st = pointStats(r.left + r.width * pts[p][0], r.top + r.height * pts[p][1], r); } catch (e) { st = null; }
         if (!st) continue;
         if (st.forced) { forced = st.forced; break; }
         Ls.push(st.L); sds.push(st.sd || 0); if (st.media) anyMedia = true;
       }
-      var ink, L, mixed = false;
-      if (forced) { ink = forced === 'light' ? 'dark' : 'light'; L = forced === 'light' ? 1 : 0; }
-      else if (!Ls.length) { ink = s.ink; L = s.L === null ? 0.2 : s.L; }
-      else {
-        L = Ls.reduce(function (a, b) { return a + b; }, 0) / Ls.length;
-        var spread = Math.max.apply(null, Ls) - Math.min.apply(null, Ls);
-        var sd = sds.reduce(function (a, b) { return a + b; }, 0) / sds.length;
-        mixed = spread > 0.3 || sd > 0.2;
-        ink = decide(s.ink, L, t0, s.t);
-        if (mixed && contrast(Math.min(1, L * 1.3 + 0.01), ink) < 3) { var Le = Math.min(1, L * 1.3 + 0.01); ink = contrast(Le, 'dark') > contrast(Le, 'light') ? 'dark' : 'light'; }
-      }
-      if (ink !== s.ink) { s.ink = ink; s.t = t0; el.setAttribute('data-ink', ink); }
-      else if (!el.hasAttribute('data-ink')) el.setAttribute('data-ink', ink);
-      if (mixed !== s.mixed) { s.mixed = mixed; if (mixed) el.setAttribute('data-ink-mixed', '1'); else el.removeAttribute('data-ink-mixed'); }
-      s.L = L; sumL += L; n++;
+      if (forced) break;
+      if (!Ls.length) continue;
+      var L = Ls.reduce(function (a, b) { return a + b; }, 0) / Ls.length;
+      var spread = Math.max.apply(null, Ls) - Math.min.apply(null, Ls);
+      var sd = sds.reduce(function (a, b) { return a + b; }, 0) / sds.length;
+      s.mixed = spread > 0.3 || sd > 0.2; if (s.mixed) anyMixed = true;
+      s.L = L;
+      var Le = cal(L), cd = contrast(Le, 'dark'), cl = contrast(Le, 'light');
+      if (cd < worstD) worstD = cd; if (cl < worstL) worstL = cl;
+      if (cd > cl) prefD++; else prefL++;
+      var w = r.width * r.height; wsum += w; wL += w * Le;
+      sumL += L; n++;
     }
+    var want = ink, mixed = false;
+    if (forced) { want = forced === 'light' ? 'dark' : 'light'; }
+    else if (n) {
+      var meanLe = wsum ? wL / wsum : cal(sumL / n);
+      mixed = (prefD > 0 && prefL > 0) || anyMixed;
+      if (Math.abs(worstD - worstL) < 0.35) want = contrast(meanLe, 'dark') >= contrast(meanLe, 'light') ? 'dark' : 'light'; /* tie: the bar as a whole decides */
+      else want = worstD > worstL ? 'dark' : 'light';
+      if (want !== ink) {
+        var better = want === 'dark' ? worstD / Math.max(0.01, worstL) : worstL / Math.max(0.01, worstD);
+        if (better < 1.15 || t0 - inkT < 300) want = ink;          /* hysteresis + dwell */
+      }
+    }
+    if (want !== ink) { ink = want; inkT = t0; }
+    nav.setAttribute('data-ink', ink);
+    /* legibility scrim: only when the words disagree about the backdrop AND the chosen ink still fails somewhere (Apple's glass darkens/lightens the same way) */
+    var worst = ink === 'dark' ? worstD : worstL;
+    var sc = (!forced && mixed && n && worst < 3) ? (ink === 'light' ? 'dark' : 'light') : '';
+    if (sc !== scrim) { scrim = sc; if (sc) nav.setAttribute('data-scrim', sc); else nav.removeAttribute('data-scrim'); }
     if (n) {
       var avg = sumL / n, t = tone;
       if (tone === 'dark' && avg > 0.56) t = 'light';
@@ -372,7 +382,8 @@
   }
   document.addEventListener('visibilitychange', function () { if (!document.hidden) reink(); });
   API.reink = reink; API.retone = reink;
-  API.inks = function () { return inkState.map(function (s) { return { text: (s.el.textContent || s.el.getAttribute('aria-label') || '').trim().slice(0, 24), ink: s.ink, L: s.L, mixed: s.mixed }; }); };
+  API.inks = function () { return inkState.map(function (s) { return { text: (s.el.textContent || s.el.getAttribute('aria-label') || '').trim().slice(0, 24), ink: ink, L: s.L, mixed: s.mixed }; }); };
+  API.ink = function () { return { ink: ink, scrim: scrim, tone: tone }; };
   API.tickMs = function () { return lastTickMs; };
   API.debugPoint = function (x, y, w) { tickCache = new Map(); var pe = nav.style.pointerEvents; nav.style.pointerEvents = 'none'; var r = { left: x - (w || 60) / 2, top: y - 8, width: w || 60, height: 16, right: x + (w || 60) / 2, bottom: y + 8 }; var st; try { st = pointStats(x, y, r); } finally { nav.style.pointerEvents = pe; } tickCache = null; return st; };
   API.setTone = function (t) { tone = t === 'light' ? 'light' : 'dark'; nav.setAttribute('data-tone', tone); };
@@ -389,46 +400,113 @@
     refractOK = !!mapImg && isBlink && CSS.supports('backdrop-filter', 'url(#x) blur(1px)') && !mqMotion.matches && !mqTrans.matches && (navigator.hardwareConcurrency || 8) >= 4 && (navigator.deviceMemory || 8) >= 4 && sessionStorage.getItem('thx-nav-norefract') !== '1';
     lite = !mqDesk.matches || !mqFine.matches || (navigator.hardwareConcurrency || 8) < 8;
   } catch (e) { refractOK = false; }
-  var mapW = 0, mapH = 0;
-  function buildMap() {
+  /* Tunables (live: __thxNav.lens({scale:70,...})). Profile T(d) over distance d from the rounded edge: a rim term
+   * (smoothstep^rimK over the outer rimW*h, the bevel) plus a body term that runs all the way to the centre line
+   * (sign < 0 = the centre magnifies like a thick slab), so the whole surface bends — no flat inset panel. */
+  var LENS = { scale: 84, rim: 0.8, rimW: 0.5, rimK: 1.3, body: -0.4, bodyK: 1.6, disp: 0.06, sat: 1.4, blur: 0.5, spec: 1, light: [-0.55, -0.83], light2: [0.55, 0.83] };
+  var mapW = 0, mapH = 0, mapURL = '';
+  var svgNS = 'http://www.w3.org/2000/svg';
+  function fe(name, attrs) { var e = document.createElementNS(svgNS, name); for (var k in attrs) e.setAttribute(k, attrs[k]); return e; }
+  function buildFilters(w, h) {
+    /* rebuilds #thx-lens (full: three displacement passes = per-channel dispersion) and #thx-lens-lite (one pass) */
+    var svg = mapImg && mapImg.ownerSVGElement; if (!svg) return false;
+    var S = LENS.scale, D = LENS.disp, cm = function (r, g, b, res, inp) { return fe('feColorMatrix', { 'in': inp, type: 'matrix', values: r + ' 0 0 0 0  0 ' + g + ' 0 0 0  0 0 ' + b + ' 0 0  0 0 0 1 0', result: res }); };
+    var build = function (id, full) {
+      var f = svg.querySelector('#' + id); if (!f) { f = fe('filter', { id: id }); svg.appendChild(f); }
+      while (f.firstChild) f.removeChild(f.firstChild);
+      f.setAttribute('x', '0'); f.setAttribute('y', '0'); f.setAttribute('width', '100%'); f.setAttribute('height', '100%'); f.setAttribute('color-interpolation-filters', 'sRGB');
+      var img = fe('feImage', { id: id + '-map', result: 'map', preserveAspectRatio: 'none', x: '0', y: '0', width: w, height: h });
+      img.setAttribute('href', mapURL); try { img.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', mapURL); } catch (e) {}
+      f.appendChild(img);
+      f.appendChild(fe('feGaussianBlur', { 'in': 'SourceGraphic', stdDeviation: LENS.blur, result: 'src' }));
+      if (full && D > 0) {
+        f.appendChild(fe('feDisplacementMap', { 'in': 'src', in2: 'map', scale: (S * (1 - D)).toFixed(2), xChannelSelector: 'R', yChannelSelector: 'G', result: 'dr' }));
+        f.appendChild(fe('feDisplacementMap', { 'in': 'src', in2: 'map', scale: S, xChannelSelector: 'R', yChannelSelector: 'G', result: 'dg' }));
+        f.appendChild(fe('feDisplacementMap', { 'in': 'src', in2: 'map', scale: (S * (1 + D)).toFixed(2), xChannelSelector: 'R', yChannelSelector: 'G', result: 'db' }));
+        f.appendChild(cm(1, 0, 0, 'r', 'dr')); f.appendChild(cm(0, 1, 0, 'g', 'dg')); f.appendChild(cm(0, 0, 1, 'b', 'db'));
+        f.appendChild(fe('feComposite', { 'in': 'r', in2: 'g', operator: 'arithmetic', k1: 0, k2: 1, k3: 1, k4: 0, result: 'rg' }));
+        f.appendChild(fe('feComposite', { 'in': 'rg', in2: 'b', operator: 'arithmetic', k1: 0, k2: 1, k3: 1, k4: 0, result: 'd' }));
+      } else {
+        f.appendChild(fe('feDisplacementMap', { 'in': 'src', in2: 'map', scale: S, xChannelSelector: 'R', yChannelSelector: 'G', result: 'd' }));
+      }
+      f.appendChild(fe('feColorMatrix', { 'in': 'd', type: 'saturate', values: LENS.sat }));
+    };
+    build('thx-lens', true); build('thx-lens-lite', false);
+    mapImg = document.getElementById('thx-lens-map'); mapImgLite = document.getElementById('thx-lens-map-lite');
+    return true;
+  }
+  function buildMap(force) {
     if (!refractOK) return;
-    var w = Math.round(nav.getBoundingClientRect().width), h = Math.round(glass.getBoundingClientRect().height);
-    if (!w || !h || (w === mapW && h === mapH)) return;
+    var nr = nav.getBoundingClientRect();
+    var w = Math.round(nr.width), h = Math.round(nr.height);
+    if (!w || !h || (!force && w === mapW && h === mapH)) return;
     mapW = w; mapH = h;
-    var cw = Math.min(w, 720), ch = Math.min(h, 112);
+    /* The lens pulls content in from OUTSIDE the pill, but a backdrop-filter only captures what is under its own box,
+     * so the glass is enlarged by `pad` on every side (and clipped back to the pill with clip-path). The map covers
+     * the enlarged box; the pill geometry sits centred in it. */
+    var pad = Math.ceil(LENS.scale / 2) + 4;
+    nav.style.setProperty('--thx-lens-pad', pad + 'px');
+    var W = w + 2 * pad, Hh = h + 2 * pad;
+    var R = Math.min(h / 2, parseFloat(getComputedStyle(nav).borderTopLeftRadius) || h / 2);
+    var H = h / 2, Rb = Math.max(12, h * LENS.rimW);
+    var L1 = LENS.light, L2 = LENS.light2;
+    /* signed distance to the rounded-rect edge (positive inside) + outward normal, for a point (px,py) relative to the pill's top-left */
+    function geo(px, py) {
+      var cx = px - w / 2, cy = py - h / 2;
+      var qx = Math.abs(cx) - (w / 2 - R), qy = Math.abs(cy) - (h / 2 - R);
+      var ox = Math.max(qx, 0), oy = Math.max(qy, 0);
+      var outside = Math.sqrt(ox * ox + oy * oy), inside = Math.min(Math.max(qx, qy), 0);
+      var dist = R - (outside + inside);
+      var nx = 0, ny = 0;
+      if (qx > 0 || qy > 0) { var len = outside || 1; nx = (ox / len) * (cx < 0 ? -1 : 1); ny = (oy / len) * (cy < 0 ? -1 : 1); }
+      else if (qx > qy) { nx = cx < 0 ? -1 : 1; } else { ny = cy < 0 ? -1 : 1; }
+      return [dist, nx, ny];
+    }
+    /* 1. displacement map over the enlarged box */
+    var cw = Math.min(W, 880), ch = Math.min(Hh, 176);
     var c = document.createElement('canvas'); c.width = cw; c.height = ch;
     var ctx = c.getContext('2d'); if (!ctx) { refractOK = false; return; }
     var img = ctx.createImageData(cw, ch), d = img.data;
-    var sx = w / cw, sy = h / ch;
-    var R = Math.min(h / 2, parseFloat(getComputedStyle(nav).borderTopLeftRadius) || h / 2);
-    var bevel = Math.min(24, Math.max(14, h * 0.40));   /* flat clear centre; the lens lives in the outer ~22px */
+    var sx = W / cw, sy = Hh / ch;
     for (var y = 0; y < ch; y++) {
       for (var x = 0; x < cw; x++) {
-        var px = (x + 0.5) * sx, py = (y + 0.5) * sy;
-        var cx = px - w / 2, cy = py - h / 2;
-        var qx = Math.abs(cx) - (w / 2 - R), qy = Math.abs(cy) - (h / 2 - R);
-        var ox = Math.max(qx, 0), oy = Math.max(qy, 0);
-        var outside = Math.sqrt(ox * ox + oy * oy), inside = Math.min(Math.max(qx, qy), 0);
-        var dist = R - (outside + inside);            /* distance to the rounded edge, positive inside */
-        var nx = 0, ny = 0;
-        if (qx > 0 || qy > 0) { var len = outside || 1; nx = (ox / len) * (cx < 0 ? -1 : 1); ny = (oy / len) * (cy < 0 ? -1 : 1); }
-        else if (qx > qy) { nx = cx < 0 ? -1 : 1; } else { ny = cy < 0 ? -1 : 1; }
-        var t = Math.max(0, Math.min(1, 1 - dist / bevel));
-        t = t * t * (3 - 2 * t); t = Math.pow(t, 1.5);     /* lens profile: flat centre, steep bevel */
-        var i = (y * cw + x) * 4;
-        d[i] = Math.round(128 + nx * t * 127); d[i + 1] = Math.round(128 + ny * t * 127); d[i + 2] = 128; d[i + 3] = 255;
+        var g = geo((x + 0.5) * sx - pad, (y + 0.5) * sy - pad), dist = g[0];
+        var i = (y * cw + x) * 4, T = 0;
+        if (dist > 0) {
+          var tr = Math.max(0, Math.min(1, 1 - dist / Rb)); tr = tr * tr * (3 - 2 * tr); tr = Math.pow(tr, LENS.rimK);
+          var tb = Math.max(0, Math.min(1, 1 - dist / H)); tb = Math.pow(tb, LENS.bodyK);
+          T = Math.max(-1, Math.min(1, tr * LENS.rim + tb * LENS.body));
+        }
+        d[i] = Math.round(128 + g[1] * T * 127); d[i + 1] = Math.round(128 + g[2] * T * 127); d[i + 2] = 128; d[i + 3] = 255;
       }
     }
     ctx.putImageData(img, 0, 0);
-    var url = c.toDataURL('image/png');
-    [mapImg, mapImgLite].forEach(function (fe) {
-      if (!fe) return;
-      fe.setAttribute('href', url);
-      try { fe.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', url); } catch (e) {}
-      fe.setAttribute('width', w); fe.setAttribute('height', h);
-    });
+    mapURL = c.toDataURL('image/png');
+    /* 2. specular rim from the same geometry (pill-sized): key light top-left, fill bottom-right, only on the bevel */
+    var cw2 = Math.min(w, 720), ch2 = Math.min(h, 112);
+    var hc = document.createElement('canvas'); hc.width = cw2; hc.height = ch2; var hctx = hc.getContext('2d');
+    if (hctx && rim) {
+      var himg = hctx.createImageData(cw2, ch2), hd = himg.data, sx2 = w / cw2, sy2 = h / ch2;
+      for (var y2 = 0; y2 < ch2; y2++) {
+        for (var x2 = 0; x2 < cw2; x2++) {
+          var g2 = geo((x2 + 0.5) * sx2, (y2 + 0.5) * sy2), d2 = Math.max(0, g2[0]), nx = g2[1], ny = g2[2];
+          var t2 = Math.max(0, Math.min(1, 1 - d2 / Rb)); t2 = t2 * t2 * (3 - 2 * t2); t2 = Math.pow(t2, LENS.rimK);
+          var s1 = Math.max(0, nx * L1[0] + ny * L1[1]), s2 = Math.max(0, nx * L2[0] + ny * L2[1]);
+          var spec = (Math.pow(s1, 2.4) * 1.0 + Math.pow(s2, 2.4) * 0.42) * Math.pow(t2, 0.85) * LENS.spec;
+          var edge = d2 < 1.2 ? 0.55 : 0;
+          var j = (y2 * cw2 + x2) * 4;
+          hd[j] = 255; hd[j + 1] = 255; hd[j + 2] = 255; hd[j + 3] = Math.round(255 * Math.min(1, spec * 0.92 + edge));
+        }
+      }
+      hctx.putImageData(himg, 0, 0);
+      rim.style.backgroundImage = 'url(' + hc.toDataURL('image/png') + ')'; nav.classList.add('has-spec');
+    }
+    if (!buildFilters(W, Hh)) { refractOK = false; return; }
     nav.classList.add('is-refract'); nav.classList.toggle('is-lite', lite);
   }
+  /* colour bleed: the glass takes on the colours around it (blurred, saturated, masked to the outer body) */
+  var tint = nav.querySelector('.thx-nav-tint');
+  if (!tint && glass) { tint = document.createElement('div'); tint.className = 'thx-nav-tint'; tint.setAttribute('aria-hidden', 'true'); glass.parentNode.insertBefore(tint, glass.nextSibling); }
   function frameBudget() {
     if (!refractOK) return;
     var last = now(), long = 0, n = 0, active = false, t0 = last;
@@ -440,13 +518,17 @@
       if (t - t0 < 4000 && n < 90) return raf(loop);
       window.removeEventListener('scroll', onS);
       if (n >= 12 && long / n > 0.2) {
-        if (!lite) { lite = true; nav.classList.add('is-lite'); }                   /* first: drop chromatic aberration */
+        if (!lite) { lite = true; nav.classList.add('is-lite'); }                   /* first: single-pass lens, no dispersion, no colour bleed */
         else { refractOK = false; nav.classList.remove('is-refract'); try { sessionStorage.setItem('thx-nav-norefract', '1'); } catch (e) {} }
       }
     })(last);
   }
-  if (refractOK) { buildMap(); frameBudget(); window.addEventListener('resize', function () { raf(buildMap); }, { passive: true }); }
-  API.lens = function () { return { on: nav.classList.contains('is-refract'), lite: nav.classList.contains('is-lite'), map: [mapW, mapH] }; };
+  if (refractOK) { buildMap(); frameBudget(); window.addEventListener('resize', function () { raf(function () { buildMap(); }); }, { passive: true }); }
+  API.lens = function (opts) {
+    if (opts && typeof opts === 'object') { for (var k in opts) if (k in LENS) LENS[k] = opts[k]; if (refractOK) buildMap(true); }
+    return { on: nav.classList.contains('is-refract'), lite: nav.classList.contains('is-lite'), map: [mapW, mapH], params: JSON.parse(JSON.stringify(LENS)) };
+  };
+  API.setLite = function (on) { lite = !!on; nav.classList.toggle('is-lite', lite); };
 
   /* ---------- 6. pointer highlight with a spring ---------- */
   var lens = { x: 0, y: 0, s: 1, vx: 0, vy: 0, vs: 0, tx: 0, ty: 0, ts: 1, on: false, running: false };
