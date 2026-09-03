@@ -404,7 +404,7 @@
    * (smoothstep^rimK over the outer rimW*h, the bevel) plus a body term that runs all the way to the centre line
    * (sign < 0 = the centre magnifies like a thick slab), so the whole surface bends — no flat inset panel. */
   var LENS = { scale: 84, rim: 0.8, rimW: 0.5, rimK: 1.3, body: -0.4, bodyK: 1.6, disp: 0.06, sat: 1.4, blur: 0.5, spec: 1, light: [-0.55, -0.83], light2: [0.55, 0.83] };
-  var mapW = 0, mapH = 0, mapURL = '';
+  var mapW = 0, mapH = 0, mapURL = '', mapRetry = 0;
   var svgNS = 'http://www.w3.org/2000/svg';
   function fe(name, attrs) { var e = document.createElementNS(svgNS, name); for (var k in attrs) e.setAttribute(k, attrs[k]); return e; }
   function buildFilters(w, h) {
@@ -439,7 +439,9 @@
     if (!refractOK) return;
     var nr = nav.getBoundingClientRect();
     var w = Math.round(nr.width), h = Math.round(nr.height);
-    if (!w || !h || (!force && w === mapW && h === mapH)) return;
+    if (!w || !h) return;
+    if (h > 160 || w < 200 || !/url\(|blur\(/.test(getComputedStyle(glass).backdropFilter || '')) { clearTimeout(mapRetry); mapRetry = setTimeout(function () { buildMap(force); }, 150); return; } /* stylesheet not applied yet (unstyled header) — never bake a map for the wrong geometry */
+    if (!force && w === mapW && h === mapH) return;
     mapW = w; mapH = h;
     /* The lens pulls content in from OUTSIDE the pill, but a backdrop-filter only captures what is under its own box,
      * so the glass is enlarged by `pad` on every side (and clipped back to the pill with clip-path). The map covers
@@ -523,7 +525,7 @@
       }
     })(last);
   }
-  if (refractOK) { buildMap(); frameBudget(); window.addEventListener('resize', function () { raf(function () { buildMap(); }); }, { passive: true }); }
+  if (refractOK) { buildMap(); frameBudget(); window.addEventListener('resize', function () { raf(function () { buildMap(); }); }, { passive: true }); window.addEventListener('load', function () { buildMap(); }); if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { buildMap(); }); }
   API.lens = function (opts) {
     if (opts && typeof opts === 'object') { for (var k in opts) if (k in LENS) LENS[k] = opts[k]; if (refractOK) buildMap(true); }
     return { on: nav.classList.contains('is-refract'), lite: nav.classList.contains('is-lite'), map: [mapW, mapH], params: JSON.parse(JSON.stringify(LENS)) };
