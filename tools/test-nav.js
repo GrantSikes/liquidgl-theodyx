@@ -49,7 +49,7 @@ async function textContrast(page, sel) {
 }
 (async () => {
   const bt = engine === 'webkit' ? webkit : chromium;
-  const browser = await bt.launch({ headless: true, args: engine === 'chromium' ? ['--disable-blink-features=AutomationControlled'] : [] });
+  const browser = await bt.launch({ headless: true, args: engine === 'chromium' ? ['--disable-blink-features=AutomationControlled', '--enable-gpu', '--use-angle=metal', '--ignore-gpu-blocklist', '--enable-gpu-rasterization'] : [] }); /* GPU raster: the SVG lens is a shader on real hardware; software raster makes the frame-budget check meaningless */
   const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1, userAgent: engine === 'chromium' ? 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36' : undefined });
   const page = await ctx.newPage();
   const override = (process.argv.find(a => a.startsWith('--override=')) || '').split('=')[1];
