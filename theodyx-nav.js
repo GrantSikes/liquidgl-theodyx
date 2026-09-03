@@ -1,4 +1,4 @@
-/*! theodyx-nav.js v4.1.0 (2026-09-03) — behaviours for the clear liquid-glass nav (#thx-nav).
+/*! theodyx-nav.js v4.2.0 (2026-09-03) — behaviours for the clear liquid-glass nav (#thx-nav).
  * One unanimous ink (every word, the logo and the burger flip together between pure white and pure black, chosen
  * from what is behind all of them), whole-surface lens (continuous refraction profile from the pill geometry, per-
  * channel dispersion, geometry-lit specular rim, colour bleed; Chromium, capability + frame-budget gated), pointer
@@ -9,7 +9,7 @@
   if (window.__thxNav) return;
   var nav = document.getElementById('thx-nav');
   if (!nav) return;
-  var API = window.__thxNav = { v: '4.1.0' };
+  var API = window.__thxNav = { v: '4.2.0' };
   var doc = document.documentElement, body = document.body;
   var glass = nav.querySelector('.thx-nav-glass');
   var rim = nav.querySelector('.thx-nav-rim');
@@ -404,7 +404,7 @@
   /* Tunables (live: __thxNav.lens({scale:70,...})). Profile T(d) over distance d from the rounded edge: a rim term
    * (smoothstep^rimK over the outer rimW*h, the bevel) plus a body term that runs all the way to the centre line
    * (sign < 0 = the centre magnifies like a thick slab), so the whole surface bends — no flat inset panel. */
-  var LENS = { scale: 84, rim: 0.8, rimW: 0.5, rimK: 1.3, body: -0.4, bodyK: 1.6, disp: 0.16, sat: 1.55, blur: 0.5, spec: 0.7, specW: 0.3, bleed: 0.6, bleedBlur: 30, light: [-0.55, -0.83], light2: [0.55, 0.83] };
+  var LENS = { scale: 84, rim: 0.8, rimW: 0.5, rimK: 1.3, body: -0.4, bodyK: 1.6, disp: 0.24, sat: 1.75, blur: 0.5, spec: 0.7, specW: 0.3, bleed: 0.78, bleedBlur: 34, light: [-0.55, -0.83], light2: [0.55, 0.83] };
   var mapW = 0, mapH = 0, mapURL = '', mapRetry = 0;
   var svgNS = 'http://www.w3.org/2000/svg';
   function fe(name, attrs) { var e = document.createElementNS(svgNS, name); for (var k in attrs) e.setAttribute(k, attrs[k]); return e; }
