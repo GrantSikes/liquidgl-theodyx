@@ -1,0 +1,8 @@
+/* ===== Phase 3 — one vertical rhythm from the token scale. This block sits after Webflow's stylesheets, so plain-class rules win by cascade order (no !important, no Designer edits). ===== */
+.thxo-sec{margin-block-start:var(--space-section)}
+.thxo-sec .thxo-sec{margin-block-start:0} /* a section nested inside a section does not add rhythm (About wraps its first section) */
+.thxo-cta-band{padding-block-start:var(--space-section)}
+.footer{padding-top:var(--space-section)}
+.thxo-hero{padding-top:calc(var(--thx-nav-h,56px) + var(--thx-nav-top,12px) + var(--space-xl))} /* hero = nav clearance + one step, monotonic across breakpoints (was 100 / 140 / 118) */
+.thxo-titleblock{padding-top:var(--space-4xl)} /* 150 → 128, on-grid */
+@media (max-width:767px){.banner-sec .thxo-wrap{padding-inline:0}} /* Home mobile: the legacy .banner-sec already insets 24px; the inner wrap doubled it to 48 */
