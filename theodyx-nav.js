@@ -1,4 +1,4 @@
-/*! theodyx-nav.js v4.2.0 (2026-09-03) — behaviours for the clear liquid-glass nav (#thx-nav).
+/*! theodyx-nav.js v4.3.0 (2026-09-03) — behaviours for the clear liquid-glass nav (#thx-nav).
  * One unanimous ink (every word, the logo and the burger flip together between pure white and pure black, chosen
  * from what is behind all of them), whole-surface lens (continuous refraction profile from the pill geometry, per-
  * channel dispersion, geometry-lit specular rim, colour bleed; Chromium, capability + frame-budget gated), pointer
@@ -9,7 +9,7 @@
   if (window.__thxNav) return;
   var nav = document.getElementById('thx-nav');
   if (!nav) return;
-  var API = window.__thxNav = { v: '4.2.0' };
+  var API = window.__thxNav = { v: '4.3.0' };
   var doc = document.documentElement, body = document.body;
   var glass = nav.querySelector('.thx-nav-glass');
   var rim = nav.querySelector('.thx-nav-rim');
@@ -68,11 +68,27 @@
   try { supportsSDA = CSS.supports('animation-timeline: scroll()'); } catch (e) {}
   if (supportsSDA && !mqMotion.matches) nav.classList.add('has-sda');
   var scrolled = null, ticking = false;
+  /* 3b. reading progress — a hairline inside the pill (article pages); no layout, no extra fixed element */
+  var prog = null;
+  function progTick(y) {
+    if (!prog) return;
+    var m = doc.scrollHeight - doc.clientHeight;
+    var p = m > 0 ? Math.max(0, Math.min(1, y / m)) : 0;
+    nav.style.setProperty('--thx-prog', p.toFixed(4));
+  }
+  API.progress = function (on) {
+    if (on && !prog) { prog = document.createElement('div'); prog.className = 'thx-nav-prog'; prog.setAttribute('aria-hidden', 'true'); nav.appendChild(prog); nav.classList.add('has-prog'); }
+    else if (!on && prog) { prog.parentNode && prog.parentNode.removeChild(prog); prog = null; nav.classList.remove('has-prog'); nav.style.removeProperty('--thx-prog'); }
+    progTick(window.scrollY || doc.scrollTop || 0);
+    return !!prog;
+  };
+  if (document.querySelector('.thx-read-body') || doc.hasAttribute('data-thx-progress')) API.progress(true);
   function onScroll() {
     ticking = false;
     var y = window.scrollY || doc.scrollTop || 0;
     var s = y > 80;
     if (s !== scrolled) { scrolled = s; nav.classList.toggle('is-scrolled', s); }
+    progTick(y);
     if (nav.getAttribute('data-open') !== 'true') reink();
   }
   var fallbackT = 0;
