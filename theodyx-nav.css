@@ -1,4 +1,4 @@
-/*! theodyx-nav.css v4.3.0 (2026-09-03) — clear liquid-glass nav. The bar is one continuous lens: transparent glass
+/*! theodyx-nav.css v4.4.0 (2026-09-03) — clear liquid-glass nav. The bar is one continuous lens: transparent glass
  * whose whole surface bends what is behind it (Chromium: SVG displacement in backdrop-filter, strongest at the
  * bevel, per-channel dispersion), a specular rim lit from the pill's own geometry, a colour bleed that takes on the
  * hues around it, and colour enhancement. The words, the logo and the burger share ONE ink — pure white or pure
@@ -11,7 +11,7 @@
 html{scroll-padding-top:calc(var(--thx-nav-h) + var(--thx-nav-top) + 16px)}
 .thx-skip{position:fixed;inset-block-start:var(--thx-nav-top);inset-inline-start:1rem;z-index:1001;padding:.6rem .9rem;border-radius:999px;background:#0c0a10;color:#fff;font:600 14px/1 var(--thx-nav-font);text-decoration:none;transform:translateY(-200%);transition:transform 200ms var(--thx-nav-ease)}
 .thx-skip:focus-visible{transform:none;outline:2px solid #fff;outline-offset:2px}
-.thx-nav{position:fixed;inset-block-start:var(--thx-nav-top);inset-inline:0;margin-inline:auto;width:var(--thx-nav-w);z-index:900;isolation:isolate;border-radius:var(--thx-nav-r);color:var(--thx-ink-light);font-family:var(--thx-nav-font);display:grid;grid-template-rows:auto 0px;transform-origin:50% 0;will-change:transform;-webkit-tap-highlight-color:transparent;transition:border-radius 420ms var(--thx-nav-ease),grid-template-rows 420ms var(--thx-nav-ease),transform 420ms var(--thx-nav-ease)}
+.thx-nav{position:fixed;inset-block-start:var(--thx-nav-top);inset-inline:0;margin-inline:auto;width:var(--thx-nav-w);z-index:900;isolation:isolate;border-radius:var(--thx-nav-r);color:var(--thx-ink-light);font-family:var(--thx-nav-font);display:grid;grid-template-rows:auto 0px;transform-origin:50% 0;-webkit-tap-highlight-color:transparent;transition:border-radius 420ms var(--thx-nav-ease),grid-template-rows 420ms var(--thx-nav-ease)}
 .thx-nav,.thx-nav *{box-sizing:border-box}
 .thx-nav{--thx-ink-light:#fff;--thx-ink-dark:#000} /* pure black or pure white, never a tint — scoped so no page-level variable can shift it */
 /* --- glass body: clear, colour-enhanced, lensed at the rim --- */
@@ -48,8 +48,9 @@ pointer-events:none;z-index:0;overflow:hidden;transition:background-color 360ms 
 .thx-nav-logo svg{height:22px;width:auto;display:block}
 .thx-nav-logo:hover{transform:scale(1.03)}.thx-nav-logo:active{transform:scale(.985)}
 .thx-nav-menu{display:flex;align-items:center;gap:2px;list-style:none;margin:0;padding:0}
+.thx-nav-menu li,.thx-nav-list li{display:flex;align-items:center;margin:0;padding:0;line-height:1;list-style:none} /* Webflow's global li{line-height:60px} pushed the words 9px low and grew the bar to 73px */
 .thx-nav-menu a{display:inline-flex;align-items:center;min-height:44px;padding:0 16px;text-decoration:none;font-size:15px;font-weight:500;letter-spacing:-.005em;line-height:1;-webkit-font-smoothing:antialiased;border-radius:999px;white-space:nowrap;transition:background-color 200ms,color 240ms var(--thx-nav-ease)}
-.thx-nav-menu a:hover,.thx-nav-menu a[aria-current="page"]{background:color-mix(in srgb,currentColor 12%,transparent)}
+.thx-nav-menu a:hover{background:color-mix(in srgb,currentColor 8%,transparent)} /* no persistent selected-page fill: it sat on top of the lens and read as a stuck button */
 .thx-nav-menu a:active{transform:scale(.985)}
 /* --- ink: the words, the logo and the burger flip TOGETHER; default light --- */
 .thx-nav-menu a,.thx-nav-logo,.thx-nav-burger{color:var(--thx-ink-light);text-shadow:none;transition:color 260ms var(--thx-nav-ease)}
@@ -80,16 +81,14 @@ pointer-events:none;z-index:0;overflow:hidden;transition:background-color 360ms 
 .thx-nav[data-tone="light"][data-open="true"] .thx-nav-list a:hover{background:rgba(12,10,16,.07)}
 .thx-nav[data-tone="light"][data-open="true"] .thx-nav-cta{background:#0c0a10;color:#fff}
 html.thx-nav-lock{overflow:hidden;padding-inline-end:var(--thx-sbw)}html.thx-nav-lock body{overflow:hidden}
-/* --- scroll condense (stays clear) --- */
-.thx-nav.is-scrolled{transform:scale(.985)}
-@supports (animation-timeline:scroll()){@media (prefers-reduced-motion:no-preference){.thx-nav.has-sda:not([data-open="true"]){animation:thx-nav-condense linear both;animation-timeline:scroll(root);animation-range:0 120px;transition:border-radius 420ms var(--thx-nav-ease),grid-template-rows 420ms var(--thx-nav-ease)}.thx-nav.has-sda.is-scrolled{transform:none}}}
-@keyframes thx-nav-condense{from{transform:scale(1)}to{transform:scale(.985)}}
+/* --- scroll: NO transform on the bar, ever — a transformed backdrop-filter re-snapshots its backdrop and the lens jumps (the 'twitch' at the 80px threshold) --- */
+.thx-nav.is-scrolled{transform:none}
 @media (max-width:899px){:root{--thx-nav-h:52px;--thx-nav-rim:8px}.thx-nav{width:min(720px,calc(100% - 1.5rem))}.thx-nav-bar{padding:4px 4px 4px 16px}.thx-nav-menu{display:none}.thx-nav-burger{display:inline-flex}}
 @media (min-width:900px){.thx-nav-panel{display:none}}
 @media (hover:none){.thx-nav-menu a:hover{background:transparent}.thx-nav-logo:hover{transform:none}}
 /* --- fallbacks --- */
 @media (prefers-reduced-transparency:reduce){.thx-nav-glass,.thx-nav.is-refract .thx-nav-glass{-webkit-backdrop-filter:none;backdrop-filter:none;background:#0c0a10;box-shadow:0 1px 0 0 rgba(0,0,0,.08),0 8px 24px rgba(0,0,0,.18)}.thx-nav-rim,.thx-nav-tint,.thx-nav-glass::before,.thx-nav-glass::after{display:none}.thx-nav .thx-nav-menu a,.thx-nav .thx-nav-logo,.thx-nav .thx-nav-burger{color:#fff!important}}
-@media (prefers-reduced-motion:reduce){.thx-nav,.thx-nav *,.thx-nav *::before,.thx-nav *::after{transition:none!important;animation:none!important}.thx-nav-glass::after{display:none}.thx-nav.is-scrolled{transform:none}}
+@media (prefers-reduced-motion:reduce){.thx-nav,.thx-nav *,.thx-nav *::before,.thx-nav *::after{transition:none!important;animation:none!important}.thx-nav-glass::after{display:none}}
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.thx-nav-glass{background:rgba(12,10,16,.92)}.thx-nav-rim,.thx-nav-tint{display:none}.thx-nav .thx-nav-menu a,.thx-nav .thx-nav-logo,.thx-nav .thx-nav-burger{color:#fff!important}}
 @media (forced-colors:active){.thx-nav-glass{background:Canvas;-webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:none;border:1px solid CanvasText}.thx-nav-rim,.thx-nav-tint{display:none}.thx-nav,.thx-nav .thx-nav-menu a,.thx-nav .thx-nav-logo,.thx-nav .thx-nav-burger{color:CanvasText;text-shadow:none}.thx-nav-glass::before,.thx-nav-glass::after{display:none}.thx-nav-menu a,.thx-nav-list a{color:LinkText}.thx-nav-cta{background:ButtonFace;color:ButtonText;border:1px solid ButtonText}}
 .hero-v1{padding-top:72px!important}
