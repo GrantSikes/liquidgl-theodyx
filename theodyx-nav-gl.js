@@ -1,4 +1,4 @@
-/*! theodyx-nav-gl.js v1.0.0 (2026-09-04) — Theodyx liquid-glass nav: the WebGL lens for WebKit (every iPhone/iPad browser and
+/*! theodyx-nav-gl.js v1.0.1 (2026-09-04) — Theodyx liquid-glass nav: the WebGL lens for WebKit (every iPhone/iPad browser and
  * desktop Safari). WebKit's backdrop-filter cannot reference an SVG filter, a transformed backdrop-filter does not magnify and an
  * element-level SVG filter does not touch the backdrop (all three probed), so the glass is rendered here instead: the page behind
  * the bar is rasterised with html2canvas into a strip around the scroll position (one viewport above, two below), uploaded as a
@@ -13,7 +13,7 @@
   var glass = nav && nav.querySelector('.thx-nav-glass');
   if (!nav || !glass) return;
   var doc = document.documentElement, ua = navigator.userAgent;
-  var API = window.__thxNavGL = { v: '1.0.0', on: false, why: '', state: function () { return { on: API.on, why: API.why }; } };
+  var API = window.__thxNavGL = { v: '1.0.1', on: false, why: '', state: function () { return { on: API.on, why: API.why }; } };
   var mq = function (q) { try { return window.matchMedia(q); } catch (e) { return { matches: false, addEventListener: function () {} }; } };
   var isBlink = !!(navigator.userAgentData && navigator.userAgentData.brands && navigator.userAgentData.brands.some(function (b) { return /Chromium/i.test(b.brand); })) || (/Chrome\/|Chromium\//.test(ua) && !/\bCriOS\b|\bEdgiOS\b|\bFxiOS\b/.test(ua));
   var isWebKit = /AppleWebKit\//.test(ua) && !isBlink;
@@ -30,9 +30,12 @@
   var now = function () { return (window.performance && performance.now) ? performance.now() : Date.now(); };
   var raf = window.requestAnimationFrame || function (f) { return setTimeout(f, 16); };
   var TAG = 'data-thxgl';
-  var DEF = { scale: 112, rim: 0.9, rimW: 0.58, rimK: 1.25, body: -0.6, bodyK: 1.5, disp: 0.34, sat: 1.9, blur: 0.45, spec: 0.7, specW: 0.3, bleed: 0.9, bleedBlur: 40, light: [-0.55, -0.83], light2: [0.55, 0.83] };
+  var DEF = { scale: 112, rim: 0.9, rimW: 0.58, rimK: 1.25, body: -0.6, bodyK: 1.5, disp: 0.34, dispW: 0.4, dispBody: 0.05, sat: 1.9, blur: 0.45, spec: 0.7, specW: 0.3, bleed: 0.9, bleedBlur: 40, light: [-0.55, -0.83], light2: [0.55, 0.83] };
   function lensParams() { try { var l = window.__thxNav && window.__thxNav.lens && window.__thxNav.lens(); if (l && l.params) return l.params; } catch (e) {} return null; }
-  var LENS = lensParams() || DEF;
+  var LENS = lensParams() || DEF; if (LENS.dispBody == null) LENS.dispBody = DEF.dispBody; if (LENS.dispW == null) LENS.dispW = DEF.dispW;
+
+  /* the layer's own CSS (mirrors the is-gl block in theodyx-nav.css, so the head block does not have to change with this script) */
+  if (!document.getElementById('thx-nav-gl-css')) { var st = document.createElement('style'); st.id = 'thx-nav-gl-css'; st.textContent = ".thx-nav-gl{position:absolute;inset:0;width:100%;height:100%;border-radius:inherit;z-index:0;display:block;pointer-events:none;opacity:0;transition:opacity 480ms var(--thx-nav-ease)} /* a replaced element keeps its intrinsic (backing-store) size under inset:0 unless width/height are set */.thx-nav.is-gl .thx-nav-gl{opacity:1}.thx-nav.is-gl-solid:not([data-open=\"true\"]) .thx-nav-glass{visibility:hidden}.thx-nav.is-gl .thx-nav-tint{display:none}.thx-nav.is-gl[data-open=\"true\"] .thx-nav-gl{display:none}.thx-nav.is-gl .thx-nav-rim{background-image:none;overflow:hidden;box-shadow:inset 0 1px 0 0 rgba(255,255,255,.62),inset 0 -1px 0 0 rgba(255,255,255,.16),inset 0 0 0 1px rgba(255,255,255,.22),inset 0 0 0 1.5px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.10),0 14px 44px rgba(0,0,0,.16)}.thx-nav.is-gl[data-open=\"true\"] .thx-nav-rim{box-shadow:none}.thx-nav.is-gl .thx-nav-rim::after{content:\"\";position:absolute;inset:-40%;border-radius:inherit;background:radial-gradient(28% 60% at var(--thx-mx,50%) var(--thx-my,50%),rgba(255,255,255,.20),transparent 70%);opacity:0;transition:opacity 320ms var(--thx-nav-ease);pointer-events:none}.thx-nav.is-gl.is-lens .thx-nav-rim::after{opacity:1}"; (document.head || doc).appendChild(st); }
 
   /* ---------- 1. WebGL ---------- */
   var canvas = document.createElement('canvas');
@@ -45,7 +48,7 @@
   var FS = [
     'precision highp float;varying vec2 vUv;',
     'uniform sampler2D uTex,uBlurTex;uniform vec2 uSize,uOrigin,uStrip,uStripSize,uL1,uL2;uniform vec3 uBg,uScrim;',
-    'uniform float uR,uScale,uDisp,uRim,uRimW,uRimK,uBody,uBodyK,uSat,uBlur,uSpec,uSpecW,uBleed,uDocH,uScrimA;',
+    'uniform float uR,uScale,uDisp,uDispW,uDispB,uRim,uRimW,uRimK,uBody,uBodyK,uSat,uBlur,uSpec,uSpecW,uBleed,uDocH,uScrimA;',
     'const vec3 LW=vec3(0.2126,0.7152,0.0722);',
     'vec3 samp(sampler2D t,vec2 s){vec2 uv=(s-uStrip)/uStripSize;vec3 c=texture2D(t,clamp(uv,0.0,1.0)).rgb;float off=step(s.y,0.0)+step(uDocH,s.y);return mix(c,uBg,clamp(off,0.0,1.0));}',
     'vec3 sampB(vec2 s){if(uBlur<0.2)return samp(uTex,s);vec2 o=vec2(uBlur);return (samp(uTex,s+o)+samp(uTex,s+vec2(-o.x,o.y))+samp(uTex,s+vec2(o.x,-o.y))+samp(uTex,s-o))*0.25;}',
@@ -56,10 +59,11 @@
     ' vec2 sg=vec2(c.x<0.0?-1.0:1.0,c.y<0.0?-1.0:1.0);',
     ' vec2 n=(q.x>0.0||q.y>0.0)?(o/max(outside,1e-4))*sg:(q.x>q.y?vec2(sg.x,0.0):vec2(0.0,sg.y));',
     ' float a=clamp(dist+0.5,0.0,1.0);if(a<=0.0){gl_FragColor=vec4(0.0);return;}',
-    ' float Rb=max(12.0,uSize.y*uRimW),H=uSize.y*0.5;float T=0.0;',
-    ' if(dist>0.0){float tr=pow(max(sm(clamp(1.0-dist/Rb,0.0,1.0)),1e-5),uRimK);float tb=pow(max(clamp(1.0-dist/H,0.0,1.0),1e-5),uBodyK);T=clamp(tr*uRim+tb*uBody,-1.0,1.0);}',
-    ' vec2 d=n*T*uScale*0.5;vec2 base=uOrigin+p;',
-    ' vec3 col;col.r=sampB(base+d*(1.0-uDisp)).r;col.g=sampB(base+d).g;col.b=sampB(base+d*(1.0+uDisp)).b;',
+    ' float Rb=max(12.0,uSize.y*uRimW),H=uSize.y*0.5;float tr=0.0,tb=0.0,dw=0.0;',
+    ' if(dist>0.0){tr=pow(max(sm(clamp(1.0-dist/Rb,0.0,1.0)),1e-5),uRimK)*uRim;tb=pow(max(clamp(1.0-dist/H,0.0,1.0),1e-5),uBodyK)*uBody;dw=sm(clamp(1.0-dist/(Rb*uDispW),0.0,1.0));}',
+    ' vec2 base=uOrigin+p;vec2 nS=n*uScale*0.5;',
+    ' float dd=uDisp*dw;vec2 dR=nS*clamp(tr*(1.0-dd)+tb*(1.0-uDispB),-1.0,1.0);vec2 dG=nS*clamp(tr+tb,-1.0,1.0);vec2 dB=nS*clamp(tr*(1.0+dd)+tb*(1.0+uDispB),-1.0,1.0);',
+    ' vec3 col;col.r=sampB(base+dR).r;col.g=sampB(base+dG).g;col.b=sampB(base+dB).b;',
     ' float l=dot(col,LW);col=mix(vec3(l),col,uSat);col=(col-0.5)*1.03+0.5;col*=1.02;col=clamp(col,0.0,1.0);',
     ' vec3 bl=samp(uBlurTex,base);float lb=dot(bl,LW);bl=clamp(mix(vec3(lb),bl,2.2)*1.04,0.0,1.0);',
     ' float m=clamp((length(c/vec2(0.7*uSize.x,1.4*uSize.y))-0.26)/0.62,0.0,1.0);col=mix(col,bl,m*uBleed);',
@@ -84,7 +88,7 @@
   gl.useProgram(prog);
   var buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
   var aPos = gl.getAttribLocation(prog, 'aPos'); gl.enableVertexAttribArray(aPos); gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
-  var U = {}; ['uTex', 'uBlurTex', 'uSize', 'uOrigin', 'uStrip', 'uStripSize', 'uL1', 'uL2', 'uBg', 'uScrim', 'uR', 'uScale', 'uDisp', 'uRim', 'uRimW', 'uRimK', 'uBody', 'uBodyK', 'uSat', 'uBlur', 'uSpec', 'uSpecW', 'uBleed', 'uDocH', 'uScrimA'].forEach(function (k) { U[k] = gl.getUniformLocation(prog, k); });
+  var U = {}; ['uTex', 'uBlurTex', 'uSize', 'uOrigin', 'uStrip', 'uStripSize', 'uL1', 'uL2', 'uBg', 'uScrim', 'uR', 'uScale', 'uDisp', 'uDispW', 'uDispB', 'uRim', 'uRimW', 'uRimK', 'uBody', 'uBodyK', 'uSat', 'uBlur', 'uSpec', 'uSpecW', 'uBleed', 'uDocH', 'uScrimA'].forEach(function (k) { U[k] = gl.getUniformLocation(prog, k); });
   function mkTex(unit) { var t = gl.createTexture(); gl.activeTexture(gl.TEXTURE0 + unit); gl.bindTexture(gl.TEXTURE_2D, t); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE); return t; }
   var tex = mkTex(0), btex = mkTex(1);
   gl.uniform1i(U.uTex, 0); gl.uniform1i(U.uBlurTex, 1);
@@ -92,7 +96,7 @@
   var MAXTEX = gl.getParameter(gl.MAX_TEXTURE_SIZE) || 4096;
   function upload(t, unit, src) { gl.activeTexture(gl.TEXTURE0 + unit); gl.bindTexture(gl.TEXTURE_2D, t); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, src); }
   function pushLens() {
-    gl.uniform1f(U.uScale, LENS.scale); gl.uniform1f(U.uDisp, LENS.disp); gl.uniform1f(U.uRim, LENS.rim); gl.uniform1f(U.uRimW, LENS.rimW); gl.uniform1f(U.uRimK, LENS.rimK);
+    gl.uniform1f(U.uScale, LENS.scale); gl.uniform1f(U.uDisp, LENS.disp); gl.uniform1f(U.uDispW, LENS.dispW || 0.4); gl.uniform1f(U.uDispB, LENS.dispBody || 0); gl.uniform1f(U.uRim, LENS.rim); gl.uniform1f(U.uRimW, LENS.rimW); gl.uniform1f(U.uRimK, LENS.rimK);
     gl.uniform1f(U.uBody, LENS.body); gl.uniform1f(U.uBodyK, LENS.bodyK); gl.uniform1f(U.uSat, LENS.sat); gl.uniform1f(U.uBlur, LENS.blur); gl.uniform1f(U.uSpec, LENS.spec); gl.uniform1f(U.uSpecW, LENS.specW); gl.uniform1f(U.uBleed, LENS.bleed);
     gl.uniform2f(U.uL1, LENS.light[0], LENS.light[1]); gl.uniform2f(U.uL2, LENS.light2[0], LENS.light2[1]);
   }

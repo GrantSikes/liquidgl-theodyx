@@ -1,4 +1,4 @@
-/*! theodyx-nav.js v4.4.0 (2026-09-03) — behaviours for the clear liquid-glass nav (#thx-nav).
+/*! theodyx-nav.js v4.5.0 (2026-09-03) — behaviours for the clear liquid-glass nav (#thx-nav).
  * One unanimous ink (every word, the logo and the burger flip together between pure white and pure black, chosen
  * from what is behind all of them), whole-surface lens (continuous refraction profile from the pill geometry, per-
  * channel dispersion, geometry-lit specular rim, colour bleed; Chromium, capability + frame-budget gated), pointer
@@ -9,7 +9,7 @@
   if (window.__thxNav) return;
   var nav = document.getElementById('thx-nav');
   if (!nav) return;
-  var API = window.__thxNav = { v: '4.4.0' };
+  var API = window.__thxNav = { v: '4.5.0' };
   var doc = document.documentElement, body = document.body;
   var glass = nav.querySelector('.thx-nav-glass');
   var rim = nav.querySelector('.thx-nav-rim');
@@ -420,8 +420,8 @@
   /* Tunables (live: __thxNav.lens({scale:70,...})). Profile T(d) over distance d from the rounded edge: a rim term
    * (smoothstep^rimK over the outer rimW*h, the bevel) plus a body term that runs all the way to the centre line
    * (sign < 0 = the centre magnifies like a thick slab), so the whole surface bends — no flat inset panel. */
-  var LENS = { scale: 112, rim: 0.9, rimW: 0.58, rimK: 1.25, body: -0.6, bodyK: 1.5, disp: 0.34, sat: 1.9, blur: 0.45, spec: 0.7, specW: 0.3, bleed: 0.9, bleedBlur: 40, light: [-0.55, -0.83], light2: [0.55, 0.83] }; /* 4.4: turned up — deeper centre magnification, wider bevel, more dispersion, saturation and colour bleed */
-  var mapW = 0, mapH = 0, mapURL = '', mapRetry = 0;
+  var LENS = { scale: 112, rim: 0.9, rimW: 0.58, rimK: 1.25, body: -0.6, bodyK: 1.5, disp: 0.34, dispW: 0.4, dispBody: 0.05, sat: 1.9, blur: 0.45, spec: 0.7, specW: 0.3, bleed: 0.9, bleedBlur: 40, light: [-0.55, -0.83], light2: [0.55, 0.83] }; /* 4.4: turned up — deeper centre magnification, wider bevel, more dispersion, saturation and colour bleed. 4.5: dispersion lives at the edge — disp fades in over the outer dispW of the bevel, dispBody is a whisper in the body — one map per channel, so text under the body no longer splits into three colours */
+  var mapW = 0, mapH = 0, mapURLs = ['', '', ''], mapRetry = 0;
   var svgNS = 'http://www.w3.org/2000/svg';
   function fe(name, attrs) { var e = document.createElementNS(svgNS, name); for (var k in attrs) e.setAttribute(k, attrs[k]); return e; }
   function buildFilters(w, h) {
@@ -432,14 +432,14 @@
       var f = svg.querySelector('#' + id); if (!f) { f = fe('filter', { id: id }); svg.appendChild(f); }
       while (f.firstChild) f.removeChild(f.firstChild);
       f.setAttribute('x', '0'); f.setAttribute('y', '0'); f.setAttribute('width', '100%'); f.setAttribute('height', '100%'); f.setAttribute('color-interpolation-filters', 'sRGB');
-      var img = fe('feImage', { id: id + '-map', result: 'map', preserveAspectRatio: 'none', x: '0', y: '0', width: w, height: h });
-      img.setAttribute('href', mapURL); try { img.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', mapURL); } catch (e) {}
-      f.appendChild(img);
+      var mk = function (mid, url, res) { var img = fe('feImage', { id: mid, result: res, preserveAspectRatio: 'none', x: '0', y: '0', width: w, height: h }); img.setAttribute('href', url); try { img.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', url); } catch (e) {} f.appendChild(img); };
+      mk(id + '-map', mapURLs[1], 'map'); /* green = the reference map (also the only map the lite filter uses) */
+      if (full && D > 0) { mk(id + '-map-r', mapURLs[0], 'mapr'); mk(id + '-map-b', mapURLs[2], 'mapb'); }
       f.appendChild(fe('feGaussianBlur', { 'in': 'SourceGraphic', stdDeviation: LENS.blur, result: 'src' }));
       if (full && D > 0) {
-        f.appendChild(fe('feDisplacementMap', { 'in': 'src', in2: 'map', scale: (S * (1 - D)).toFixed(2), xChannelSelector: 'R', yChannelSelector: 'G', result: 'dr' }));
+        f.appendChild(fe('feDisplacementMap', { 'in': 'src', in2: 'mapr', scale: S, xChannelSelector: 'R', yChannelSelector: 'G', result: 'dr' }));
         f.appendChild(fe('feDisplacementMap', { 'in': 'src', in2: 'map', scale: S, xChannelSelector: 'R', yChannelSelector: 'G', result: 'dg' }));
-        f.appendChild(fe('feDisplacementMap', { 'in': 'src', in2: 'map', scale: (S * (1 + D)).toFixed(2), xChannelSelector: 'R', yChannelSelector: 'G', result: 'db' }));
+        f.appendChild(fe('feDisplacementMap', { 'in': 'src', in2: 'mapb', scale: S, xChannelSelector: 'R', yChannelSelector: 'G', result: 'db' }));
         f.appendChild(cm(1, 0, 0, 'r', 'dr')); f.appendChild(cm(0, 1, 0, 'g', 'dg')); f.appendChild(cm(0, 0, 1, 'b', 'db'));
         f.appendChild(fe('feComposite', { 'in': 'r', in2: 'g', operator: 'arithmetic', k1: 0, k2: 1, k3: 1, k4: 0, result: 'rg' }));
         f.appendChild(fe('feComposite', { 'in': 'rg', in2: 'b', operator: 'arithmetic', k1: 0, k2: 1, k3: 1, k4: 0, result: 'd' }));
@@ -490,23 +490,29 @@
     var cw = Math.min(W, 880), ch = Math.min(Hh, 176);
     var c = document.createElement('canvas'); c.width = cw; c.height = ch;
     var ctx = c.getContext('2d'); if (!ctx) { refractOK = false; return; }
-    var img = ctx.createImageData(cw, ch), d = img.data;
-    var sx = W / cw, sy = Hh / ch;
+    var imgs = [ctx.createImageData(cw, ch), ctx.createImageData(cw, ch), ctx.createImageData(cw, ch)];
+    var sx = W / cw, sy = Hh / ch, D = LENS.disp, Db = LENS.dispBody || 0, kk = [-1, 0, 1];
     for (var y = 0; y < ch; y++) {
       for (var x = 0; x < cw; x++) {
         var g = geo((x + 0.5) * sx - pad, (y + 0.5) * sy - padT), dist = g[0];
-        var i = (y * cw + x) * 4, T = 0;
+        var i = (y * cw + x) * 4, tr = 0, tb = 0, dw = 0;
         if (dist > 0) {
-          var tr = Math.max(0, Math.min(1, 1 - dist / Rb)); tr = tr * tr * (3 - 2 * tr); tr = Math.pow(tr, LENS.rimK);
-          var tb = Math.max(0, Math.min(1, 1 - dist / H)); tb = Math.pow(tb, LENS.bodyK);
-          T = Math.max(-1, Math.min(1, tr * LENS.rim + tb * LENS.body));
-          if (T > 0 && g[2] < 0) { var reach = 2 * (padT + dist) / (LENS.scale * (1 + LENS.disp) * -g[2]); if (T > reach) T = reach; } /* an upward sample may not go above the viewport */
+          tr = Math.max(0, Math.min(1, 1 - dist / Rb)); tr = tr * tr * (3 - 2 * tr); tr = Math.pow(tr, LENS.rimK);
+          tb = Math.max(0, Math.min(1, 1 - dist / H)); tb = Math.pow(tb, LENS.bodyK);
+          dw = Math.max(0, Math.min(1, 1 - dist / (Rb * (LENS.dispW || 0.4)))); dw = dw * dw * (3 - 2 * dw); /* colour splits only at the outer edge of the bevel */
         }
-        d[i] = Math.round(128 + g[1] * T * 127); d[i + 1] = Math.round(128 + g[2] * T * 127); d[i + 2] = 128; d[i + 3] = 255;
+        for (var ci = 0; ci < 3; ci++) {
+          var T = 0;
+          if (dist > 0) {
+            T = Math.max(-1, Math.min(1, tr * LENS.rim * (1 + kk[ci] * D * dw) + tb * LENS.body * (1 + kk[ci] * Db)));
+            if (T > 0 && g[2] < 0) { var reach = 2 * (padT + dist) / (LENS.scale * -g[2]); if (T > reach) T = reach; } /* an upward sample may not go above the viewport */
+          }
+          var dd = imgs[ci].data;
+          dd[i] = Math.round(128 + g[1] * T * 127); dd[i + 1] = Math.round(128 + g[2] * T * 127); dd[i + 2] = 128; dd[i + 3] = 255;
+        }
       }
     }
-    ctx.putImageData(img, 0, 0);
-    mapURL = c.toDataURL('image/png');
+    for (var mi = 0; mi < 3; mi++) { ctx.putImageData(imgs[mi], 0, 0); mapURLs[mi] = c.toDataURL('image/png'); }
     /* 2. specular rim from the same geometry (pill-sized): key light top-left, fill bottom-right, only on the bevel */
     var cw2 = Math.min(w, 720), ch2 = Math.min(h, 112);
     var hc = document.createElement('canvas'); hc.width = cw2; hc.height = ch2; var hctx = hc.getContext('2d');
