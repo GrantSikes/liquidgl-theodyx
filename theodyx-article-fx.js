@@ -1,4 +1,4 @@
-/*! theodyx-article-fx v1.4.0 — Theodyx publication template reading chrome.
+/*! theodyx-article-fx v1.4.1 — Theodyx publication template reading chrome.
    CONTRACT: enhancement-only. All content is native Webflow DOM; this script only
    (1) links existing <sup>N</sup> footnote markers to the Notes & sources list (dedicated .art-notes section, or legacy in-body h6+ol),
    (2) injects an "In this report" TOC from the article headings (h2, falling back to h3 then h4; 3+ entries) across EVERY
@@ -221,7 +221,7 @@
           if (Array.isArray(art.image)) art.image = art.image.filter(Boolean);
           if (art.image && !art.image.length) delete art.image;
           var an = (art.author && art.author.name) || author;
-          if (an) { var pid = personId(an); art.author = pid ? { '@type': 'Person', '@id': pid, 'name': an } : { '@type': 'Person', 'name': an }; }
+          if (an && !/theodyx/i.test(an)) { var pid = personId(an); art.author = pid ? { '@type': 'Person', '@id': pid, 'name': an } : { '@type': 'Person', 'name': an }; }
           else art.author = { '@type': 'Organization', '@id': ORG, 'name': 'Theodyx' };
           if (!art.publisher) art.publisher = { '@id': ORG };
           if (!art.mainEntityOfPage) art.mainEntityOfPage = url;
@@ -246,7 +246,7 @@
     if (image) article.image = [image];
     if (iso) { article.datePublished = iso; article.dateModified = (mod && mod >= iso) ? mod : iso; }
     if (section) article.articleSection = section;
-    article.author = author ? (PID ? { '@type': 'Person', '@id': PID, 'name': author } : { '@type': 'Person', 'name': author }) : { '@type': 'Organization', 'name': 'Theodyx', '@id': ORG };
+    article.author = (author && !/theodyx/i.test(author)) ? (PID ? { '@type': 'Person', '@id': PID, 'name': author } : { '@type': 'Person', 'name': author }) : { '@type': 'Organization', 'name': 'Theodyx', '@id': ORG };
     if (wc > 50) article.wordCount = wc;
     if (min) article.timeRequired = 'PT' + min + 'M';
     article.publisher = { '@type': 'Organization', 'name': 'Theodyx', '@id': ORG };
