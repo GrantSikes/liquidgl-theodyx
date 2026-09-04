@@ -1,4 +1,4 @@
-/*! theodyx-nav-gl.js v1.0.1 (2026-09-04) — Theodyx liquid-glass nav: the WebGL lens for WebKit (every iPhone/iPad browser and
+/*! theodyx-nav-gl.js v1.1.0 (2026-09-04) — Theodyx liquid-glass nav: the WebGL lens for WebKit (every iPhone/iPad browser and
  * desktop Safari). WebKit's backdrop-filter cannot reference an SVG filter, a transformed backdrop-filter does not magnify and an
  * element-level SVG filter does not touch the backdrop (all three probed), so the glass is rendered here instead: the page behind
  * the bar is rasterised with html2canvas into a strip around the scroll position (one viewport above, two below), uploaded as a
@@ -13,7 +13,7 @@
   var glass = nav && nav.querySelector('.thx-nav-glass');
   if (!nav || !glass) return;
   var doc = document.documentElement, ua = navigator.userAgent;
-  var API = window.__thxNavGL = { v: '1.0.1', on: false, why: '', state: function () { return { on: API.on, why: API.why }; } };
+  var API = window.__thxNavGL = { v: '1.1.0', on: false, why: '', state: function () { return { on: API.on, why: API.why }; } };
   var mq = function (q) { try { return window.matchMedia(q); } catch (e) { return { matches: false, addEventListener: function () {} }; } };
   var isBlink = !!(navigator.userAgentData && navigator.userAgentData.brands && navigator.userAgentData.brands.some(function (b) { return /Chromium/i.test(b.brand); })) || (/Chrome\/|Chromium\//.test(ua) && !/\bCriOS\b|\bEdgiOS\b|\bFxiOS\b/.test(ua));
   var isWebKit = /AppleWebKit\//.test(ua) && !isBlink;
@@ -30,12 +30,12 @@
   var now = function () { return (window.performance && performance.now) ? performance.now() : Date.now(); };
   var raf = window.requestAnimationFrame || function (f) { return setTimeout(f, 16); };
   var TAG = 'data-thxgl';
-  var DEF = { scale: 112, rim: 0.9, rimW: 0.58, rimK: 1.25, body: -0.6, bodyK: 1.5, disp: 0.34, dispW: 0.4, dispBody: 0.05, sat: 1.9, blur: 0.45, spec: 0.7, specW: 0.3, bleed: 0.9, bleedBlur: 40, light: [-0.55, -0.83], light2: [0.55, 0.83] };
+  var DEF = { scale: 112, rim: 0.9, rimW: 0.58, rimK: 1.25, body: -0.6, bodyK: 1.5, disp: 0.34, dispW: 0.4, dispBody: 0.05, sat: 1.9, blur: 0.45, spec: 0.5, specW: 0.24, bleed: 0.9, bleedBlur: 40, light: [-0.55, -0.83], light2: [0.55, 0.83] };
   function lensParams() { try { var l = window.__thxNav && window.__thxNav.lens && window.__thxNav.lens(); if (l && l.params) return l.params; } catch (e) {} return null; }
   var LENS = lensParams() || DEF; if (LENS.dispBody == null) LENS.dispBody = DEF.dispBody; if (LENS.dispW == null) LENS.dispW = DEF.dispW;
 
   /* the layer's own CSS (mirrors the is-gl block in theodyx-nav.css, so the head block does not have to change with this script) */
-  if (!document.getElementById('thx-nav-gl-css')) { var st = document.createElement('style'); st.id = 'thx-nav-gl-css'; st.textContent = ".thx-nav-gl{position:absolute;inset:0;width:100%;height:100%;border-radius:inherit;z-index:0;display:block;pointer-events:none;opacity:0;transition:opacity 480ms var(--thx-nav-ease)} /* a replaced element keeps its intrinsic (backing-store) size under inset:0 unless width/height are set */.thx-nav.is-gl .thx-nav-gl{opacity:1}.thx-nav.is-gl-solid:not([data-open=\"true\"]) .thx-nav-glass{visibility:hidden}.thx-nav.is-gl .thx-nav-tint{display:none}.thx-nav.is-gl[data-open=\"true\"] .thx-nav-gl{display:none}.thx-nav.is-gl .thx-nav-rim{background-image:none;overflow:hidden;box-shadow:inset 0 1px 0 0 rgba(255,255,255,.62),inset 0 -1px 0 0 rgba(255,255,255,.16),inset 0 0 0 1px rgba(255,255,255,.22),inset 0 0 0 1.5px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.10),0 14px 44px rgba(0,0,0,.16)}.thx-nav.is-gl[data-open=\"true\"] .thx-nav-rim{box-shadow:none}.thx-nav.is-gl .thx-nav-rim::after{content:\"\";position:absolute;inset:-40%;border-radius:inherit;background:radial-gradient(28% 60% at var(--thx-mx,50%) var(--thx-my,50%),rgba(255,255,255,.20),transparent 70%);opacity:0;transition:opacity 320ms var(--thx-nav-ease);pointer-events:none}.thx-nav.is-gl.is-lens .thx-nav-rim::after{opacity:1}"; (document.head || doc).appendChild(st); }
+  if (!document.getElementById('thx-nav-gl-css')) { var st = document.createElement('style'); st.id = 'thx-nav-gl-css'; st.textContent = '.thx-nav.is-gl-stale .thx-nav-gl{opacity:0;transition-duration:140ms}.thx-nav.is-gl.is-gl-stale .thx-nav-glass{visibility:visible!important}' + ".thx-nav-gl{position:absolute;inset:0;width:100%;height:100%;border-radius:inherit;z-index:0;display:block;pointer-events:none;opacity:0;transition:opacity 480ms var(--thx-nav-ease)} /* a replaced element keeps its intrinsic (backing-store) size under inset:0 unless width/height are set */.thx-nav.is-gl .thx-nav-gl{opacity:1}.thx-nav.is-gl-solid:not([data-open=\"true\"]) .thx-nav-glass{visibility:hidden}.thx-nav.is-gl .thx-nav-tint{display:none}.thx-nav.is-gl[data-open=\"true\"] .thx-nav-gl{display:none}.thx-nav.is-gl .thx-nav-rim{background-image:none;overflow:hidden;box-shadow:inset 0 1px 0 0 rgba(255,255,255,.62),inset 0 -1px 0 0 rgba(255,255,255,.16),inset 0 0 0 1px rgba(255,255,255,.22),inset 0 0 0 1.5px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.10),0 14px 44px rgba(0,0,0,.16)}.thx-nav.is-gl[data-open=\"true\"] .thx-nav-rim{box-shadow:none}.thx-nav.is-gl .thx-nav-rim::after{content:\"\";position:absolute;inset:-40%;border-radius:inherit;background:radial-gradient(28% 60% at var(--thx-mx,50%) var(--thx-my,50%),rgba(255,255,255,.20),transparent 70%);opacity:0;transition:opacity 320ms var(--thx-nav-ease);pointer-events:none}.thx-nav.is-gl.is-lens .thx-nav-rim::after{opacity:1}"; (document.head || doc).appendChild(st); }
 
   /* ---------- 1. WebGL ---------- */
   var canvas = document.createElement('canvas');
@@ -67,7 +67,7 @@
     ' float l=dot(col,LW);col=mix(vec3(l),col,uSat);col=(col-0.5)*1.03+0.5;col*=1.02;col=clamp(col,0.0,1.0);',
     ' vec3 bl=samp(uBlurTex,base);float lb=dot(bl,LW);bl=clamp(mix(vec3(lb),bl,2.2)*1.04,0.0,1.0);',
     ' float m=clamp((length(c/vec2(0.7*uSize.x,1.4*uSize.y))-0.26)/0.62,0.0,1.0);col=mix(col,bl,m*uBleed);',
-    ' float g1=0.10*(1.0-clamp(length((p-vec2(0.18*uSize.x,-0.30*uSize.y))/vec2(1.2*uSize.x,0.9*uSize.y))/0.55,0.0,1.0));',
+    ' float g1=0.07*(1.0-clamp(length((p-vec2(0.18*uSize.x,-0.30*uSize.y))/vec2(1.2*uSize.x,0.9*uSize.y))/0.55,0.0,1.0));',
     ' float g2=0.05*(1.0-clamp(length((p-vec2(0.92*uSize.x,1.20*uSize.y))/vec2(0.6*uSize.x,1.2*uSize.y))/0.60,0.0,1.0));',
     ' col+=(g1+g2)*0.9*(1.0-col);',
     ' col=mix(col,vec3(1.0),0.035);',
@@ -75,7 +75,7 @@
     ' float d2=max(dist,0.0);float t2=pow(max(sm(clamp(1.0-d2/max(8.0,uSize.y*uSpecW),0.0,1.0)),1e-5),uRimK);',
     ' float s1=max(0.0,dot(n,uL1)),s2=max(0.0,dot(n,uL2));',
     ' float spec=(pow(max(s1,1e-5),2.4)+0.42*pow(max(s2,1e-5),2.4))*pow(max(t2,1e-5),0.85)*uSpec;',
-    ' float edge=d2<1.2?0.55:0.0;float sa=min(1.0,spec*0.92+edge)*0.95;',
+    ' float edge=d2<1.2?0.40:0.0;float sa=min(1.0,spec*0.92+edge)*0.95;',
     ' col=mix(col,vec3(1.0),sa);',
     ' gl_FragColor=vec4(col*a,a);',
     '}'
@@ -124,11 +124,13 @@
 
   /* ---------- 3. the strip (html2canvas) ---------- */
   var strip = { top: 0, h: 0, s: 1, w: 0, comp: null, ctx: null, small: null, sctx: null, div: 16, ready: false, at: 0 };
+  var lastY = 0, vel = 0; /* px/s, signed */
   var h2c = null, capturing = false, pending = false, fails = 0, captures = 0, capT = 0, scaleCut = 1, MAXCAP = 40;
   function plan() {
-    var y = scrollY();
-    var top = Math.max(0, Math.min(Math.round(y - vh), Math.max(0, docH - 3 * vh)));
-    var h = Math.max(1, Math.min(Math.round(3 * vh), docH - top));
+    /* 4.5 viewports, biased the way the reader is moving: a fast flick down keeps most of the strip ahead of the bar */
+    var y = scrollY(), above = vel > 900 ? 0.75 : (vel < -900 ? 2.5 : 1.5), H = Math.round(4.5 * vh);
+    var top = Math.max(0, Math.min(Math.round(y - above * vh), Math.max(0, docH - H)));
+    var h = Math.max(1, Math.min(H, docH - top));
     var budget = vw < 900 ? 4.5e6 : 6.5e6;
     var s = Math.min(dpr, 2, (MAXTEX - 2) / h, (MAXTEX - 2) / vw, Math.sqrt(budget / (vw * h))) * scaleCut;
     s = Math.max(0.5, Math.floor(s * 100) / 100);
@@ -137,9 +139,16 @@
   function needsCapture() {
     if (!strip.ready) return true;
     var y = scrollY(), top = strip.top, bot = strip.top + strip.h;
-    if (top > 0 && y < top + vh * 0.5) return true;
-    if (bot < docH - 2 && y + vh > bot - vh * 0.5) return true;
+    if (top > 0 && y < top + vh * 1.0) return true;
+    if (bot < docH - 2 && y + vh > bot - vh * 1.5) return true;
     return false;
+  }
+  /* is the bar's whole sample band (pill + lens reach) inside the current strip? if not the lens would stretch the strip's edge row — step aside instead */
+  function bandCovered() {
+    if (!strip.ready) return false;
+    var pad = LENS.scale / 2 + 4, t = pill.y - pad, b = pill.y + pill.h + pad;
+    var top = strip.top, bot = strip.top + strip.h;
+    return (t >= top - 1 || top <= 0) && (b <= bot + 1 || bot >= docH - 2);
   }
   /* tag the live DOM: 'i' (in range, height pinned in the clone), 'o' (out of range: pinned, hidden and emptied so it costs nothing), 'x' (ignored) */
   function tagRange(p) {
@@ -208,14 +217,14 @@
     (document.head || doc).appendChild(s);
   }
   var capTimer = 0;
-  function scheduleCapture(delay, why) { clearTimeout(capTimer); capTimer = setTimeout(function () { capture(why || 'scheduled'); }, delay == null ? 120 : delay); }
-  function capture(why) {
+  function scheduleCapture(delay, why, urgent) { clearTimeout(capTimer); capTimer = setTimeout(function () { capture(why || 'scheduled', urgent); }, delay == null ? 120 : delay); }
+  function capture(why, urgent) {
     if (!API.on && API.why) return;
     if (!h2c) { pending = true; return; }
     if (capturing) { pending = true; return; }
     if (captures >= MAXCAP) return;
     if (document.hidden) { pending = true; return; }
-    if (now() - lastScrollT < 160 && strip.ready) { scheduleCapture(180, why); return; } /* never rasterise mid-gesture */
+    if (!urgent && now() - lastScrollT < 160 && strip.ready) { scheduleCapture(180, why); return; } /* never rasterise mid-gesture unless the bar has run off the strip */
     measure();
     var p = plan(); capturing = true; captures++; var t0 = now(); var list = tagRange(p); API.lastWhy = why;
     var opts = {
@@ -337,13 +346,23 @@
   }
 
   /* ---------- 5. render loop ---------- */
-  var dirty = true, running = false, lastScrollT = 0, frames = [], lastVideoT = 0;
+  var dirty = true, running = false, lastScrollT = 0, frames = [], lastVideoT = 0, scrimCur = 0, scrimT = 0, lastRenderT = 0, animating = false;
   function render() {
     if (!strip.ready) return;
     var t0 = now();
     measure();
-    var scrimAttr = nav.getAttribute('data-scrim'), scrimA = 0, scrim = [0, 0, 0];
-    if (scrimAttr === 'dark') { scrimA = 0.20; } else if (scrimAttr === 'light') { scrimA = 0.26; scrim = [1, 1, 1]; }
+    var covered = bandCovered();
+    if (nav.classList.contains('is-gl-stale') === covered) nav.classList.toggle('is-gl-stale', !covered);
+    if (!covered && !capturing) capture('stale', true);
+    /* the legibility scrim eases in and out (the CSS glass transitions it over 360 ms; a hard switch flickers over video) */
+    var scrimAttr = nav.getAttribute('data-scrim'), target = 0, scrim = [0, 0, 0];
+    if (scrimAttr === 'dark') { target = 0.20; } else if (scrimAttr === 'light') { target = 0.26; scrim = [1, 1, 1]; }
+    if (scrimAttr === 'light') scrimT = 1; else if (scrimAttr === 'dark') scrimT = 0;
+    var dt = Math.min(0.05, (t0 - (lastRenderT || t0)) / 1000); lastRenderT = t0;
+    scrimCur += (target - scrimCur) * Math.min(1, dt / 0.36 * 2.2);
+    if (Math.abs(target - scrimCur) < 0.003) scrimCur = target;
+    animating = scrimCur !== target;
+    var scrimA = scrimCur; if (scrimT === 1) scrim = [1, 1, 1];
     gl.uniform2f(U.uSize, pill.w, pill.h); gl.uniform2f(U.uOrigin, pill.x, pill.y); gl.uniform1f(U.uR, pill.r);
     gl.uniform2f(U.uStrip, 0, strip.top); gl.uniform2f(U.uStripSize, strip.w, strip.h); gl.uniform1f(U.uDocH, docH);
     gl.uniform3f(U.uBg, bg[0], bg[1], bg[2]); gl.uniform3f(U.uScrim, scrim[0], scrim[1], scrim[2]); gl.uniform1f(U.uScrimA, scrimA);
@@ -362,10 +381,10 @@
         if (vids.length && t - lastVideoT >= 30) { lastVideoT = t; drawVideos(); if (videoLive) dirty = true; }
         if (dirty) { dirty = false; render(); }
       }
-      if (videoLive && !open) { running = true; raf(loop); }
+      if ((videoLive || animating) && !open) { running = true; if (animating) dirty = true; raf(loop); }
     });
   }
-  function onScroll() { lastScrollT = now(); dirty = true; tick(); if (needsCapture()) scheduleCapture(140, 'scroll'); }
+  function onScroll() { var t = now(), y = scrollY(); if (lastScrollT) { var v = (y - lastY) / Math.max(1, t - lastScrollT) * 1000; vel = Math.abs(v) < 20000 ? v : vel; } lastY = y; lastScrollT = t; dirty = true; tick(); if (needsCapture()) scheduleCapture(bandCovered() ? 140 : 0, 'scroll', !bandCovered()); }
   window.addEventListener('scroll', onScroll, { passive: true });
   if (window.visualViewport) window.visualViewport.addEventListener('scroll', function () { dirty = true; tick(); }, { passive: true });
   var rsT = 0;
@@ -375,21 +394,29 @@
   window.addEventListener('pageshow', function (e) { if (e.persisted) scheduleCapture(200, 'bfcache'); });
   /* the page changes under the bar (reveals, lazy images, carousels): re-rasterise, rate-limited, never mid-scroll */
   var moT = 0, lastCapReq = 0;
-  function requestRecapture(why) { var t = now(); clearTimeout(moT); var wait = Math.max(450, 1500 - (t - lastCapReq)); moT = setTimeout(function () { lastCapReq = now(); capture(why); }, wait); }
-  function inRange(el) { if (!el || !el.getBoundingClientRect || !strip.ready) return true; var r = el.getBoundingClientRect(); if (r.width === 0 && r.height === 0) return false; var t = r.top + scrollY(), b = r.bottom + scrollY(); return b >= strip.top - 400 && t <= strip.top + strip.h + 400; }
+  function requestRecapture(why) { var t = now(); clearTimeout(moT); var wait = Math.max(700, 2000 - (t - lastCapReq)); moT = setTimeout(function () { lastCapReq = now(); capture(why); }, wait); }
+  function inBand(el) { if (!el || !el.getBoundingClientRect || !strip.ready) return true; var r = el.getBoundingClientRect(); if (r.width === 0 && r.height === 0) return false; var t = r.top + scrollY(), b = r.bottom + scrollY(); return b >= pill.y - vh * 1.2 && t <= pill.y + pill.h + vh * 1.2; }
+  function ours(n) { return !n || n === canvas || n === scratch || n.__thxGLShadow || (n.nodeType === 1 && (n.classList.contains('html2canvas-container') || n.getAttribute(TAG) === 'x' || n.id === 'thx-nav-gl-css')); }
+  function styleDelta(m) { /* true when a style write changed anything other than transform/opacity/translate (scroll animations rewrite those every frame) */
+    if (m.attributeName !== 'style') return true; var a = String(m.oldValue || ''), b = m.target.getAttribute('style') || ''; if (a === b) return false;
+    var strip2 = function (s) { return s.replace(/(?:^|;)\s*(?:-webkit-)?(?:transform|opacity|translate|will-change|transition)\s*:[^;]*/g, '').replace(/\s+/g, ''); };
+    return strip2(a) !== strip2(b);
+  }
   try {
     new MutationObserver(function (recs) {
       if (capturing) return;
       for (var k = 0; k < recs.length; k++) {
         var m = recs[k], tg = m.target;
         if (!(tg instanceof Element)) tg = tg.parentElement;
-        if (!tg || nav.contains(tg) || tg.__thxGLShadow || tg === scratch) continue;
-        if (m.type === 'attributes' && (m.attributeName === TAG)) continue;
-        if (inRange(tg)) { requestRecapture('mutation'); return; }
+        if (!tg || nav.contains(tg) || ours(tg)) continue;
+        if (m.type === 'childList') { var only = true; var all = [].slice.call(m.addedNodes).concat([].slice.call(m.removedNodes)); for (var q = 0; q < all.length; q++) if (!ours(all[q]) && all[q].nodeType === 1) { only = false; break; } if (only) continue; }
+        if (m.type === 'attributes' && (m.attributeName === TAG || m.attributeName === 'loading')) continue;
+        if (m.type === 'attributes' && !styleDelta(m)) continue;
+        if (inBand(tg)) { requestRecapture('mutation'); return; }
       }
-    }).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'style', 'src', 'srcset', 'hidden', 'open', 'poster'] });
+    }).observe(document.body, { childList: true, subtree: true, attributes: true, attributeOldValue: true, attributeFilter: ['class', 'style', 'src', 'srcset', 'hidden', 'open', 'poster'] });
   } catch (e) {}
-  document.addEventListener('load', function (e) { var t = e.target; if (t && (t.tagName === 'IMG' || t.tagName === 'PICTURE') && inRange(t)) requestRecapture('img'); }, true);
+  document.addEventListener('load', function (e) { var t = e.target; if (t && (t.tagName === 'IMG' || t.tagName === 'PICTURE') && inBand(t)) requestRecapture('img'); }, true);
   try { new MutationObserver(function () { dirty = true; tick(); }).observe(nav, { attributes: true, attributeFilter: ['data-scrim', 'data-open', 'data-ink'] }); } catch (e) {}
 
   function disable(why) {
@@ -404,7 +431,7 @@
   API.lens = function (opts) { if (opts && typeof opts === 'object') { for (var k in opts) if (k in LENS) LENS[k] = opts[k]; pushLens(); dirty = true; tick(); } return { on: API.on, params: JSON.parse(JSON.stringify(LENS)), strip: { top: strip.top, h: strip.h, s: strip.s, w: strip.w }, captureMs: API.captureMs, avgMs: API.avgMs }; };
   API.disable = function () { disable("api"); };
   API.dump = function () { return strip.comp ? strip.comp.toDataURL("image/jpeg", 0.72) : null; };
-  API.state = function () { return { on: API.on, why: API.why, captures: captures, strips: API.strips || 0, captureMs: API.captureMs, avgMs: API.avgMs, drift: API.drift, videos: vids.map(function (e) { return e.state; }), h2c: !!h2c, canvas: [canvas.width, canvas.height], strip: { top: strip.top, h: strip.h, s: strip.s, w: strip.w } }; };
+  API.state = function () { return { on: API.on, why: API.why, stale: nav.classList.contains('is-gl-stale'), vel: Math.round(vel), scrim: +scrimCur.toFixed(3), captures: captures, strips: API.strips || 0, captureMs: API.captureMs, avgMs: API.avgMs, drift: API.drift, videos: vids.map(function (e) { return e.state; }), h2c: !!h2c, canvas: [canvas.width, canvas.height], strip: { top: strip.top, h: strip.h, s: strip.s, w: strip.w } }; };
 
   /* ---------- 6. go ---------- */
   nav.setAttribute('data-gl', 'loading');

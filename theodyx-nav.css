@@ -96,6 +96,8 @@ html.thx-nav-lock{overflow:hidden;padding-inline-end:var(--thx-sbw)}html.thx-nav
 .thx-nav.is-gl[data-open="true"] .thx-nav-rim{box-shadow:none}
 .thx-nav.is-gl .thx-nav-rim::after{content:"";position:absolute;inset:-40%;border-radius:inherit;background:radial-gradient(28% 60% at var(--thx-mx,50%) var(--thx-my,50%),rgba(255,255,255,.20),transparent 70%);opacity:0;transition:opacity 320ms var(--thx-nav-ease);pointer-events:none}
 .thx-nav.is-gl.is-lens .thx-nav-rim::after{opacity:1}
+.thx-nav.is-gl-stale .thx-nav-gl{opacity:0;transition-duration:140ms} /* the bar has run off the rasterised strip: CSS blur glass covers until the next capture */
+.thx-nav.is-gl.is-gl-stale .thx-nav-glass{visibility:visible!important}
 /* --- fallbacks --- */
 @media (prefers-reduced-transparency:reduce){.thx-nav-glass,.thx-nav.is-refract .thx-nav-glass{-webkit-backdrop-filter:none;backdrop-filter:none;background:#0c0a10;box-shadow:0 1px 0 0 rgba(0,0,0,.08),0 8px 24px rgba(0,0,0,.18)}.thx-nav-rim,.thx-nav-tint,.thx-nav-glass::before,.thx-nav-glass::after{display:none}.thx-nav .thx-nav-menu a,.thx-nav .thx-nav-logo,.thx-nav .thx-nav-burger{color:#fff!important}}
 @media (prefers-reduced-motion:reduce){.thx-nav,.thx-nav *,.thx-nav *::before,.thx-nav *::after{transition:none!important;animation:none!important}.thx-nav-glass::after{display:none}}

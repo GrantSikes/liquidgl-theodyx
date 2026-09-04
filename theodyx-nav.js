@@ -1,4 +1,4 @@
-/*! theodyx-nav.js v4.5.0 (2026-09-03) — behaviours for the clear liquid-glass nav (#thx-nav).
+/*! theodyx-nav.js v4.5.1 (2026-09-03) — behaviours for the clear liquid-glass nav (#thx-nav).
  * One unanimous ink (every word, the logo and the burger flip together between pure white and pure black, chosen
  * from what is behind all of them), whole-surface lens (continuous refraction profile from the pill geometry, per-
  * channel dispersion, geometry-lit specular rim, colour bleed; Chromium, capability + frame-budget gated), pointer
@@ -9,7 +9,7 @@
   if (window.__thxNav) return;
   var nav = document.getElementById('thx-nav');
   if (!nav) return;
-  var API = window.__thxNav = { v: '4.5.0' };
+  var API = window.__thxNav = { v: '4.5.1' };
   var doc = document.documentElement, body = document.body;
   var glass = nav.querySelector('.thx-nav-glass');
   var rim = nav.querySelector('.thx-nav-rim');
@@ -420,7 +420,7 @@
   /* Tunables (live: __thxNav.lens({scale:70,...})). Profile T(d) over distance d from the rounded edge: a rim term
    * (smoothstep^rimK over the outer rimW*h, the bevel) plus a body term that runs all the way to the centre line
    * (sign < 0 = the centre magnifies like a thick slab), so the whole surface bends — no flat inset panel. */
-  var LENS = { scale: 112, rim: 0.9, rimW: 0.58, rimK: 1.25, body: -0.6, bodyK: 1.5, disp: 0.34, dispW: 0.4, dispBody: 0.05, sat: 1.9, blur: 0.45, spec: 0.7, specW: 0.3, bleed: 0.9, bleedBlur: 40, light: [-0.55, -0.83], light2: [0.55, 0.83] }; /* 4.4: turned up — deeper centre magnification, wider bevel, more dispersion, saturation and colour bleed. 4.5: dispersion lives at the edge — disp fades in over the outer dispW of the bevel, dispBody is a whisper in the body — one map per channel, so text under the body no longer splits into three colours */
+  var LENS = { scale: 112, rim: 0.9, rimW: 0.58, rimK: 1.25, body: -0.6, bodyK: 1.5, disp: 0.34, dispW: 0.4, dispBody: 0.05, sat: 1.9, blur: 0.45, spec: 0.5, specW: 0.24, bleed: 0.9, bleedBlur: 40, light: [-0.55, -0.83], light2: [0.55, 0.83] }; /* 4.4: turned up — deeper centre magnification, wider bevel, more dispersion, saturation and colour bleed. 4.5: dispersion lives at the edge — disp fades in over the outer dispW of the bevel, dispBody is a whisper in the body — one map per channel, so text under the body no longer splits into three colours */
   var mapW = 0, mapH = 0, mapURLs = ['', '', ''], mapRetry = 0;
   var svgNS = 'http://www.w3.org/2000/svg';
   function fe(name, attrs) { var e = document.createElementNS(svgNS, name); for (var k in attrs) e.setAttribute(k, attrs[k]); return e; }
@@ -524,7 +524,7 @@
           var t2 = Math.max(0, Math.min(1, 1 - d2 / Math.max(8, h * LENS.specW))); t2 = t2 * t2 * (3 - 2 * t2); t2 = Math.pow(t2, LENS.rimK); /* the highlight lives on a narrower band than the lens, so a dark page stays dark through the body */
           var s1 = Math.max(0, nx * L1[0] + ny * L1[1]), s2 = Math.max(0, nx * L2[0] + ny * L2[1]);
           var spec = (Math.pow(s1, 2.4) * 1.0 + Math.pow(s2, 2.4) * 0.42) * Math.pow(t2, 0.85) * LENS.spec;
-          var edge = d2 < 1.2 ? 0.55 : 0;
+          var edge = d2 < 1.2 ? 0.40 : 0;
           var j = (y2 * cw2 + x2) * 4;
           hd[j] = 255; hd[j + 1] = 255; hd[j + 2] = 255; hd[j + 3] = Math.round(255 * Math.min(1, spec * 0.92 + edge));
         }
