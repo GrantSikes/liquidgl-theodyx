@@ -1,4 +1,4 @@
-/*! theodyx-nav.js v4.5.2 (2026-09-03) — behaviours for the clear liquid-glass nav (#thx-nav).
+/*! theodyx-nav.js v4.5.3 (2026-09-03) — behaviours for the clear liquid-glass nav (#thx-nav).
  * One unanimous ink (every word, the logo and the burger flip together between pure white and pure black, chosen
  * from what is behind all of them), whole-surface lens (continuous refraction profile from the pill geometry, per-
  * channel dispersion, geometry-lit specular rim, colour bleed; Chromium, capability + frame-budget gated), pointer
@@ -9,12 +9,13 @@
   if (window.__thxNav) return;
   var nav = document.getElementById('thx-nav');
   if (!nav) return;
-  var API = window.__thxNav = { v: '4.5.2' };
+  var API = window.__thxNav = { v: '4.5.3' };
   var I18N = window.__thxI18n; function T(k) { return (I18N && I18N.t) ? I18N.t(k) : ({ 'nav.open': 'Open menu', 'nav.close': 'Close menu' })[k] || k; } /* Phase 6: locale runtime (nv2pagesf) keyed by <html lang> */
   var doc = document.documentElement, body = document.body;
   var glass = nav.querySelector('.thx-nav-glass');
   var rim = nav.querySelector('.thx-nav-rim');
   var burger = nav.querySelector('.thx-nav-burger');
+  if (burger) burger.setAttribute('aria-label', T('nav.open')); /* the embed's static English label is replaced by the locale runtime's */
   var logo = nav.querySelector('.thx-nav-logo');
   var panel = document.getElementById('thx-nav-panel');
   var mapImg = document.getElementById('thx-lens-map'), mapImgLite = document.getElementById('thx-lens-map-lite');

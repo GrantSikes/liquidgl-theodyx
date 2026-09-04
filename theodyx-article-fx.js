@@ -1,4 +1,4 @@
-/*! theodyx-article-fx v1.5.0 — Theodyx publication template reading chrome.
+/*! theodyx-article-fx v1.5.1 — Theodyx publication template reading chrome.
    CONTRACT: enhancement-only. All content is native Webflow DOM; this script only
    (1) links existing <sup>N</sup> footnote markers to the Notes & sources list (dedicated .art-notes section, or legacy in-body h6+ol),
    (2) injects an "In this report" TOC from the article headings (h2, falling back to h3 then h4; 3+ entries) across EVERY
@@ -241,6 +241,7 @@
           if (!art.mainEntityOfPage) art.mainEntityOfPage = url;
           if (!art.inLanguage) art.inLanguage = 'en-US';
           ssr.textContent = JSON.stringify(d);
+          try { var ml2 = document.querySelector('.thx-art-metaline'); if (ml2 && art.datePublished) { var mm = txt(ml2).match(/([A-Z][a-z]+ \d{1,2},\s*\d{4})/); if (mm) timeWrap(ml2, mm[1], String(art.datePublished).slice(0, 10)); } } catch (e) {} /* the visible date gets <time datetime> + Intl text on the server-rendered path too */
           return;
         }
       } catch (e) { /* malformed server block (e.g. a quote in a bound field): fall through and build a clean one */ }
