@@ -1,4 +1,4 @@
-/*! theodyx-article-fx v1.5.2 — Theodyx publication template reading chrome.
+/*! theodyx-article-fx v1.6.0 — Theodyx publication template reading chrome.
    CONTRACT: enhancement-only. All content is native Webflow DOM; this script only
    (1) links existing <sup>N</sup> footnote markers to the Notes & sources list (dedicated .art-notes section, or legacy in-body h6+ol),
    (2) injects an "In this report" TOC from the article headings (h2, falling back to h3 then h4; 3+ entries) across EVERY
@@ -32,7 +32,7 @@
   var txt = function (el) { return el ? (el.textContent || '').trim() : ''; };
   var WPM = 230;
   var PUB = '/our-thinking';
-  var SEC = { 'Report': '/our-thinking/reports', 'News': '/our-thinking/news', 'Briefing': '/our-thinking/briefings', 'Resource': '/our-thinking/resources' };
+  var SEC = { 'Report': '/our-thinking', 'News': '/our-thinking', 'Briefing': '/our-thinking', 'Resource': '/our-thinking', 'Publication': '/our-thinking' }; /* Phase 7: no per-section hubs exist; the crumb points at the hub instead of a 404 */
   var MO = { january: 1, february: 2, march: 3, april: 4, may: 5, june: 6, july: 7, august: 8, september: 9, october: 10, november: 11, december: 12 };
 
   function bodies() { return [].slice.call(document.querySelectorAll('.thx-read-body')); }
@@ -225,6 +225,8 @@
         var art = d['@graph'] ? d['@graph'].filter(function (n) { return n['@type'] === 'Article' || n['@type'] === 'BlogPosting'; })[0] : d;
         if (art) {
           if (!art.headline && title) art.headline = title;
+          var dec = function (v) { if (typeof v !== 'string' || v.indexOf('&') < 0) return v; var t = document.createElement('textarea'); t.innerHTML = v; return t.value; }; /* Webflow HTML-escapes bound text inside custom code: &#39; → ' */
+          if (art.headline) art.headline = dec(art.headline); if (art.description) art.description = dec(art.description); if (art.articleSection) art.articleSection = dec(art.articleSection);
           if (art.datePublished) art.datePublished = isoDate(art.datePublished) || art.datePublished;
           if (art.dateModified) art.dateModified = isoDate(art.dateModified) || art.dateModified;
           art.inLanguage = document.documentElement.getAttribute('lang') || art.inLanguage || 'en-US';
@@ -240,6 +242,12 @@
           if (!art.publisher) art.publisher = { '@id': ORG };
           if (!art.mainEntityOfPage) art.mainEntityOfPage = url;
           if (!art.inLanguage) art.inLanguage = 'en-US';
+          /* Phase 7 (SD-03/SD-04): the server block is a flat Article; publish it as a @graph with a resolvable publisher, the WebSite node and a BreadcrumbList */
+          var LOGO = 'https://cdn.prod.website-files.com/69fe0aaad9f3034241913693/6a1a1717e93ecc012e58ba8b_theodyx-webclip.png';
+          art.publisher = { '@type': 'Organization', '@id': ORG, 'name': 'Theodyx', 'url': origin + '/', 'logo': { '@type': 'ImageObject', 'url': LOGO } };
+          art.isPartOf = { '@id': WEB };
+          var crumbs = [{ '@type': 'ListItem', 'position': 1, 'name': 'Home', 'item': origin + '/' }, { '@type': 'ListItem', 'position': 2, 'name': 'Our Thinking', 'item': origin + PUB }, { '@type': 'ListItem', 'position': 3, 'name': art.headline || title, 'item': url }];
+          d = { '@context': 'https://schema.org', '@graph': [art, { '@type': 'WebSite', '@id': WEB, 'url': origin + '/', 'name': 'Theodyx', 'publisher': { '@id': ORG } }, { '@type': 'BreadcrumbList', '@id': url + '#breadcrumb', 'itemListElement': crumbs }] };
           ssr.textContent = JSON.stringify(d);
           try { var ml2 = document.querySelector('.thx-art-metaline'); if (ml2 && art.datePublished) { var mm = txt(ml2).match(/([A-Z][a-z]+ \d{1,2},\s*\d{4})/); if (mm) timeWrap(ml2, mm[1], isoDate(mm[1]) || String(art.datePublished).slice(0, 10)); } } catch (e) {} /* the visible date gets <time datetime> + Intl text on the server-rendered path too; the ISO comes from the rendered day (site timezone), not the UTC stamp */
           return;
