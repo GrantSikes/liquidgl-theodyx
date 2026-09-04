@@ -1,17 +1,17 @@
-/*! theodyx-nav.css v4.5.0 (2026-09-04) — clear liquid-glass nav. The bar is one continuous lens: transparent glass
+/*! theodyx-nav.css v4.5.1 (2026-09-04) — clear liquid-glass nav. The bar is one continuous lens: transparent glass
  * whose whole surface bends what is behind it (Chromium: SVG displacement in backdrop-filter, strongest at the
  * bevel, per-channel dispersion), a specular rim lit from the pill's own geometry, a colour bleed that takes on the
  * hues around it, and colour enhancement. The words, the logo and the burger share ONE ink — pure white or pure
  * black — chosen from what is behind all of them; a faint scrim appears only when the backdrop disagrees with
  * itself. The expanded mobile sheet is frosted for legibility. */
-:root{--thx-nav-w:min(1180px,calc(100% - 2rem));--thx-nav-top:max(12px,env(safe-area-inset-top,0px));--thx-nav-h:56px;--thx-nav-r:999px;
+:root{--thx-nav-w:min(1180px,calc(100% - 2rem - env(safe-area-inset-left,0px) - env(safe-area-inset-right,0px)));--thx-nav-top:max(12px,env(safe-area-inset-top,0px));--thx-nav-h:56px;--thx-nav-r:999px;
 --thx-nav-blur:1.2px;--thx-nav-rim:7px;--thx-nav-sat:1.55;--thx-nav-bleed:.6;--thx-nav-bleed-blur:30px;--thx-scrim-dark:rgba(0,0,0,.20);--thx-scrim-light:rgba(255,255,255,.26);
 --thx-ink-light:#ffffff;--thx-ink-dark:#0c0a10;
 --thx-nav-ease:cubic-bezier(.22,1,.36,1);--thx-nav-font:"Google Sans Flex","Google Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;--thx-sbw:0px}
 html{scroll-padding-top:calc(var(--thx-nav-h) + var(--thx-nav-top) + 16px)}
-.thx-skip{position:fixed;inset-block-start:var(--thx-nav-top);inset-inline-start:1rem;z-index:1001;padding:.6rem .9rem;border-radius:999px;background:#0c0a10;color:#fff;font:600 14px/1 var(--thx-nav-font);text-decoration:none;transform:translateY(-200%);transition:transform 200ms var(--thx-nav-ease)}
+.thx-skip{position:fixed;inset-block-start:var(--thx-nav-top);inset-inline-start:max(1rem,env(safe-area-inset-left,0px));z-index:1001;min-height:44px;display:inline-flex;align-items:center;padding:.6rem .9rem;border-radius:999px;background:#0c0a10;color:#fff;font:600 14px/1 var(--thx-nav-font);text-decoration:none;transform:translateY(-200%);transition:transform 200ms var(--thx-nav-ease)}
 .thx-skip:focus-visible{transform:none;outline:2px solid #fff;outline-offset:2px}
-.thx-nav{position:fixed;inset-block-start:var(--thx-nav-top);inset-inline:0;margin-inline:auto;width:var(--thx-nav-w);z-index:900;isolation:isolate;border-radius:var(--thx-nav-r);color:var(--thx-ink-light);font-family:var(--thx-nav-font);display:grid;grid-template-rows:auto 0px;transform-origin:50% 0;-webkit-tap-highlight-color:transparent;transition:border-radius 420ms var(--thx-nav-ease),grid-template-rows 420ms var(--thx-nav-ease)}
+.thx-nav{position:fixed;inset-block-start:var(--thx-nav-top);inset-inline:env(safe-area-inset-left,0px) env(safe-area-inset-right,0px);margin-inline:auto;width:var(--thx-nav-w);z-index:900;isolation:isolate;border-radius:var(--thx-nav-r);color:var(--thx-ink-light);font-family:var(--thx-nav-font);display:grid;grid-template-rows:auto 0px;transform-origin:50% 0;-webkit-tap-highlight-color:transparent;transition:border-radius 420ms var(--thx-nav-ease),grid-template-rows 420ms var(--thx-nav-ease)}
 .thx-nav,.thx-nav *{box-sizing:border-box}
 .thx-nav{--thx-ink-light:#fff;--thx-ink-dark:#000} /* pure black or pure white, never a tint — scoped so no page-level variable can shift it */
 /* --- glass body: clear, colour-enhanced, lensed at the rim --- */
