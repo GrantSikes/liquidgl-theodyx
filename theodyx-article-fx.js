@@ -1,4 +1,4 @@
-/*! theodyx-article-fx v1.6.0 — Theodyx publication template reading chrome.
+/*! theodyx-article-fx v1.6.1 — Theodyx publication template reading chrome.
    CONTRACT: enhancement-only. All content is native Webflow DOM; this script only
    (1) links existing <sup>N</sup> footnote markers to the Notes & sources list (dedicated .art-notes section, or legacy in-body h6+ol),
    (2) injects an "In this report" TOC from the article headings (h2, falling back to h3 then h4; 3+ entries) across EVERY
@@ -332,4 +332,21 @@
     var again = function () { setTimeout(run, 60); setTimeout(run, 700); };
     if (document.readyState === 'complete') again(); else addEventListener('load', again, { once: true });
   });
+})();
+
+/* 1.6.1 (Phase 7) outline hygiene. Two template quirks the Data API cannot change: a Heading element cannot become a div
+   (so the aria-hidden .thx-read-title h2 stays an h2 in the outline), and a CMS-bound heading with no value still renders as an
+   empty <h2 class="w-dyn-bind-empty"> (Webflow only hides it with CSS). Both are corrected in the rendered DOM: empty bound
+   headings are removed, and the read-title heading is swapped for a div that keeps every attribute and child. */
+;(function () {
+  function fix() {
+    try {
+      document.querySelectorAll('h1.w-dyn-bind-empty,h2.w-dyn-bind-empty,h3.w-dyn-bind-empty,h4.w-dyn-bind-empty,h5.w-dyn-bind-empty,h6.w-dyn-bind-empty').forEach(function (h) { if (!h.textContent.trim()) h.remove(); });
+      document.querySelectorAll('h1.thx-read-title,h2.thx-read-title,h3.thx-read-title,h4.thx-read-title').forEach(function (h) {
+        var d = document.createElement('div'); for (var i = 0; i < h.attributes.length; i++) d.setAttribute(h.attributes[i].name, h.attributes[i].value);
+        while (h.firstChild) d.appendChild(h.firstChild); h.parentNode.replaceChild(d, h);
+      });
+    } catch (e) {}
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fix); else fix();
 })();
