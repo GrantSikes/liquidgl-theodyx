@@ -1,4 +1,4 @@
-/*! theodyx-article-fx v1.4.1 — Theodyx publication template reading chrome.
+/*! theodyx-article-fx v1.5.0 — Theodyx publication template reading chrome.
    CONTRACT: enhancement-only. All content is native Webflow DOM; this script only
    (1) links existing <sup>N</sup> footnote markers to the Notes & sources list (dedicated .art-notes section, or legacy in-body h6+ol),
    (2) injects an "In this report" TOC from the article headings (h2, falling back to h3 then h4; 3+ entries) across EVERY
@@ -14,7 +14,20 @@
    Runs at DOMContentLoaded and again after load (the composer splits the body between the two), idempotently.
    Removing this script degrades gracefully; content stays fully Designer-editable. */
 (function () {
-  if (window.__thxArtFx) return; window.__thxArtFx = 1;
+  /* Phase 6: strings come from the locale runtime (nv2pagesf carries the dictionary; English fallback here); the visible date renders through Intl inside <time datetime> */
+  var I = window.__thxI18n, EN = { 'art.note': 'Note {n}', 'art.backref': 'Back to reference {n}', 'art.toc': 'In this report', 'art.readmin': '{n} min read' };
+  function T(k, v) { if (I && I.t) return I.t(k, v); var s = EN[k] || k; if (v) for (var p in v) s = s.split('{' + p + '}').join(v[p]); return s; }
+  function timeWrap(el, shown, iso) {
+    try {
+      if (!iso || el.querySelector('time')) return;
+      var w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null), n;
+      while ((n = w.nextNode())) {
+        var i = n.nodeValue.indexOf(shown); if (i < 0) continue;
+        var t = document.createElement('time'); t.setAttribute('datetime', iso); t.textContent = I ? I.date(iso) : shown;
+        var after = n.splitText(i); after.nodeValue = after.nodeValue.slice(shown.length); n.parentNode.insertBefore(t, after); return;
+      }
+    } catch (e) {}
+  }  if (window.__thxArtFx) return; window.__thxArtFx = 1;
   var ready = function (f) { document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', f) : f(); };
   var txt = function (el) { return el ? (el.textContent || '').trim() : ''; };
   var WPM = 230;
@@ -114,7 +127,7 @@
       a.href = '#note-' + n;
       if (!document.getElementById('ref-' + n)) a.id = 'ref-' + n;
       a.textContent = n;
-      a.setAttribute('aria-label', 'Note ' + n);
+      a.setAttribute('aria-label', T('art.note', { n: n }));
       s.textContent = '';
       s.appendChild(a);
     }
@@ -124,7 +137,7 @@
       b.className = 'thx-note-back';
       b.href = '#ref-' + (i + 1);
       b.textContent = '↩';
-      b.setAttribute('aria-label', 'Back to reference ' + (i + 1));
+      b.setAttribute('aria-label', T('art.backref', { n: i + 1 }));
       lis[i].appendChild(document.createTextNode(' '));
       lis[i].appendChild(b);
     }
@@ -151,8 +164,8 @@
     if (!nav) {
       nav = document.createElement('nav');
       nav.className = 'thx-toc';
-      nav.setAttribute('aria-label', 'In this report');
-      var lab = document.createElement('p'); lab.className = 'thx-toc-h'; lab.textContent = 'In this report'; nav.appendChild(lab);
+      nav.setAttribute('aria-label', T('art.toc'));
+      var lab = document.createElement('p'); lab.className = 'thx-toc-h'; lab.textContent = T('art.toc'); nav.appendChild(lab);
       nav.appendChild(document.createElement('ol'));
       var kt = document.getElementById('thxartkt');
       if (kt) kt.insertAdjacentElement('afterend', nav); else body.parentNode.insertBefore(nav, body);
@@ -190,7 +203,7 @@
     if (box) {
       var ps = box.querySelectorAll('.thx-ml-t');
       if (ps.length && /^\d+$/.test(txt(ps[0]))) ps[0].textContent = String(min);
-      else if (ps.length && /^\d+\s*min/i.test(txt(ps[0]))) ps[0].textContent = min + ' min read';
+      else if (ps.length && /^\d+\s*min/i.test(txt(ps[0]))) ps[0].textContent = T('art.readmin', { n: I ? I.num(min) : String(min) });
     }
     return min;
   }
@@ -214,6 +227,7 @@
           if (!art.headline && title) art.headline = title;
           if (art.datePublished) art.datePublished = isoDate(art.datePublished) || art.datePublished;
           if (art.dateModified) art.dateModified = isoDate(art.dateModified) || art.dateModified;
+          art.inLanguage = document.documentElement.getAttribute('lang') || art.inLanguage || 'en-US';
           if (!art.dateModified && art.datePublished) art.dateModified = art.datePublished;
           if (art.dateModified && art.datePublished && art.dateModified < art.datePublished) art.dateModified = art.datePublished;
           if (wc > 50) art.wordCount = wc;
@@ -239,7 +253,7 @@
     var section = sectionName();
     var iso = '';
     var ml = document.querySelector('.thx-art-metaline');
-    if (ml) { var m = txt(ml).match(/([A-Z][a-z]+ \d{1,2},\s*\d{4})/); if (m) iso = isoDate(m[1]); }
+    if (ml) { var m = txt(ml).match(/([A-Z][a-z]+ \d{1,2},\s*\d{4})/); if (m) { iso = isoDate(m[1]); timeWrap(ml, m[1], iso); } }
     var mod = document.documentElement.getAttribute('data-thx-updated') ? isoDate(document.documentElement.getAttribute('data-thx-updated')) : '';
     var article = { '@type': 'Article', 'headline': title, 'inLanguage': 'en-US' };
     if (deck) article.description = deck;

@@ -1,4 +1,4 @@
-/*! theodyx-nav.css v4.5.1 (2026-09-04) — clear liquid-glass nav. The bar is one continuous lens: transparent glass
+/*! theodyx-nav.css v4.5.2 (2026-09-04) — clear liquid-glass nav. The bar is one continuous lens: transparent glass
  * whose whole surface bends what is behind it (Chromium: SVG displacement in backdrop-filter, strongest at the
  * bevel, per-channel dispersion), a specular rim lit from the pill's own geometry, a colour bleed that takes on the
  * hues around it, and colour enhancement. The words, the logo and the burger share ONE ink — pure white or pure
@@ -39,11 +39,12 @@ pointer-events:none;z-index:0;overflow:hidden;transition:background-color 360ms 
 .thx-nav.has-spec .thx-nav-rim{background-image:none;background-color:transparent}
 /* --- bar --- */
 /* reading progress (4.3): hairline inside the pill, driven by --thx-prog from theodyx-nav.js; absolute → no layout, no CLS */
-.thx-nav-prog{position:absolute;left:22px;right:22px;bottom:5px;height:2px;border-radius:2px;background:var(--thx-ink-light);opacity:.9;transform:scaleX(var(--thx-prog,0));transform-origin:0 50%;z-index:2;pointer-events:none;will-change:transform}
+.thx-nav-prog{position:absolute;inset-inline:22px;bottom:5px;height:2px;border-radius:2px;background:var(--thx-ink-light);opacity:.9;transform:scaleX(var(--thx-prog,0));transform-origin:0 50%;z-index:2;pointer-events:none;will-change:transform}
 .thx-nav[data-ink="dark"] .thx-nav-prog{background:var(--thx-ink-dark)}
 .thx-nav[data-open="true"] .thx-nav-prog{display:none}
-@media (max-width:899px){.thx-nav-prog{left:16px;right:16px;bottom:4px}}
-.thx-nav-bar{position:relative;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:1rem;min-height:var(--thx-nav-h);padding:6px 6px 6px 22px}
+@media (max-width:899px){.thx-nav-prog{inset-inline:16px;bottom:4px}}
+[dir="rtl"] .thx-nav-prog{transform-origin:100% 50%} /* the reading hairline grows from the inline start */
+.thx-nav-bar{position:relative;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:1rem;min-height:var(--thx-nav-h);padding:6px;padding-inline-start:22px}
 .thx-nav-logo{display:inline-flex;align-items:center;height:44px;padding:0 4px;text-decoration:none;border-radius:999px;transition:transform 300ms var(--thx-nav-ease),color 240ms var(--thx-nav-ease)}
 .thx-nav-logo svg{height:22px;width:auto;display:block}
 .thx-nav-logo:hover{transform:scale(1.03)}.thx-nav-logo:active{transform:scale(.985)}
@@ -83,7 +84,7 @@ pointer-events:none;z-index:0;overflow:hidden;transition:background-color 360ms 
 html.thx-nav-lock{overflow:hidden;padding-inline-end:var(--thx-sbw)}html.thx-nav-lock body{overflow:hidden}
 /* --- scroll: NO transform on the bar, ever — a transformed backdrop-filter re-snapshots its backdrop and the lens jumps (the 'twitch' at the 80px threshold) --- */
 .thx-nav.is-scrolled{transform:none}
-@media (max-width:899px){:root{--thx-nav-h:52px;--thx-nav-rim:8px}.thx-nav{width:min(720px,calc(100% - 1.5rem))}.thx-nav-bar{padding:4px 4px 4px 16px}.thx-nav-menu{display:none}.thx-nav-burger{display:inline-flex}}
+@media (max-width:899px){:root{--thx-nav-h:52px;--thx-nav-rim:8px}.thx-nav{width:min(720px,calc(100% - 1.5rem))}.thx-nav-bar{padding:4px;padding-inline-start:16px}.thx-nav-menu{display:none}.thx-nav-burger{display:inline-flex}}
 @media (min-width:900px){.thx-nav-panel{display:none}}
 @media (hover:none){.thx-nav-menu a:hover{background:transparent}.thx-nav-logo:hover{transform:none}}
 /* --- WebGL lens (theodyx-nav-gl.js, WebKit only): the canvas paints the lensed backdrop above the glass layer and below the rim and the words; once it is solid the CSS glass steps aside. Open sheet: canvas hidden, frosted CSS glass back --- */

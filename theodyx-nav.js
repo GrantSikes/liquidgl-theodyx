@@ -1,4 +1,4 @@
-/*! theodyx-nav.js v4.5.1 (2026-09-03) — behaviours for the clear liquid-glass nav (#thx-nav).
+/*! theodyx-nav.js v4.5.2 (2026-09-03) — behaviours for the clear liquid-glass nav (#thx-nav).
  * One unanimous ink (every word, the logo and the burger flip together between pure white and pure black, chosen
  * from what is behind all of them), whole-surface lens (continuous refraction profile from the pill geometry, per-
  * channel dispersion, geometry-lit specular rim, colour bleed; Chromium, capability + frame-budget gated), pointer
@@ -9,7 +9,8 @@
   if (window.__thxNav) return;
   var nav = document.getElementById('thx-nav');
   if (!nav) return;
-  var API = window.__thxNav = { v: '4.5.1' };
+  var API = window.__thxNav = { v: '4.5.2' };
+  var I18N = window.__thxI18n; function T(k) { return (I18N && I18N.t) ? I18N.t(k) : ({ 'nav.open': 'Open menu', 'nav.close': 'Close menu' })[k] || k; } /* Phase 6: locale runtime (nv2pagesf) keyed by <html lang> */
   var doc = document.documentElement, body = document.body;
   var glass = nav.querySelector('.thx-nav-glass');
   var rim = nav.querySelector('.thx-nav-rim');
@@ -623,7 +624,7 @@
     var inner = panel.firstElementChild;
     nav.style.setProperty('--thx-panel-h', (inner ? inner.offsetHeight : panel.scrollHeight) + 'px');
     nav.setAttribute('data-open', 'true');
-    burger.setAttribute('aria-expanded', 'true'); burger.setAttribute('aria-label', 'Close menu');
+    burger.setAttribute('aria-expanded', 'true'); burger.setAttribute('aria-label', T('nav.close'));
     panel.removeAttribute('inert'); panel.setAttribute('aria-hidden', 'false');
     lens.tx = 0; lens.ty = 0; lens.on = false; nav.classList.remove('is-lens'); kick();
     lock(); setInert(true);
@@ -634,7 +635,7 @@
   function close(restore) {
     if (nav.getAttribute('data-open') !== 'true') return;
     nav.setAttribute('data-open', 'false');
-    burger.setAttribute('aria-expanded', 'false'); burger.setAttribute('aria-label', 'Open menu');
+    burger.setAttribute('aria-expanded', 'false'); burger.setAttribute('aria-label', T('nav.open'));
     panel.setAttribute('inert', ''); panel.setAttribute('aria-hidden', 'true');
     setInert(false); unlock();
     if (restore !== false) { var t = (lastFocus && lastFocus !== body && lastFocus !== doc && document.contains(lastFocus)) ? lastFocus : burger; try { t.focus({ preventScroll: true }); } catch (e) {} }
