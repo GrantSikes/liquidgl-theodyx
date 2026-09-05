@@ -1,4 +1,4 @@
-/*! theodyx-article-fx v1.6.3 — Theodyx publication template reading chrome.
+/*! theodyx-article-fx v1.7.0 — Theodyx publication template reading chrome.
    CONTRACT: enhancement-only. All content is native Webflow DOM; this script only
    (1) links existing <sup>N</sup> footnote markers to the Notes & sources list (dedicated .art-notes section, or legacy in-body h6+ol),
    (2) injects an "In this report" TOC from the article headings (h2, falling back to h3 then h4; 3+ entries) across EVERY
@@ -12,11 +12,15 @@
    (7) JSON-LD: patches the server-rendered #thx-article-ssr block (wordCount, timeRequired, author @id, dateModified, dates → ISO)
        or, when the template has none, injects WebSite + Article + BreadcrumbList built from the live DOM.
    Runs at DOMContentLoaded and again after load (the composer splits the body between the two), idempotently.
-   Removing this script degrades gracefully; content stays fully Designer-editable. */
+   Removing this script degrades gracefully; content stays fully Designer-editable.
+   1.7.0 (Phase 9 accessibility): KB-07 footnote <li> targets hold focus; KB-08 TOC headings hold focus and are focused after the
+   jump; C-08 the breadcrumb separators are decorative; SEM-19 the TOC carries one accessible name; SEM-20 CMS body sections are
+   exposed (aria-level) as siblings of "Key takeaways"/"Notes & sources" rather than children of the takeaways box; SEM-01 (interim) the hero is a named region and
+   the Keep-reading band is named by its own heading; SEM-07 footnote markers are real <sup> links named "Footnote N: <source>". */
 (function () {
   /* Phase 6: strings come from the locale runtime (nv2pagesf carries the dictionary; English fallback here); the visible date renders through Intl inside <time datetime> */
   /* 1.6.3: the locale runtime (nv2pagesf) is a deferred script now, so it is not on window while this file evaluates; resolve it lazily. */
-  var EN = { 'art.note': 'Note {n}', 'art.backref': 'Back to reference {n}', 'art.toc': 'In this report', 'art.readmin': '{n} min read' };
+  var EN = { 'art.note': 'Note {n}', 'art.backref': 'Back to reference {n}', 'art.toc': 'In this report', 'art.readmin': '{n} min read', 'art.fn': 'Footnote {n}: {s}', 'art.header': 'Article header' };
   function I18() { var r = window.__thxI18n; return (r && r.t) ? r : null; }
   function T(k, v) { var I = I18(); if (I && I.t) return I.t(k, v); var s = EN[k] || k; if (v) for (var p in v) s = s.split('{' + p + '}').join(v[p]); return s; }
   function timeWrap(el, shown, iso) {
@@ -117,7 +121,8 @@
     }
     if (!notes) return;
     var lis = notes.children, i;
-    for (i = 0; i < lis.length; i++) lis[i].id = lis[i].id || 'note-' + (i + 1);
+    /* KB-07: the fragment target must be able to hold focus, or Chromium drops focus to <body> one frame after the jump */
+    for (i = 0; i < lis.length; i++) { lis[i].id = lis[i].id || 'note-' + (i + 1); if (!lis[i].hasAttribute('tabindex')) lis[i].setAttribute('tabindex', '-1'); }
     var sups = [];
     bodies().forEach(function (b) { sups = sups.concat([].slice.call(b.querySelectorAll('sup'))); });
     for (i = 0; i < sups.length; i++) {
@@ -145,6 +150,89 @@
     }
   }
 
+  /* SEM-07: markers are links whose whole accessible name is a superscript glyph. Give every one a real name
+     ("Footnote 3: fortune.com") and, where the CMS author typed a bare superscript character instead of a <sup>,
+     wrap it so the marker is exposed as a reference. The live source list is the inline one; the CMS-bound
+     .art-notes-list container renders empty on most articles, so the source name falls back to the link's host. */
+  var SUPD = { '⁰': '0', '¹': '1', '²': '2', '³': '3', '⁴': '4', '⁵': '5', '⁶': '6', '⁷': '7', '⁸': '8', '⁹': '9' };
+  function supNum(s, inSup) {
+    s = (s || '').trim(); if (!s || s.length > 3) return '';
+    var out = '', raised = false;
+    for (var i = 0; i < s.length; i++) {
+      var c = s.charAt(i);
+      if (SUPD[c] != null) { out += SUPD[c]; raised = true; }
+      else if (c >= '0' && c <= '9') out += c;
+      else return '';
+    }
+    if (!raised && !inSup) return '';       /* a plain "2026" link in body copy is not a footnote marker */
+    return String(parseInt(out, 10) || '');
+  }
+  function host(u) { try { return new URL(u, location.origin).hostname.replace(/^www\./, ''); } catch (e) { return ''; } }
+  function srcName(a) {
+    var href = a.getAttribute('href') || '';
+    if (href.charAt(0) !== '#') return host(href);
+    var li = document.getElementById(href.slice(1));
+    if (!li) return '';
+    var l = li.querySelector('a[href^="http"]');
+    if (l) return host(l.getAttribute('href'));
+    return txt(li).replace(/↩\s*$/, '').split(',')[0].slice(0, 60);
+  }
+  function fnmarks() {
+    bodies().forEach(function (b) {
+      [].slice.call(b.querySelectorAll('a')).forEach(function (a) {
+        if (a.getAttribute('data-thx-fn')) return;
+        var sup = a.closest ? a.closest('sup') : null;
+        var n = supNum(a.textContent, !!sup);
+        if (!n) return;
+        var s = srcName(a);
+        a.setAttribute('aria-label', s ? T('art.fn', { n: n, s: s }) : T('art.note', { n: n }));
+        a.setAttribute('data-thx-fn', n);
+        if (!sup) {
+          var w = document.createElement('sup');
+          a.parentNode.insertBefore(w, a); w.appendChild(a);
+          if (a.textContent.trim() !== n) a.textContent = n;   /* inside <sup> the plain digit renders as the raised glyph did */
+        }
+      });
+    });
+  }
+
+  /* ---------- outline: promote CMS body sections (SEM-20) ----------
+     Screen readers build heading lists from the flat level, not the HTML5 outline, so h3 body sections read as children of the
+     aside's h2 "Key takeaways" instead of its siblings. The headings are per-item CMS rich text, so the correction has to be made
+     at runtime: when the body's shallowest heading is an h3, every body heading is exposed one level higher.
+     It is done with aria-level rather than by replacing the element. The Ethos template runtime (theodyxethosx, a deferred script
+     that runs BEFORE this file — measured document order: nv2pagesf, theodyxethos, theodyxethosx, then this) builds the desktop
+     section rail from these very nodes and keeps them in an IntersectionObserver and in per-link click closures; swapping the
+     elements out leaves that observer watching detached nodes (measured: rail .on 1 -> 0 at scrollY 5000) and sends every rail
+     link to the top of the page. The scroll-reveal observer holds the same nodes. aria-level changes the exposed heading level
+     with none of that: the node, its id, its classes and every observer stay intact. */
+  var NOTESRE = /^\s*(notes?|sources?|notes?\s*(&|and)\s*sources?)\s*[:.]?\s*$/i;
+  function retag() {
+    var bs = bodies(); if (!bs.length) return;
+    var i, hasH2 = false;
+    for (i = 0; i < bs.length; i++) if (bs[i].querySelector('h2')) hasH2 = true;
+    if (hasH2) return;
+    bs.forEach(function (b) {
+      [].slice.call(b.querySelectorAll('h3,h4,h5')).forEach(function (h) {
+        if (h.hasAttribute('aria-level') || h.closest('aside') || h.classList.contains('thx-notes-h') || NOTESRE.test(txt(h))) return;
+        h.setAttribute('aria-level', String(parseInt(h.tagName.slice(1), 10) - 1));
+      });
+    });
+  }
+
+  /* ---------- landmarks (SEM-01, interim: no DOM move) ---------- */
+  function landmarks() {
+    try {
+      var hero = document.querySelector('.ethx-hero');
+      if (hero && !hero.closest('main') && !hero.getAttribute('role')) { hero.setAttribute('role', 'region'); hero.setAttribute('aria-label', T('art.header')); }
+      var rel = document.getElementById('thx-rel');
+      if (rel && !rel.getAttribute('aria-labelledby') && !rel.getAttribute('aria-label')) {
+        var rh = rel.querySelector('.thx-rel-h');
+        if (rh && txt(rh)) { if (!rh.id) rh.id = 'thx-rel-h'; rel.setAttribute('aria-labelledby', rh.id); }
+      }
+    } catch (e) {}
+  }
+
   /* ---------- headings + TOC + active section ---------- */
   function headings() {
     var bs = bodies(), lvls = ['h2', 'h3', 'h4'], out = [];
@@ -160,17 +248,40 @@
     var hs = headings();
     var key = hs.map(function (h) { return txt(h); }).join('|');
     if (!hs.length) return;
-    hs.forEach(function (h, idx) { if (!h.id) h.id = 's' + (idx + 1) + '-' + txt(h).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 56); });
+    /* KB-08: a heading is not focusable, so the browser's scroll-to-fragment leaves focus in the TOC */
+    hs.forEach(function (h, idx) {
+      if (!h.id) h.id = 's' + (idx + 1) + '-' + txt(h).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 56);
+      if (!h.hasAttribute('tabindex')) h.setAttribute('tabindex', '-1');
+    });
     var nav = document.querySelector('.thx-toc');
     if (nav && key === tocState.key) return;
     if (!nav) {
       nav = document.createElement('nav');
       nav.className = 'thx-toc';
-      nav.setAttribute('aria-label', T('art.toc'));
       var lab = document.createElement('p'); lab.className = 'thx-toc-h'; lab.textContent = T('art.toc'); nav.appendChild(lab);
       nav.appendChild(document.createElement('ol'));
       var kt = document.getElementById('thxartkt');
       if (kt) kt.insertAdjacentElement('afterend', nav); else body.parentNode.insertBefore(nav, body);
+    }
+    /* SEM-19: the visible label names the landmark instead of being repeated as an aria-label */
+    var labEl = nav.querySelector('.thx-toc-h');
+    if (labEl && txt(labEl)) { if (!labEl.id) labEl.id = 'thx-toc-h'; nav.setAttribute('aria-labelledby', labEl.id); nav.removeAttribute('aria-label'); }
+    else if (!nav.getAttribute('aria-labelledby')) nav.setAttribute('aria-label', T('art.toc'));
+    if (!nav.getAttribute('data-thx-focus')) {
+      nav.setAttribute('data-thx-focus', '1');
+      nav.addEventListener('click', function (e) {
+        var a3 = e.target && e.target.closest ? e.target.closest('a[href^="#"]') : null; if (!a3) return;
+        var h = document.getElementById(decodeURIComponent((a3.getAttribute('href') || '').slice(1))); if (!h) return;
+        if (!h.hasAttribute('tabindex')) h.setAttribute('tabindex', '-1');
+        var done = false;
+        var go = function () {
+          if (done) return; done = true;
+          if (window.removeEventListener) window.removeEventListener('scrollend', go);
+          try { h.focus({ preventScroll: true }); } catch (er) { h.focus(); }
+        };
+        if ('onscrollend' in window) addEventListener('scrollend', go, { once: true });   /* the jump is a smooth scroll: focus once it settles */
+        setTimeout(go, 'onscrollend' in window ? 1400 : 400);
+      });
     }
     var ol = nav.querySelector('ol'); ol.textContent = '';
     tocState.links = [];
@@ -309,6 +420,8 @@
   function crumb() {
     var c = document.querySelector('.thx-crumb');
     if (!c) return;
+    /* C-08: the separator glyph is decoration — it is announced between crumbs and measures 2.85:1 */
+    c.querySelectorAll('.thx-dot').forEach(function (d) { d.setAttribute('aria-hidden', 'true'); });
     c.querySelectorAll('p:not(.thx-dot):not(.thx-crumb-t)').forEach(function (p) {
       var t = txt(p);
       if (SEC[t] && !p.querySelector('a')) { var a4 = document.createElement('a'); a4.href = SEC[t]; a4.textContent = t; p.textContent = ''; p.appendChild(a4); }
@@ -317,9 +430,12 @@
 
   function run() {
     cards();
+    try { landmarks(); } catch (e) {}
     var body = document.querySelector('.thx-read-body');
     if (!body) return;
+    try { retag(); } catch (e) {}
     try { footnotes(body); } catch (e) {}
+    try { fnmarks(); } catch (e) {}
     try { toc(body); } catch (e) {}
     try { crumb(); } catch (e) {}
     try { bodies().forEach(function (b) { b.querySelectorAll('p').forEach(function (p) { if (/^Sources?:/.test(txt(p))) p.classList.add('thx-srcline'); }); }); } catch (e) {}
@@ -328,6 +444,8 @@
     try { jsonld(min); } catch (e) {}
     try { progress(); } catch (e) {}
   }
+  /* SEM-20 as early as this file evaluates, so the level is right before any assistive tech reads the page */
+  try { if (document.body) retag(); } catch (e) {}
   ready(function () {
     run();
     /* the pubs composer may split the body after us: re-run once the page has loaded (idempotent) */

@@ -1,10 +1,11 @@
+/*! nv2pagesf 1.73.0 (2026-09-05, Phase 9): footer language slot hidden while one locale exists and labelled by its visible label (SEM-18); /contact form outcome wrappers carry live-region roles (SEM-03) */
 /*! nv2pagesf 1.72.0 (2026-09-04, Phase 7): 404 page uses -p-800 thumbnails, lazy data-bg, role=img + alt, h1 + main landmark, direct article paths */
 /*! theodyx-i18n 1.0.0 (2026-09-04, Phase 6) — locale runtime for script-injected UI. Source of truth is <html lang>, which the server sets per locale (Webflow Localization); matched by language prefix (en-US → en, pt-BR → pt); every key falls back to English. Never consults the browser's language list, never rewrites page text: the anchor navigates, the server decides. Consumers register their own strings with add(). */
 (function(){
   if(window.__thxI18n && window.__thxI18n.t) return;
   var LANG=(document.documentElement.getAttribute('lang')||'en').toLowerCase(), BASE=LANG.split('-')[0];
   var RTL={ar:1,he:1,fa:1,ur:1,yi:1};
-  var D={"en": {"close": "Close", "idx.read": "Read", "idx.tagline": "Notes from the speed of culture.", "404.title": "This page wandered off the feed.", "404.body": "That link is broken — but our latest thinking is not. Pick one up below, or browse the full archive.", "404.browse": "Browse Our Thinking", "404.home": "Back to home", "lang.label": "Language", "nav.open": "Open menu", "nav.close": "Close menu", "art.note": "Note {n}", "art.backref": "Back to reference {n}", "art.toc": "In this report", "art.readmin": "{n} min read"}, "es": {"close": "Cerrar", "idx.read": "Leer", "idx.tagline": "Notas a la velocidad de la cultura.", "404.title": "Esta página se salió del feed.", "404.body": "Ese enlace está roto, pero nuestras ideas más recientes no. Elige una abajo o explora el archivo completo.", "404.browse": "Explorar Our Thinking", "404.home": "Volver al inicio", "lang.label": "Idioma", "nav.open": "Abrir el menú", "nav.close": "Cerrar el menú", "art.note": "Nota {n}", "art.backref": "Volver a la referencia {n}", "art.toc": "En este informe", "art.readmin": "{n} min de lectura"}, "pt": {"close": "Fechar", "idx.read": "Ler", "idx.tagline": "Notas na velocidade da cultura.", "404.title": "Esta página saiu do feed.", "404.body": "Esse link está quebrado, mas as nossas ideias mais recentes não. Escolha uma abaixo ou explore o arquivo completo.", "404.browse": "Explorar Our Thinking", "404.home": "Voltar ao início", "lang.label": "Idioma", "nav.open": "Abrir o menu", "nav.close": "Fechar o menu", "art.note": "Nota {n}", "art.backref": "Voltar à referência {n}", "art.toc": "Neste relatório", "art.readmin": "{n} min de leitura"}, "fr": {"close": "Fermer", "idx.read": "Lire", "idx.tagline": "Des notes à la vitesse de la culture.", "404.title": "Cette page s’est égarée dans le fil.", "404.body": "Ce lien est cassé, mais pas nos dernières réflexions. Choisissez-en une ci-dessous ou parcourez toutes les archives.", "404.browse": "Parcourir Our Thinking", "404.home": "Retour à l’accueil", "lang.label": "Langue", "nav.open": "Ouvrir le menu", "nav.close": "Fermer le menu", "art.note": "Note {n}", "art.backref": "Retour à la référence {n}", "art.toc": "Dans ce rapport", "art.readmin": "{n} min de lecture"}};
+  var D={"en": {"close": "Close", "idx.read": "Read", "idx.tagline": "Notes from the speed of culture.", "404.title": "This page wandered off the feed.", "404.body": "That link is broken — but our latest thinking is not. Pick one up below, or browse the full archive.", "404.browse": "Browse Our Thinking", "404.home": "Back to home", "lang.label": "Language", "nav.open": "Open menu", "nav.close": "Close menu", "art.note": "Note {n}", "art.backref": "Back to reference {n}", "art.toc": "In this report", "art.readmin": "{n} min read", "art.fn": "Footnote {n}: {s}", "art.header": "Article header"}, "es": {"close": "Cerrar", "idx.read": "Leer", "idx.tagline": "Notas a la velocidad de la cultura.", "404.title": "Esta página se salió del feed.", "404.body": "Ese enlace está roto, pero nuestras ideas más recientes no. Elige una abajo o explora el archivo completo.", "404.browse": "Explorar Our Thinking", "404.home": "Volver al inicio", "lang.label": "Idioma", "nav.open": "Abrir el menú", "nav.close": "Cerrar el menú", "art.note": "Nota {n}", "art.backref": "Volver a la referencia {n}", "art.toc": "En este informe", "art.readmin": "{n} min de lectura", "art.fn": "Nota {n}: {s}", "art.header": "Encabezado del artículo"}, "pt": {"close": "Fechar", "idx.read": "Ler", "idx.tagline": "Notas na velocidade da cultura.", "404.title": "Esta página saiu do feed.", "404.body": "Esse link está quebrado, mas as nossas ideias mais recentes não. Escolha uma abaixo ou explore o arquivo completo.", "404.browse": "Explorar Our Thinking", "404.home": "Voltar ao início", "lang.label": "Idioma", "nav.open": "Abrir o menu", "nav.close": "Fechar o menu", "art.note": "Nota {n}", "art.backref": "Voltar à referência {n}", "art.toc": "Neste relatório", "art.readmin": "{n} min de leitura", "art.fn": "Nota {n}: {s}", "art.header": "Cabeçalho do artigo"}, "fr": {"close": "Fermer", "idx.read": "Lire", "idx.tagline": "Des notes à la vitesse de la culture.", "404.title": "Cette page s’est égarée dans le fil.", "404.body": "Ce lien est cassé, mais pas nos dernières réflexions. Choisissez-en une ci-dessous ou parcourez toutes les archives.", "404.browse": "Parcourir Our Thinking", "404.home": "Retour à l’accueil", "lang.label": "Langue", "nav.open": "Ouvrir le menu", "nav.close": "Fermer le menu", "art.note": "Note {n}", "art.backref": "Retour à la référence {n}", "art.toc": "Dans ce rapport", "art.readmin": "{n} min de lecture", "art.fn": "Note {n} : {s}", "art.header": "En-tête de l’article"}};
   function t(k,v){ var s=(D[BASE]&&D[BASE][k]!=null)?D[BASE][k]:(D.en[k]!=null?D.en[k]:k); if(v) for(var p in v) s=s.split('{'+p+'}').join(v[p]); return s; }
   function num(n,o){ try{ return new Intl.NumberFormat(LANG,o).format(n); }catch(e){ return String(n); } }
   function date(d,o){ try{ if(typeof d==='string') d=new Date(/T/.test(d)?d:d+'T00:00:00'); return new Intl.DateTimeFormat(LANG,o||{year:'numeric',month:'long',day:'numeric'}).format(d); }catch(e){ return String(d); } }
@@ -67,13 +68,20 @@ if(document.body)imo();if(document.readyState!=='loading')imo();else document.ad
   }
   function build() {
     var slot = document.getElementById('thx-lang-slot'); if (!slot || slot.querySelector('.thx-lang')) return;
-    var L = localeList(); if (L.length < 2) return;
-    var cur = I.base, wrap = document.createElement('nav'); wrap.className = 'thx-lang'; wrap.setAttribute('aria-label', I.t('lang.label')); wrap.setAttribute('data-thx-noi18n', '1');
+    var lab = document.querySelector('.footer-lang-label');
+    var L = localeList();
+    /* SEM-18: with one published locale the slot stays empty, and an empty labelled <ul> is announced as "Language, list, 0 items" */
+    if (L.length < 2) { slot.hidden = true; return; }
+    slot.hidden = false;
+    if (lab && !lab.id) lab.id = 'thx-lang-label';
+    var cur = I.base, wrap = document.createElement('nav'); wrap.className = 'thx-lang'; wrap.setAttribute('data-thx-noi18n', '1');
+    if (lab) wrap.setAttribute('aria-labelledby', lab.id); else wrap.setAttribute('aria-label', I.t('lang.label'));
     var current = L.filter(function (x) { return x.code.split('-')[0] === cur; })[0] || L[0];
     var btn = document.createElement('button'); btn.type = 'button'; btn.className = 'thx-lang-btn'; btn.setAttribute('aria-haspopup', 'listbox'); btn.setAttribute('aria-expanded', 'false'); btn.setAttribute('aria-controls', 'thx-langlist');
     btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.5 2.7 2.5 15.3 0 18M12 3c-2.5 2.7-2.5 15.3 0 18"/></svg><span class="thx-lang-cur"></span>';
     btn.querySelector('.thx-lang-cur').textContent = current.name; btn.setAttribute('aria-label', I.t('lang.label') + ': ' + current.name);
-    var ul = document.createElement('ul'); ul.id = 'thx-langlist'; ul.className = 'thx-lang-list'; ul.setAttribute('role', 'listbox'); ul.setAttribute('aria-label', I.t('lang.label')); ul.hidden = true;
+    var ul = document.createElement('ul'); ul.id = 'thx-langlist'; ul.className = 'thx-lang-list'; ul.setAttribute('role', 'listbox'); ul.hidden = true;
+    if (lab) ul.setAttribute('aria-labelledby', lab.id); else ul.setAttribute('aria-label', I.t('lang.label'));
     var links = [];
     L.forEach(function (x) { var li = document.createElement('li'); li.setAttribute('role', 'none'); var a = document.createElement('a'); a.setAttribute('role', 'option'); a.href = x.href; a.setAttribute('lang', x.code); a.setAttribute('hreflang', x.code); a.textContent = x.name; var on = x === current; a.setAttribute('aria-selected', on ? 'true' : 'false'); if (on) a.setAttribute('aria-current', 'true'); a.tabIndex = on ? 0 : -1; li.appendChild(a); ul.appendChild(li); links.push(a); });
     function open() { ul.hidden = false; btn.setAttribute('aria-expanded', 'true'); var f = links.filter(function (a) { return a.getAttribute('aria-selected') === 'true'; })[0] || links[0]; f.focus(); }
@@ -128,6 +136,44 @@ if(document.body)imo();if(document.readyState!=='loading')imo();else document.ad
         });
       }, { rootMargin: '200px 0px' });
       vids.forEach(function (v) { io.observe(v); });
+    } catch (e) {}
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
+})();
+
+/* 1.73.0 (Phase 9, SEM-03): Webflow's AJAX submit toggles `display` on .w-form-done / .w-form-fail without live-region
+   semantics, so the outcome of a /contact submit is silent for a screen reader. Stamp the roles before Webflow's own
+   toggle can run, and — when nothing else has taken focus — move focus to the message it reveals. */
+;(function () {
+  function boot() {
+    try {
+      if (!/^\/contact\/?$/.test(location.pathname)) return;
+      var seen = [];
+      var mark = function (sel, role, live) {
+        document.querySelectorAll(sel).forEach(function (el) {
+          if (el.getAttribute('role') !== role) el.setAttribute('role', role);
+          if (el.getAttribute('aria-live') !== live) el.setAttribute('aria-live', live);
+          if (seen.indexOf(el) < 0) seen.push(el);
+        });
+      };
+      var pass = function () { mark('.w-form-done', 'status', 'polite'); mark('.w-form-fail', 'alert', 'assertive'); };
+      pass();
+      /* Webflow's own form init stamps role="region" on these wrappers after us, so re-assert and keep watching */
+      [400, 1200, 3000].forEach(function (ms) { setTimeout(pass, ms); });
+      addEventListener('load', pass);
+      if (!seen.length || !window.MutationObserver) return;
+      var mo = new MutationObserver(function (recs) {
+        var again = false;
+        recs.forEach(function (r) {
+          if (r.attributeName === 'role' || r.attributeName === 'aria-live') { again = true; return; }
+          var el = r.target;
+          if (getComputedStyle(el).display === 'none') return;
+          var a = document.activeElement;
+          if (!a || a === document.body || a === document.documentElement) { try { if (!el.hasAttribute('tabindex')) el.setAttribute('tabindex', '-1'); el.focus({ preventScroll: true }); } catch (e) {} }
+        });
+        if (again) pass();
+      });
+      seen.forEach(function (el) { mo.observe(el, { attributes: true, attributeFilter: ['style', 'class', 'role', 'aria-live'] }); });
     } catch (e) {}
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();

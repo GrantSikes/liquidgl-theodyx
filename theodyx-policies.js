@@ -1,7 +1,27 @@
+/*! theodyx-policies v3.2.0 — /policies/* in-page contents rail.
+    3.2.0 (Phase 9 accessibility): KB-08 activating a contents link moves focus to the section it scrolled to;
+    SEM-25 "Contents" is a real heading that names the aside, and the 13 links are a list. */
 (function(){
 if(!/^\/policies\//.test(location.pathname))return;
+/* SEM-25: the label was a bare <div> text node, the aside was unnamed and the links were bare <a> children of a <div> */
+function structure(root){
+ var side=root.querySelector('.polx-side'); if(!side)return;
+ var t=side.querySelector('.polx-side-title');
+ if(t&&t.tagName!=='H2'){var h=document.createElement('h2');for(var i=0;i<t.attributes.length;i++)h.setAttribute(t.attributes[i].name,t.attributes[i].value);
+  var cs=getComputedStyle(t);h.style.font=cs.font;h.style.margin=cs.margin;h.style.letterSpacing=cs.letterSpacing;h.style.textTransform=cs.textTransform;/* the base h2 rules carry a heading line-height; keep the label pixel-identical */
+  while(t.firstChild)h.appendChild(t.firstChild);t.parentNode.replaceChild(h,t);t=h;}
+ if(t){if(!t.id)t.id='polx-toc-h';if(!side.getAttribute('aria-labelledby')&&!side.getAttribute('aria-label'))side.setAttribute('aria-labelledby',t.id);}
+ var nav=side.querySelector('.polx-side-list')||side;
+ if(nav.querySelector('ul'))return;
+ var ls=[].slice.call(nav.querySelectorAll('.polx-side-link')); if(!ls.length)return;
+ var holder=ls[0].parentNode;
+ var ul=document.createElement('ul');ul.className='polx-side-ul';ul.style.cssText='list-style:none;margin:0;padding:0';
+ ls.forEach(function(a){var li=document.createElement('li');li.style.cssText='list-style:none;margin:0;padding:0';li.appendChild(a);ul.appendChild(li);});
+ holder.appendChild(ul);
+}
 function init(){
  var root=document.querySelector('.polx-root'); if(!root)return;
+ try{structure(root);}catch(e){}
  var links=[].slice.call(root.querySelectorAll('.polx-side-link'));
  var anchors=links.map(function(a){var id=(a.getAttribute('href')||'').replace(/^.*#/,'');return document.getElementById(id);}).filter(Boolean);
  if(!anchors.length)return;
@@ -13,6 +33,9 @@ function init(){
   e.preventDefault();e.stopPropagation();
   window.scrollTo(0,Math.max(0,window.pageYOffset+sec.getBoundingClientRect().top-NAV));
   setActive(id);
+  /* KB-08: the handler cancels the fragment navigation, so nothing moves focus — put it on the section the user chose */
+  if(!sec.hasAttribute('tabindex'))sec.setAttribute('tabindex','-1');
+  try{sec.focus({preventScroll:true});}catch(err){try{sec.focus();}catch(e2){}}
   if(history.replaceState)history.replaceState(null,'',location.pathname+'#'+id);
  },true);
  var side=root.querySelector('.polx-side'),ticking=false;
