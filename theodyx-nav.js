@@ -1,8 +1,8 @@
-/*! theodyx-nav.js v4.9.2 (2026-09-05) — behaviours for the clear liquid-glass nav (#thx-nav).
+/*! theodyx-nav.js v4.9.3 (2026-09-05) — behaviours for the clear liquid-glass nav (#thx-nav).
  * One unanimous ink (every word, the logo and the burger flip together between pure white and pure black, chosen
  * from what is behind all of them: the ink whose worst word still reads best, with hysteresis and a dwell). 4.9.1:
  * the glass itself never changes - the per-word/menu plates and the legibility scrim of 4.7-4.8 are gone; only the
- * words change colour (owner decision 2026-09-05); 4.9.2: the majority flip is no longer vetoed by the maximin hysteresis. Whole-surface lens (continuous refraction profile from the pill geometry, per-
+ * words change colour (owner decision 2026-09-05); 4.9.2: the majority flip is no longer vetoed by the maximin hysteresis; 4.9.3: the first election is never gated by the dwell (no white-on-white flash at load). Whole-surface lens (continuous refraction profile from the pill geometry, per-
  * channel dispersion, geometry-lit specular rim, colour bleed; Chromium, capability + frame-budget gated), pointer
  * highlight with a spring, scroll condense, accessible mobile sheet (focus trap, Escape, inert, iOS-safe scroll lock), skip link
  * target, legacy first-section clearance, conversion hooks. No dependencies. */
@@ -11,7 +11,7 @@
   if (window.__thxNav) return;
   var nav = document.getElementById('thx-nav');
   if (!nav) return;
-  var API = window.__thxNav = { v: '4.9.2' };
+  var API = window.__thxNav = { v: '4.9.3' };
   var I18N = window.__thxI18n; function T(k) { return (I18N && I18N.t) ? I18N.t(k) : ({ 'nav.open': 'Open menu', 'nav.close': 'Close menu' })[k] || k; } /* Phase 6: locale runtime (nv2pagesf) keyed by <html lang> */
   var doc = document.documentElement, body = document.body;
   var glass = nav.querySelector('.thx-nav-glass');
@@ -408,7 +408,7 @@
   nav.querySelectorAll('.thx-nav-menu a').forEach(function (a) { inkEls.push(a); });
   if (burger) inkEls.push(burger);
   var inkState = inkEls.map(function (el) { return { el: el, L: null, mixed: false }; });
-  var ink = 'light', inkT = 0, tone = 'dark', anyMedia = false, lastTickMs = 0, inkTimer = 0, inkInterval = 320, tickId = 0;
+  var ink = 'light', inkT = 0, inkPrimed = false, tone = 'dark', anyMedia = false, lastTickMs = 0, inkTimer = 0, inkInterval = 320, tickId = 0; /* 4.9.3: inkPrimed - the first real election is never gated by the dwell (inkT starts at 0 on the performance.now() clock, so a fast load used to keep the default white words on a white page for up to 600 ms) */
   var cal = function (L) { return Math.min(1, L * 1.3 + 0.01); }; /* calibrated against rendered pixels through the glass: sampler underreads ~12% and the glass lifts the backdrop ~15% */
   function contrast(L, which) { return which === 'light' ? 1.05 / (L + 0.05) : (L + 0.05) / 0.05; }
   nav.setAttribute('data-ink', ink);
@@ -467,8 +467,9 @@
         /* hysteresis + dwell (4.9.1: 600 ms - a moving hero frame must not flip the words). 4.9.2: the majority flip answers only to the
          * dwell - when both inks lose a word (a black band under four words, cream under the mark), the ratio of two catastrophic
          * worsts is noise, and the ink that saves more words must win. */
-        if ((!maj && better < 1.15) || t0 - inkT < 600) want = ink;
+        if (inkPrimed && ((!maj && better < 1.15) || t0 - inkT < 600)) want = ink;
       }
+      inkPrimed = true;
     }
     if (want !== ink) { ink = want; inkT = t0; }
     nav.setAttribute('data-ink', ink);
