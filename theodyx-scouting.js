@@ -1,4 +1,13 @@
-/* theodyx-scouting 2.0.1 — Phase 10 campaign readiness. The two full-screen modal gates are gone:
+/* theodyx-scouting 2.1.0 — Phase 11 motion. EASE-03: no control transitions `all` any more —
+ * the chips, the submit, the gate/consent buttons, the inputs and the dropzones each name the
+ * properties their own state rules change (transform/opacity, plus colour where colour IS the
+ * feedback) on one spring token, --sc-ease: cubic-bezier(.22,1,.36,1), at 140-160 ms; no layout
+ * and no shadow property is scheduled. ACT-04: the upload zones are real drop targets —
+ * dragenter/dragover/dragleave/drop with an .is-over treatment (tint + border + a 1.5% scale),
+ * and a dropped file runs the identical accept/10 MB/status-announcement path as the picker;
+ * click and keyboard still open the picker. prefers-reduced-motion drops the movement, and
+ * forced-colors gets a Highlight outline for the drag state.
+ * 2.0.1 — Phase 10 campaign readiness. The two full-screen modal gates are gone:
  * the safety statement is an inline <section id="sc-safety"> above the form and its acknowledgement
  * is a required checkbox in the consent block; age comes only from #sc-dob, evaluated on blur and
  * on submit, so a mistyped date is always correctable (FORMS-04). The first viewport now carries the
@@ -471,8 +480,71 @@
     }
     on(drop, 'click', function () { input.click(); });
     on(remove, 'click', function () { reset(true); });
+
+    /* ACT-04 — the zone is drawn as a drop target, so it accepts a drop. The dragged file goes
+     * through exactly the same path as one chosen in the picker: same accept check, same 10 MB
+     * limit, same status-region announcements, same progress and success rendering. Keyboard and
+     * click behaviour are untouched — the <button> still opens the picker. */
+    var accepts = String(accept || '').split(',').map(function (t) { return t.trim().toLowerCase(); })
+      .filter(function (t) { return !!t; });
+    function typeOk(file) {
+      if (!accepts.length) return true;
+      var t = String(file.type || '').toLowerCase();
+      for (var i = 0; i < accepts.length; i++) {
+        var a = accepts[i];
+        if (a === t) return true;
+        if (a.slice(-2) === '/*' && t.indexOf(a.slice(0, -1)) === 0) return true;
+      }
+      return false;
+    }
+    var overDepth = 0;
+    function setOver(on_) {
+      if (on_) drop.classList.add('is-over'); else drop.classList.remove('is-over');
+    }
+    function hasFiles(e) {
+      var dt = e.dataTransfer; if (!dt) return false;
+      if (dt.types) { for (var i = 0; i < dt.types.length; i++) if (dt.types[i] === 'Files') return true; }
+      return false;
+    }
+    on(drop, 'dragenter', function (e) {
+      if (!hasFiles(e)) return;
+      e.preventDefault(); e.stopPropagation();
+      overDepth++; setOver(true);
+    });
+    on(drop, 'dragover', function (e) {
+      if (!hasFiles(e)) return;
+      e.preventDefault(); e.stopPropagation();
+      try { e.dataTransfer.dropEffect = 'copy'; } catch (err) {}
+      setOver(true);
+    });
+    on(drop, 'dragleave', function (e) {
+      e.stopPropagation();
+      overDepth = Math.max(0, overDepth - 1);
+      if (!overDepth) setOver(false);
+    });
+    on(drop, 'drop', function (e) {
+      e.preventDefault(); e.stopPropagation();
+      overDepth = 0; setOver(false);
+      var dt = e.dataTransfer; var file = dt && dt.files && dt.files[0];
+      if (!file) return;
+      if (!typeOk(file)) {
+        drop.classList.add('is-error');
+        setDropState(drop, '<span class="sc-drop-main sc-drop-main--err">' + escapeHtml(uploadErr('unsupported_type')) + '</span><span class="sc-drop-sub">' + T('sc.drop.another') + '</span>');
+        srSay(status, uploadErr('unsupported_type'));
+        return;
+      }
+      /* keep the <input> the source of truth where the browser allows it, so a later reset()
+       * clears the same object the picker would have set */
+      try { if (window.DataTransfer && input.files !== dt.files) input.files = dt.files; } catch (err) {}
+      handleFile(file);
+    });
+
     on(input, 'change', function () {
       var file = input.files && input.files[0]; if (!file) return;
+      handleFile(file);
+    });
+
+    function handleFile(file) {
       trk('upload_added', dropId);
       remove.hidden = true;
       if (file.size > MAX_UPLOAD_BYTES) {
@@ -502,7 +574,7 @@
           srSay(status, res.error);
         }
       });
-    });
+    }
   }
   function escapeHtml(s) { return String(s).replace(/[&<>"']/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]; }); }
 
@@ -914,17 +986,17 @@
       '.sc-full{grid-column:1/-1;}',
       '.sc-field{display:flex;flex-direction:column;}',
       '.sc-label{display:block;font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:var(--sc-ink);margin-bottom:8px;}',
-      '.sc-input,.sc-select,.sc-textarea{width:100%;background:transparent;border:0;border-bottom:1px solid var(--sc-line);padding:8px 0 10px;font-family:inherit;font-size:clamp(16px,1.5vw,18px);color:var(--sc-ink);border-radius:0;-webkit-appearance:none;appearance:none;transition:border-color .16s ease;}',
+      '.sc-input,.sc-select,.sc-textarea{width:100%;background:transparent;border:0;border-bottom:1px solid var(--sc-line);padding:8px 0 10px;font-family:inherit;font-size:clamp(16px,1.5vw,18px);color:var(--sc-ink);border-radius:0;-webkit-appearance:none;appearance:none;transition:border-color 160ms var(--sc-ease);}',
       '.sc-textarea{resize:vertical;min-height:96px;}',
       '.sc-select{background-image:url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'12\' height=\'8\'><path d=\'M1 1l5 5 5-5\' stroke=\'%230E0E0F\' fill=\'none\' stroke-width=\'1.4\'/></svg>");background-repeat:no-repeat;background-position:right 2px center;--sc-arrow:1;padding-inline-end:20px;}',
       '.sc-input:focus,.sc-select:focus,.sc-textarea:focus{outline:none;border-bottom-color:var(--sc-ink);border-bottom-width:1.5px;}',
       '.sc-input::placeholder,.sc-textarea::placeholder{color:rgba(14,14,15,0.4);}',
       '.sc-input--error{border-bottom-color:var(--sc-err)!important;}',
       '.sc-chips{display:flex;gap:12px;flex-wrap:wrap;}',
-      '.sc-chip{font-family:"Space Mono","Mono",ui-monospace,monospace;font-size:13px;padding:9px 18px;border:1px solid var(--sc-line);background:transparent;color:var(--sc-ink);cursor:pointer;transition:all .14s ease;}',
+      '.sc-chip{font-family:"Space Mono","Mono",ui-monospace,monospace;font-size:13px;padding:9px 18px;border:1px solid var(--sc-line);background:transparent;color:var(--sc-ink);cursor:pointer;transition:background-color 140ms var(--sc-ease),border-color 140ms var(--sc-ease),color 140ms var(--sc-ease),transform 140ms var(--sc-ease);}',
       '.sc-chip[data-on="true"]{background:var(--sc-ink);color:var(--sc-paper);border-color:var(--sc-ink);}',
       '.sc-legend{font-family:"Space Mono","Mono",ui-monospace,monospace;font-size:11px;letter-spacing:0.16em;text-transform:uppercase;margin-bottom:12px;display:block;}',
-      '.sc-drop{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;aspect-ratio:4/3;border:1px dashed var(--sc-line);text-align:center;cursor:pointer;padding:16px;transition:background .14s ease;}',
+      '.sc-drop{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;aspect-ratio:4/3;border:1px dashed var(--sc-line);text-align:center;cursor:pointer;padding:16px;transition:background-color 160ms var(--sc-ease),border-color 160ms var(--sc-ease),transform 160ms var(--sc-ease);}',
       '.sc-drop:hover{background:rgba(0,0,0,0.02);}',
       '.sc-drop.is-done{border-style:solid;cursor:default;aspect-ratio:auto;flex-direction:row;justify-content:space-between;padding:14px 16px;}',
       '.sc-drop-main{font-family:"Space Mono","Mono",ui-monospace,monospace;font-size:12px;color:var(--sc-mute);}',
@@ -952,7 +1024,7 @@
       /* reserve the QR box so the code does not push the intro around when it renders */
       '#sc-qr{width:120px;height:120px;}',
       '.sc-err{display:none;margin-top:22px;border-inline-start:2px solid var(--sc-err);padding-inline-start:16px;color:var(--sc-err);font-size:15px;line-height:1.5;}',
-      '.sc-submit{margin-top:28px;width:100%;max-width:420px;display:inline-flex;align-items:center;justify-content:center;gap:10px;background:var(--sc-ink);color:var(--sc-paper);border:1px solid var(--sc-ink);padding:18px 28px;font-family:"Space Mono","Mono",ui-monospace,monospace;font-size:13px;letter-spacing:0.16em;text-transform:uppercase;cursor:pointer;transition:all .16s ease;}',
+      '.sc-submit{margin-top:28px;width:100%;max-width:420px;display:inline-flex;align-items:center;justify-content:center;gap:10px;background:var(--sc-ink);color:var(--sc-paper);border:1px solid var(--sc-ink);padding:18px 28px;font-family:"Space Mono","Mono",ui-monospace,monospace;font-size:13px;letter-spacing:0.16em;text-transform:uppercase;cursor:pointer;transition:background-color 160ms var(--sc-ease),border-color 160ms var(--sc-ease),color 160ms var(--sc-ease),opacity 160ms var(--sc-ease),transform 160ms var(--sc-ease);}',
       '.sc-submit:hover:not(:disabled){background:var(--sc-paper);color:var(--sc-ink);}',
       '.sc-submit:disabled{opacity:.6;cursor:default;}',
       '.sc-note{margin-top:14px;font-family:"Space Mono","Mono",ui-monospace,monospace;font-size:11px;color:var(--sc-mute);}',
@@ -976,7 +1048,7 @@
       '.sc-gate-body{font-size:16px;line-height:1.7;margin:28px 0 0;color:var(--sc-paper);}',
       '.sc-gate-body a{color:var(--sc-paper);text-decoration:underline;text-underline-offset:2px;}',
       '.sc-gate-note{font-family:"Space Mono","Mono",ui-monospace,monospace;font-size:12px;line-height:1.6;color:var(--sc-mute-ink);margin-top:28px;}',
-      '.sc-gate-btn{margin-top:40px;background:var(--sc-paper);color:var(--sc-ink);border:1px solid var(--sc-paper);padding:16px 32px;font-family:"Space Mono","Mono",ui-monospace,monospace;font-size:13px;letter-spacing:0.16em;text-transform:uppercase;cursor:pointer;transition:all .16s ease;}',
+      '.sc-gate-btn{margin-top:40px;background:var(--sc-paper);color:var(--sc-ink);border:1px solid var(--sc-paper);padding:16px 32px;font-family:"Space Mono","Mono",ui-monospace,monospace;font-size:13px;letter-spacing:0.16em;text-transform:uppercase;cursor:pointer;transition:background-color 160ms var(--sc-ease),border-color 160ms var(--sc-ease),color 160ms var(--sc-ease),opacity 160ms var(--sc-ease),transform 160ms var(--sc-ease);}',
       '.sc-gate-btn:hover:not(:disabled){background:transparent;color:var(--sc-paper);}',
       '.sc-gate-btn:disabled{opacity:.5;cursor:not-allowed;}',
       '#sc-success .sc-gate-inner{min-height:70vh;display:flex;flex-direction:column;justify-content:center;}',
@@ -1096,7 +1168,41 @@
       '.sc-u14-inline{margin:8px 0 0;padding:24px 0 0;border-top:1px solid var(--sc-hair);}',
       '.sc-u14-inline .sc-h2{font-size:clamp(22px,2.6vw,30px)!important;}',
       '.sc-u14-change{background:var(--sc-ink);color:var(--sc-paper);border:1px solid var(--sc-ink);margin-top:24px;}',
-      '.sc-u14-change:hover:not(:disabled){background:transparent;color:var(--sc-ink);}'
+      '.sc-u14-change:hover:not(:disabled){background:transparent;color:var(--sc-ink);}',
+
+      /* ---------------------------- Phase 11: motion (EASE-03 / ACT-04) ----------------------------
+         One spring token for every control on this page. `transition:all` is gone from the chips, the
+         submit, the gate buttons and the dropzones — each now names only the properties its own
+         :hover / :focus / [data-on] / .is-over rules actually change, so nothing schedules a layout
+         or a shadow pass. Durations stay in the 140-240 ms UI band. */
+      ':root{--sc-ease:cubic-bezier(.22,1,.36,1);}',
+      /* The page's own <style id="sc-native-css"> block (Webflow page custom code, in the body and
+         therefore later in the cascade) restates `.sc-chip{transition:all .14s ease}`,
+         `.sc-submit`/`.sc-gate-btn{transition:all .16s ease}` and `.sc-drop{transition:background
+         .14s ease}`. This file cannot edit that block, so the explicit lists are stated !important
+         here — that is the only way `all` actually leaves the computed style. */
+      '.sc-chip{transition:background-color 140ms var(--sc-ease),border-color 140ms var(--sc-ease),color 140ms var(--sc-ease),transform 140ms var(--sc-ease)!important;}',
+      '.sc-submit,.sc-gate-btn,.sc-u14-change{transition:background-color 160ms var(--sc-ease),border-color 160ms var(--sc-ease),color 160ms var(--sc-ease),opacity 160ms var(--sc-ease),transform 160ms var(--sc-ease)!important;}',
+      '.sc-input,.sc-select,.sc-textarea{transition:border-color 160ms var(--sc-ease)!important;}',
+      '.sc-drop{transition:background-color 160ms var(--sc-ease),border-color 160ms var(--sc-ease),transform 160ms var(--sc-ease)!important;}',
+      'a.sc-hero-cta{transition:background-color 160ms var(--sc-ease),color 160ms var(--sc-ease),transform 160ms var(--sc-ease)!important;}',
+      /* ACT-04 — the zone advertises a drop, so a drag now gets an answer: a solid border, a real
+         tint (the old 2% hover read as 1% on screen) and a 1.5% lift on transform only. The native
+         block's `.sc-drop:hover` ties on specificity and lands later, and a drag is always a hover,
+         so the drag state is stated !important too. */
+      'button.sc-drop:hover:not(.is-done){background-color:rgba(14,14,15,0.05)!important;border-color:var(--sc-ink)!important;}',
+      'button.sc-drop.is-over{background-color:rgba(14,14,15,0.07)!important;border-style:solid;border-color:var(--sc-ink)!important;transform:scale(1.015);}',
+      '.sc-drop.is-over .sc-drop-main,.sc-drop.is-over .sc-drop-sub{color:var(--sc-ink);}',
+      '.sc-drop:focus-visible{outline:2px solid var(--sc-ink);outline-offset:3px;}',
+      /* RM parity with the rest of the suite: colour feedback survives, movement does not. */
+      '@media (prefers-reduced-motion: reduce){',
+      '.sc-chip,.sc-submit,.sc-gate-btn,.sc-u14-change,.sc-input,.sc-select,.sc-textarea,.sc-drop,a.sc-hero-cta{transition-duration:1ms!important;}',
+      'button.sc-drop.is-over{transform:none;}',
+      '}',
+      /* forced colours drop author backgrounds, so the drag state needs a system-colour outline */
+      '@media (forced-colors: active){',
+      '.sc-drop.is-over{outline:3px solid Highlight;outline-offset:-5px;}',
+      '}'
     ].join('\n');
     var style = document.createElement('style');
     style.id = 'sc-css';
