@@ -1,25 +1,21 @@
-/*! theodyx-nav.js v4.9.0 (2026-09-05) — behaviours for the frosted liquid-glass nav (#thx-nav).
- * One unanimous ink (every word, the logo and the burger flip together between pure white and pure black, elected
- * from what is behind all of them: the ink that needs the least frost to clear AA at its worst word, biased by the
- * section's tone, with hysteresis and a dwell) plus ONE adaptive frost over the whole surface - white under dark ink,
- * black under light ink - whose alpha is solved in gamma space from the elected ink's worst sampled point (4.9.0; the
- * per-word plates and the scrim of 4.7/4.8 are gone, the pill is one piece of glass everywhere). Whole-surface lens
- * (continuous refraction profile from the pill geometry, per-channel dispersion, geometry-lit specular rim, soft colour
- * bleed; Chromium, capability + frame-budget gated; 4.9.0 frosted: blur 8, saturate 1.3), pointer highlight with a
- * spring, scroll condense, accessible mobile sheet (focus trap, Escape, inert, iOS-safe scroll lock), skip link target,
- * legacy first-section clearance, conversion hooks. No dependencies. */
+/*! theodyx-nav.js v4.9.1 (2026-09-05) — behaviours for the clear liquid-glass nav (#thx-nav).
+ * One unanimous ink (every word, the logo and the burger flip together between pure white and pure black, chosen
+ * from what is behind all of them: the ink whose worst word still reads best, with hysteresis and a dwell). 4.9.1:
+ * the glass itself never changes - the per-word/menu plates and the legibility scrim of 4.7-4.8 are gone; only the
+ * words change colour (owner decision 2026-09-05). Whole-surface lens (continuous refraction profile from the pill geometry, per-
+ * channel dispersion, geometry-lit specular rim, colour bleed; Chromium, capability + frame-budget gated), pointer
+ * highlight with a spring, scroll condense, accessible mobile sheet (focus trap, Escape, inert, iOS-safe scroll lock), skip link
+ * target, legacy first-section clearance, conversion hooks. No dependencies. */
 (function () {
   'use strict';
   if (window.__thxNav) return;
   var nav = document.getElementById('thx-nav');
   if (!nav) return;
-  var API = window.__thxNav = { v: '4.9.0' };
+  var API = window.__thxNav = { v: '4.9.1' };
   var I18N = window.__thxI18n; function T(k) { return (I18N && I18N.t) ? I18N.t(k) : ({ 'nav.open': 'Open menu', 'nav.close': 'Close menu' })[k] || k; } /* Phase 6: locale runtime (nv2pagesf) keyed by <html lang> */
   var doc = document.documentElement, body = document.body;
   var glass = nav.querySelector('.thx-nav-glass');
   var rim = nav.querySelector('.thx-nav-rim');
-  var frost = nav.querySelector('.thx-nav-frost'); /* 4.9.0: ONE adaptive tint over the whole surface (see section 4) - created here so the embed markup never changes */
-  if (!frost) { frost = document.createElement('div'); frost.className = 'thx-nav-frost'; frost.setAttribute('aria-hidden', 'true'); nav.insertBefore(frost, rim || null); }
   var burger = nav.querySelector('.thx-nav-burger');
   if (burger) burger.setAttribute('aria-label', T('nav.open')); /* the embed's static English label is replaced by the locale runtime's */
   var logo = nav.querySelector('.thx-nav-logo');
@@ -413,7 +409,7 @@
   if (burger) inkEls.push(burger);
   var inkState = inkEls.map(function (el) { return { el: el, L: null, mixed: false }; });
   var ink = 'light', inkT = 0, tone = 'dark', anyMedia = false, lastTickMs = 0, inkTimer = 0, inkInterval = 320, tickId = 0;
-  var cal = function (L) { return Math.min(1, L * 1.18 + 0.01); }; /* calibrated against rendered pixels through the glass: sampler underreads ~12%; 4.9.0 the glass lifts the backdrop less (saturate 1.3, not 1.9) */
+  var cal = function (L) { return Math.min(1, L * 1.3 + 0.01); }; /* calibrated against rendered pixels through the glass: sampler underreads ~12% and the glass lifts the backdrop ~15% */
   function contrast(L, which) { return which === 'light' ? 1.05 / (L + 0.05) : (L + 0.05) / 0.05; }
   nav.setAttribute('data-ink', ink);
   function reink() {
@@ -425,12 +421,10 @@
   }
   function reinkInner(t0) {
     tickId++;
-    /* 4.9.0: 1. sample every inked element (9-point grid each). 2. elect ONE ink for all of them: the ink that needs the
-     * least frost to clear AA at its worst word, with the section's tone as a bias (a dark scene wears white words on
-     * smoked glass, a light page black words on clear glass), plus hysteresis and a dwell so a moving frame cannot flip
-     * it. 3. solve the frost - ONE tint over the whole surface - from the elected ink's worst word. The per-element
-     * plates and the scrim of 4.7/4.8 are gone: the pill is one piece of glass at every scroll position. */
-    var forced = null, sumL = 0, n = 0, needD = 0, needL = 0;
+    /* 1. sample every inked element (9-point grid each), 2. decide ONE ink for all of them: the ink whose worst word
+     * still reads best (maximin contrast), mean luminance breaking ties, with hysteresis + dwell so it never flickers.
+     * 4.9.1: that is all the solver does - the glass is never tinted, plated or scrimmed; only the ink moves. */
+    var forced = null, worstD = Infinity, worstL = Infinity, sumL = 0, n = 0, prefD = 0, prefL = 0, anyMixed = false, wsum = 0, wL = 0, failD = 0, failL = 0;
     for (var i = 0; i < inkState.length; i++) {
       var s = inkState[i], el = s.el;
       if (!el.offsetParent) continue;
@@ -448,53 +442,41 @@
       var L = Ls.reduce(function (a, b) { return a + b; }, 0) / Ls.length;
       var spread = Math.max.apply(null, Ls) - Math.min.apply(null, Ls);
       var sd = sds.reduce(function (a, b) { return a + b; }, 0) / sds.length;
-      s.mixed = spread > 0.3 || sd > 0.2;
+      s.mixed = spread > 0.3 || sd > 0.2; if (s.mixed) anyMixed = true;
       s.L = L; s.Lmin = Math.min.apply(null, Ls); s.Lmax = Math.max.apply(null, Ls); s.tick = tickId;
-      var standalone = (el === logo || el === burger), tgt = standalone ? 3.6 : 5.2; /* AA 3:1 / 4.5:1 plus margin: the nine-point grid misses the darkest pixels of a photo or a moving frame (measured 3.8:1 at a 4.9 target over the capabilities band) */
-      var nd = frostNeed(cal(s.Lmin), 'dark', tgt), nl = frostNeed(cal(s.Lmax), 'light', tgt);
-      if (nd > needD) needD = nd; if (nl > needL) needL = nl;
+      var Le = cal(L), cd = contrast(Le, 'dark'), cl = contrast(Le, 'light');
+      if (cd < worstD) worstD = cd; if (cl < worstL) worstL = cl;
+      if (cd > cl) prefD++; else prefL++;
+      var tgtI = (el === logo || el === burger) ? 3 : 4.5; if (cd < tgtI) failD++; if (cl < tgtI) failL++;
+      var w = r.width * r.height; wsum += w; wL += w * Le;
       sumL += L; n++;
     }
+    var want = ink, mixed = false;
+    if (forced) { want = forced === 'light' ? 'dark' : 'light'; }
+    else if (n) {
+      var meanLe = wsum ? wL / wsum : cal(sumL / n);
+      mixed = (prefD > 0 && prefL > 0) || anyMixed;
+      if (Math.abs(worstD - worstL) < 0.35) want = contrast(meanLe, 'dark') >= contrast(meanLe, 'light') ? 'dark' : 'light'; /* tie: the bar as a whole decides */
+      else want = worstD > worstL ? 'dark' : 'light';
+      /* 4.8.0 (Phase 11 SIG-01): when a majority of the words fail AA in the elected ink and fewer would fail in the other, flip the
+       * whole bar - white words over a dark band are the answer. */
+      if (failD !== undefined) { var fw = want === 'dark' ? failD : failL, fo = want === 'dark' ? failL : failD; if (n >= 3 && fw * 2 >= n && fo < fw) want = want === 'dark' ? 'light' : 'dark'; }
+      if (want !== ink) {
+        var better = want === 'dark' ? worstD / Math.max(0.01, worstL) : worstL / Math.max(0.01, worstD);
+        if (better < 1.15 || t0 - inkT < 600) want = ink;          /* hysteresis + dwell (4.9.1: 600 ms - a moving hero frame must not flip the words) */
+      }
+    }
+    if (want !== ink) { ink = want; inkT = t0; }
+    nav.setAttribute('data-ink', ink);
     if (n) {
       var avg = sumL / n, t = tone;
       if (tone === 'dark' && avg > 0.56) t = 'light';
       if (tone === 'light' && avg < 0.40) t = 'dark';
       if (t !== tone) { tone = t; nav.setAttribute('data-tone', t); nav.dispatchEvent(new CustomEvent('thx-nav-tone', { detail: t })); }
     }
-    var want = ink;
-    if (forced) { want = forced === 'light' ? 'dark' : 'light'; }
-    else if (n) {
-      var costD = needD + (tone === 'dark' ? TONE_BIAS : 0), costL = needL + (tone === 'light' ? TONE_BIAS : 0);
-      var other = ink === 'dark' ? 'light' : 'dark';
-      var costCur = ink === 'dark' ? costD : costL, costOth = ink === 'dark' ? costL : costD, needCur = ink === 'dark' ? needD : needL;
-      if (costOth < costCur - INK_HYST && (t0 - inkT >= INK_DWELL || needCur > FROST_CAP)) want = other;
-    }
-    if (want !== ink) { ink = want; inkT = t0; }
-    nav.setAttribute('data-ink', ink);
-    setFrost(forced ? 0 : (ink === 'dark' ? needD : needL), t0);
     lastTickMs = now() - t0;
     tickCache = null;
     schedMedia();
-  }
-  /* 4.9.0 frost. The glass carries ONE adaptive tint over its whole surface (.thx-nav-frost): white under dark ink, black
-   * under light ink. Its alpha is solved from the elected ink's worst sampled point so every word clears AA (4.5:1 text,
-   * 3:1 mark + burger, plus margin for sampler error), floored at FROST_BASE so the material always reads as glass and
-   * capped at FROST_CAP; when the cap would not be enough for the current ink and the other ink needs less, the ink
-   * flips instead. Compositing happens on sRGB-encoded values while WCAG luminance is linear, so the solve runs in gamma
-   * space (a white tint at .2 over black paints rgb(51,51,51) = L .033, not L .2). Frost comes in at once and eases off
-   * lazily (dwell) so a moving hero frame cannot make it breathe. */
-  var FROST_BASE = 0.18, FROST_CAP = 0.64, FROST_HEADROOM = 0.10, FROST_DWELL = 420, TONE_BIAS = 0.40, INK_HYST = 0.10, INK_DWELL = 600, frostA = -1, frostT = 0;
-  function frostNeed(Lw, which, target) {
-    var G = function (L) { return Math.pow(Math.max(0, Math.min(1, L)), 1 / 2.2); }, vb = G(Lw), a;
-    if (which === 'dark') { var vn = G(target * 0.05 - 0.05); a = vb >= vn ? 0 : (vn - vb) / Math.max(0.001, 1 - vb); }
-    else { var vl = G(1.05 / target - 0.05); a = vb <= vl ? 0 : 1 - vl / Math.max(0.001, vb); }
-    return a > 0 ? a + FROST_HEADROOM : 0;
-  }
-  function setFrost(a, t0) {
-    a = Math.max(FROST_BASE, Math.min(FROST_CAP, a || 0)); a = Math.round(a * 50) / 50;
-    if (frostA >= 0 && a < frostA && t0 - frostT < FROST_DWELL) return;
-    if (a === frostA) return;
-    frostA = a; frostT = t0; nav.style.setProperty('--thx-frost', a.toFixed(2));
   }
   function schedMedia() {
     clearTimeout(inkTimer);
@@ -504,8 +486,8 @@
   }
   document.addEventListener('visibilitychange', function () { if (!document.hidden) reink(); });
   API.reink = reink; API.retone = reink;
-  API.inks = function () { return inkState.map(function (s) { return { text: (s.el.textContent || s.el.getAttribute('aria-label') || '').trim().slice(0, 24), ink: ink, L: s.L, Lmin: s.Lmin, Lmax: s.Lmax, mixed: s.mixed, frost: frostA < 0 ? FROST_BASE : frostA }; }); };
-  API.ink = function () { return { ink: ink, frost: frostA < 0 ? FROST_BASE : frostA, tone: tone }; };
+  API.inks = function () { return inkState.map(function (s) { return { text: (s.el.textContent || s.el.getAttribute('aria-label') || '').trim().slice(0, 24), ink: ink, L: s.L, Lmin: s.Lmin, Lmax: s.Lmax, mixed: s.mixed }; }); };
+  API.ink = function () { return { ink: ink, tone: tone }; };
   API.tickMs = function () { return lastTickMs; };
   API.debugPoint = function (x, y, w) { tickCache = new Map(); var pe = nav.style.pointerEvents; nav.style.pointerEvents = 'none'; var r = { left: x - (w || 60) / 2, top: y - 8, width: w || 60, height: 16, right: x + (w || 60) / 2, bottom: y + 8 }; var st; try { st = pointStats(x, y, r); } finally { nav.style.pointerEvents = pe; } tickCache = null; return st; };
   API.setTone = function (t) { tone = t === 'light' ? 'light' : 'dark'; nav.setAttribute('data-tone', tone); };
@@ -525,7 +507,7 @@
   /* Tunables (live: __thxNav.lens({scale:70,...})). Profile T(d) over distance d from the rounded edge: a rim term
    * (smoothstep^rimK over the outer rimW*h, the bevel) plus a body term that runs all the way to the centre line
    * (sign < 0 = the centre magnifies like a thick slab), so the whole surface bends — no flat inset panel. */
-  var LENS = { scale: 112, rim: 0.9, rimW: 0.58, rimK: 1.25, body: -0.6, bodyK: 1.5, disp: 0.34, dispW: 0.4, dispBody: 0.05, sat: 1.3, blur: 8, spec: 0.5, specW: 0.24, bleed: 0.32, bleedBlur: 24, light: [-0.55, -0.83], light2: [0.55, 0.83] }; /* 4.9.0: frosted, not clear - blur 8 (was .45) and saturate 1.3 (was 1.9): over a warm hero the clear glass rendered as a saturated slab; the bleed sits at .32 (was .9). 4.4: turned up — deeper centre magnification, wider bevel, more dispersion, saturation and colour bleed. 4.5: dispersion lives at the edge — disp fades in over the outer dispW of the bevel, dispBody is a whisper in the body — one map per channel, so text under the body no longer splits into three colours */
+  var LENS = { scale: 112, rim: 0.9, rimW: 0.58, rimK: 1.25, body: -0.6, bodyK: 1.5, disp: 0.34, dispW: 0.4, dispBody: 0.05, sat: 1.9, blur: 0.45, spec: 0.5, specW: 0.24, bleed: 0.9, bleedBlur: 20, light: [-0.55, -0.83], light2: [0.55, 0.83] }; /* 4.4: turned up — deeper centre magnification, wider bevel, more dispersion, saturation and colour bleed. 4.5: dispersion lives at the edge — disp fades in over the outer dispW of the bevel, dispBody is a whisper in the body — one map per channel, so text under the body no longer splits into three colours */
   var mapW = 0, mapH = 0, mapURLs = ['', '', ''], mapRetry = 0;
   var svgNS = 'http://www.w3.org/2000/svg';
   function fe(name, attrs) { var e = document.createElementNS(svgNS, name); for (var k in attrs) e.setAttribute(k, attrs[k]); return e; }
