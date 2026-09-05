@@ -1,4 +1,4 @@
-/*! theodyx-article-fx v1.6.1 — Theodyx publication template reading chrome.
+/*! theodyx-article-fx v1.6.2 — Theodyx publication template reading chrome.
    CONTRACT: enhancement-only. All content is native Webflow DOM; this script only
    (1) links existing <sup>N</sup> footnote markers to the Notes & sources list (dedicated .art-notes section, or legacy in-body h6+ol),
    (2) injects an "In this report" TOC from the article headings (h2, falling back to h3 then h4; 3+ entries) across EVERY
@@ -236,7 +236,7 @@
           if (min) art.timeRequired = 'PT' + min + 'M';
           if (Array.isArray(art.image)) art.image = art.image.filter(Boolean);
           if (art.image && !art.image.length) delete art.image;
-          var an = (art.author && art.author.name) || author;
+          var an = (author && !/theodyx/i.test(author)) ? author : ((art.author && art.author.name) || author); /* 1.6.2: the rendered byline wins over the static SSR Organization when it names a person */
           if (an && !/theodyx/i.test(an)) { var pid = personId(an); art.author = pid ? { '@type': 'Person', '@id': pid, 'name': an } : { '@type': 'Person', 'name': an }; }
           else art.author = { '@type': 'Organization', '@id': ORG, 'name': 'Theodyx' };
           if (!art.publisher) art.publisher = { '@id': ORG };
