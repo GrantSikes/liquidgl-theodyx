@@ -1,4 +1,4 @@
-/*! theodyx-nav.js v4.7.1 (2026-09-05) — behaviours for the clear liquid-glass nav (#thx-nav).
+/*! theodyx-nav.js v4.7.2 (2026-09-05) — behaviours for the clear liquid-glass nav (#thx-nav).
  * One unanimous ink (every word, the logo and the burger flip together between pure white and pure black, chosen
  * from what is behind all of them) plus, since 4.7.0, a per-word plate: any word the elected ink still fails gets
  * its own soft plate sized from its worst sampled backdrop (or, when that plate would flatten the glass, its own ink), whole-surface lens (continuous refraction profile from the pill geometry, per-
@@ -123,17 +123,37 @@
   var sampler = document.createElement('canvas'); sampler.width = 24; sampler.height = 6;
   var sctx = null; try { sctx = sampler.getContext('2d', { willReadFrequently: true }); } catch (e) { sctx = null; }
   var corsImgs = {};   /* src -> Image (CORS clone) */
+  /* 4.7.2 (Phase 10 SPEED-05): the sampler's CORS copies were fetched at high priority during the LCP window and
+   * competed with the hero itself. Copies now wait until the page has painted its LCP (largest-contentful-paint
+   * observer, or load + 800 ms as the fallback), are requested at low priority, and only *.r2.dev (which sends
+   * Access-Control-Allow-Origin solely when an Origin header is present) uses cache:'reload'; every other host
+   * reuses the browser cache. Until then the nav wears the ink it elected from the colours it can read. */
+  var lcpDone = false, lcpQueue = [];
+  function lcpSettled() { if (lcpDone) return; lcpDone = true; var q = lcpQueue; lcpQueue = []; for (var i = 0; i < q.length; i++) { try { q[i](); } catch (e) {} } }
+  (function () {
+    var t = setTimeout(lcpSettled, 4000);
+    function afterLoad() { setTimeout(lcpSettled, 800); }
+    if (document.readyState === 'complete') afterLoad(); else window.addEventListener('load', afterLoad, { once: true });
+    try {
+      if (window.PerformanceObserver && PerformanceObserver.supportedEntryTypes && PerformanceObserver.supportedEntryTypes.indexOf('largest-contentful-paint') !== -1) {
+        var po = new PerformanceObserver(function () { clearTimeout(t); setTimeout(function () { lcpSettled(); try { po.disconnect(); } catch (e) {} }, 300); });
+        po.observe({ type: 'largest-contentful-paint', buffered: true });
+      }
+    } catch (e) {}
+  })();
   function corsLoad(src, done) {
-    /* 4.7.1: the browser may already hold this URL as a no-CORS response (the <img>/preload fetch); R2 sends
-     * Access-Control-Allow-Origin only when an Origin header is present, so re-using that cache entry for a CORS
-     * read fails with a console error. cache:'reload' forces a fresh CORS fetch; the blob feeds an Image. */
     var im = new Image(); im.decoding = 'async'; corsImgs[src] = im;
     var fail = function () { im.__thxFail = true; };
-    if (typeof fetch === 'function' && typeof URL !== 'undefined' && URL.createObjectURL) {
-      fetch(src, { mode: 'cors', cache: 'reload', credentials: 'omit' }).then(function (r) { if (!r.ok) throw new Error(r.status); return r.blob(); })
-        .then(function (b) { im.onload = function () { if (done) done(); }; im.onerror = fail; im.src = URL.createObjectURL(b); })
-        .catch(function () { im.crossOrigin = 'anonymous'; im.onload = function () { if (done) done(); }; im.onerror = fail; im.src = src; });
-    } else { im.crossOrigin = 'anonymous'; im.onload = function () { if (done) done(); }; im.onerror = fail; im.src = src; }
+    var go = function () {
+      var r2 = /\.r2\.dev$/.test((function () { try { return new URL(src, location.href).hostname; } catch (e) { return ''; } })());
+      if (typeof fetch === 'function' && typeof URL !== 'undefined' && URL.createObjectURL) {
+        var opts = { mode: 'cors', credentials: 'omit', priority: 'low' }; if (r2) opts.cache = 'reload';
+        fetch(src, opts).then(function (r) { if (!r.ok) throw new Error(r.status); return r.blob(); })
+          .then(function (b) { im.onload = function () { if (done) done(); }; im.onerror = fail; im.src = URL.createObjectURL(b); })
+          .catch(function () { im.crossOrigin = 'anonymous'; im.onload = function () { if (done) done(); }; im.onerror = fail; im.src = src; });
+      } else { im.crossOrigin = 'anonymous'; im.onload = function () { if (done) done(); }; im.onerror = fail; im.src = src; }
+    };
+    if (lcpDone) go(); else lcpQueue.push(go);
     return im;
   }
   var tickCache = null; /* per-tick memo: element -> stats */
