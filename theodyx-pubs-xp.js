@@ -1,9 +1,9 @@
-/*! theodyx-pubs-xp v1.4.0 — Publications reading-experience composer.
+/*! theodyx-pubs-xp v1.4.1 — Publications reading-experience composer.
    Runs LAST on the Publications template (after articlefx/ethos/ethosx/r2media).
    (1) weaves the media bands into the reading flow: carousel 1 ~top-middle,
        divider at the article midpoint (splits the body into two sheets),
        carousel 2 ~middle-bottom; notes/disclaimer follow the second half.
-   (2) carousel dots + arrows, magnetic CTA, share row. Enhancement-only: no CMS
+   (2) carousel dots + arrows, share row (the magnetic CTA was removed in 1.4.1, INV-05). Enhancement-only: no CMS
        content is created here.
    Phase 11 motion: REVEAL-03/REVEAL-08 the .xp-rvl scroll-reveal system, its 3.5 s
    timer and its catch() safety net are gone - article blocks are visible at once;
@@ -167,13 +167,10 @@ addEventListener('scroll',function(){if(!rtick){rtick=true;requestAnimationFrame
 }catch(e){}
 
 
-/* ---------- 6. magnetic CTA ---------- */
-if(!MOB&&!RED){try{
-q('.ethx-cta .thxo-btn').forEach(function(b){
-  b.addEventListener('pointermove',function(e){var r=b.getBoundingClientRect();var dx=(e.clientX-r.left-r.width/2)/r.width,dy=(e.clientY-r.top-r.height/2)/r.height;b.style.transform='translate('+(dx*8).toFixed(1)+'px,'+(dy*6).toFixed(1)+'px)'});
-  b.addEventListener('pointerleave',function(){b.style.transform=''});
-});
-}catch(e){}}
-/*thx-pubs-xp-1.4.0-p11motion*/
+/* ---------- 6. (removed) ---------- */
+/* INV-05: the magnetic CTA (pointermove -> style.transform on .ethx-cta .thxo-btn) is gone. It was an
+   uncomposited per-move style write on the page's primary conversion control and made the hit target
+   drift under a slow pointer; the button's colour hover and the site-wide pressed state answer the pointer. */
+/*thx-pubs-xp-1.4.1-p11motion*/
 }catch(e){}});
 })();
