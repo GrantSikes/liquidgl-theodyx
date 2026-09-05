@@ -28,10 +28,10 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
   if (run('head')) { const { page, ctx, errors } = await open('/about');
     const html = await page.content();
     const lines = fs.readFileSync(HEAD_MIN, 'utf8').split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('<!--'));
-    const norm = t => t.replace(/ crossorigin(?=[ >])/g, ' crossorigin=""').replace(/ defer>/g, ' defer="">'); const H = norm(html); const missing = lines.filter(l => !H.includes(norm(l)) && !html.includes(l));
-    check('head v4.8.0 banner is live', html.includes('Theodyx head code · v4.8.0'));
+    const norm = t => t.replace(/ (crossorigin|defer|data-thx-robots)(?=[ >])/g, ' $1=""'); const H = norm(html); const missing = lines.filter(l => !H.includes(norm(l)) && !html.includes(l));
+    check('head v4.9.0 banner is live', html.includes('Theodyx head code · v4.9.0'));
     check('every line of site-head.min.html appears in the page', missing.length === 0, { missing: missing.length, first: missing[0] && missing[0].slice(0, 120) });
-    for (const [f, sha] of [['theodyx-nav.js', '64813172742f9d9809d83a79d5691f71b91a75c1'], ['nv2pagesf.js', '4d3c1ecf1d456ba990a2f379c5f725cf9d889856'], ['theodyx-cookies.js', 'c13a6d679076d1176d94efdfa168b516d229923f'], ['theodyx-article-fx.js', '4d3c1ecf1d456ba990a2f379c5f725cf9d889856']]) {
+    for (const [f, sha] of [['theodyx-nav.js', '0f7f3134fe7096984f6143447b57218f8a51f865'], ['nv2pagesf.js', 'fc7b8073d7feb6ba40a091b7503773b36951b85d'], ['theodyx-cookies.js', 'c13a6d679076d1176d94efdfa168b516d229923f'], ['theodyx-article-fx.js', '4d3c1ecf1d456ba990a2f379c5f725cf9d889856']]) {
       const re = new RegExp('<script src="https://cdn\\.jsdelivr\\.net/gh/GrantSikes/liquidgl-theodyx@' + sha + '/' + f.replace('.', '\\.') + '" integrity="sha384-[^"]+" crossorigin="anonymous" defer(="")?>');
       check('footer tag pinned: ' + f + ' @' + sha.slice(0, 7), re.test(html));
     }
@@ -65,7 +65,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     await ctx.close(); }
   // 3. home hero
   if (run('home')) { const { page, ctx, errors } = await open('/');
-    check('footer tag pinned: theodyx-cine.js @6481317 (Home)', /liquidgl-theodyx@64813172742f9d9809d83a79d5691f71b91a75c1\/theodyx-cine\.js" integrity="sha384-/.test(await page.content()));
+    check('footer tag pinned: theodyx-cine.js @fc7b807 (Home)', /liquidgl-theodyx@fc7b8073d7feb6ba40a091b7503773b36951b85d\/theodyx-cine\.js" integrity="sha384-/.test(await page.content()));
     await page.keyboard.press('Tab'); await sleep(800);
     const h = await page.evaluate(() => { const v = document.querySelector('video.hero-video'); const pause = document.querySelector('.hero-ctrl-btn[data-hero-pause]'); const wm = document.querySelector('.hero-vlabel'); return { muted: v && v.muted, label: v && v.getAttribute('aria-label'), pause: pause ? { pressed: pause.getAttribute('aria-pressed'), name: pause.getAttribute('aria-label') } : null, wm: wm ? { role: wm.getAttribute('role'), name: wm.getAttribute('aria-label'), hiddenLetters: wm.querySelectorAll('p[aria-hidden="true"]').length } : null, alts: [...document.querySelectorAll('img[alt*="Theodyx Capital"]')].length }; });
     check('F-01: hero video stays muted after a keystroke', h.muted === true, h.muted);
