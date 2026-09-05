@@ -1,4 +1,12 @@
-/* Theodyx Cine v5.0.3 — homepage cinematic. Library-free. Modules removable via CFG.
+/* Theodyx Cine v5.1.0 — homepage cinematic. Library-free. Modules removable via CFG.
+   Phase 11 (motion) 5.1.0: no section on Home animates on scroll any more. The reveals v3 and
+   parallax modules are deleted outright (REVEAL-01, REVEAL-02, REVEAL-08, INV-01, INV-02,
+   EASE-04, ACT-12) together with the CSS they injected and the no-JS safety net that only
+   existed to undo them; content is visible immediately with no opacity or clip-path residue.
+   The hero video is now owned solely by theodyx-home-fx (its Phase 10 poster/LCP gate and the
+   Phase 9 reduced-motion hold) — cine no longer calls play() on it. EASE normalised to the
+   house spring token. Net effect on Home: this file installs zero scroll listeners and zero
+   rAF loops. The one orchestrated entrance left on the page is the hero [data-thx-reveal].
    Intro: typed line -> word constellation builds center-screen -> family spotlight ->
    gravitational collapse -> "what it means to be Human." -> video emerges. No blur anywhere. */
 (function(){
@@ -14,14 +22,14 @@ var CFG={
   heroIntro:false,    // page loads straight into the video (constellation kept behind this flag)
   autoSound:true,
   scrollZoom:false,   // no intro -> hero stays in its native designed state
-  reveals:true,
-  parallax:true,
+  /* 5.1.0 (Phase 11): `reveals` and `parallax` are gone, not just switched off — their blocks
+     are deleted below. Nothing on Home may animate on scroll. */
   pressBand:false     // replaced by the native From Our Thinking section
 };
 
 var reduced=false;
 try{reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;}catch(e){}
-var EASE='cubic-bezier(.19,1,.22,1)';
+var EASE='cubic-bezier(.22,1,.36,1)';   /* 5.1.0: house spring token (was an expo-out variant) */
 
 /* the constellation — media, craft, feeling, people. family is the spotlight tail. */
 var CLOUD=['video.','music.','writing.','film.','podcasts.','fashion.','gaming.','sports.','news.','culture.','stories.','stages.','platforms.','audiences.','fans.','voices.','visions.','dreams.','craft.','art.','design.','code.','capital.','deals.','rights.','royalties.','brands.','studios.','institutions.','partners.','clients.','creators.','artists.','athlete.','olympian.','nurse.','doctor.','lawyer.','teacher.','construction.','welder.','scholar.','thinker.','actor.','executive.','builders.','dreamers.','believers.','mentors.','teammates.','neighbors.','strangers.','laughter.','tears.','joy.','grief.','love.','courage.','doubt.','hope.','ambition.','legacy.','moments.','memories.','beginnings.','comebacks.','encores.'];
@@ -32,8 +40,10 @@ function init(){
   if(CFG.eagerImages){try{var vh=window.innerHeight||0;[].slice.call(document.images).forEach(function(im){
     if(im.loading!=='lazy')return;var r=im.getBoundingClientRect();if(r.bottom>0&&r.top<vh)im.loading='eager';});}catch(e){}}
 
+  /* 5.1.0: the hero <video> belongs to theodyx-home-fx — it holds the source off the wire until
+     after LCP (SPEED-04) and keeps the loop paused under prefers-reduced-motion (F-03). cine only
+     keeps a reference for the heroIntro teardown; it must never mute, load or play it here. */
   var video=document.querySelector('.hero-media video, video.hero-video');
-  if(video){try{video.muted=true;video.play().catch(function(){});}catch(e){}}
 
   /* 5.0.2 (Phase 9 F-01): the gesture auto-unmute is gone - audio only ever starts from the hero's own mute button
      (theodyx-home-fx). A first keystroke or tap must never turn sound on. CFG.autoSound is ignored. */
@@ -331,93 +341,18 @@ function init(){
     }catch(e){}
   }
 
-  /* ---------- reveals v3 ---------- */
-  if(CFG.reveals&&!reduced&&'IntersectionObserver' in window){
-    try{
-      var lite=window.innerWidth<768;
-      var css=document.createElement('style');
-      css.textContent=
-        '.thx-rvH{opacity:0;transform:translateY(46px);'+(lite?'':'clip-path:inset(0 0 58% 0);')+'transition:opacity 1.1s '+EASE+',transform 1.15s '+EASE+(lite?'':',clip-path 1.15s '+EASE)+'}'+
-        '.thx-rvH.thx-on{opacity:1;transform:none;'+(lite?'':'clip-path:inset(0 0 0% 0);')+'}'+
-        '.thx-rvC{opacity:0;transform:translateY(34px);transition:opacity .95s '+EASE+',transform 1s '+EASE+'}'+
-        '.thx-rvC.thx-on{opacity:1;transform:none}'+
-        '.thx-rvI{opacity:0;transform:scale(1.1);clip-path:inset(0 0 96% 0 round 16px);transition:opacity 1.05s '+EASE+',transform 1.3s '+EASE+',clip-path 1.25s '+EASE+'}'+
-        '.thx-rvI.thx-on{opacity:1;transform:scale(1);clip-path:inset(0 0 0% 0 round 16px)}';
-      document.head.appendChild(css);
-      var vh=window.innerHeight;
-      var sections=[].slice.call(document.querySelectorAll('.banner-sec,.fx-hero,.fx-split,.fx-sec'));
-      var groups=[];
-      sections.forEach(function(sec){
-        var heads=[].slice.call(sec.querySelectorAll('h1,h2,h3,h4,.fx-h3,.lynx-heading'));
-        var copy=[].slice.call(sec.querySelectorAll('.lynx-paragraph,.fx-stp,.fx-bp,.fx-body-1,.fx-link'));
-        var imgs=[].slice.call(sec.querySelectorAll('img'));
-        var els=[];
-        heads.forEach(function(el){els.push({el:el,k:'thx-rvH'});});
-        copy.forEach(function(el){els.push({el:el,k:'thx-rvC'});});
-        imgs.forEach(function(el){els.push({el:el,k:'thx-rvI'});});
-        els=els.filter(function(o){
-          var el=o.el;
-          if(el.closest('.site-navbar,.thx-nav')||el.closest('footer')||el.closest('.footer')||el.closest('.hero'))return false;
-          var r=el.getBoundingClientRect();
-          if(r.height<8)return false;
-          return r.top>vh*0.9;
-        }).slice(0,16);
-        els.sort(function(a,b){return a.el.getBoundingClientRect().top-b.el.getBoundingClientRect().top;});
-        if(els.length)groups.push({sec:sec,els:els});
-      });
-      var io=new IntersectionObserver(function(entries){
-        entries.forEach(function(en){
-          if(!en.isIntersecting)return;
-          var grp=null;
-          for(var i=0;i<groups.length;i++)if(groups[i].sec===en.target)grp=groups[i];
-          if(grp)grp.els.forEach(function(o,i){
-            var d=Math.min(i,10)*110;
-            o.el.style.transitionDelay=d+'ms';
-            o.el.classList.add('thx-on');
-            setTimeout(function(){o.el.style.transitionDelay='';o.el.classList.remove(o.k,'thx-on');},d+1450);
-          });
-          io.unobserve(en.target);
-        });
-      },{rootMargin:'0px 0px -10% 0px',threshold:0.07});
-      groups.forEach(function(g){g.els.forEach(function(o){o.el.classList.add(o.k);});io.observe(g.sec);});
-      function sweep(){
-        [].slice.call(document.querySelectorAll('.thx-rvH:not(.thx-on),.thx-rvC:not(.thx-on),.thx-rvI:not(.thx-on)')).forEach(function(el){
-          var r=el.getBoundingClientRect();
-          if(r.top<window.innerHeight*0.97&&r.bottom>0){
-            el.classList.add('thx-on');
-            setTimeout(function(){el.style.transitionDelay='';el.classList.remove('thx-rvH','thx-rvC','thx-rvI','thx-on');},1450);
-          }
-        });
-      }
-      window.addEventListener('scroll',sweep,{passive:true});
-      setTimeout(sweep,3500);
-    }catch(e){}
-  }
-
-  /* ---------- parallax ---------- */
-  if(CFG.parallax&&!reduced&&window.innerWidth>=768){
-    try{
-      var imgs2=[].slice.call(document.querySelectorAll('.lynx-image,.lynx-image-absolute,.image-16,.image-17,.image-18')).filter(function(im){
-        return im.getBoundingClientRect().height>140;
-      });
-      imgs2.forEach(function(im){im.style.willChange='transform';});
-      var ticking=false;
-      function applyPx(){
-        ticking=false;
-        var vh2=window.innerHeight;
-        imgs2.forEach(function(im){
-          if(im.classList.contains('thx-rvI'))return;
-          var r=im.getBoundingClientRect();
-          if(r.bottom<-100||r.top>vh2+100)return;
-          var c=(r.top+r.height/2-vh2/2)/vh2;
-          var ty=Math.max(-12,Math.min(12,-c*18));
-          im.style.transform='translateY('+ty.toFixed(1)+'px) scale(1.05)';
-        });
-      }
-      window.addEventListener('scroll',function(){if(document.hidden){applyPx();return;}if(!ticking){ticking=true;requestAnimationFrame(applyPx);}},{passive:true});
-      applyPx();
-    }catch(e){}
-  }
+  /* ---------- reveals + parallax: REMOVED in 5.1.0 (Phase 11) ----------
+     REVEAL-01/02, INV-01/02, EASE-04, REVEAL-08, ACT-12. The reveals v3 block tagged 16
+     headings with .thx-rvH and ran opacity 1.1s + translateY(46px) 1.15s + clip-path 1.15s
+     on a Math.min(i,10)*110 stagger that collapsed six headings onto d1100 (worst case 2250 ms
+     to a finished heading). Its .thx-rvC/.thx-rvI copy and image selectors matched zero elements
+     on the rebuilt page, so every card title wiped in against a paragraph that never moved.
+     The parallax block targeted five pre-rebuild classes that also match zero elements yet still
+     bound a passive scroll listener driving a rAF over an empty array.
+     Both are gone, with them the injected <style>, the IntersectionObserver, the sweep() scroll
+     listener and setTimeout(sweep,3500) that existed only to undo the reveal (REVEAL-08).
+     Home now runs exactly one entrance: the hero [data-thx-reveal] fade in theodyx-home-fx.
+     cine installs no scroll listener and no rAF on Home. Do not reintroduce either here. */
 
   /* ---------- pressBand ---------- */
   if(CFG.pressBand){

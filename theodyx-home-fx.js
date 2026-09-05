@@ -1,4 +1,4 @@
-/* theodyx-home-fx.js 1.2.0 — Theodyx HOME page ANIMATION ONLY.
+/* theodyx-home-fx.js 1.3.0 — Theodyx HOME page ANIMATION ONLY.
  * Contract: may only append/read inside [data-thx-anim] / [data-thx-reveal] elements,
  * plus the hero control buttons it already owns.
  * MUST NOT: set hrefs, hide/move/restyle content, inject text content,
@@ -14,7 +14,17 @@
  * fading the poster out on the first frame. A 480p rendition is chosen under (max-width:767px).
  * If the markup still ships a src, it is detached on mount and re-attached on the same gate.
  * Reduced motion never attaches a source at all — the Play button does.
- * Modules: media-mosaic (WebGL wordmark), hero-video controls, hero wordmark, scroll reveal. */
+ * Phase 11 motion (1.3.0, EASE-08 / INV-01): every transition this file injects now runs on the
+ * house spring curve cubic-bezier(.22,1,.36,1) instead of plain `ease`. The poster -> video
+ * crossfade is a UI response and drops to 320 ms (was 600 ms); the mosaic crossfade joins the
+ * hero's arrival at 700 ms (was 1 s on `ease`) so the two read as one moment rather than two
+ * overlapping fades. The hero [data-thx-reveal] keeps its 700 ms fade + translateY(26px): with
+ * the cine reveals deleted in cine 5.1.0 it is the ONLY entrance animation on Home, and it is an
+ * arrival rather than a response, so it is exempt from the 200-400 ms band. Do not add a stagger
+ * to it, do not extend [data-thx-reveal] to any element below the hero, and do not add scroll- or
+ * pointer-driven motion to this file — the mosaic's pointer input feeds a shader, it never moves
+ * a hit target.
+ * Modules: media-mosaic (WebGL wordmark), hero-video controls, hero wordmark, hero reveal. */
 (function () {
   "use strict";
   if (window.__thxHomeFx) return; window.__thxHomeFx = true;
@@ -30,15 +40,19 @@
   var WORD = "THEODYX";
   function dpr() { return Math.min(window.devicePixelRatio || 1, 2); }
 
+  /* Phase 11: one easing token for everything this file animates. */
+  var SPRING = 'cubic-bezier(.22,1,.36,1)';
+
   function injectCSS() {
     if (document.getElementById('thx-home-fx-css')) return;
     var st = document.createElement('style'); st.id = 'thx-home-fx-css';
     st.textContent = [
-      '[data-thx-anim="mosaic"]>canvas{position:absolute;inset:0;width:100%;height:100%;display:block;opacity:0;transition:opacity 1s ease;z-index:2}',
-      '[data-thx-reveal]{opacity:0;transform:translateY(26px);transition:opacity .7s ease,transform .7s ease}',
+      '[data-thx-anim="mosaic"]>canvas{position:absolute;inset:0;width:100%;height:100%;display:block;opacity:0;transition:opacity .7s ' + SPRING + ';z-index:2}',
+      /* the one entrance animation on Home — an arrival, not a UI response, hence 700 ms. */
+      '[data-thx-reveal]{opacity:0;transform:translateY(26px);transition:opacity .7s ' + SPRING + ',transform .7s ' + SPRING + '}',
       '[data-thx-reveal].thx-in{opacity:1;transform:none}',
       /* SPEED-04: the poster is a real image so it can be the LCP without the MP4 on its shoulder. */
-      '[data-thx-anim="hero-video"] .hero-poster{position:absolute;inset:0;z-index:0;width:100%;height:100%;object-fit:cover;border-radius:inherit;opacity:1;transition:opacity .6s ease;pointer-events:none}',
+      '[data-thx-anim="hero-video"] .hero-poster{position:absolute;inset:0;z-index:0;width:100%;height:100%;object-fit:cover;border-radius:inherit;opacity:1;transition:opacity .32s ' + SPRING + ';pointer-events:none}',
       '[data-thx-anim="hero-video"] .hero-poster.thx-off{opacity:0}'
     ].join('');
     (document.head || document.documentElement).appendChild(st);
@@ -291,7 +305,7 @@
     function dropPoster() {
       if (!pimg) return;
       pimg.classList.add('thx-off');
-      setTimeout(function () { if (pimg) pimg.style.visibility = 'hidden'; }, 700);
+      setTimeout(function () { if (pimg) pimg.style.visibility = 'hidden'; }, 420);  /* > the 320 ms fade */
     }
 
     /* the 480p rendition is 30% of the 720p file — worth ~7 s of connection time on a phone. */
@@ -450,17 +464,33 @@
     [].forEach.call(w.querySelectorAll('.hero-vletter'), function (p) { p.setAttribute('aria-hidden', 'true'); });
   }
 
-  /* ── module 3: scroll reveal on opt-in [data-thx-reveal] elements ───── */
+  /* ── module 3: the hero entrance — the ONE orchestrated animation on Home ───
+     1.3.0: made deterministic. injectCSS() and this function run back to back in the same task,
+     and the IntersectionObserver's first callback can be delivered before the browser has ever
+     computed a style for [data-thx-reveal] with the opacity:0 / translateY(26px) start state.
+     With no before-change style there is nothing to interpolate from, so the class flip is a
+     snap, not a fade — CDP reported the hero as a single CSSTransition of 0 ms. Waiting two
+     animation frames guarantees the start state has been rendered once, after which the flip
+     transitions over the full 700 ms. (This was latent in 1.2.0; deleting the cine reveals in
+     cine 5.1.0 shortened init() enough to expose it every load.) */
   function mountReveal() {
     var els = [].slice.call(document.querySelectorAll('[data-thx-reveal]'));
     if (!els.length) return;
     var reduce = false; try { reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
     if (reduce) { els.forEach(function (el) { el.classList.add('thx-in'); }); return; }
+    function show(el) { if (el.classList.contains('thx-in')) return; el.classList.add('thx-in'); }
+    function painted(el, cb) {
+      /* first rAF lands before the paint of the current frame, the second after it */
+      requestAnimationFrame(function () { requestAnimationFrame(function () { cb(el); }); });
+    }
     try {
-      var io = new IntersectionObserver(function (es) { es.forEach(function (en) { if (en.isIntersecting) { en.target.classList.add('thx-in'); io.unobserve(en.target); } }); }, { threshold: 0.12 });
+      var io = new IntersectionObserver(function (es) {
+        es.forEach(function (en) { if (en.isIntersecting) { io.unobserve(en.target); painted(en.target, show); } });
+      }, { threshold: 0.12 });
       els.forEach(function (el) { io.observe(el); });
-    } catch (e) { els.forEach(function (el) { el.classList.add('thx-in'); }); }
-    setTimeout(function () { els.forEach(function (el) { el.classList.add('thx-in'); }); }, 2000);
+    } catch (e) { els.forEach(show); }
+    /* safety net: the hero must never stay hidden because an observer or a frame never arrived */
+    setTimeout(function () { els.forEach(show); }, 2000);
   }
 
   function init() { injectCSS(); mountMosaic(); mountHeroVideo(); mountWordmark(); mountReveal(); }
