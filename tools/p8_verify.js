@@ -28,7 +28,7 @@ async function main() {
     ok('about: nav 4.7.x pinned with SRI (Phase 9)', names.some(n => n === 'theodyx-nav.js') && /liquidgl-theodyx@[0-9a-f]{40}\/theodyx-nav\.js" integrity="sha384-/.test(raw), '');
     ok('about: no theodyx-policies.js / theodyx-cine.js (page-scoped now)', !scriptTags(raw).some(s => /theodyx-policies\.js|theodyx-cine\.js/.test(s.src)), '');
     ok('about: nav-gl not fetched on Chromium', !reqs.some(u => /theodyx-nav-gl\.js/.test(u)), '');
-    ok('head v4.9 marker', /Theodyx head code · v4\.9/.test(raw), '');
+    ok('head v4.10 marker', /Theodyx head code · v4\.10/.test(raw), '');
     ok('head: 6 preconnects incl. the asset host, no dns-prefetch', (raw.match(/<link rel="preconnect"/g) || []).length === 6 && !/rel="dns-prefetch"/.test(raw) && /preconnect" href="https:\/\/cdn\.prod\.website-files\.com/.test(raw), String((raw.match(/<link rel="preconnect"/g) || []).length));
     ok('head: dead slnt rule gone; nav font has Theodyx Sans Fallback', !/"slnt" -10/.test(raw) && /--thx-nav-font:"Google Sans Flex","Google Sans","Theodyx Sans Fallback"/.test(raw), '');
     ok('head: @font-face aliases single-family', !/font-family:"(Objectivity|Archivo)","Theodyx Sans Fallback";src:/.test(raw), '');
@@ -50,7 +50,7 @@ async function main() {
     const h = await p.$$eval('a.polx-side-link', a => a.map(x => Math.round(x.getBoundingClientRect().height))); ok('policy: TOC links ≥ 33px tall (height frozen)', h.length && h.every(x => x >= 33), h.slice(0, 5).join(','));
   });
   await page('/our-thinking/the-end-of-the-sponsorship-era', async (p, raw) => {
-    ok('article: article-fx 1.7.0 once', scriptTags(raw).filter(s => /theodyx-article-fx\.js/.test(s.src)).length === 1 && /liquidgl-theodyx@4d3c1ecf/.test(raw), '');
+    ok('article: article-fx 1.8.0 once', scriptTags(raw).filter(s => /theodyx-article-fx\.js/.test(s.src)).length === 1 && /liquidgl-theodyx@1ada34ca/.test(raw), '');
     const ld = await p.$$eval('script[type="application/ld+json"]', s => s.map(x => x.textContent.length)); ok('article: JSON-LD present', ld.length >= 1, '');
     const hero = raw.match(/<img[^>]*class="ethx-media"[^>]*>/); ok('article: hero img WebP eager', hero && /\.webp/.test(hero[0]) && /loading="eager"/.test(hero[0]), '');
   });
