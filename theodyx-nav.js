@@ -1,6 +1,7 @@
-/*! theodyx-nav.js v4.6.0 (2026-09-05) — behaviours for the clear liquid-glass nav (#thx-nav).
+/*! theodyx-nav.js v4.7.0 (2026-09-05) — behaviours for the clear liquid-glass nav (#thx-nav).
  * One unanimous ink (every word, the logo and the burger flip together between pure white and pure black, chosen
- * from what is behind all of them), whole-surface lens (continuous refraction profile from the pill geometry, per-
+ * from what is behind all of them) plus, since 4.7.0, a per-word plate: any word the elected ink still fails gets
+ * its own soft plate sized from its worst sampled backdrop (or, when that plate would flatten the glass, its own ink), whole-surface lens (continuous refraction profile from the pill geometry, per-
  * channel dispersion, geometry-lit specular rim, colour bleed; Chromium, capability + frame-budget gated), pointer
  * highlight with a spring, scroll condense, accessible mobile sheet (focus trap, Escape, inert, iOS-safe scroll lock), skip link
  * target, legacy first-section clearance, conversion hooks. No dependencies. */
@@ -195,6 +196,18 @@
     } catch (e) { el.__thxTainted = true; }
     return null;
   }
+  function warmPosters() {
+    /* 4.7.0: the sampler reads a lazy video through a CORS copy of its poster; fetch those copies at idle so the first
+     * sample over such a video reads the scene rather than the card behind it (first-encounter latency measured ~400 ms) */
+    try {
+      document.querySelectorAll('video[poster]').forEach(function (v) {
+        var ps = v.poster || v.getAttribute('poster'); if (!ps || corsImgs[ps]) return;
+        var pim = new Image(); pim.crossOrigin = 'anonymous'; pim.decoding = 'async'; corsImgs[ps] = pim;
+        pim.onerror = function () { pim.__thxFail = true; }; pim.src = ps;
+      });
+    } catch (e) {}
+  }
+  if (window.requestIdleCallback) requestIdleCallback(warmPosters, { timeout: 1500 }); else setTimeout(warmPosters, 600);
   function bgStats(el, cs, bgi, r) {
     if (!sctx || el.__thxTainted) return null;
     var m = bgi.match(/url\((['"]?)(.*?)\1\)/); if (!m) return null;
@@ -280,6 +293,9 @@
       return paintLayers(cs, el, x, y);
     } catch (e) { return []; }
   }
+  function mediaKids(el) {
+    try { return Array.prototype.slice.call(el.querySelectorAll(':scope > img,:scope > video,:scope > canvas,:scope > picture,:scope > * > img,:scope > * > video,:scope > * > picture')); } catch (e) { return []; }
+  }
   function hasDirectText(el) {
     for (var c = el.firstChild; c; c = c.nextSibling) if (c.nodeType === 3 && /\S/.test(c.data)) return true;
     return false;
@@ -304,6 +320,25 @@
         var cs0 = getComputedStyle(el), pb = parseBg(cs0);
         if (pb !== null) { acc += rem * G(pb); rem = 0; break; }
         sdMax = Math.max(sdMax, 0.25); continue; /* no frames yet and no colour of its own (a video still loading): what is painted beneath it is what the eye sees */
+      }
+      /* 4.7.0: Chromium's hit-test skips a media child whose box is mostly scrolled out of the viewport (a 508px photo with
+       * 57px still showing), so the stack holds the white card behind the photo. Look one and two levels down for media
+       * that covers the point and is missing from the stack, and read it as if it were on top. */
+      if (!hasDirectText(el)) {
+        if (!('kids' in per)) per.kids = mediaKids(el);
+        var kids = per.kids, hit = false;
+        for (var kk = 0; kk < kids.length; kk++) {
+          var km = kids[kk]; if (els.indexOf(km) !== -1) continue;
+          var kr = per['kr' + kk] || (per['kr' + kk] = km.getBoundingClientRect());
+          if (x < kr.left || x > kr.right || y < kr.top || y > kr.bottom) continue;
+          var perK = tickCache.get(km); if (!perK) { perK = {}; tickCache.set(km, perK); }
+          if (!(key in perK)) perK[key] = mediaStats(km, r);
+          var stk = perK[key]; media = true; hit = true;
+          if (stk) { sdMax = Math.max(sdMax, stk.sd); acc += rem * G(stk.L); rem = 0; }
+          else sdMax = Math.max(sdMax, 0.25);
+          break;
+        }
+        if (hit && rem === 0) break;
       }
       var cs = getComputedStyle(el);
       var after = pseudoLayers(el, '::after', x, y);
@@ -334,7 +369,7 @@
   nav.querySelectorAll('.thx-nav-menu a').forEach(function (a) { inkEls.push(a); });
   if (burger) inkEls.push(burger);
   var inkState = inkEls.map(function (el) { return { el: el, L: null, mixed: false }; });
-  var ink = 'light', inkT = 0, scrim = '', tone = 'dark', anyMedia = false, lastTickMs = 0, inkTimer = 0, inkInterval = 320;
+  var ink = 'light', inkT = 0, scrim = '', tone = 'dark', anyMedia = false, lastTickMs = 0, inkTimer = 0, inkInterval = 320, tickId = 0;
   var cal = function (L) { return Math.min(1, L * 1.3 + 0.01); }; /* calibrated against rendered pixels through the glass: sampler underreads ~12% and the glass lifts the backdrop ~15% */
   function contrast(L, which) { return which === 'light' ? 1.05 / (L + 0.05) : (L + 0.05) / 0.05; }
   nav.setAttribute('data-ink', ink);
@@ -346,6 +381,7 @@
     try { reinkInner(t0); } finally { nav.style.pointerEvents = pe; }
   }
   function reinkInner(t0) {
+    tickId++;
     /* 1. sample every inked element (9-point grid each), 2. decide ONE ink for all of them: the ink whose worst word
      * still reads best (maximin contrast), mean luminance breaking ties, with hysteresis + dwell so it never flickers. */
     var forced = null, worstD = Infinity, worstL = Infinity, sumL = 0, n = 0, prefD = 0, prefL = 0, anyMixed = false, wsum = 0, wL = 0;
@@ -367,7 +403,7 @@
       var spread = Math.max.apply(null, Ls) - Math.min.apply(null, Ls);
       var sd = sds.reduce(function (a, b) { return a + b; }, 0) / sds.length;
       s.mixed = spread > 0.3 || sd > 0.2; if (s.mixed) anyMixed = true;
-      s.L = L;
+      s.L = L; s.Lmin = Math.min.apply(null, Ls); s.Lmax = Math.max.apply(null, Ls); s.tick = tickId; /* raw: the plate solver models the glass itself */
       var Le = cal(L), cd = contrast(Le, 'dark'), cl = contrast(Le, 'light');
       if (cd < worstD) worstD = cd; if (cl < worstL) worstL = cl;
       if (cd > cl) prefD++; else prefL++;
@@ -388,6 +424,7 @@
     }
     if (want !== ink) { ink = want; inkT = t0; }
     nav.setAttribute('data-ink', ink);
+    platePass(t0, !!forced);
     /* legibility scrim: only when the words disagree about the backdrop AND the chosen ink still fails somewhere (Apple's glass darkens/lightens the same way) */
     var worst = ink === 'dark' ? worstD : worstL;
     var sc = (!forced && mixed && n && worst < 3) ? (ink === 'light' ? 'dark' : 'light') : '';
@@ -402,6 +439,53 @@
     tickCache = null;
     schedMedia();
   }
+  /* 4.7.0 (Phase 9, C-01/C-06): the unanimous election picks the ink whose WORST word reads best, but when the words
+   * disagree about the backdrop that worst word can still sit at 1-3:1 (black over a black band while its neighbours sit
+   * on cream). The global scrim only engaged on the mixed/unanimous flag, so a unanimous-but-catastrophic election drew
+   * nothing. Now every word is checked on its own against AA (4.5:1 text, 3:1 mark + burger, plus margin for sampler
+   * error) using its worst sampled point, and a word that fails gets a soft plate behind it - white under dark ink,
+   * black under light ink - with the alpha solved from the luminance it needs, quantised to 0.05 and capped. When the
+   * cap would not be enough and the other ink needs a lighter plate, that word flips ink on its own instead. Plates come
+   * in at once and fade out lazily (dwell), so a moving hero frame cannot make them flicker. */
+  var PLATE_CAP = 0.72, PLATE_STEP = 0.05, PLATE_DWELL = 350, PLATE_HEADROOM = 0.05, GLASS_TINT = 0.035;
+  function plateNeed(Lw, which, target) {
+    /* alpha compositing happens on sRGB-encoded values while WCAG luminance is linear, so solve in gamma space:
+     * a white plate at 0.2 over black paints rgb(51,51,51), which is L 0.033 (2.3:1), not L 0.2. The clear glass
+     * (rgba(255,255,255,.035)) sits under the plate, so lift the backdrop by it first; the headroom covers the
+     * darkest pixels the nine-point grid does not land on. */
+    var G = function (L) { return Math.pow(Math.max(0, Math.min(1, L)), 1 / 2.2); }, vb = G(Lw), a;
+    vb = vb + GLASS_TINT * (1 - vb);
+    if (which === 'dark') { var vn = G(target * 0.05 - 0.05); a = vb >= vn ? 0 : (vn - vb) / Math.max(0.001, 1 - vb); }
+    else { var vl = G(1.05 / target - 0.05); a = vb <= vl ? 0 : 1 - vl / Math.max(0.001, vb); }
+    return a > 0 ? a + PLATE_HEADROOM : 0;
+  }
+  function platePass(t0, forced) {
+    var other = ink === 'dark' ? 'light' : 'dark';
+    for (var i = 0; i < inkState.length; i++) {
+      var s = inkState[i], el = s.el;
+      if (forced || s.tick !== tickId || s.L === null || s.L === undefined) { setPlate(s, ink, 0, t0); continue; }
+      var target = (el === logo || el === burger) ? 3.4 : 4.9;
+      var aG = plateNeed(ink === 'dark' ? s.Lmin : s.Lmax, ink, target);
+      var aO = plateNeed(other === 'dark' ? s.Lmin : s.Lmax, other, target);
+      var useInk = ink, a = aG;
+      if ((aG > PLATE_CAP || (s.wordInk === other && aG > PLATE_CAP - 0.15)) && aO < aG) { useInk = other; a = aO; }
+      setPlate(s, useInk, Math.min(PLATE_CAP, a), t0);
+    }
+  }
+  function setPlate(s, wInk, a, t0) {
+    var el = s.el, cur = s.plate || 0;
+    a = a > 0 ? Math.min(PLATE_CAP, Math.ceil(a / PLATE_STEP - 1e-6) * PLATE_STEP) : 0;
+    if (a < cur && t0 - (s.plateT || 0) < PLATE_DWELL) a = cur;
+    if (a !== cur) { s.plate = a; s.plateT = t0; }
+    var plateColor = wInk === 'dark' ? 'light' : 'dark';
+    if (a > 0) {
+      if (el.getAttribute('data-plate') !== plateColor) el.setAttribute('data-plate', plateColor);
+      if (a !== cur || s.plateInk !== wInk) el.style.setProperty('--thx-plate', a.toFixed(2));
+    } else if (el.hasAttribute('data-plate')) { el.removeAttribute('data-plate'); el.style.removeProperty('--thx-plate'); }
+    if (wInk !== ink) { if (el.getAttribute('data-ink') !== wInk) el.setAttribute('data-ink', wInk); }
+    else if (el.hasAttribute('data-ink')) el.removeAttribute('data-ink');
+    s.wordInk = wInk; s.plateInk = wInk;
+  }
   function schedMedia() {
     clearTimeout(inkTimer);
     if (!anyMedia || document.hidden) return;
@@ -410,7 +494,7 @@
   }
   document.addEventListener('visibilitychange', function () { if (!document.hidden) reink(); });
   API.reink = reink; API.retone = reink;
-  API.inks = function () { return inkState.map(function (s) { return { text: (s.el.textContent || s.el.getAttribute('aria-label') || '').trim().slice(0, 24), ink: ink, L: s.L, mixed: s.mixed }; }); };
+  API.inks = function () { return inkState.map(function (s) { return { text: (s.el.textContent || s.el.getAttribute('aria-label') || '').trim().slice(0, 24), ink: s.wordInk || ink, L: s.L, Lmin: s.Lmin, Lmax: s.Lmax, mixed: s.mixed, plate: s.plate || 0 }; }); };
   API.ink = function () { return { ink: ink, scrim: scrim, tone: tone }; };
   API.tickMs = function () { return lastTickMs; };
   API.debugPoint = function (x, y, w) { tickCache = new Map(); var pe = nav.style.pointerEvents; nav.style.pointerEvents = 'none'; var r = { left: x - (w || 60) / 2, top: y - 8, width: w || 60, height: 16, right: x + (w || 60) / 2, bottom: y + 8 }; var st; try { st = pointStats(x, y, r); } finally { nav.style.pointerEvents = pe; } tickCache = null; return st; };

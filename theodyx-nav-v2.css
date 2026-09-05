@@ -70,7 +70,7 @@ html{scroll-padding-top:calc(var(--thx-nav-h) + var(--thx-nav-top) + 16px)}
 .thx-nav-menu a{display:inline-flex;align-items:center;min-height:44px;padding:0 16px;color:var(--thx-nav-fg-muted);text-decoration:none;font-size:14.5px;font-weight:500;letter-spacing:.005em;line-height:1;border-radius:999px;white-space:nowrap;transition:background-color 200ms,color 200ms}
 .thx-nav-menu a:hover,.thx-nav-menu a[aria-current="page"]{background:var(--thx-nav-hover);color:var(--thx-nav-fg)}
 .thx-nav-menu a:active{transform:scale(.985)}
-.thx-nav a:focus-visible,.thx-nav button:focus-visible{outline:2px solid currentColor;outline-offset:2px;border-radius:999px}
+.thx-nav a:focus-visible,.thx-nav button:focus-visible{outline:2px solid #000;outline-offset:2px;border-radius:999px;box-shadow:0 0 0 4px #fff,0 0 0 6px #000}
 .thx-nav-burger{display:none;width:44px;height:44px;border:0;border-radius:999px;background:transparent;color:inherit;cursor:pointer;padding:0;align-items:center;justify-content:center;flex-direction:column;gap:5px;transition:background-color 200ms}
 .thx-nav-burger:hover{background:var(--thx-nav-hover)}
 .thx-nav-burger span{display:block;width:20px;height:2px;border-radius:2px;background:currentColor;transition:transform 320ms var(--thx-nav-ease),opacity 200ms}
