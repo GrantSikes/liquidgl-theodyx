@@ -1,4 +1,4 @@
-/* theodyx-home-fx.js 1.1.0 — Theodyx HOME page ANIMATION ONLY.
+/* theodyx-home-fx.js 1.2.0 — Theodyx HOME page ANIMATION ONLY.
  * Contract: may only append/read inside [data-thx-anim] / [data-thx-reveal] elements,
  * plus the hero control buttons it already owns.
  * MUST NOT: set hrefs, hide/move/restyle content, inject text content,
@@ -7,6 +7,13 @@
  * a Pause/Play control with aria-pressed; no auto-start under prefers-reduced-motion;
  * the mute control is withdrawn when the source carries no audio track; ARIA names for
  * the hero video and the hero wordmark. ARIA-only attributes — no visual change.
+ * Phase 10 perf (1.2.0, SPEED-04): the hero MP4 no longer competes with the LCP. The markup
+ * carries data-thx-src (no src) and preload="none"; this file paints a real eager, high-priority
+ * <img class="hero-poster"> over the video, waits for the largest-contentful-paint entry (or
+ * window load + 800 ms, whichever lands first), then attaches the source and plays it muted,
+ * fading the poster out on the first frame. A 480p rendition is chosen under (max-width:767px).
+ * If the markup still ships a src, it is detached on mount and re-attached on the same gate.
+ * Reduced motion never attaches a source at all — the Play button does.
  * Modules: media-mosaic (WebGL wordmark), hero-video controls, hero wordmark, scroll reveal. */
 (function () {
   "use strict";
@@ -29,7 +36,10 @@
     st.textContent = [
       '[data-thx-anim="mosaic"]>canvas{position:absolute;inset:0;width:100%;height:100%;display:block;opacity:0;transition:opacity 1s ease;z-index:2}',
       '[data-thx-reveal]{opacity:0;transform:translateY(26px);transition:opacity .7s ease,transform .7s ease}',
-      '[data-thx-reveal].thx-in{opacity:1;transform:none}'
+      '[data-thx-reveal].thx-in{opacity:1;transform:none}',
+      /* SPEED-04: the poster is a real image so it can be the LCP without the MP4 on its shoulder. */
+      '[data-thx-anim="hero-video"] .hero-poster{position:absolute;inset:0;z-index:0;width:100%;height:100%;object-fit:cover;border-radius:inherit;opacity:1;transition:opacity .6s ease;pointer-events:none}',
+      '[data-thx-anim="hero-video"] .hero-poster.thx-off{opacity:0}'
     ].join('');
     (document.head || document.documentElement).appendChild(st);
   }
@@ -245,31 +255,111 @@
     if (!hv || hv.__thxFxMounted) return; hv.__thxFxMounted = true;
     var v = hv.querySelector('video'); if (!v) return;
     v.muted = true;
+    try { if (getComputedStyle(hv).position === 'static') hv.style.position = 'relative'; } catch (e) {}
 
     /* SEM-05 — the backdrop has functional sibling controls, so it is named rather than hidden. */
     if (!v.getAttribute('aria-label') && !v.getAttribute('aria-labelledby')) {
       v.setAttribute('aria-label', 'Ambient background film of Theodyx creators at work');
     }
 
+    /* ── SPEED-04 (a): hold the source off the wire ────────────────────
+       The markup should ship data-thx-src + preload="none" + no src. If it still ships a src
+       (old published markup, or a rebuild), detach it here — the parser's fetch is aborted and
+       the connection goes back to the poster, which is the LCP. */
+    var SRC = (v.getAttribute('data-thx-src') || '').trim();
+    if (!SRC) SRC = (v.getAttribute('src') || '').trim();
+    if (v.hasAttribute('src')) { try { v.removeAttribute('src'); v.load(); } catch (e) {} }
+    if (SRC && !v.getAttribute('data-thx-src')) v.setAttribute('data-thx-src', SRC);
+    try { v.preload = 'none'; v.setAttribute('preload', 'none'); } catch (e) {}
+
+    /* ── SPEED-04 (b): the poster becomes a real LCP candidate ─────────
+       An eager, high-priority <img> layered over the video, faded out on the first frame.
+       The head already preloads this URL at fetchpriority=high, so it costs no extra bytes. */
+    var POSTER = (v.getAttribute('poster') || '').trim();
+    var pimg = hv.querySelector('img.hero-poster');
+    if (POSTER && !pimg) {
+      pimg = document.createElement('img');
+      pimg.className = 'hero-poster';
+      pimg.setAttribute('alt', '');
+      pimg.setAttribute('aria-hidden', 'true');
+      pimg.setAttribute('loading', 'eager');
+      pimg.setAttribute('fetchpriority', 'high');
+      pimg.setAttribute('decoding', 'async');
+      pimg.src = POSTER;
+      if (v.parentNode) v.parentNode.insertBefore(pimg, v.nextSibling);
+    }
+    function dropPoster() {
+      if (!pimg) return;
+      pimg.classList.add('thx-off');
+      setTimeout(function () { if (pimg) pimg.style.visibility = 'hidden'; }, 700);
+    }
+
+    /* the 480p rendition is 30% of the 720p file — worth ~7 s of connection time on a phone. */
+    function pickSrc() {
+      if (!SRC) return '';
+      var small = false; try { small = window.matchMedia('(max-width:767px)').matches; } catch (e) {}
+      if (!small) return SRC;
+      var mob = (v.getAttribute('data-thx-src-mobile') || '').trim();
+      if (mob) return mob;
+      var alt = SRC.replace('-720-', '-480-');
+      return alt !== SRC ? alt : SRC;
+    }
+
+    var attached = false;
+    function attachSrc() {
+      if (attached || !SRC) return attached;
+      attached = true;
+      var u = pickSrc();
+      try {
+        v.preload = 'auto'; v.setAttribute('preload', 'auto');
+        v.setAttribute('src', u); v.src = u;
+        v.setAttribute('data-thx-src-at', String(Math.round((window.performance && performance.now()) || 0)));
+        v.load();
+      } catch (e) {}
+      return true;
+    }
+
     /* F-03 — under prefers-reduced-motion the loop does not start itself; the poster stays
-       and the Play button is the only way in. */
+       and the Play button is the only way in. (1.2.0: it does not even fetch the file.) */
     var reduce = false; try { reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
     var userPaused = reduce;   // reduced motion starts in the "user has not asked for play" state
 
     function autoOK() { return !reduce && !userPaused; }
-    function tryPlay() { if (!autoOK()) return; if (v.paused) { try { v.play().catch(function () {}); } catch (e) {} } }
+    function tryPlay() { if (!autoOK() || !attached) return; if (v.paused) { try { v.play().catch(function () {}); } catch (e) {} } }
 
     if (reduce) {
       try { v.autoplay = false; v.removeAttribute('autoplay'); v.pause(); if (v.currentTime > 0) v.currentTime = 0; } catch (e) {}
-      /* the markup carries autoplay="true", so the UA may already have started: hold it back
-         until the user presses Play. */
+      /* the markup may still carry autoplay="true", so the UA could start on its own once a
+         source exists: hold it back until the user presses Play. */
       v.addEventListener('play', function () { if (!userPaused) return; try { v.pause(); } catch (e) {} });
     }
 
-    tryPlay();
     v.addEventListener('loadeddata', tryPlay);
     v.addEventListener('canplay', tryPlay);
-    [300, 1000, 2500, 5000].forEach(function (t) { setTimeout(tryPlay, t); });
+    v.addEventListener('playing', dropPoster);
+    v.addEventListener('timeupdate', function () { if (v.currentTime > 0.05) dropPoster(); });
+
+    /* ── SPEED-04 (c): the gate — first LCP entry, or window load + 800 ms ── */
+    function afterLCP(cb) {
+      var fired = false, po = null, tid = 0;
+      function fire() { if (fired) return; fired = true; clearTimeout(tid); try { if (po) po.disconnect(); } catch (e) {} cb(); }
+      function posterPainted() { return !pimg || pimg.complete; }
+      try {
+        po = new PerformanceObserver(function (list) { if (list.getEntries().length && posterPainted()) fire(); });
+        po.observe({ type: 'largest-contentful-paint', buffered: true });
+      } catch (e) { po = null; }
+      function arm() { tid = setTimeout(fire, 800); }
+      if (document.readyState === 'complete') arm(); else window.addEventListener('load', arm, { once: true });
+      setTimeout(fire, 8000);   // ceiling: neither signal ever arrives (bfcache restore, no LCP)
+    }
+
+    function startPlayback() {
+      attachSrc();
+      tryPlay();
+      [300, 1000, 2500, 5000].forEach(function (t) { setTimeout(tryPlay, t); });
+    }
+    if (reduce) { /* no source is fetched at all until the Play button asks for one */ }
+    else afterLCP(startPlayback);
 
     var fs = hv.querySelector('[data-hero-fs]');
     var mu = hv.querySelector('[data-hero-mute]');
@@ -286,7 +376,7 @@
     }
     if (fs) fs.addEventListener('click', function (e) { e.preventDefault(); try { (v.requestFullscreen || v.webkitRequestFullscreen || function () {}).call(v); } catch (err) {} });
     /* F-01 — audio starts here and nowhere else. There is no document-level gesture path. */
-    if (mu) mu.addEventListener('click', function (e) { e.preventDefault(); v.muted = !v.muted; if (!v.muted) v.volume = 1; try { v.play().catch(function () {}); } catch (err) {} icons(v.muted); });
+    if (mu) mu.addEventListener('click', function (e) { e.preventDefault(); attachSrc(); v.muted = !v.muted; if (!v.muted) v.volume = 1; try { v.play().catch(function () {}); } catch (err) {} icons(v.muted); });
     icons(true);
 
     /* F-03 — Pause / Play. */
@@ -313,7 +403,7 @@
     if (pb) {
       pb.addEventListener('click', function (e) {
         e.preventDefault();
-        if (v.paused) { userPaused = false; try { v.play().catch(function () {}); } catch (err) {} }
+        if (v.paused) { userPaused = false; attachSrc(); try { v.play().catch(function () {}); } catch (err) {} }
         else { userPaused = true; try { v.pause(); } catch (err) {} }
         pIcons();
       });
@@ -346,7 +436,7 @@
     v.addEventListener('timeupdate', resolveAudio);
     [1200, 3000, 6000].forEach(function (t) { setTimeout(resolveAudio, t); });
 
-    function kick() { if (!autoOK()) return; if (v.paused) { try { v.play().catch(function () {}); } catch (e) {} } }
+    function kick() { if (!autoOK() || !attached) return; if (v.paused) { try { v.play().catch(function () {}); } catch (e) {} } }
     document.addEventListener('touchstart', kick, { once: true, capture: true });
     document.addEventListener('visibilitychange', function () { if (!document.hidden) kick(); });
   }

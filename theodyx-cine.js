@@ -1,4 +1,4 @@
-/* Theodyx Cine v5.0.2 — homepage cinematic. Library-free. Modules removable via CFG.
+/* Theodyx Cine v5.0.3 — homepage cinematic. Library-free. Modules removable via CFG.
    Intro: typed line -> word constellation builds center-screen -> family spotlight ->
    gravitational collapse -> "what it means to be Human." -> video emerges. No blur anywhere. */
 (function(){
@@ -6,7 +6,11 @@ if(location.pathname!=='/'&&location.pathname!=='')return;
 if(window.__thxCineInit)return;window.__thxCineInit=1;
 
 var CFG={
-  eagerImages:true,
+  /* 5.0.3 (Phase 10 SPEED-03): OFF. Promoting every document.images to loading="eager" pushed
+     ~1.05 MB of below-the-fold JPEG ahead of the hero poster and cost 2.73 s of mobile LCP.
+     No cine band decodes an image early — reveals and parallax only move/fade them — so nothing
+     here depends on it. If it is ever turned back on, only first-viewport images are promoted. */
+  eagerImages:false,
   heroIntro:false,    // page loads straight into the video (constellation kept behind this flag)
   autoSound:true,
   scrollZoom:false,   // no intro -> hero stays in its native designed state
@@ -25,7 +29,8 @@ var EMPH=['stories.','creators.','love.','dreams.','culture.','legacy.','hope.',
 var FAMILY=['mom.','son.','aunt.','friend.'];
 
 function init(){
-  if(CFG.eagerImages){try{[].slice.call(document.images).forEach(function(im){if(im.loading==='lazy')im.loading='eager';});}catch(e){}}
+  if(CFG.eagerImages){try{var vh=window.innerHeight||0;[].slice.call(document.images).forEach(function(im){
+    if(im.loading!=='lazy')return;var r=im.getBoundingClientRect();if(r.bottom>0&&r.top<vh)im.loading='eager';});}catch(e){}}
 
   var video=document.querySelector('.hero-media video, video.hero-video');
   if(video){try{video.muted=true;video.play().catch(function(){});}catch(e){}}
