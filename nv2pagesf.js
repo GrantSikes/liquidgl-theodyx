@@ -1,4 +1,4 @@
-/*! nv2pagesf 1.70.0 (2026-09-04, Phase 7): 404 page uses -p-800 thumbnails, lazy data-bg, role=img + alt, h1 + main landmark, direct article paths */
+/*! nv2pagesf 1.71.0 (2026-09-04, Phase 7): 404 page uses -p-800 thumbnails, lazy data-bg, role=img + alt, h1 + main landmark, direct article paths */
 /*! theodyx-i18n 1.0.0 (2026-09-04, Phase 6) — locale runtime for script-injected UI. Source of truth is <html lang>, which the server sets per locale (Webflow Localization); matched by language prefix (en-US → en, pt-BR → pt); every key falls back to English. Never consults the browser's language list, never rewrites page text: the anchor navigates, the server decides. Consumers register their own strings with add(). */
 (function(){
   if(window.__thxI18n && window.__thxI18n.t) return;
@@ -95,3 +95,18 @@ if(document.body)imo();if(document.readyState!=='loading')imo();else document.ad
 })();
 ;(function(){try{var d=document.querySelectorAll('.thx-prism');for(var i=0;i<d.length;i++)d[i].remove();}catch(e){}})();
 
+/* 1.71.0 (Phase 8): Webflow's renderer drops the boolean `muted` and `loop` attributes from DOM <video> elements (the API stores
+   them, the published HTML lacks them), so an autoplay video without `muted` is blocked by every browser's autoplay policy.
+   Restore both, then play. Applies to any autoplay video on the site; videos that already carry muted/loop are left alone. */
+;(function () {
+  function fix() {
+    try {
+      document.querySelectorAll('video[autoplay]').forEach(function (v) {
+        if (!v.hasAttribute('muted')) { v.muted = true; v.defaultMuted = true; v.setAttribute('muted', ''); }
+        if (!v.hasAttribute('loop')) { v.loop = true; v.setAttribute('loop', ''); }
+        if (v.paused) { var p = v.play(); if (p && p.catch) p.catch(function () {}); }
+      });
+    } catch (e) {}
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fix); else fix();
+})();
