@@ -1,4 +1,4 @@
-/*! nv2pagesf 1.71.0 (2026-09-04, Phase 7): 404 page uses -p-800 thumbnails, lazy data-bg, role=img + alt, h1 + main landmark, direct article paths */
+/*! nv2pagesf 1.72.0 (2026-09-04, Phase 7): 404 page uses -p-800 thumbnails, lazy data-bg, role=img + alt, h1 + main landmark, direct article paths */
 /*! theodyx-i18n 1.0.0 (2026-09-04, Phase 6) — locale runtime for script-injected UI. Source of truth is <html lang>, which the server sets per locale (Webflow Localization); matched by language prefix (en-US → en, pt-BR → pt); every key falls back to English. Never consults the browser's language list, never rewrites page text: the anchor navigates, the server decides. Consumers register their own strings with add(). */
 (function(){
   if(window.__thxI18n && window.__thxI18n.t) return;
@@ -109,4 +109,26 @@ if(document.body)imo();if(document.readyState!=='loading')imo();else document.ad
     } catch (e) {}
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fix); else fix();
+})();
+
+/* 1.72.0 (Phase 8): lazy inline videos. A <video data-thx-lazy> ships with preload="none" and no autoplay, so it costs nothing
+   until it is near the viewport; then it is fetched and played (muted, looping), and paused again when it leaves. Honours
+   prefers-reduced-motion: the poster stays. */
+;(function () {
+  function boot() {
+    try {
+      var vids = document.querySelectorAll('video[data-thx-lazy]'); if (!vids.length) return;
+      var still = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (still || !('IntersectionObserver' in window)) return;
+      var io = new IntersectionObserver(function (es) {
+        es.forEach(function (en) {
+          var v = en.target;
+          if (en.isIntersecting) { v.muted = true; v.loop = true; v.setAttribute('muted', ''); v.setAttribute('loop', ''); if (v.preload === 'none') v.preload = 'auto'; var p = v.play(); if (p && p.catch) p.catch(function () {}); }
+          else if (!v.paused) v.pause();
+        });
+      }, { rootMargin: '200px 0px' });
+      vids.forEach(function (v) { io.observe(v); });
+    } catch (e) {}
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
 })();
