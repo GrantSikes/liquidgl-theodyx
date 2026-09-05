@@ -1,4 +1,4 @@
-/*! theodyx-nav.js v4.7.2 (2026-09-05) — behaviours for the clear liquid-glass nav (#thx-nav).
+/*! theodyx-nav.js v4.8.0 (2026-09-05) — behaviours for the clear liquid-glass nav (#thx-nav).
  * One unanimous ink (every word, the logo and the burger flip together between pure white and pure black, chosen
  * from what is behind all of them) plus, since 4.7.0, a per-word plate: any word the elected ink still fails gets
  * its own soft plate sized from its worst sampled backdrop (or, when that plate would flatten the glass, its own ink), whole-surface lens (continuous refraction profile from the pill geometry, per-
@@ -88,7 +88,8 @@
   if (document.querySelector('.thx-read-body') || doc.hasAttribute('data-thx-progress')) API.progress(true);
   function onScroll() {
     ticking = false;
-    var y = window.scrollY || doc.scrollTop || 0;
+    var y = window.scrollY || doc.scrollTop || 0, tn = now();
+    if (lastScrollT) { var dt = tn - lastScrollT; if (dt > 0) scrollV = Math.abs(y - lastScrollY) / dt; } lastScrollY = y; lastScrollT = tn;
     var s = y > 80;
     if (s !== scrolled) { scrolled = s; nav.classList.toggle('is-scrolled', s); }
     progTick(y);
@@ -97,11 +98,16 @@
   /* 4.6.0 (Phase 8): the ink sampler ran on every scroll frame (18-54 elementsFromPoint hit-tests + 72-281 getComputedStyle
    * reads per frame). It now runs at most every REINK_MS while scrolling, plus one trailing run after the last scroll event,
    * so the settled ink is still exact; the hysteresis + 300 ms dwell inside reinkInner already smooth the transitions. */
-  var REINK_MS = 100, reinkT = 0, lastReink = 0;
+  var REINK_MS = 100, reinkT = 0, lastReink = 0, lastReinkY = -1e9, lastScrollY = 0, lastScrollT = 0, scrollV = 0;
+  /* 4.8.0 (Phase 11 SIG-02): the solver never runs inside a scroll frame. It is queued into idle time (rAF fallback), skipped when
+   * the page moved under 24 px and no media is in the band, and its cadence backs off to 160 ms while the finger is flying. */
+  function idleReink() { if (window.requestIdleCallback) requestIdleCallback(function () { reink(); }, { timeout: 200 }); else raf(function () { reink(); }); }
   function reinkSoon() {
-    var t = now();
-    if (t - lastReink >= REINK_MS) { lastReink = t; reink(); }
-    clearTimeout(reinkT); reinkT = setTimeout(function () { lastReink = now(); reink(); }, REINK_MS + 40);
+    var t = now(), y = window.scrollY || doc.scrollTop || 0;
+    if (Math.abs(y - lastReinkY) < 24 && !anyMedia && lastReinkY !== -1e9) return;
+    var gap = scrollV > 1.5 ? 160 : REINK_MS;
+    if (t - lastReink >= gap) { lastReink = t; lastReinkY = y; idleReink(); }
+    clearTimeout(reinkT); reinkT = setTimeout(function () { lastReink = now(); lastReinkY = window.scrollY || doc.scrollTop || 0; idleReink(); }, gap + 40);
   }
   var fallbackT = 0;
   function sched() { if (!ticking) { ticking = true; raf(onScroll); clearTimeout(fallbackT); fallbackT = setTimeout(function () { if (ticking) onScroll(); }, 140); } }
@@ -401,7 +407,8 @@
   nav.querySelectorAll('.thx-nav-menu a').forEach(function (a) { inkEls.push(a); });
   if (burger) inkEls.push(burger);
   var inkState = inkEls.map(function (el) { return { el: el, L: null, mixed: false }; });
-  var ink = 'light', inkT = 0, scrim = '', tone = 'dark', anyMedia = false, lastTickMs = 0, inkTimer = 0, inkInterval = 320, tickId = 0;
+  var ink = 'light', inkT = 0, scrim = '', scrimT = 0, scrimOff = 0, tone = 'dark', anyMedia = false, lastTickMs = 0, inkTimer = 0, inkInterval = 320, tickId = 0;
+  var menuEl = nav.querySelector('.thx-nav-menu');
   var cal = function (L) { return Math.min(1, L * 1.3 + 0.01); }; /* calibrated against rendered pixels through the glass: sampler underreads ~12% and the glass lifts the backdrop ~15% */
   function contrast(L, which) { return which === 'light' ? 1.05 / (L + 0.05) : (L + 0.05) / 0.05; }
   nav.setAttribute('data-ink', ink);
@@ -416,7 +423,7 @@
     tickId++;
     /* 1. sample every inked element (9-point grid each), 2. decide ONE ink for all of them: the ink whose worst word
      * still reads best (maximin contrast), mean luminance breaking ties, with hysteresis + dwell so it never flickers. */
-    var forced = null, worstD = Infinity, worstL = Infinity, sumL = 0, n = 0, prefD = 0, prefL = 0, anyMixed = false, wsum = 0, wL = 0;
+    var forced = null, worstD = Infinity, worstL = Infinity, sumL = 0, n = 0, prefD = 0, prefL = 0, anyMixed = false, wsum = 0, wL = 0, failD = 0, failL = 0;
     for (var i = 0; i < inkState.length; i++) {
       var s = inkState[i], el = s.el;
       if (!el.offsetParent) continue;
@@ -439,6 +446,7 @@
       var Le = cal(L), cd = contrast(Le, 'dark'), cl = contrast(Le, 'light');
       if (cd < worstD) worstD = cd; if (cl < worstL) worstL = cl;
       if (cd > cl) prefD++; else prefL++;
+      var tgtI = (el === logo || el === burger) ? 3 : 4.5; if (cd < tgtI) failD++; if (cl < tgtI) failL++;
       var w = r.width * r.height; wsum += w; wL += w * Le;
       sumL += L; n++;
     }
@@ -449,6 +457,9 @@
       mixed = (prefD > 0 && prefL > 0) || anyMixed;
       if (Math.abs(worstD - worstL) < 0.35) want = contrast(meanLe, 'dark') >= contrast(meanLe, 'light') ? 'dark' : 'light'; /* tie: the bar as a whole decides */
       else want = worstD > worstL ? 'dark' : 'light';
+      /* 4.8.0 (Phase 11 SIG-01): when a majority of the words fail AA in the elected ink and fewer would fail in the other, flip the
+       * whole bar instead of plating - white words over a dark band are the answer, not five lozenges. */
+      if (failD !== undefined) { var fw = want === 'dark' ? failD : failL, fo = want === 'dark' ? failL : failD; if (n >= 3 && fw * 2 >= n && fo < fw) want = want === 'dark' ? 'light' : 'dark'; }
       if (want !== ink) {
         var better = want === 'dark' ? worstD / Math.max(0.01, worstL) : worstL / Math.max(0.01, worstD);
         if (better < 1.15 || t0 - inkT < 300) want = ink;          /* hysteresis + dwell */
@@ -460,7 +471,10 @@
     /* legibility scrim: only when the words disagree about the backdrop AND the chosen ink still fails somewhere (Apple's glass darkens/lightens the same way) */
     var worst = ink === 'dark' ? worstD : worstL;
     var sc = (!forced && mixed && n && worst < 3) ? (ink === 'light' ? 'dark' : 'light') : '';
-    if (sc !== scrim) { scrim = sc; if (sc) nav.setAttribute('data-scrim', sc); else nav.removeAttribute('data-scrim'); }
+    /* 4.8.0 (Phase 11 SIG-03): the scrim fails toward legibility - it comes on at once, and only goes off after 600 ms and two agreeing ticks */
+    if (sc && sc !== scrim) { scrim = sc; scrimT = t0; scrimOff = 0; nav.setAttribute('data-scrim', sc); }
+    else if (!sc && scrim) { scrimOff++; if (scrimOff >= 2 && t0 - scrimT >= 600) { scrim = ''; scrimT = t0; scrimOff = 0; nav.removeAttribute('data-scrim'); } }
+    else scrimOff = 0;
     if (n) {
       var avg = sumL / n, t = tone;
       if (tone === 'dark' && avg > 0.56) t = 'light';
@@ -479,7 +493,7 @@
    * black under light ink - with the alpha solved from the luminance it needs, quantised to 0.05 and capped. When the
    * cap would not be enough and the other ink needs a lighter plate, that word flips ink on its own instead. Plates come
    * in at once and fade out lazily (dwell), so a moving hero frame cannot make them flicker. */
-  var PLATE_CAP = 0.72, PLATE_STEP = 0.05, PLATE_DWELL = 350, PLATE_HEADROOM = 0.05, GLASS_TINT = 0.035;
+  var PLATE_CAP = 0.72, PLATE_DWELL = 350, PLATE_HEADROOM = 0.05, GLASS_TINT = 0.035;
   function plateNeed(Lw, which, target) {
     /* alpha compositing happens on sRGB-encoded values while WCAG luminance is linear, so solve in gamma space:
      * a white plate at 0.2 over black paints rgb(51,51,51), which is L 0.033 (2.3:1), not L 0.2. The clear glass
@@ -492,31 +506,28 @@
     return a > 0 ? a + PLATE_HEADROOM : 0;
   }
   function platePass(t0, forced) {
-    var other = ink === 'dark' ? 'light' : 'dark';
+    /* 4.8.0 (Phase 11 SIG-01/SIG-03): the menu gets ONE plate, sized from its worst word and quantised to 0 / .34 / .52, so the pill
+     * stays one piece of glass instead of a row of lozenges; the mark and the burger keep a plate of their own (they stand alone). */
+    var needMenu = 0;
     for (var i = 0; i < inkState.length; i++) {
-      var s = inkState[i], el = s.el;
-      if (forced || s.tick !== tickId || s.L === null || s.L === undefined) { setPlate(s, ink, 0, t0); continue; }
-      var target = (el === logo || el === burger) ? 3.4 : 4.9;
-      var aG = plateNeed(ink === 'dark' ? s.Lmin : s.Lmax, ink, target);
-      var aO = plateNeed(other === 'dark' ? s.Lmin : s.Lmax, other, target);
-      var useInk = ink, a = aG;
-      if ((aG > PLATE_CAP || (s.wordInk === other && aG > PLATE_CAP - 0.15)) && aO < aG) { useInk = other; a = aO; }
-      setPlate(s, useInk, Math.min(PLATE_CAP, a), t0);
+      var s = inkState[i], el = s.el, standalone = (el === logo || el === burger);
+      if (forced || s.tick !== tickId || s.L === null || s.L === undefined) { if (standalone) setPlate(s, el, 0, t0); continue; }
+      var target = standalone ? 3.4 : 4.9;
+      var a = plateNeed(ink === 'dark' ? s.Lmin : s.Lmax, ink, target);
+      if (standalone) setPlate(s, el, a, t0); else if (a > needMenu) needMenu = a;
     }
+    if (menuEl) setPlate(menuState, menuEl, forced ? 0 : needMenu, t0);
   }
-  function setPlate(s, wInk, a, t0) {
-    var el = s.el, cur = s.plate || 0;
-    a = a > 0 ? Math.min(PLATE_CAP, Math.ceil(a / PLATE_STEP - 1e-6) * PLATE_STEP) : 0;
-    if (a < cur && t0 - (s.plateT || 0) < PLATE_DWELL) a = cur;
+  var menuState = { plate: 0, plateT: 0 };
+  function quant(a) { return a <= 0.06 ? 0 : a <= 0.40 ? 0.34 : 0.52; }
+  function setPlate(s, el, a, t0) {
+    var cur = s.plate || 0;
+    a = quant(a);
+    if (a < cur && t0 - (s.plateT || 0) < PLATE_DWELL) a = cur;   /* plates come in at once and fade out lazily */
+    if (a === cur && (a === 0) === !el.hasAttribute('data-plate')) { if (a > 0 && el.getAttribute('data-plate') !== (ink === 'dark' ? 'light' : 'dark')) el.setAttribute('data-plate', ink === 'dark' ? 'light' : 'dark'); return; }
     if (a !== cur) { s.plate = a; s.plateT = t0; }
-    var plateColor = wInk === 'dark' ? 'light' : 'dark';
-    if (a > 0) {
-      if (el.getAttribute('data-plate') !== plateColor) el.setAttribute('data-plate', plateColor);
-      if (a !== cur || s.plateInk !== wInk) el.style.setProperty('--thx-plate', a.toFixed(2));
-    } else if (el.hasAttribute('data-plate')) { el.removeAttribute('data-plate'); el.style.removeProperty('--thx-plate'); }
-    if (wInk !== ink) { if (el.getAttribute('data-ink') !== wInk) el.setAttribute('data-ink', wInk); }
-    else if (el.hasAttribute('data-ink')) el.removeAttribute('data-ink');
-    s.wordInk = wInk; s.plateInk = wInk;
+    if (a > 0) { el.setAttribute('data-plate', ink === 'dark' ? 'light' : 'dark'); el.style.setProperty('--thx-plate', a.toFixed(2)); }
+    else { el.removeAttribute('data-plate'); el.style.removeProperty('--thx-plate'); }
   }
   function schedMedia() {
     clearTimeout(inkTimer);
@@ -526,7 +537,7 @@
   }
   document.addEventListener('visibilitychange', function () { if (!document.hidden) reink(); });
   API.reink = reink; API.retone = reink;
-  API.inks = function () { return inkState.map(function (s) { return { text: (s.el.textContent || s.el.getAttribute('aria-label') || '').trim().slice(0, 24), ink: s.wordInk || ink, L: s.L, Lmin: s.Lmin, Lmax: s.Lmax, mixed: s.mixed, plate: s.plate || 0 }; }); };
+  API.inks = function () { return inkState.map(function (s) { return { text: (s.el.textContent || s.el.getAttribute('aria-label') || '').trim().slice(0, 24), ink: ink, L: s.L, Lmin: s.Lmin, Lmax: s.Lmax, mixed: s.mixed, plate: (s.el === logo || s.el === burger) ? (s.plate || 0) : menuState.plate }; }); };
   API.ink = function () { return { ink: ink, scrim: scrim, tone: tone }; };
   API.tickMs = function () { return lastTickMs; };
   API.debugPoint = function (x, y, w) { tickCache = new Map(); var pe = nav.style.pointerEvents; nav.style.pointerEvents = 'none'; var r = { left: x - (w || 60) / 2, top: y - 8, width: w || 60, height: 16, right: x + (w || 60) / 2, bottom: y + 8 }; var st; try { st = pointStats(x, y, r); } finally { nav.style.pointerEvents = pe; } tickCache = null; return st; };
@@ -752,6 +763,7 @@
     lastFocus = document.activeElement;
     var inner = panel.firstElementChild;
     nav.style.setProperty('--thx-panel-h', (inner ? inner.offsetHeight : panel.scrollHeight) + 'px');
+    clearTimeout(closingT); nav.removeAttribute('data-closing');
     nav.setAttribute('data-open', 'true');
     burger.setAttribute('aria-expanded', 'true'); burger.setAttribute('aria-label', T('nav.close'));
     panel.removeAttribute('inert'); panel.setAttribute('aria-hidden', 'false');
@@ -761,9 +773,12 @@
     setTimeout(function () { if (f) f.focus({ preventScroll: true }); }, 60);
     track('nav_menu_open');
   }
+  var closingT = 0;
   function close(restore) {
     if (nav.getAttribute('data-open') !== 'true') return;
     nav.setAttribute('data-open', 'false');
+    /* 4.8.0 (Phase 11 SIG-05): the grid row snaps; the panel content slides up on transform, so the box stays open for that long */
+    nav.setAttribute('data-closing', 'true'); clearTimeout(closingT); closingT = setTimeout(function () { nav.removeAttribute('data-closing'); }, 440);
     burger.setAttribute('aria-expanded', 'false'); burger.setAttribute('aria-label', T('nav.open'));
     panel.setAttribute('inert', ''); panel.setAttribute('aria-hidden', 'true');
     setInert(false); unlock();

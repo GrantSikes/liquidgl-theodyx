@@ -11,20 +11,20 @@
 html{scroll-padding-top:calc(var(--thx-nav-h) + var(--thx-nav-top) + 16px)}
 .thx-skip{position:fixed;inset-block-start:var(--thx-nav-top);inset-inline-start:max(1rem,env(safe-area-inset-left,0px));z-index:1001;min-height:44px;display:inline-flex;align-items:center;padding:.6rem .9rem;border-radius:999px;background:#0c0a10;color:#fff;font:600 var(--step--1,14px)/1 var(--thx-nav-font);text-decoration:none;transform:translateY(-200%);transition:transform 200ms var(--thx-nav-ease)}
 .thx-skip:focus-visible{transform:none;outline:2px solid #fff;outline-offset:2px}
-.thx-nav{position:fixed;inset-block-start:var(--thx-nav-top);inset-inline:env(safe-area-inset-left,0px) env(safe-area-inset-right,0px);margin-inline:auto;width:var(--thx-nav-w);z-index:900;isolation:isolate;border-radius:var(--thx-nav-r);color:var(--thx-ink-light);font-family:var(--thx-nav-font);display:grid;grid-template-rows:auto 0px;transform-origin:50% 0;-webkit-tap-highlight-color:transparent;transition:border-radius 420ms var(--thx-nav-ease),grid-template-rows 420ms var(--thx-nav-ease)}
+.thx-nav{position:fixed;inset-block-start:var(--thx-nav-top);inset-inline:env(safe-area-inset-left,0px) env(safe-area-inset-right,0px);margin-inline:auto;width:var(--thx-nav-w);z-index:900;isolation:isolate;border-radius:var(--thx-nav-r);color:var(--thx-ink-light);font-family:var(--thx-nav-font);display:grid;grid-template-rows:auto 0px;transform-origin:50% 0;-webkit-tap-highlight-color:transparent} /* 4.8.0 (Phase 11 SIG-05/EASE-01): the grid row and the radius snap; the sheet content moves on transform */
 .thx-nav,.thx-nav *{box-sizing:border-box}
 .thx-nav{--thx-ink-light:#fff;--thx-ink-dark:#000} /* pure black or pure white, never a tint — scoped so no page-level variable can shift it */
 /* --- glass body: clear, colour-enhanced, lensed at the rim --- */
 .thx-nav-glass{position:absolute;inset:0;border-radius:inherit;background:rgba(255,255,255,.035);
 box-shadow:inset 0 1px 0 0 rgba(255,255,255,.62),inset 0 -1px 0 0 rgba(255,255,255,.16),inset 0 0 0 1px rgba(255,255,255,.22),inset 0 0 0 1.5px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.10),0 14px 44px rgba(0,0,0,.16);
 -webkit-backdrop-filter:blur(var(--thx-nav-blur)) saturate(var(--thx-nav-sat)) contrast(1.03) brightness(1.02);backdrop-filter:blur(var(--thx-nav-blur)) saturate(var(--thx-nav-sat)) contrast(1.03) brightness(1.02);
-pointer-events:none;z-index:0;overflow:hidden;transition:background-color 360ms var(--thx-nav-ease),box-shadow 320ms var(--thx-nav-ease)}
+pointer-events:none;z-index:0;overflow:hidden;transition:background-color 360ms var(--thx-nav-ease)} /* 4.8.0 (Phase 11 EASE-07): the shadow snaps - a shadow transition over a backdrop-filter repaints the blur */
 /* legibility scrim: only while the words disagree about the backdrop (mixed) and the chosen ink still fails somewhere */
 .thx-nav[data-scrim="dark"] .thx-nav-glass{background:var(--thx-scrim-dark)}
 .thx-nav[data-scrim="light"] .thx-nav-glass{background:var(--thx-scrim-light)}
 /* colour bleed: the glass picks up the colours around it — blurred, saturated, masked to the outer body so the centre stays clear */
 .thx-nav-tint{position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:0;opacity:var(--thx-nav-bleed);-webkit-backdrop-filter:blur(var(--thx-nav-bleed-blur)) saturate(2.2) brightness(1.04);backdrop-filter:blur(var(--thx-nav-bleed-blur)) saturate(2.2) brightness(1.04);-webkit-mask:radial-gradient(70% 140% at 50% 50%,transparent 26%,#000 88%);mask:radial-gradient(70% 140% at 50% 50%,transparent 26%,#000 88%);transition:opacity 320ms var(--thx-nav-ease)}
-.thx-nav.is-lite .thx-nav-tint,.thx-nav[data-open="true"] .thx-nav-tint{display:none}
+.thx-nav.is-lite .thx-nav-tint,.thx-nav[data-open="true"] .thx-nav-tint,.thx-nav:not(.is-refract):not(.is-gl) .thx-nav-tint{display:none} /* 4.8.0 (Phase 11 SIG-07): the tint is a second 30px blur; without the lens it made the fallback the slow path */
 .thx-nav.is-refract .thx-nav-glass{backdrop-filter:url(#thx-lens) contrast(1.03) brightness(1.02);inset:calc(-1 * var(--thx-lens-pad-t,11px)) calc(-1 * var(--thx-lens-pad,46px)) calc(-1 * var(--thx-lens-pad,46px)) calc(-1 * var(--thx-lens-pad,46px));border-radius:0;clip-path:inset(var(--thx-lens-pad-t,11px) var(--thx-lens-pad,46px) var(--thx-lens-pad,46px) var(--thx-lens-pad,46px) round var(--thx-nav-r));box-shadow:none} /* enlarged capture (the lens samples outside the pill), clipped back to the pill; the top pad stays inside the viewport */
 .thx-nav.is-refract.is-lite .thx-nav-glass{backdrop-filter:url(#thx-lens-lite) contrast(1.03) brightness(1.02)}
 .thx-nav.is-refract .thx-nav-glass::before{inset:var(--thx-lens-pad-t,11px) var(--thx-lens-pad,46px) var(--thx-lens-pad,46px) var(--thx-lens-pad,46px);border-radius:var(--thx-nav-r)}
@@ -54,15 +54,15 @@ pointer-events:none;z-index:0;overflow:hidden;transition:background-color 360ms 
 .thx-nav-menu a:hover{background:color-mix(in srgb,currentColor 8%,transparent)} /* no persistent selected-page fill: it sat on top of the lens and read as a stuck button */
 .thx-nav-menu a:active{transform:scale(.985)}
 /* --- ink: the words, the logo and the burger flip TOGETHER; default light --- */
-.thx-nav-menu a,.thx-nav-logo,.thx-nav-burger{color:var(--thx-ink-light);text-shadow:none;transition:color 260ms var(--thx-nav-ease)}
+.thx-nav-menu a,.thx-nav-logo,.thx-nav-burger{color:var(--thx-ink-light);text-shadow:none} /* 4.8.0 (Phase 11 EASE-02): no transition shorthand here — it reset the logo/menu longhands above (hover scale + fill snapped) */
 .thx-nav[data-ink="dark"] .thx-nav-menu a,.thx-nav[data-ink="dark"] .thx-nav-logo,.thx-nav[data-ink="dark"] .thx-nav-burger{color:var(--thx-ink-dark)}
 .thx-nav[data-ink="light"] .thx-nav-menu a,.thx-nav[data-ink="light"] .thx-nav-logo,.thx-nav[data-ink="light"] .thx-nav-burger{color:var(--thx-ink-light)}
-.thx-nav .thx-nav-menu a[data-ink="dark"],.thx-nav .thx-nav-logo[data-ink="dark"],.thx-nav .thx-nav-burger[data-ink="dark"]{color:var(--thx-ink-dark)}
-.thx-nav .thx-nav-menu a[data-ink="light"],.thx-nav .thx-nav-logo[data-ink="light"],.thx-nav .thx-nav-burger[data-ink="light"]{color:var(--thx-ink-light)}
-.thx-nav .thx-nav-menu a[data-plate="light"],.thx-nav .thx-nav-logo[data-plate="light"],.thx-nav .thx-nav-burger[data-plate="light"]{background-color:rgba(255,255,255,var(--thx-plate,.5))} /* 4.7.0 per-word plate: white under dark ink, black under light ink; alpha solved per word by the script */
-.thx-nav .thx-nav-menu a[data-plate="dark"],.thx-nav .thx-nav-logo[data-plate="dark"],.thx-nav .thx-nav-burger[data-plate="dark"]{background-color:rgba(0,0,0,var(--thx-plate,.5))}
-.thx-nav[data-open="true"] .thx-nav-menu a[data-plate],.thx-nav[data-open="true"] .thx-nav-logo[data-plate],.thx-nav[data-open="true"] .thx-nav-burger[data-plate]{background-color:transparent}
-@media (prefers-reduced-transparency:reduce){.thx-nav .thx-nav-menu a[data-plate],.thx-nav .thx-nav-logo[data-plate],.thx-nav .thx-nav-burger[data-plate]{background-color:transparent!important}}
+.thx-nav-menu{position:relative;z-index:0}.thx-nav-menu::before{content:"";position:absolute;inset:0;border-radius:999px;background:#fff;opacity:var(--thx-plate,0);transition:opacity 240ms var(--thx-nav-ease);pointer-events:none;z-index:-1} /* 4.8.0 (Phase 11 SIG-01): ONE plate behind the whole menu, quantised by the script; the mark and burger keep their own */
+.thx-nav-menu[data-plate="dark"]::before{background:#000}
+.thx-nav .thx-nav-logo[data-plate="light"],.thx-nav .thx-nav-burger[data-plate="light"]{background-color:rgba(255,255,255,var(--thx-plate,.5))}
+.thx-nav .thx-nav-logo[data-plate="dark"],.thx-nav .thx-nav-burger[data-plate="dark"]{background-color:rgba(0,0,0,var(--thx-plate,.5))}
+.thx-nav[data-open="true"] .thx-nav-menu::before{opacity:0}.thx-nav[data-open="true"] .thx-nav-logo[data-plate],.thx-nav[data-open="true"] .thx-nav-burger[data-plate]{background-color:transparent}
+@media (prefers-reduced-transparency:reduce){.thx-nav-menu::before{display:none}.thx-nav .thx-nav-logo[data-plate],.thx-nav .thx-nav-burger[data-plate]{background-color:transparent!important}}
 .thx-nav a:focus-visible,.thx-nav button:focus-visible{outline:2px solid #000;outline-offset:2px;border-radius:999px;box-shadow:0 0 0 4px #fff,0 0 0 6px #000} /* Phase 9 KB-02/C-03: two-tone ring, cannot vanish against any ink or surface */
 /* --- burger --- */
 .thx-nav-burger{display:none;width:44px;height:44px;border:0;border-radius:999px;background:transparent;cursor:pointer;padding:0;align-items:center;justify-content:center;flex-direction:column;gap:5px;transition:background-color 200ms,color 240ms}
@@ -72,12 +72,14 @@ pointer-events:none;z-index:0;overflow:hidden;transition:background-color 360ms 
 .thx-nav[data-open="true"] .thx-nav-burger span:last-child{transform:translateY(-3.5px) rotate(-45deg)}
 /* --- expanded mobile sheet: frosted (legibility), inked by the overall backdrop tone --- */
 .thx-nav-panel{position:relative;z-index:2;min-height:0;overflow:hidden;visibility:hidden;transition:visibility 0s linear 420ms}
-.thx-nav-panel-in{padding:6px 14px 18px}
+.thx-nav-panel-in{padding:6px 14px 18px;transform:translateY(-100%);transition:transform 420ms var(--thx-nav-ease)}
 .thx-nav-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
 .thx-nav-list a{display:flex;align-items:center;min-height:48px;padding:0 14px;color:#fff;text-decoration:none;font-size:17px;font-weight:500;border-radius:14px;opacity:0;transform:translateY(8px);transition:opacity 320ms var(--thx-nav-ease),transform 420ms var(--thx-nav-ease),background-color 200ms}
 .thx-nav-list a:hover{background:rgba(255,255,255,.12)}
 .thx-nav-cta{display:flex;align-items:center;justify-content:center;min-height:48px;margin-top:10px;padding:0 18px;border-radius:14px;background:#faf8f2;color:#0c0a10;text-decoration:none;font-size:var(--step-0,16px);font-weight:600;opacity:0;transform:translateY(8px);transition:opacity 320ms var(--thx-nav-ease),transform 420ms var(--thx-nav-ease)}
-.thx-nav[data-open="true"]{grid-template-rows:auto var(--thx-panel-h,auto);border-radius:28px}
+.thx-nav[data-open="true"],.thx-nav[data-closing="true"]{grid-template-rows:auto var(--thx-panel-h,auto);border-radius:28px}
+.thx-nav[data-open="true"] .thx-nav-panel-in{transform:none}
+.thx-nav[data-closing="true"] .thx-nav-panel{visibility:visible}
 .thx-nav[data-open="true"] .thx-nav-panel{visibility:visible;transition-delay:0s}
 .thx-nav[data-open="true"] .thx-nav-list a,.thx-nav[data-open="true"] .thx-nav-cta{opacity:1;transform:none}
 .thx-nav[data-open="true"] .thx-nav-list li:nth-child(2) a{transition-delay:40ms}.thx-nav[data-open="true"] .thx-nav-list li:nth-child(3) a{transition-delay:80ms}.thx-nav[data-open="true"] .thx-nav-list li:nth-child(4) a{transition-delay:120ms}.thx-nav[data-open="true"] .thx-nav-list li:nth-child(5) a{transition-delay:160ms}.thx-nav[data-open="true"] .thx-nav-cta{transition-delay:200ms}
