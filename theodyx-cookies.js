@@ -1,5 +1,5 @@
-/* theodyx-cookies 1.5.0 (Phase 8): strings via the locale runtime (window.__thxI18n, keyed by <html lang>, English fallback); logical CSS properties. */
-var __CK={"en": {"ck.settings": "Cookie Settings", "ck.intro": "Cookies and similar identifiers keep small pieces of information on your device. We keep this to a minimum: no advertising cookies, no cross-site tracking, and analytics that are cookieless by design. Decide below what we may use — your choice is saved on this device and you can change it anytime. <a href=\"/policies/cookie-policy\">Learn more</a>.", "ck.always": "Always on", "ck.necessary": "Necessary", "ck.necessary.d": "Security, bot protection, and the core features of the Site — the basics that keep pages, forms, and applications working. The Site can’t run without these.", "ck.analytics": "Analytics", "ck.analytics.d": "First-party, cookieless measurement of how the Site performs — page views and scroll depth. Never a raw IP address, never cross-site tracking.", "ck.marketing": "Marketing", "ck.marketing.d": "Would allow personalization and measurement of our marketing on other platforms. We don’t use these today — the switch is here so the choice is always yours.", "ck.save": "Save preferences", "ck.acceptall": "Accept all", "ck.gpc": "We honor Global Privacy Control. When your browser sends a GPC signal, analytics and marketing default to off.", "ck.gpc.active": " — a GPC signal is active in this browser.", "ck.banner.h": "Your privacy, handled properly", "ck.banner.p": "We run a privacy-first, largely cookieless site. Choose what we may measure — you can change this anytime.", "ck.necessaryonly": "Necessary only", "ck.prefs": "Preferences", "ck.footer": "Cookie Preferences"}, "es": {"ck.settings": "Configuración de cookies", "ck.intro": "Las cookies e identificadores similares guardan pequeños fragmentos de información en tu dispositivo. Los reducimos al mínimo: sin cookies publicitarias, sin rastreo entre sitios y con analítica sin cookies por diseño. Decide abajo qué podemos usar; tu elección se guarda en este dispositivo y puedes cambiarla cuando quieras. <a href=\"/policies/cookie-policy\">Más información</a>.", "ck.always": "Siempre activas", "ck.necessary": "Necesarias", "ck.necessary.d": "Seguridad, protección contra bots y las funciones básicas del sitio: lo esencial para que las páginas, los formularios y las solicitudes funcionen. El sitio no puede funcionar sin ellas.", "ck.analytics": "Analítica", "ck.analytics.d": "Medición propia y sin cookies del rendimiento del sitio: páginas vistas y profundidad de desplazamiento. Nunca una dirección IP en bruto, nunca rastreo entre sitios.", "ck.marketing": "Marketing", "ck.marketing.d": "Permitiría personalizar y medir nuestro marketing en otras plataformas. Hoy no las usamos; el interruptor está aquí para que la decisión sea siempre tuya.", "ck.save": "Guardar preferencias", "ck.acceptall": "Aceptar todas", "ck.gpc": "Respetamos Global Privacy Control. Cuando tu navegador envía una señal GPC, la analítica y el marketing quedan desactivados por defecto.", "ck.gpc.active": " Hay una señal GPC activa en este navegador.", "ck.banner.h": "Tu privacidad, bien gestionada", "ck.banner.p": "Somos un sitio que prioriza la privacidad y apenas usa cookies. Elige qué podemos medir; puedes cambiarlo cuando quieras.", "ck.necessaryonly": "Solo las necesarias", "ck.prefs": "Preferencias", "ck.footer": "Preferencias de cookies"}, "pt": {"ck.settings": "Configurações de cookies", "ck.intro": "Cookies e identificadores semelhantes guardam pequenos fragmentos de informação no seu dispositivo. Mantemos isso no mínimo: sem cookies de publicidade, sem rastreamento entre sites e com análise sem cookies por padrão. Decida abaixo o que podemos usar; sua escolha fica salva neste dispositivo e pode ser alterada a qualquer momento. <a href=\"/policies/cookie-policy\">Saiba mais</a>.", "ck.always": "Sempre ativos", "ck.necessary": "Necessários", "ck.necessary.d": "Segurança, proteção contra bots e as funções essenciais do site: o básico para que páginas, formulários e candidaturas funcionem. O site não funciona sem eles.", "ck.analytics": "Análise", "ck.analytics.d": "Medição própria e sem cookies do desempenho do site: visualizações de página e profundidade de rolagem. Nunca um endereço IP bruto, nunca rastreamento entre sites.", "ck.marketing": "Marketing", "ck.marketing.d": "Permitiria personalizar e medir nosso marketing em outras plataformas. Não os usamos hoje; o botão está aqui para que a escolha seja sempre sua.", "ck.save": "Salvar preferências", "ck.acceptall": "Aceitar todos", "ck.gpc": "Respeitamos o Global Privacy Control. Quando seu navegador envia um sinal GPC, análise e marketing ficam desativados por padrão.", "ck.gpc.active": " Há um sinal GPC ativo neste navegador.", "ck.banner.h": "Sua privacidade, tratada como deve ser", "ck.banner.p": "Somos um site que prioriza a privacidade e quase não usa cookies. Escolha o que podemos medir; você pode mudar isso a qualquer momento.", "ck.necessaryonly": "Apenas os necessários", "ck.prefs": "Preferências", "ck.footer": "Preferências de cookies"}, "fr": {"ck.settings": "Paramètres des cookies", "ck.intro": "Les cookies et identifiants similaires conservent de petites informations sur votre appareil. Nous les limitons au strict minimum : pas de cookies publicitaires, pas de suivi entre sites et une mesure d’audience sans cookies par conception. Choisissez ci-dessous ce que nous pouvons utiliser ; votre choix est enregistré sur cet appareil et modifiable à tout moment. <a href=\"/policies/cookie-policy\">En savoir plus</a>.", "ck.always": "Toujours actifs", "ck.necessary": "Nécessaires", "ck.necessary.d": "Sécurité, protection contre les robots et fonctions essentielles du site : l’indispensable pour que les pages, formulaires et candidatures fonctionnent. Le site ne peut pas s’en passer.", "ck.analytics": "Mesure d’audience", "ck.analytics.d": "Mesure interne et sans cookies des performances du site : pages vues et profondeur de défilement. Jamais d’adresse IP brute, jamais de suivi entre sites.", "ck.marketing": "Marketing", "ck.marketing.d": "Permettrait de personnaliser et de mesurer notre marketing sur d’autres plateformes. Nous ne les utilisons pas aujourd’hui ; l’interrupteur est là pour que le choix vous appartienne toujours.", "ck.save": "Enregistrer les préférences", "ck.acceptall": "Tout accepter", "ck.gpc": "Nous respectons le Global Privacy Control. Lorsque votre navigateur envoie un signal GPC, la mesure d’audience et le marketing sont désactivés par défaut.", "ck.gpc.active": " Un signal GPC est actif dans ce navigateur.", "ck.banner.h": "Votre vie privée, traitée comme il se doit", "ck.banner.p": "Notre site privilégie la vie privée et n’utilise presque aucun cookie. Choisissez ce que nous pouvons mesurer ; vous pourrez changer d’avis à tout moment.", "ck.necessaryonly": "Nécessaires uniquement", "ck.prefs": "Préférences", "ck.footer": "Préférences de cookies"}};var __I=window.__thxI18n;if(__I){for(var __lc in __CK)__I.add(__lc,__CK[__lc]);}function T(k,v){if(__I&&__I.t)return __I.t(k,v);var s=__CK.en[k]||k;if(v)for(var p in v)s=s.split('{'+p+'}').join(v[p]);return s;}
+/* theodyx-cookies 1.6.0 (Phase 9 a11y): banner is a named role=region inserted first in <body>, revealed on pointer/keydown/focusin, outcomes announced through a visually-hidden role=status; footer control is a real <button>; forced-colors + reduced-transparency + coarse-pointer support. Strings via the locale runtime (window.__thxI18n, keyed by <html lang>, English fallback); logical CSS properties. */
+var __CK={"en": {"ck.settings": "Cookie Settings", "ck.intro": "Cookies and similar identifiers keep small pieces of information on your device. We keep this to a minimum: no advertising cookies, no cross-site tracking, and analytics that are cookieless by design. Decide below what we may use — your choice is saved on this device and you can change it anytime. <a href=\"/policies/cookie-policy\">Learn more</a>.", "ck.always": "Always on", "ck.necessary": "Necessary", "ck.necessary.d": "Security, bot protection, and the core features of the Site — the basics that keep pages, forms, and applications working. The Site can’t run without these.", "ck.analytics": "Analytics", "ck.analytics.d": "First-party, cookieless measurement of how the Site performs — page views and scroll depth. Never a raw IP address, never cross-site tracking.", "ck.marketing": "Marketing", "ck.marketing.d": "Would allow personalization and measurement of our marketing on other platforms. We don’t use these today — the switch is here so the choice is always yours.", "ck.save": "Save preferences", "ck.acceptall": "Accept all", "ck.gpc": "We honor Global Privacy Control. When your browser sends a GPC signal, analytics and marketing default to off.", "ck.gpc.active": " — a GPC signal is active in this browser.", "ck.banner.h": "Your privacy, handled properly", "ck.banner.p": "We run a privacy-first, largely cookieless site. Choose what we may measure — you can change this anytime.", "ck.necessaryonly": "Necessary only", "ck.prefs": "Preferences", "ck.footer": "Cookie Preferences", "ck.ann.all": "All cookies accepted. Your choice is saved on this device.", "ck.ann.nec": "Necessary cookies only. Your choice is saved on this device.", "ck.ann.saved": "Cookie preferences saved."}, "es": {"ck.settings": "Configuración de cookies", "ck.intro": "Las cookies e identificadores similares guardan pequeños fragmentos de información en tu dispositivo. Los reducimos al mínimo: sin cookies publicitarias, sin rastreo entre sitios y con analítica sin cookies por diseño. Decide abajo qué podemos usar; tu elección se guarda en este dispositivo y puedes cambiarla cuando quieras. <a href=\"/policies/cookie-policy\">Más información</a>.", "ck.always": "Siempre activas", "ck.necessary": "Necesarias", "ck.necessary.d": "Seguridad, protección contra bots y las funciones básicas del sitio: lo esencial para que las páginas, los formularios y las solicitudes funcionen. El sitio no puede funcionar sin ellas.", "ck.analytics": "Analítica", "ck.analytics.d": "Medición propia y sin cookies del rendimiento del sitio: páginas vistas y profundidad de desplazamiento. Nunca una dirección IP en bruto, nunca rastreo entre sitios.", "ck.marketing": "Marketing", "ck.marketing.d": "Permitiría personalizar y medir nuestro marketing en otras plataformas. Hoy no las usamos; el interruptor está aquí para que la decisión sea siempre tuya.", "ck.save": "Guardar preferencias", "ck.acceptall": "Aceptar todas", "ck.gpc": "Respetamos Global Privacy Control. Cuando tu navegador envía una señal GPC, la analítica y el marketing quedan desactivados por defecto.", "ck.gpc.active": " Hay una señal GPC activa en este navegador.", "ck.banner.h": "Tu privacidad, bien gestionada", "ck.banner.p": "Somos un sitio que prioriza la privacidad y apenas usa cookies. Elige qué podemos medir; puedes cambiarlo cuando quieras.", "ck.necessaryonly": "Solo las necesarias", "ck.prefs": "Preferencias", "ck.footer": "Preferencias de cookies", "ck.ann.all": "Se han aceptado todas las cookies. Tu elección se ha guardado en este dispositivo.", "ck.ann.nec": "Solo cookies necesarias. Tu elección se ha guardado en este dispositivo.", "ck.ann.saved": "Preferencias de cookies guardadas."}, "pt": {"ck.settings": "Configurações de cookies", "ck.intro": "Cookies e identificadores semelhantes guardam pequenos fragmentos de informação no seu dispositivo. Mantemos isso no mínimo: sem cookies de publicidade, sem rastreamento entre sites e com análise sem cookies por padrão. Decida abaixo o que podemos usar; sua escolha fica salva neste dispositivo e pode ser alterada a qualquer momento. <a href=\"/policies/cookie-policy\">Saiba mais</a>.", "ck.always": "Sempre ativos", "ck.necessary": "Necessários", "ck.necessary.d": "Segurança, proteção contra bots e as funções essenciais do site: o básico para que páginas, formulários e candidaturas funcionem. O site não funciona sem eles.", "ck.analytics": "Análise", "ck.analytics.d": "Medição própria e sem cookies do desempenho do site: visualizações de página e profundidade de rolagem. Nunca um endereço IP bruto, nunca rastreamento entre sites.", "ck.marketing": "Marketing", "ck.marketing.d": "Permitiria personalizar e medir nosso marketing em outras plataformas. Não os usamos hoje; o botão está aqui para que a escolha seja sempre sua.", "ck.save": "Salvar preferências", "ck.acceptall": "Aceitar todos", "ck.gpc": "Respeitamos o Global Privacy Control. Quando seu navegador envia um sinal GPC, análise e marketing ficam desativados por padrão.", "ck.gpc.active": " Há um sinal GPC ativo neste navegador.", "ck.banner.h": "Sua privacidade, tratada como deve ser", "ck.banner.p": "Somos um site que prioriza a privacidade e quase não usa cookies. Escolha o que podemos medir; você pode mudar isso a qualquer momento.", "ck.necessaryonly": "Apenas os necessários", "ck.prefs": "Preferências", "ck.footer": "Preferências de cookies", "ck.ann.all": "Todos os cookies foram aceitos. Sua escolha foi salva neste dispositivo.", "ck.ann.nec": "Apenas os cookies necessários. Sua escolha foi salva neste dispositivo.", "ck.ann.saved": "Preferências de cookies salvas."}, "fr": {"ck.settings": "Paramètres des cookies", "ck.intro": "Les cookies et identifiants similaires conservent de petites informations sur votre appareil. Nous les limitons au strict minimum : pas de cookies publicitaires, pas de suivi entre sites et une mesure d’audience sans cookies par conception. Choisissez ci-dessous ce que nous pouvons utiliser ; votre choix est enregistré sur cet appareil et modifiable à tout moment. <a href=\"/policies/cookie-policy\">En savoir plus</a>.", "ck.always": "Toujours actifs", "ck.necessary": "Nécessaires", "ck.necessary.d": "Sécurité, protection contre les robots et fonctions essentielles du site : l’indispensable pour que les pages, formulaires et candidatures fonctionnent. Le site ne peut pas s’en passer.", "ck.analytics": "Mesure d’audience", "ck.analytics.d": "Mesure interne et sans cookies des performances du site : pages vues et profondeur de défilement. Jamais d’adresse IP brute, jamais de suivi entre sites.", "ck.marketing": "Marketing", "ck.marketing.d": "Permettrait de personnaliser et de mesurer notre marketing sur d’autres plateformes. Nous ne les utilisons pas aujourd’hui ; l’interrupteur est là pour que le choix vous appartienne toujours.", "ck.save": "Enregistrer les préférences", "ck.acceptall": "Tout accepter", "ck.gpc": "Nous respectons le Global Privacy Control. Lorsque votre navigateur envoie un signal GPC, la mesure d’audience et le marketing sont désactivés par défaut.", "ck.gpc.active": " Un signal GPC est actif dans ce navigateur.", "ck.banner.h": "Votre vie privée, traitée comme il se doit", "ck.banner.p": "Notre site privilégie la vie privée et n’utilise presque aucun cookie. Choisissez ce que nous pouvons mesurer ; vous pourrez changer d’avis à tout moment.", "ck.necessaryonly": "Nécessaires uniquement", "ck.prefs": "Préférences", "ck.footer": "Préférences de cookies", "ck.ann.all": "Tous les cookies ont été acceptés. Votre choix est enregistré sur cet appareil.", "ck.ann.nec": "Cookies nécessaires uniquement. Votre choix est enregistré sur cet appareil.", "ck.ann.saved": "Préférences de cookies enregistrées."}};var __I=window.__thxI18n;if(__I){for(var __lc in __CK)__I.add(__lc,__CK[__lc]);}function T(k,v){if(__I&&__I.t)return __I.t(k,v);var s=__CK.en[k]||k;if(v)for(var p in v)s=s.split('{'+p+'}').join(v[p]);return s;}
 /* Theodyx Cookie Preferences — banner + settings modal, GPC-aware. v1.3.0 (focus management: focus-in, trap, inert background, restore) */
 (function(){
 if(window.__thxCookiesInit)return;window.__thxCookiesInit=1;
@@ -15,10 +15,10 @@ else{window.__thxAnalyticsOptOut=GPC;}
 
 var CSS=''+
 '.thxck-banner{position:fixed;inset-inline-start:18px;bottom:18px;z-index:9990;max-width:380px;background:#0c0c0d;border:1px solid rgba(250,248,242,.14);border-radius:18px;padding:18px 20px;color:#faf8f2;font-size:13.5px;line-height:1.55;letter-spacing:normal;box-shadow:0 20px 60px rgba(0,0,0,.6);font-family:"Google Sans Flex","Google Sans",system-ui,sans-serif}.thxck-banner *,.thxck-modal *{font-family:inherit;letter-spacing:normal}'+
-'.thxck-banner h4{margin:0 0 6px;font-size:15px;font-weight:600;color:#faf8f2}'+
+'.thxck-banner .thxck-h{margin:0 0 6px;font-size:15px;font-weight:600;color:#faf8f2;line-height:1.35}'+
 '.thxck-banner p{margin:0 0 14px;color:rgba(250,248,242,.72)}'+
 '.thxck-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}'+
-'.thxck-btn{cursor:pointer;border-radius:999px;padding:9px 16px;font-size:13px;font-weight:600;border:1px solid rgba(250,248,242,.28);background:transparent;color:#faf8f2;font-family:inherit}'+
+'.thxck-btn{cursor:pointer;border-radius:999px;padding:9px 16px;font-size:13px;font-weight:600;border:1px solid rgba(250,248,242,.40);background:transparent;color:#faf8f2;font-family:inherit}'+
 '.thxck-btn:hover{border-color:rgba(250,248,242,.6)}'+
 '.thxck-btn.thxck-primary{background:#faf8f2;color:#0b0b0c;border-color:#faf8f2}'+
 '.thxck-link{cursor:pointer;background:none;border:0;color:rgba(250,248,242,.62);font-size:13px;text-decoration:underline;text-underline-offset:3px;padding:9px 2px;font-family:inherit}'+
@@ -32,21 +32,63 @@ var CSS=''+
 '.thxck-cat h3{margin:0 0 4px;font-size:15px;font-weight:600;color:#faf8f2}'+
 '.thxck-cat p{margin:0;font-size:13px;color:rgba(250,248,242,.65)}'+
 '.thxck-req{flex:none;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:rgba(250,248,242,.5);border:1px solid rgba(250,248,242,.2);border-radius:999px;padding:5px 10px;margin-top:2px}'+
-'.thxck-sw{flex:none;position:relative;width:46px;height:26px;border-radius:999px;background:rgba(250,248,242,.18);border:0;cursor:pointer;transition:background .2s;margin-top:2px}'+
+'.thxck-sw{flex:none;position:relative;width:46px;height:26px;border-radius:999px;background:rgba(250,248,242,.40);border:0;cursor:pointer;transition:background .2s;margin-top:2px}'+
 '.thxck-sw::after{content:"";position:absolute;top:3px;inset-inline-start:3px;width:20px;height:20px;border-radius:50%;background:#faf8f2;transition:transform .2s}'+
 '.thxck-sw[aria-checked="true"]{background:#3d8f4f}'+
 '.thxck-sw[aria-checked="true"]::after{transform:translateX(calc(20px * var(--thx-dir,1)))}'+
 '.thxck-foot{margin-top:20px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}'+
 '.thxck-gpc{margin:16px 0 0;font-size:12px;color:rgba(250,248,242,.5)}'+
-'@media(max-width:600px){.thxck-banner{inset-inline:12px;bottom:12px;max-width:none}.thxck-modal{padding:24px 20px 20px}}';
+'.thxck-sr{position:absolute!important;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0}'+
+'button:where(.thxck-footbtn){-webkit-appearance:none;appearance:none;background:none;border:0;padding:0;margin:0;font:inherit;color:inherit;letter-spacing:inherit;text-align:inherit;cursor:pointer}'+
+'@media(max-width:600px){.thxck-banner{inset-inline:12px;bottom:12px;max-width:none}.thxck-modal{padding:24px 20px 20px}}'+
+/* F-07 — forced colors: the switches must keep a visible boundary and a distinguishable state */
+'@media (forced-colors: active){'+
+'.thxck-sw{forced-color-adjust:none;border:1px solid ButtonText;background:ButtonFace}'+
+'.thxck-sw::after{background:ButtonText}'+
+'.thxck-sw[aria-checked="true"]{background:Highlight}'+
+'.thxck-sw[aria-checked="true"]::after{background:HighlightText}'+
+'}'+
+/* F-15 — reduced transparency: parity with the nav, no backdrop blur */
+'@media (prefers-reduced-transparency: reduce){'+
+'.thxck-overlay{backdrop-filter:none;-webkit-backdrop-filter:none;background:rgba(0,0,0,.86)}'+
+'}'+
+/* TZ-03 — coarse pointers get the site's own 44px target standard */
+'@media (pointer:coarse){'+
+'.thxck-btn{min-height:44px;padding-block:0;display:inline-flex;align-items:center}'+
+'.thxck-sw{width:66px;height:44px}'+
+'.thxck-sw::after{top:9px;width:26px;height:26px}'+
+'.thxck-sw[aria-checked="true"]::after{transform:translateX(calc(34px * var(--thx-dir,1)))}'+
+'}';
 
 function el(tag,cls,html){var e=document.createElement(tag);if(cls)e.className=cls;if(html!=null)e.innerHTML=html;return e;}
 var st=el('style');st.textContent=CSS;document.head.appendChild(st);
+
+/* COOKIE-BANNER — a persistent, visually-hidden live region so the outcome of every consent
+   choice is announced. It lives outside the banner so it survives the banner being removed. */
+var liveEl=null;
+function ensureLive(){
+  try{
+    if(!liveEl||!document.contains(liveEl)){
+      liveEl=el('div','thxck-sr');liveEl.setAttribute('role','status');
+      liveEl.setAttribute('aria-live','polite');liveEl.setAttribute('aria-atomic','true');
+      document.body.appendChild(liveEl);
+    }
+  }catch(e){}
+  return liveEl;
+}
+function announce(msg){
+  try{
+    ensureLive();if(!liveEl)return;
+    liveEl.textContent='';
+    setTimeout(function(){try{liveEl.textContent=msg;}catch(e){}},80);
+  }catch(e){}
+}
 
 var state={analytics: stored?!!stored.analytics:(GPC?false:true), marketing: stored?!!stored.marketing:false};
 
 function modal(){
   if(document.querySelector('.thxck-overlay'))return;
+  ensureLive();
   var ov=el('div','thxck-overlay');
   var m=el('div','thxck-modal');m.setAttribute('role','dialog');m.setAttribute('aria-modal','true');m.setAttribute('aria-label',T('ck.settings'));
   m.appendChild(el('h2',null,T('ck.settings')));
@@ -69,14 +111,24 @@ function modal(){
   var foot=el('div','thxck-foot');
   var save=el('button','thxck-btn thxck-primary',T('ck.save'));
   var all=el('button','thxck-btn',T('ck.acceptall'));
-  save.addEventListener('click',function(){write({analytics:state.analytics,marketing:state.marketing});close();});
-  all.addEventListener('click',function(){state.analytics=true;state.marketing=true;write({analytics:true,marketing:true});close();});
+  save.addEventListener('click',function(){write({analytics:state.analytics,marketing:state.marketing});announce(T('ck.ann.saved'));close();});
+  all.addEventListener('click',function(){state.analytics=true;state.marketing=true;write({analytics:true,marketing:true});announce(T('ck.ann.all'));close();});
   foot.appendChild(save);foot.appendChild(all);
   m.appendChild(foot);
   m.appendChild(el('p','thxck-gpc',T('ck.gpc')+(GPC?T('ck.gpc.active'):'')));
   ov.appendChild(m);
   var prevFocus=document.activeElement, inerted=[];
-  function close(){ov.remove();document.removeEventListener('keydown',esc);inerted.forEach(function(c){c.removeAttribute('inert');});inerted=[];banner(false);try{if(prevFocus&&prevFocus.focus&&document.contains(prevFocus))prevFocus.focus();}catch(e){}}
+  /* KB-05 — restore focus BEFORE the banner is torn down. If the opener was inside the banner
+     (the Preferences button), it is about to be removed, so fall back to the footer control. */
+  function close(){
+    ov.remove();document.removeEventListener('keydown',esc);
+    inerted.forEach(function(c){c.removeAttribute('inert');});inerted=[];
+    var back=null;
+    if(prevFocus&&prevFocus.focus&&document.contains(prevFocus)&&!(bannerEl&&bannerEl.contains(prevFocus)))back=prevFocus;
+    if(back){try{back.focus();}catch(e){}}
+    banner(false);
+    if(!back){var fb=document.querySelector('[data-thx-cookie-prefs]');if(fb&&fb.focus){try{fb.focus();}catch(e){}}}
+  }
   m.addEventListener('keydown',function(e){if(e.key!=='Tab')return;var f=Array.prototype.filter.call(m.querySelectorAll('button,[href],[tabindex]:not([tabindex="-1"])'),function(x){return x.offsetParent!==null;});if(!f.length)return;var first=f[0],last=f[f.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}});
   function esc(e){if(e.key==='Escape')close();}
   ov.addEventListener('click',function(e){if(e.target===ov)close();});
@@ -91,33 +143,43 @@ var bannerEl=null;
 function banner(show){
   if(!show){if(bannerEl){bannerEl.remove();bannerEl=null;}return;}
   if(bannerEl||read())return;
+  ensureLive();
   bannerEl=el('div','thxck-banner');
-  bannerEl.appendChild(el('h4',null,T('ck.banner.h')));
+  /* COOKIE-BANNER — a named region, and a styled paragraph instead of a free-floating <h4>
+     that broke the page's heading outline. */
+  bannerEl.setAttribute('role','region');
+  bannerEl.setAttribute('aria-label',T('ck.banner.h'));
+  bannerEl.appendChild(el('p','thxck-h',T('ck.banner.h')));
   bannerEl.appendChild(el('p',null,T('ck.banner.p')));
   var row=el('div','thxck-row');
   var all=el('button','thxck-btn thxck-primary',T('ck.acceptall'));
   var nec=el('button','thxck-btn',T('ck.necessaryonly'));
   var pref=el('button','thxck-link',T('ck.prefs'));
-  all.addEventListener('click',function(){write({analytics:true,marketing:true});banner(false);});
-  nec.addEventListener('click',function(){write({analytics:false,marketing:false});banner(false);});
+  all.addEventListener('click',function(){write({analytics:true,marketing:true});announce(T('ck.ann.all'));banner(false);});
+  nec.addEventListener('click',function(){write({analytics:false,marketing:false});announce(T('ck.ann.nec'));banner(false);});
   pref.addEventListener('click',function(){modal();});
   row.appendChild(all);row.appendChild(nec);row.appendChild(pref);
   bannerEl.appendChild(row);
-  document.body.appendChild(bannerEl);
+  /* COOKIE-BANNER — first in the DOM so it is an early tab stop rather than stop 37.
+     position:fixed keeps the visual placement unchanged. Focus is deliberately NOT moved. */
+  document.body.insertBefore(bannerEl,document.body.firstChild);
 }
 if(!stored){
   var shown=false;
   function reveal(){if(shown||read())return;shown=true;banner(true);}
   setTimeout(reveal,120000);
   setTimeout(function(){
-    var onDown=function(){document.removeEventListener('pointerdown',onDown,true);setTimeout(reveal,450);};
-    document.addEventListener('pointerdown',onDown,true);
+    /* COOKIE-BANNER — keydown and focusin alongside pointerdown, so a keyboard-only session
+       is offered the consent choice at all. */
+    var TRIG=['pointerdown','keydown','focusin'];
+    var onAct=function(){TRIG.forEach(function(t){document.removeEventListener(t,onAct,true);});setTimeout(reveal,450);};
+    TRIG.forEach(function(t){document.addEventListener(t,onAct,true);});
   },6000);
 }
 
 /* Footer "Cookie Preferences" link — appended into the Terms & Policies column, idempotent */
 function footLink(){
-  if(document.querySelector('a[data-thx-cookie-prefs]'))return true;
+  if(document.querySelector('[data-thx-cookie-prefs]'))return true;
   var anchors=[].slice.call(document.querySelectorAll('footer a, .footer a'));
   var target=null,fallback=null;
   for(var i=0;i<anchors.length;i++){
@@ -132,10 +194,13 @@ function footLink(){
   }
   target=target||fallback;
   if(!target)return false;
-  var a=document.createElement('a');
-  a.href='#cookie-preferences';a.textContent=T('ck.footer');
-  a.className=String(target.className||'').replace(/(^|\s)legal-(compact|detail)(?=\s|$)/g,' ').replace(/\s+/g,' ').trim()||'footer-link';
+  /* SEM-21 — this control opens a dialog, so it is a button, not a link to a dead fragment.
+     It keeps the footer-link class for styling; thxck-footbtn only strips the UA button chrome. */
+  var a=document.createElement('button');
+  a.type='button';a.textContent=T('ck.footer');
+  a.className=(String(target.className||'').replace(/(^|\s)legal-(compact|detail)(?=\s|$)/g,' ').replace(/\s+/g,' ').trim()||'footer-link')+' thxck-footbtn';
   a.setAttribute('data-thx-cookie-prefs','1');
+  a.setAttribute('aria-haspopup','dialog');
   target.parentNode.appendChild(a);
   /* last-resort guard: if anything still resolves this link to display:none, force it visible —
      the cookie centre has to stay reachable on every screen. */
@@ -144,7 +209,7 @@ function footLink(){
 }
 var tries=0,iv=setInterval(function(){if(footLink()||++tries>25)clearInterval(iv);},400);
 document.addEventListener('click',function(e){
-  var a=e.target.closest?e.target.closest('a[href="#cookie-preferences"],a[data-thx-cookie-prefs]'):null;
+  var a=e.target.closest?e.target.closest('a[href="#cookie-preferences"],[data-thx-cookie-prefs]'):null;
   if(!a)return;e.preventDefault();modal();
 },true);
 })();

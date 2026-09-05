@@ -1,8 +1,13 @@
-/* theodyx-home-fx.js — Theodyx HOME page ANIMATION ONLY.
- * Contract: may only append/read inside [data-thx-anim] / [data-thx-reveal] elements.
+/* theodyx-home-fx.js 1.1.0 — Theodyx HOME page ANIMATION ONLY.
+ * Contract: may only append/read inside [data-thx-anim] / [data-thx-reveal] elements,
+ * plus the hero control buttons it already owns.
  * MUST NOT: set hrefs, hide/move/restyle content, inject text content,
  * or query anything outside its mount elements.
- * Modules: media-mosaic (WebGL wordmark), hero-video controls, scroll reveal. */
+ * Phase 9 a11y (1.1.0): the hero never unmutes itself (audio only from the mute button);
+ * a Pause/Play control with aria-pressed; no auto-start under prefers-reduced-motion;
+ * the mute control is withdrawn when the source carries no audio track; ARIA names for
+ * the hero video and the hero wordmark. ARIA-only attributes — no visual change.
+ * Modules: media-mosaic (WebGL wordmark), hero-video controls, hero wordmark, scroll reveal. */
 (function () {
   "use strict";
   if (window.__thxHomeFx) return; window.__thxHomeFx = true;
@@ -240,36 +245,119 @@
     if (!hv || hv.__thxFxMounted) return; hv.__thxFxMounted = true;
     var v = hv.querySelector('video'); if (!v) return;
     v.muted = true;
-    function tryPlay() { if (v.paused) { try { v.play().catch(function () {}); } catch (e) {} } }
+
+    /* SEM-05 — the backdrop has functional sibling controls, so it is named rather than hidden. */
+    if (!v.getAttribute('aria-label') && !v.getAttribute('aria-labelledby')) {
+      v.setAttribute('aria-label', 'Ambient background film of Theodyx creators at work');
+    }
+
+    /* F-03 — under prefers-reduced-motion the loop does not start itself; the poster stays
+       and the Play button is the only way in. */
+    var reduce = false; try { reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
+    var userPaused = reduce;   // reduced motion starts in the "user has not asked for play" state
+
+    function autoOK() { return !reduce && !userPaused; }
+    function tryPlay() { if (!autoOK()) return; if (v.paused) { try { v.play().catch(function () {}); } catch (e) {} } }
+
+    if (reduce) {
+      try { v.autoplay = false; v.removeAttribute('autoplay'); v.pause(); if (v.currentTime > 0) v.currentTime = 0; } catch (e) {}
+      /* the markup carries autoplay="true", so the UA may already have started: hold it back
+         until the user presses Play. */
+      v.addEventListener('play', function () { if (!userPaused) return; try { v.pause(); } catch (e) {} });
+    }
+
     tryPlay();
     v.addEventListener('loadeddata', tryPlay);
     v.addEventListener('canplay', tryPlay);
     [300, 1000, 2500, 5000].forEach(function (t) { setTimeout(tryPlay, t); });
+
     var fs = hv.querySelector('[data-hero-fs]');
     var mu = hv.querySelector('[data-hero-mute]');
+    var ctrls = (mu && mu.parentNode) || (fs && fs.parentNode) || hv.querySelector('.hero-ctrls');
+
+    /* AXE-08 — the mute control is a toggle, so it exposes aria-pressed as well as a label. */
     function icons(muted) {
       if (!mu) return;
       var a = mu.querySelector('[data-icon="muted"]'), b = mu.querySelector('[data-icon="unmuted"]');
       if (a) a.style.display = muted ? '' : 'none';
       if (b) b.style.display = muted ? 'none' : '';
       mu.setAttribute('aria-label', muted ? 'Unmute video' : 'Mute video');
+      mu.setAttribute('aria-pressed', muted ? 'true' : 'false');
     }
     if (fs) fs.addEventListener('click', function (e) { e.preventDefault(); try { (v.requestFullscreen || v.webkitRequestFullscreen || function () {}).call(v); } catch (err) {} });
+    /* F-01 — audio starts here and nowhere else. There is no document-level gesture path. */
     if (mu) mu.addEventListener('click', function (e) { e.preventDefault(); v.muted = !v.muted; if (!v.muted) v.volume = 1; try { v.play().catch(function () {}); } catch (err) {} icons(v.muted); });
     icons(true);
-    function kick() { if (v.paused) { try { v.play().catch(function () {}); } catch (e) {} } }
-    var armed = true;
-    function gesture(e) {
-      if (!armed) return;
-      if (mu && (e.target === mu || (e.target.closest && e.target.closest('[data-hero-mute],[data-hero-fs]')))) return;
-      armed = false;
-      try { v.muted = false; v.volume = 1; v.play().catch(function () {}); } catch (err) {}
-      setTimeout(function () { icons(v.muted); }, 90);
-      ['pointerdown', 'touchstart', 'keydown', 'click'].forEach(function (t) { document.removeEventListener(t, gesture, true); });
+
+    /* F-03 — Pause / Play. */
+    var pb = null;
+    if (ctrls && !hv.querySelector('[data-hero-pause]')) {
+      pb = document.createElement('button');
+      pb.type = 'button';
+      pb.className = (fs && fs.className) || (mu && mu.className) || 'hero-ctrl-btn';
+      pb.setAttribute('data-hero-pause', '1');
+      pb.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true" data-icon="pause"><path d="M7 5h3.2v14H7zM13.8 5H17v14h-3.2z"></path></svg>'
+                   + '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true" data-icon="play" style="display:none"><path d="M8 5.2v13.6L19 12z"></path></svg>';
+      ctrls.insertBefore(pb, ctrls.firstChild);
+    } else { pb = hv.querySelector('[data-hero-pause]'); }
+
+    function pIcons() {
+      if (!pb) return;
+      var paused = v.paused;
+      var a = pb.querySelector('[data-icon="pause"]'), b = pb.querySelector('[data-icon="play"]');
+      if (a) a.style.display = paused ? 'none' : '';
+      if (b) b.style.display = paused ? '' : 'none';
+      pb.setAttribute('aria-label', paused ? 'Play video' : 'Pause video');
+      pb.setAttribute('aria-pressed', paused ? 'true' : 'false');
     }
-    ['pointerdown', 'touchstart', 'keydown', 'click'].forEach(function (t) { document.addEventListener(t, gesture, true); });
+    if (pb) {
+      pb.addEventListener('click', function (e) {
+        e.preventDefault();
+        if (v.paused) { userPaused = false; try { v.play().catch(function () {}); } catch (err) {} }
+        else { userPaused = true; try { v.pause(); } catch (err) {} }
+        pIcons();
+      });
+      v.addEventListener('play', pIcons);
+      v.addEventListener('pause', pIcons);
+      pIcons();
+    }
+
+    /* AXE-08 — this loop has no audio stream (ffprobe: one h264 stream, no audio), so the
+       "Unmute video" control promises something that cannot happen. Withdraw it whenever the
+       source is measurably audio-less; if nothing can be measured, leave the control alone. */
+    var muGone = false;
+    function dropMute() {
+      if (!mu || muGone) return; muGone = true;
+      mu.setAttribute('hidden', ''); mu.style.display = 'none';
+      mu.setAttribute('aria-hidden', 'true'); mu.tabIndex = -1;
+    }
+    function resolveAudio() {
+      if (muGone || !mu) return;
+      try {
+        if (typeof v.mozHasAudio === 'boolean') { if (!v.mozHasAudio) dropMute(); return; }
+        if (v.audioTracks && typeof v.audioTracks.length === 'number') { if (!v.audioTracks.length) dropMute(); return; }
+        if (typeof v.webkitAudioDecodedByteCount === 'number') {
+          if (v.webkitAudioDecodedByteCount > 0) return;          // audio is being decoded — keep it
+          if (v.currentTime > 0.35) dropMute();                   // played, and nothing decoded
+        }
+      } catch (e) {}
+    }
+    v.addEventListener('loadedmetadata', resolveAudio);
+    v.addEventListener('timeupdate', resolveAudio);
+    [1200, 3000, 6000].forEach(function (t) { setTimeout(resolveAudio, t); });
+
+    function kick() { if (!autoOK()) return; if (v.paused) { try { v.play().catch(function () {}); } catch (e) {} } }
     document.addEventListener('touchstart', kick, { once: true, capture: true });
     document.addEventListener('visibilitychange', function () { if (!document.hidden) kick(); });
+  }
+
+  /* ── module 2b: hero wordmark semantics (SEM-06) ─────────────────────── */
+  function mountWordmark() {
+    var w = document.querySelector('[data-thx-reveal] .hero-vlabel, [data-thx-anim] .hero-vlabel');
+    if (!w || w.__thxFxMounted) return; w.__thxFxMounted = true;
+    var word = (w.getAttribute('data-word') || '').trim() || 'Theodyx';
+    w.setAttribute('role', 'img'); w.setAttribute('aria-label', word);
+    [].forEach.call(w.querySelectorAll('.hero-vletter'), function (p) { p.setAttribute('aria-hidden', 'true'); });
   }
 
   /* ── module 3: scroll reveal on opt-in [data-thx-reveal] elements ───── */
@@ -285,6 +373,6 @@
     setTimeout(function () { els.forEach(function (el) { el.classList.add('thx-in'); }); }, 2000);
   }
 
-  function init() { injectCSS(); mountMosaic(); mountHeroVideo(); mountReveal(); }
+  function init() { injectCSS(); mountMosaic(); mountHeroVideo(); mountWordmark(); mountReveal(); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
 })();
