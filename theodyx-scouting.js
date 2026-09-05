@@ -1,16 +1,19 @@
-/* theodyx-scouting 1.10.0 — Phase 9 accessibility: the safety and age gates are real modals (they
- * take focus, everything else goes inert + aria-hidden, Tab is trapped, focus is restored on
- * clear); submit renders a full error summary of links with per-field messages wired through
- * aria-describedby; required / autocomplete / group semantics are declared; uploads are real
- * buttons that announce their state; Turnstile has a labelled box and an email fallback route.
- * First paint still matches the final gate state (no CLS), and Turnstile and the QR still load
- * only once they are actually needed, from our own SRI-pinned copy. */
+/* theodyx-scouting 2.0.0 — Phase 10 campaign readiness. The two full-screen modal gates are gone:
+ * the safety statement is an inline <section id="sc-safety"> above the form and its acknowledgement
+ * is a required checkbox in the consent block; age comes only from #sc-dob, evaluated on blur and
+ * on submit, so a mistyped date is always correctable (FORMS-04). The first viewport now carries the
+ * offer — eyebrow, headline, one sentence and a CTA — instead of a black overlay (LAND-01), and
+ * nothing is hidden at first paint any more (SPEED-02). Every funnel event goes through the site
+ * head's window.__thxTrack, the single data layer (INST-02/03/04/06, FORMS-02, UTM-02/04), and the
+ * submission carries session + landingPath + utm so a paid click can be credited (UTM-05).
+ * Phase 9 accessibility is preserved throughout: error summary, aria-invalid/aria-describedby,
+ * required + autocomplete, chip group, upload buttons with status, Turnstile fallback. */
 (function () {
   'use strict';
   if (window.__thxScouting) return;
   window.__thxScouting = true;
-  /* theodyx-scouting i18n (Phase 6): every user-facing string goes through T(); dictionaries (en/es/pt/fr) register with the site locale runtime, keyed by <html lang>. The safety statement and the age gate stay English on purpose: legal copy is translated by people, not scripts. */
-  var SCD = {"en": {"sc.lbl.email": "Email", "sc.lbl.firstName": "First name", "sc.lbl.lastName": "Last name", "sc.lbl.dob": "Date of birth", "sc.lbl.platform": "Primary platform", "sc.lbl.country": "Country", "sc.lbl.state": "State / Region", "sc.lbl.city": "City", "sc.lbl.instagram": "Instagram handle", "sc.lbl.tiktok": "TikTok handle", "sc.lbl.youtube": "YouTube channel", "sc.lbl.otherPlatform": "Other platform", "sc.lbl.representedBy": "Represented by", "sc.lbl.notes": "Anything else?", "sc.lbl.link1": "post / video 1", "sc.lbl.link2": "post / video 2", "sc.lbl.link3": "post / video 3", "sc.lbl.pictures": "Your pictures", "sc.ph.email": "you@email.com", "sc.ph.state": "State, province, or region", "sc.ph.city": "Where are you based?", "sc.ph.handle": "yourhandle", "sc.ph.youtube": "@channel or URL", "sc.ph.otherPlatform": "e.g. Substack, Twitch", "sc.ph.representedBy": "Agency / manager", "sc.ph.country": "Select your country…", "sc.ph.select": "Select…", "sc.eyebrow.you": "01 — You", "sc.h2.you": "Tell us who you are", "sc.eyebrow.work": "02 — Work", "sc.h2.work": "Show us your work", "sc.text.work": "Upload the media you’re proudest of — a few links, or a media kit. Optional, but it helps our team get to know you better.", "sc.sec.you": "About you", "sc.sec.work": "Your work", "sc.sec.consent": "Consent and submit", "sc.legend.rep": "Are you currently represented? *", "sc.yes": "Yes", "sc.no": "No", "sc.optional": "(optional)", "sc.drop.upload": "+ Upload", "sc.drop.max": "≤ 10 MB", "sc.drop.toobig": "Files must be 10 MB or smaller.", "sc.drop.another": "Tap to try another", "sc.drop.again": "Tap to try again", "sc.drop.uploading": "Uploading…", "sc.drop.remove": "Remove", "sc.err.uploadnet": "Upload failed. Check your connection.", "sc.err.upload": "Upload failed. Please try again.", "sc.err.email": "Enter a valid email address.", "sc.err.first": "First name is required.", "sc.err.last": "Last name is required.", "sc.err.dob": "Enter your date of birth.", "sc.err.age": "You must be {n} or older to apply.", "sc.err.dobmatch": "Your date of birth doesn’t match the age you gave earlier.", "sc.err.country": "Select your country.", "sc.err.platform": "Select your main platform.", "sc.err.rep": "Let us know if you’re represented.", "sc.err.repby": "Who represents you?", "sc.err.other": "Name the platform.", "sc.err.links": "Enter valid links (https://…).", "sc.err.consent": "Please agree to continue.", "sc.err.turnstile": "Please complete the verification, then submit.", "sc.err.fields": "Please check the highlighted fields.", "sc.err.rate": "Too many attempts. Please try again later, or email {email}.", "sc.submit": "Submit application", "sc.submitting": "Submitting…", "sc.success.eyebrow": "Application received", "sc.success.title": "Thank you.", "sc.success.body": "Your application is in. Thank you for taking the time to apply.", "sc.home": "Return home", "sc.req.note": "Fields marked * are required.", "sc.err.summary": "Please fix the following:", "sc.qr.label": "Scan to continue this application on your phone", "sc.ts.label": "Verification", "sc.err.tsfallback": "Verification isn’t available in this browser — email {email} and we’ll take your application by email.", "sc.a11y.uploading": "Uploading {name} — {pct}%", "sc.a11y.uploaded": "{name} uploaded.", "sc.a11y.removed": "File removed.", "sc.a11y.removeFile": "Remove {name}"}, "es": {"sc.lbl.email": "Correo electrónico", "sc.lbl.firstName": "Nombre", "sc.lbl.lastName": "Apellidos", "sc.lbl.dob": "Fecha de nacimiento", "sc.lbl.platform": "Plataforma principal", "sc.lbl.country": "País", "sc.lbl.state": "Estado / Región", "sc.lbl.city": "Ciudad", "sc.lbl.instagram": "Usuario de Instagram", "sc.lbl.tiktok": "Usuario de TikTok", "sc.lbl.youtube": "Canal de YouTube", "sc.lbl.otherPlatform": "Otra plataforma", "sc.lbl.representedBy": "Representado por", "sc.lbl.notes": "¿Algo más?", "sc.lbl.link1": "publicación / vídeo 1", "sc.lbl.link2": "publicación / vídeo 2", "sc.lbl.link3": "publicación / vídeo 3", "sc.lbl.pictures": "Tus fotos", "sc.ph.email": "tu@correo.com", "sc.ph.state": "Estado, provincia o región", "sc.ph.city": "¿Dónde vives?", "sc.ph.handle": "tuusuario", "sc.ph.youtube": "@canal o URL", "sc.ph.otherPlatform": "p. ej., Substack, Twitch", "sc.ph.representedBy": "Agencia / representante", "sc.ph.country": "Selecciona tu país…", "sc.ph.select": "Selecciona…", "sc.eyebrow.you": "01 — Tú", "sc.h2.you": "Cuéntanos quién eres", "sc.eyebrow.work": "02 — Trabajo", "sc.h2.work": "Muéstranos tu trabajo", "sc.text.work": "Sube el contenido del que estés más orgulloso: unos enlaces o un media kit. Es opcional, pero ayuda a nuestro equipo a conocerte mejor.", "sc.sec.you": "Sobre ti", "sc.sec.work": "Tu trabajo", "sc.sec.consent": "Consentimiento y envío", "sc.legend.rep": "¿Tienes representación actualmente? *", "sc.yes": "Sí", "sc.no": "No", "sc.optional": "(opcional)", "sc.drop.upload": "+ Subir", "sc.drop.max": "≤ 10 MB", "sc.drop.toobig": "Los archivos deben pesar 10 MB o menos.", "sc.drop.another": "Toca para probar con otro", "sc.drop.again": "Toca para intentarlo de nuevo", "sc.drop.uploading": "Subiendo…", "sc.drop.remove": "Quitar", "sc.err.uploadnet": "Error al subir el archivo. Comprueba tu conexión.", "sc.err.upload": "Error al subir el archivo. Inténtalo de nuevo.", "sc.err.email": "Introduce una dirección de correo válida.", "sc.err.first": "El nombre es obligatorio.", "sc.err.last": "Los apellidos son obligatorios.", "sc.err.dob": "Introduce tu fecha de nacimiento.", "sc.err.age": "Debes tener {n} años o más para solicitar.", "sc.err.dobmatch": "Tu fecha de nacimiento no coincide con la edad que indicaste antes.", "sc.err.country": "Selecciona tu país.", "sc.err.platform": "Selecciona tu plataforma principal.", "sc.err.rep": "Dinos si tienes representación.", "sc.err.repby": "¿Quién te representa?", "sc.err.other": "Indica la plataforma.", "sc.err.links": "Introduce enlaces válidos (https://…).", "sc.err.consent": "Acepta para continuar.", "sc.err.turnstile": "Completa la verificación y luego envía.", "sc.err.fields": "Revisa los campos marcados.", "sc.err.rate": "Demasiados intentos. Inténtalo más tarde o escribe a {email}.", "sc.submit": "Enviar solicitud", "sc.submitting": "Enviando…", "sc.success.eyebrow": "Solicitud recibida", "sc.success.title": "Gracias.", "sc.success.body": "Tu solicitud ha sido enviada. Gracias por tomarte el tiempo de presentarla.", "sc.home": "Volver al inicio", "sc.req.note": "Los campos marcados con * son obligatorios.", "sc.err.summary": "Corrige lo siguiente:", "sc.qr.label": "Escanea para continuar esta solicitud en tu teléfono", "sc.ts.label": "Verificación", "sc.err.tsfallback": "La verificación no está disponible en este navegador: escribe a {email} y recibiremos tu solicitud por correo.", "sc.a11y.uploading": "Subiendo {name}: {pct}%", "sc.a11y.uploaded": "{name} se ha subido.", "sc.a11y.removed": "Archivo eliminado.", "sc.a11y.removeFile": "Quitar {name}"}, "pt": {"sc.lbl.email": "E-mail", "sc.lbl.firstName": "Nome", "sc.lbl.lastName": "Sobrenome", "sc.lbl.dob": "Data de nascimento", "sc.lbl.platform": "Plataforma principal", "sc.lbl.country": "País", "sc.lbl.state": "Estado / Região", "sc.lbl.city": "Cidade", "sc.lbl.instagram": "Usuário do Instagram", "sc.lbl.tiktok": "Usuário do TikTok", "sc.lbl.youtube": "Canal do YouTube", "sc.lbl.otherPlatform": "Outra plataforma", "sc.lbl.representedBy": "Representado por", "sc.lbl.notes": "Mais alguma coisa?", "sc.lbl.link1": "publicação / vídeo 1", "sc.lbl.link2": "publicação / vídeo 2", "sc.lbl.link3": "publicação / vídeo 3", "sc.lbl.pictures": "Suas fotos", "sc.ph.email": "voce@email.com", "sc.ph.state": "Estado, província ou região", "sc.ph.city": "Onde você mora?", "sc.ph.handle": "seuusuario", "sc.ph.youtube": "@canal ou URL", "sc.ph.otherPlatform": "ex.: Substack, Twitch", "sc.ph.representedBy": "Agência / empresário", "sc.ph.country": "Selecione seu país…", "sc.ph.select": "Selecione…", "sc.eyebrow.you": "01 — Você", "sc.h2.you": "Conte quem você é", "sc.eyebrow.work": "02 — Trabalho", "sc.h2.work": "Mostre o seu trabalho", "sc.text.work": "Envie o conteúdo de que mais se orgulha: alguns links ou um media kit. É opcional, mas ajuda a nossa equipe a conhecer você melhor.", "sc.sec.you": "Sobre você", "sc.sec.work": "Seu trabalho", "sc.sec.consent": "Consentimento e envio", "sc.legend.rep": "Você tem representação atualmente? *", "sc.yes": "Sim", "sc.no": "Não", "sc.optional": "(opcional)", "sc.drop.upload": "+ Enviar", "sc.drop.max": "≤ 10 MB", "sc.drop.toobig": "Os arquivos devem ter no máximo 10 MB.", "sc.drop.another": "Toque para tentar outro", "sc.drop.again": "Toque para tentar novamente", "sc.drop.uploading": "Enviando…", "sc.drop.remove": "Remover", "sc.err.uploadnet": "Falha no envio. Verifique sua conexão.", "sc.err.upload": "Falha no envio. Tente novamente.", "sc.err.email": "Insira um e-mail válido.", "sc.err.first": "O nome é obrigatório.", "sc.err.last": "O sobrenome é obrigatório.", "sc.err.dob": "Insira sua data de nascimento.", "sc.err.age": "Você precisa ter {n} anos ou mais para se candidatar.", "sc.err.dobmatch": "Sua data de nascimento não corresponde à idade informada antes.", "sc.err.country": "Selecione seu país.", "sc.err.platform": "Selecione sua plataforma principal.", "sc.err.rep": "Diga se você tem representação.", "sc.err.repby": "Quem representa você?", "sc.err.other": "Informe a plataforma.", "sc.err.links": "Insira links válidos (https://…).", "sc.err.consent": "Aceite para continuar.", "sc.err.turnstile": "Conclua a verificação e depois envie.", "sc.err.fields": "Verifique os campos destacados.", "sc.err.rate": "Muitas tentativas. Tente novamente mais tarde ou escreva para {email}.", "sc.submit": "Enviar candidatura", "sc.submitting": "Enviando…", "sc.success.eyebrow": "Candidatura recebida", "sc.success.title": "Obrigado.", "sc.success.body": "Sua candidatura foi enviada. Obrigado por dedicar seu tempo.", "sc.home": "Voltar ao início", "sc.req.note": "Os campos marcados com * são obrigatórios.", "sc.err.summary": "Corrija o seguinte:", "sc.qr.label": "Escaneie para continuar esta candidatura no seu telefone", "sc.ts.label": "Verificação", "sc.err.tsfallback": "A verificação não está disponível neste navegador — escreva para {email} e receberemos sua candidatura por e-mail.", "sc.a11y.uploading": "Enviando {name}: {pct}%", "sc.a11y.uploaded": "{name} enviado.", "sc.a11y.removed": "Arquivo removido.", "sc.a11y.removeFile": "Remover {name}"}, "fr": {"sc.lbl.email": "E-mail", "sc.lbl.firstName": "Prénom", "sc.lbl.lastName": "Nom", "sc.lbl.dob": "Date de naissance", "sc.lbl.platform": "Plateforme principale", "sc.lbl.country": "Pays", "sc.lbl.state": "État / Région", "sc.lbl.city": "Ville", "sc.lbl.instagram": "Identifiant Instagram", "sc.lbl.tiktok": "Identifiant TikTok", "sc.lbl.youtube": "Chaîne YouTube", "sc.lbl.otherPlatform": "Autre plateforme", "sc.lbl.representedBy": "Représenté par", "sc.lbl.notes": "Autre chose ?", "sc.lbl.link1": "publication / vidéo 1", "sc.lbl.link2": "publication / vidéo 2", "sc.lbl.link3": "publication / vidéo 3", "sc.lbl.pictures": "Vos photos", "sc.ph.email": "vous@email.com", "sc.ph.state": "État, province ou région", "sc.ph.city": "Où êtes-vous basé(e) ?", "sc.ph.handle": "votreidentifiant", "sc.ph.youtube": "@chaîne ou URL", "sc.ph.otherPlatform": "ex. : Substack, Twitch", "sc.ph.representedBy": "Agence / manager", "sc.ph.country": "Sélectionnez votre pays…", "sc.ph.select": "Sélectionnez…", "sc.eyebrow.you": "01 — Vous", "sc.h2.you": "Dites-nous qui vous êtes", "sc.eyebrow.work": "02 — Travail", "sc.h2.work": "Montrez-nous votre travail", "sc.text.work": "Partagez les contenus dont vous êtes le plus fier : quelques liens ou un kit média. Facultatif, mais cela aide notre équipe à mieux vous connaître.", "sc.sec.you": "À propos de vous", "sc.sec.work": "Votre travail", "sc.sec.consent": "Consentement et envoi", "sc.legend.rep": "Êtes-vous actuellement représenté(e) ? *", "sc.yes": "Oui", "sc.no": "Non", "sc.optional": "(facultatif)", "sc.drop.upload": "+ Importer", "sc.drop.max": "≤ 10 Mo", "sc.drop.toobig": "Les fichiers doivent faire 10 Mo ou moins.", "sc.drop.another": "Touchez pour en essayer un autre", "sc.drop.again": "Touchez pour réessayer", "sc.drop.uploading": "Envoi…", "sc.drop.remove": "Retirer", "sc.err.uploadnet": "Échec de l’envoi. Vérifiez votre connexion.", "sc.err.upload": "Échec de l’envoi. Veuillez réessayer.", "sc.err.email": "Saisissez une adresse e-mail valide.", "sc.err.first": "Le prénom est obligatoire.", "sc.err.last": "Le nom est obligatoire.", "sc.err.dob": "Saisissez votre date de naissance.", "sc.err.age": "Vous devez avoir {n} ans ou plus pour postuler.", "sc.err.dobmatch": "Votre date de naissance ne correspond pas à l’âge indiqué précédemment.", "sc.err.country": "Sélectionnez votre pays.", "sc.err.platform": "Sélectionnez votre plateforme principale.", "sc.err.rep": "Indiquez si vous êtes représenté(e).", "sc.err.repby": "Qui vous représente ?", "sc.err.other": "Indiquez la plateforme.", "sc.err.links": "Saisissez des liens valides (https://…).", "sc.err.consent": "Veuillez accepter pour continuer.", "sc.err.turnstile": "Veuillez terminer la vérification, puis envoyer.", "sc.err.fields": "Veuillez vérifier les champs signalés.", "sc.err.rate": "Trop de tentatives. Réessayez plus tard ou écrivez à {email}.", "sc.submit": "Envoyer ma candidature", "sc.submitting": "Envoi…", "sc.success.eyebrow": "Candidature reçue", "sc.success.title": "Merci.", "sc.success.body": "Votre candidature est envoyée. Merci d’avoir pris le temps de postuler.", "sc.home": "Retour à l’accueil", "sc.req.note": "Les champs marqués d’un * sont obligatoires.", "sc.err.summary": "Veuillez corriger les points suivants :", "sc.qr.label": "Scannez pour continuer cette candidature sur votre téléphone", "sc.ts.label": "Vérification", "sc.err.tsfallback": "La vérification n’est pas disponible dans ce navigateur — écrivez à {email} et nous recevrons votre candidature par e-mail.", "sc.a11y.uploading": "Envoi de {name} : {pct} %", "sc.a11y.uploaded": "{name} envoyé.", "sc.a11y.removed": "Fichier supprimé.", "sc.a11y.removeFile": "Retirer {name}"}};
+  /* theodyx-scouting i18n (Phase 6): every user-facing string goes through T(); dictionaries (en/es/pt/fr) register with the site locale runtime, keyed by <html lang>. sc.safety.body carries the same English sentence in all four dictionaries on purpose: it is legal safety copy and is translated by people, not scripts — the key exists in every locale so a human translation drops straight in. */
+  var SCD = {"en": {"sc.lbl.email": "Email", "sc.lbl.firstName": "First name", "sc.lbl.lastName": "Last name", "sc.lbl.dob": "Date of birth", "sc.lbl.platform": "Primary platform", "sc.lbl.country": "Country", "sc.lbl.state": "State / Region", "sc.lbl.city": "City", "sc.lbl.instagram": "Instagram handle", "sc.lbl.tiktok": "TikTok handle", "sc.lbl.youtube": "YouTube channel", "sc.lbl.otherPlatform": "Other platform", "sc.lbl.representedBy": "Represented by", "sc.lbl.notes": "Anything else?", "sc.lbl.link1": "post / video 1", "sc.lbl.link2": "post / video 2", "sc.lbl.link3": "post / video 3", "sc.lbl.pictures": "Your pictures", "sc.ph.email": "you@email.com", "sc.ph.state": "State, province, or region", "sc.ph.city": "Where are you based?", "sc.ph.handle": "yourhandle", "sc.ph.youtube": "@channel or URL", "sc.ph.otherPlatform": "e.g. Substack, Twitch", "sc.ph.representedBy": "Agency / manager", "sc.ph.country": "Select your country…", "sc.ph.select": "Select…", "sc.eyebrow.you": "01 — You", "sc.h2.you": "Tell us who you are", "sc.eyebrow.work": "02 — Work", "sc.h2.work": "Show us your work", "sc.text.work": "Upload the media you’re proudest of — a few links, or a media kit. Optional, but it helps our team get to know you better.", "sc.sec.you": "About you", "sc.sec.work": "Your work", "sc.sec.consent": "Consent and submit", "sc.legend.rep": "Are you currently represented? *", "sc.yes": "Yes", "sc.no": "No", "sc.optional": "(optional)", "sc.drop.upload": "+ Upload", "sc.drop.max": "≤ 10 MB", "sc.drop.toobig": "Files must be 10 MB or smaller.", "sc.drop.another": "Tap to try another", "sc.drop.again": "Tap to try again", "sc.drop.uploading": "Uploading…", "sc.drop.remove": "Remove", "sc.err.uploadnet": "Upload failed. Check your connection.", "sc.err.upload": "Upload failed. Please try again.", "sc.err.email": "Enter a valid email address.", "sc.err.first": "First name is required.", "sc.err.last": "Last name is required.", "sc.err.dob": "Enter your date of birth.", "sc.err.age": "You must be {n} or older to apply.", "sc.err.dobmatch": "Your date of birth doesn’t match the age you gave earlier.", "sc.err.country": "Select your country.", "sc.err.platform": "Select your main platform.", "sc.err.rep": "Let us know if you’re represented.", "sc.err.repby": "Who represents you?", "sc.err.other": "Name the platform.", "sc.err.links": "Enter valid links (https://…).", "sc.err.consent": "Please agree to continue.", "sc.err.turnstile": "Please complete the verification, then submit.", "sc.err.fields": "Please check the highlighted fields.", "sc.err.rate": "Too many attempts. Please try again later, or email {email}.", "sc.submit": "Submit application", "sc.submitting": "Submitting…", "sc.success.eyebrow": "Application received", "sc.success.title": "Thank you.", "sc.success.body": "Your application is in. Thank you for taking the time to apply.", "sc.home": "Return home", "sc.req.note": "Fields marked * are required.", "sc.err.summary": "Please fix the following:", "sc.qr.label": "Scan to continue this application on your phone", "sc.ts.label": "Verification", "sc.err.tsfallback": "Verification isn’t available in this browser — email {email} and we’ll take your application by email.", "sc.a11y.uploading": "Uploading {name} — {pct}%", "sc.a11y.uploaded": "{name} uploaded.", "sc.a11y.removed": "File removed.", "sc.a11y.removeFile": "Remove {name}", "sc.hero.eyebrow": "For creators", "sc.hero.sub": "Theodyx is scouting the next class of creators. Every application is read by a person — and there are no fees, ever.", "sc.hero.cta": "Apply to be scouted", "sc.safety.eyebrow": "Theodyx — Safety", "sc.safety.title": "Your safety comes first.", "sc.safety.body": "Safety is our top priority. Protecting aspiring creatives — including young individuals — from online predators is of the utmost importance. If you would like to confirm an email or communication is from an official Theodyx representative or affiliate, email scouting@theodyx.com and we will be glad to confirm. Theodyx never asks for photos in the nude or lingerie and never requires any kind of payment. If something doesn’t feel right, please don’t hesitate to contact us at scouting@theodyx.com.", "sc.safety.ack": "I have read the safety statement", "sc.err.safety": "Please confirm you have read the safety statement.", "sc.u14.change": "Update your date of birth"}, "es": {"sc.lbl.email": "Correo electrónico", "sc.lbl.firstName": "Nombre", "sc.lbl.lastName": "Apellidos", "sc.lbl.dob": "Fecha de nacimiento", "sc.lbl.platform": "Plataforma principal", "sc.lbl.country": "País", "sc.lbl.state": "Estado / Región", "sc.lbl.city": "Ciudad", "sc.lbl.instagram": "Usuario de Instagram", "sc.lbl.tiktok": "Usuario de TikTok", "sc.lbl.youtube": "Canal de YouTube", "sc.lbl.otherPlatform": "Otra plataforma", "sc.lbl.representedBy": "Representado por", "sc.lbl.notes": "¿Algo más?", "sc.lbl.link1": "publicación / vídeo 1", "sc.lbl.link2": "publicación / vídeo 2", "sc.lbl.link3": "publicación / vídeo 3", "sc.lbl.pictures": "Tus fotos", "sc.ph.email": "tu@correo.com", "sc.ph.state": "Estado, provincia o región", "sc.ph.city": "¿Dónde vives?", "sc.ph.handle": "tuusuario", "sc.ph.youtube": "@canal o URL", "sc.ph.otherPlatform": "p. ej., Substack, Twitch", "sc.ph.representedBy": "Agencia / representante", "sc.ph.country": "Selecciona tu país…", "sc.ph.select": "Selecciona…", "sc.eyebrow.you": "01 — Tú", "sc.h2.you": "Cuéntanos quién eres", "sc.eyebrow.work": "02 — Trabajo", "sc.h2.work": "Muéstranos tu trabajo", "sc.text.work": "Sube el contenido del que estés más orgulloso: unos enlaces o un media kit. Es opcional, pero ayuda a nuestro equipo a conocerte mejor.", "sc.sec.you": "Sobre ti", "sc.sec.work": "Tu trabajo", "sc.sec.consent": "Consentimiento y envío", "sc.legend.rep": "¿Tienes representación actualmente? *", "sc.yes": "Sí", "sc.no": "No", "sc.optional": "(opcional)", "sc.drop.upload": "+ Subir", "sc.drop.max": "≤ 10 MB", "sc.drop.toobig": "Los archivos deben pesar 10 MB o menos.", "sc.drop.another": "Toca para probar con otro", "sc.drop.again": "Toca para intentarlo de nuevo", "sc.drop.uploading": "Subiendo…", "sc.drop.remove": "Quitar", "sc.err.uploadnet": "Error al subir el archivo. Comprueba tu conexión.", "sc.err.upload": "Error al subir el archivo. Inténtalo de nuevo.", "sc.err.email": "Introduce una dirección de correo válida.", "sc.err.first": "El nombre es obligatorio.", "sc.err.last": "Los apellidos son obligatorios.", "sc.err.dob": "Introduce tu fecha de nacimiento.", "sc.err.age": "Debes tener {n} años o más para solicitar.", "sc.err.dobmatch": "Tu fecha de nacimiento no coincide con la edad que indicaste antes.", "sc.err.country": "Selecciona tu país.", "sc.err.platform": "Selecciona tu plataforma principal.", "sc.err.rep": "Dinos si tienes representación.", "sc.err.repby": "¿Quién te representa?", "sc.err.other": "Indica la plataforma.", "sc.err.links": "Introduce enlaces válidos (https://…).", "sc.err.consent": "Acepta para continuar.", "sc.err.turnstile": "Completa la verificación y luego envía.", "sc.err.fields": "Revisa los campos marcados.", "sc.err.rate": "Demasiados intentos. Inténtalo más tarde o escribe a {email}.", "sc.submit": "Enviar solicitud", "sc.submitting": "Enviando…", "sc.success.eyebrow": "Solicitud recibida", "sc.success.title": "Gracias.", "sc.success.body": "Tu solicitud ha sido enviada. Gracias por tomarte el tiempo de presentarla.", "sc.home": "Volver al inicio", "sc.req.note": "Los campos marcados con * son obligatorios.", "sc.err.summary": "Corrige lo siguiente:", "sc.qr.label": "Escanea para continuar esta solicitud en tu teléfono", "sc.ts.label": "Verificación", "sc.err.tsfallback": "La verificación no está disponible en este navegador: escribe a {email} y recibiremos tu solicitud por correo.", "sc.a11y.uploading": "Subiendo {name}: {pct}%", "sc.a11y.uploaded": "{name} se ha subido.", "sc.a11y.removed": "Archivo eliminado.", "sc.a11y.removeFile": "Quitar {name}", "sc.hero.eyebrow": "Para creadores", "sc.hero.sub": "Theodyx está buscando a la próxima generación de creadores. Cada solicitud la lee una persona, y nunca hay comisiones.", "sc.hero.cta": "Solicita ser descubierto", "sc.safety.eyebrow": "Theodyx — Seguridad", "sc.safety.title": "Tu seguridad es lo primero.", "sc.safety.body": "Safety is our top priority. Protecting aspiring creatives — including young individuals — from online predators is of the utmost importance. If you would like to confirm an email or communication is from an official Theodyx representative or affiliate, email scouting@theodyx.com and we will be glad to confirm. Theodyx never asks for photos in the nude or lingerie and never requires any kind of payment. If something doesn’t feel right, please don’t hesitate to contact us at scouting@theodyx.com.", "sc.safety.ack": "He leído la declaración de seguridad", "sc.err.safety": "Confirma que has leído la declaración de seguridad.", "sc.u14.change": "Actualiza tu fecha de nacimiento"}, "pt": {"sc.lbl.email": "E-mail", "sc.lbl.firstName": "Nome", "sc.lbl.lastName": "Sobrenome", "sc.lbl.dob": "Data de nascimento", "sc.lbl.platform": "Plataforma principal", "sc.lbl.country": "País", "sc.lbl.state": "Estado / Região", "sc.lbl.city": "Cidade", "sc.lbl.instagram": "Usuário do Instagram", "sc.lbl.tiktok": "Usuário do TikTok", "sc.lbl.youtube": "Canal do YouTube", "sc.lbl.otherPlatform": "Outra plataforma", "sc.lbl.representedBy": "Representado por", "sc.lbl.notes": "Mais alguma coisa?", "sc.lbl.link1": "publicação / vídeo 1", "sc.lbl.link2": "publicação / vídeo 2", "sc.lbl.link3": "publicação / vídeo 3", "sc.lbl.pictures": "Suas fotos", "sc.ph.email": "voce@email.com", "sc.ph.state": "Estado, província ou região", "sc.ph.city": "Onde você mora?", "sc.ph.handle": "seuusuario", "sc.ph.youtube": "@canal ou URL", "sc.ph.otherPlatform": "ex.: Substack, Twitch", "sc.ph.representedBy": "Agência / empresário", "sc.ph.country": "Selecione seu país…", "sc.ph.select": "Selecione…", "sc.eyebrow.you": "01 — Você", "sc.h2.you": "Conte quem você é", "sc.eyebrow.work": "02 — Trabalho", "sc.h2.work": "Mostre o seu trabalho", "sc.text.work": "Envie o conteúdo de que mais se orgulha: alguns links ou um media kit. É opcional, mas ajuda a nossa equipe a conhecer você melhor.", "sc.sec.you": "Sobre você", "sc.sec.work": "Seu trabalho", "sc.sec.consent": "Consentimento e envio", "sc.legend.rep": "Você tem representação atualmente? *", "sc.yes": "Sim", "sc.no": "Não", "sc.optional": "(opcional)", "sc.drop.upload": "+ Enviar", "sc.drop.max": "≤ 10 MB", "sc.drop.toobig": "Os arquivos devem ter no máximo 10 MB.", "sc.drop.another": "Toque para tentar outro", "sc.drop.again": "Toque para tentar novamente", "sc.drop.uploading": "Enviando…", "sc.drop.remove": "Remover", "sc.err.uploadnet": "Falha no envio. Verifique sua conexão.", "sc.err.upload": "Falha no envio. Tente novamente.", "sc.err.email": "Insira um e-mail válido.", "sc.err.first": "O nome é obrigatório.", "sc.err.last": "O sobrenome é obrigatório.", "sc.err.dob": "Insira sua data de nascimento.", "sc.err.age": "Você precisa ter {n} anos ou mais para se candidatar.", "sc.err.dobmatch": "Sua data de nascimento não corresponde à idade informada antes.", "sc.err.country": "Selecione seu país.", "sc.err.platform": "Selecione sua plataforma principal.", "sc.err.rep": "Diga se você tem representação.", "sc.err.repby": "Quem representa você?", "sc.err.other": "Informe a plataforma.", "sc.err.links": "Insira links válidos (https://…).", "sc.err.consent": "Aceite para continuar.", "sc.err.turnstile": "Conclua a verificação e depois envie.", "sc.err.fields": "Verifique os campos destacados.", "sc.err.rate": "Muitas tentativas. Tente novamente mais tarde ou escreva para {email}.", "sc.submit": "Enviar candidatura", "sc.submitting": "Enviando…", "sc.success.eyebrow": "Candidatura recebida", "sc.success.title": "Obrigado.", "sc.success.body": "Sua candidatura foi enviada. Obrigado por dedicar seu tempo.", "sc.home": "Voltar ao início", "sc.req.note": "Os campos marcados com * são obrigatórios.", "sc.err.summary": "Corrija o seguinte:", "sc.qr.label": "Escaneie para continuar esta candidatura no seu telefone", "sc.ts.label": "Verificação", "sc.err.tsfallback": "A verificação não está disponível neste navegador — escreva para {email} e receberemos sua candidatura por e-mail.", "sc.a11y.uploading": "Enviando {name}: {pct}%", "sc.a11y.uploaded": "{name} enviado.", "sc.a11y.removed": "Arquivo removido.", "sc.a11y.removeFile": "Remover {name}", "sc.hero.eyebrow": "Para criadores", "sc.hero.sub": "A Theodyx está descobrindo a próxima geração de criadores. Cada candidatura é lida por uma pessoa — e nunca há taxas.", "sc.hero.cta": "Candidate-se para ser descoberto", "sc.safety.eyebrow": "Theodyx — Segurança", "sc.safety.title": "Sua segurança vem primeiro.", "sc.safety.body": "Safety is our top priority. Protecting aspiring creatives — including young individuals — from online predators is of the utmost importance. If you would like to confirm an email or communication is from an official Theodyx representative or affiliate, email scouting@theodyx.com and we will be glad to confirm. Theodyx never asks for photos in the nude or lingerie and never requires any kind of payment. If something doesn’t feel right, please don’t hesitate to contact us at scouting@theodyx.com.", "sc.safety.ack": "Li a declaração de segurança", "sc.err.safety": "Confirme que leu a declaração de segurança.", "sc.u14.change": "Atualize sua data de nascimento"}, "fr": {"sc.lbl.email": "E-mail", "sc.lbl.firstName": "Prénom", "sc.lbl.lastName": "Nom", "sc.lbl.dob": "Date de naissance", "sc.lbl.platform": "Plateforme principale", "sc.lbl.country": "Pays", "sc.lbl.state": "État / Région", "sc.lbl.city": "Ville", "sc.lbl.instagram": "Identifiant Instagram", "sc.lbl.tiktok": "Identifiant TikTok", "sc.lbl.youtube": "Chaîne YouTube", "sc.lbl.otherPlatform": "Autre plateforme", "sc.lbl.representedBy": "Représenté par", "sc.lbl.notes": "Autre chose ?", "sc.lbl.link1": "publication / vidéo 1", "sc.lbl.link2": "publication / vidéo 2", "sc.lbl.link3": "publication / vidéo 3", "sc.lbl.pictures": "Vos photos", "sc.ph.email": "vous@email.com", "sc.ph.state": "État, province ou région", "sc.ph.city": "Où êtes-vous basé(e) ?", "sc.ph.handle": "votreidentifiant", "sc.ph.youtube": "@chaîne ou URL", "sc.ph.otherPlatform": "ex. : Substack, Twitch", "sc.ph.representedBy": "Agence / manager", "sc.ph.country": "Sélectionnez votre pays…", "sc.ph.select": "Sélectionnez…", "sc.eyebrow.you": "01 — Vous", "sc.h2.you": "Dites-nous qui vous êtes", "sc.eyebrow.work": "02 — Travail", "sc.h2.work": "Montrez-nous votre travail", "sc.text.work": "Partagez les contenus dont vous êtes le plus fier : quelques liens ou un kit média. Facultatif, mais cela aide notre équipe à mieux vous connaître.", "sc.sec.you": "À propos de vous", "sc.sec.work": "Votre travail", "sc.sec.consent": "Consentement et envoi", "sc.legend.rep": "Êtes-vous actuellement représenté(e) ? *", "sc.yes": "Oui", "sc.no": "Non", "sc.optional": "(facultatif)", "sc.drop.upload": "+ Importer", "sc.drop.max": "≤ 10 Mo", "sc.drop.toobig": "Les fichiers doivent faire 10 Mo ou moins.", "sc.drop.another": "Touchez pour en essayer un autre", "sc.drop.again": "Touchez pour réessayer", "sc.drop.uploading": "Envoi…", "sc.drop.remove": "Retirer", "sc.err.uploadnet": "Échec de l’envoi. Vérifiez votre connexion.", "sc.err.upload": "Échec de l’envoi. Veuillez réessayer.", "sc.err.email": "Saisissez une adresse e-mail valide.", "sc.err.first": "Le prénom est obligatoire.", "sc.err.last": "Le nom est obligatoire.", "sc.err.dob": "Saisissez votre date de naissance.", "sc.err.age": "Vous devez avoir {n} ans ou plus pour postuler.", "sc.err.dobmatch": "Votre date de naissance ne correspond pas à l’âge indiqué précédemment.", "sc.err.country": "Sélectionnez votre pays.", "sc.err.platform": "Sélectionnez votre plateforme principale.", "sc.err.rep": "Indiquez si vous êtes représenté(e).", "sc.err.repby": "Qui vous représente ?", "sc.err.other": "Indiquez la plateforme.", "sc.err.links": "Saisissez des liens valides (https://…).", "sc.err.consent": "Veuillez accepter pour continuer.", "sc.err.turnstile": "Veuillez terminer la vérification, puis envoyer.", "sc.err.fields": "Veuillez vérifier les champs signalés.", "sc.err.rate": "Trop de tentatives. Réessayez plus tard ou écrivez à {email}.", "sc.submit": "Envoyer ma candidature", "sc.submitting": "Envoi…", "sc.success.eyebrow": "Candidature reçue", "sc.success.title": "Merci.", "sc.success.body": "Votre candidature est envoyée. Merci d’avoir pris le temps de postuler.", "sc.home": "Retour à l’accueil", "sc.req.note": "Les champs marqués d’un * sont obligatoires.", "sc.err.summary": "Veuillez corriger les points suivants :", "sc.qr.label": "Scannez pour continuer cette candidature sur votre téléphone", "sc.ts.label": "Vérification", "sc.err.tsfallback": "La vérification n’est pas disponible dans ce navigateur — écrivez à {email} et nous recevrons votre candidature par e-mail.", "sc.a11y.uploading": "Envoi de {name} : {pct} %", "sc.a11y.uploaded": "{name} envoyé.", "sc.a11y.removed": "Fichier supprimé.", "sc.a11y.removeFile": "Retirer {name}", "sc.hero.eyebrow": "Pour les créateurs", "sc.hero.sub": "Theodyx recherche la prochaine génération de créateurs. Chaque candidature est lue par une personne — et il n’y a jamais de frais.", "sc.hero.cta": "Postuler pour être repéré(e)", "sc.safety.eyebrow": "Theodyx — Sécurité", "sc.safety.title": "Votre sécurité avant tout.", "sc.safety.body": "Safety is our top priority. Protecting aspiring creatives — including young individuals — from online predators is of the utmost importance. If you would like to confirm an email or communication is from an official Theodyx representative or affiliate, email scouting@theodyx.com and we will be glad to confirm. Theodyx never asks for photos in the nude or lingerie and never requires any kind of payment. If something doesn’t feel right, please don’t hesitate to contact us at scouting@theodyx.com.", "sc.safety.ack": "J’ai lu la déclaration de sécurité", "sc.err.safety": "Veuillez confirmer que vous avez lu la déclaration de sécurité.", "sc.u14.change": "Modifier votre date de naissance"}};
   var __I = window.__thxI18n; if (__I) { for (var __lc in SCD) __I.add(__lc, SCD[__lc]); }
   function T(k, v) { if (__I && __I.t) return __I.t(k, v); var s = SCD.en[k] || k; if (v) for (var p in v) s = s.split('{' + p + '}').join(v[p]); return s; }
 
@@ -71,17 +74,15 @@
     var g = loadJSON(SS_GATES) || {};
     return { trust: !!g.trust, ageResolved: !!g.ageResolved, eligible: !!g.eligible, age: g.age == null ? null : g.age };
   })();
-  /* The page head carries <style id="sc-gate-preboot"> plus a two-line inline script that reads
-   * the very same SS_GATES keys and stamps sc-open / sc-u14 / sc-gated on <html> before first
-   * paint, so the gated sections are already in their final state when the pixels land. Stamping
-   * again here (module scope, before init) keeps the script correct on its own if that head
-   * snippet is ever missing — worst case the class lands a frame late instead of never. */
-  function gateClass() { return (gates.trust && gates.ageResolved) ? (gates.eligible ? 'sc-open' : 'sc-u14') : 'sc-gated'; }
+  /* The page head carries <style id="sc-gate-preboot"> plus a two-line inline script reading the
+   * very same SS_GATES keys. Phase 10 inverts the default: nothing is hidden at first paint, and the
+   * only class the preboot can stamp is sc-u14 — a session that already told us it is under 14.
+   * Stamping again here keeps the script correct on its own if that head snippet is ever missing. */
+  function rootClass() { return (gates.ageResolved && !gates.eligible) ? 'sc-u14' : ''; }
   function stampRoot() {
-    var d = document.documentElement, c = gateClass();
-    if (d.classList.contains(c)) return;
-    d.classList.remove('sc-open', 'sc-u14', 'sc-gated');
-    d.classList.add(c);
+    var d = document.documentElement, c = rootClass();
+    d.classList.remove('sc-open', 'sc-gated', 'sc-done');   /* 1.x leftovers, if any linger */
+    if (c) d.classList.add(c); else d.classList.remove('sc-u14');
   }
   stampRoot();
 
@@ -117,143 +118,174 @@
       sel.appendChild(og);
     });
   }
-  function fillAges() {
-    var sel = $('sc-age-select');
-    if (!sel || sel.dataset.thxFilled) return;
-    sel.dataset.thxFilled = '1';
-    function opt(v, t, dis, seld) { var o = document.createElement('option'); o.value = v; o.textContent = t; if (dis) o.disabled = true; if (seld) o.selected = true; return o; }
-    sel.appendChild(opt('', 'Select your age…', true, true));
-    sel.appendChild(opt('under', 'Under ' + MIN_AGE));
-    for (var a = MIN_AGE; a <= 80; a++) sel.appendChild(opt(String(a), String(a)));
-  }
+  /* ------------------------------------------------------- funnel events
+   * One data layer. window.__thxTrack is defined by the site head beacon (session id, UTM with a
+   * sessionStorage fallback, GPC + consent gating). The page never carries a second beacon, and the
+   * page view is the head's landing_view — this file emits only the scouting funnel steps. */
+  function trk(ev, step, once) { try { if (window.__thxTrack) window.__thxTrack(ev, step || null, !!once); } catch (e) {} }
 
-  /* --------------------------------------------------------------- gates */
+  /* --------------------------------------------------------------- state */
   function persistGates() { saveJSON(SS_GATES, gates); }
-  function lockScroll(lock) { document.body.style.overflow = lock ? 'hidden' : ''; }
 
-  var APP_SECTIONS = ['sc-form-you', 'sc-form-work', 'sc-form-consent'];
-  /* Reveal-only. Hiding is done by the class on <html> (preboot style in the page head, mirrored
-   * in injectCSS below), never by writing display:none over something that was visible at first
-   * paint — that write is exactly what used to shove the footer up ~635px. */
+  /* Reveal-only, and after Phase 10 the reveal is the default: the class on <html> only ever hides.
+   * Never write display:none over something that was visible at first paint — that write is exactly
+   * what used to shove the footer up ~635px. */
   function showApp(disp) {
     var d = document.documentElement;
-    /* Hiding is driven by disp, not by the gate keys: onSuccess() calls showApp(false) with every
-     * gate still cleared, and the app has to fold away behind the success panel just as before. */
-    var c = disp ? 'sc-open' : ((gates.trust && gates.ageResolved && !gates.eligible) ? 'sc-u14' : 'sc-gated');
-    d.classList.remove('sc-open', 'sc-u14', 'sc-gated');
-    d.classList.add(c);
-    var intro = qs('.sc-intro'); if (intro) intro.style.display = disp ? 'block' : '';
-    APP_SECTIONS.forEach(function (id) { var e = $(id); if (e) e.style.display = disp ? 'block' : ''; });
+    if (disp === false) d.classList.add('sc-done'); else d.classList.remove('sc-done');
   }
 
-  /* ---------------------------------------------- modal gates (KB-01/SEM-02)
-   * The safety and age overlays declare role="dialog" aria-modal="true", so they have to behave
-   * like modals: take focus when they open, put every other top-level node inert + aria-hidden,
-   * cycle Tab inside themselves, and hand focus on to the thing they were guarding when they
-   * clear. Same setInert()/focus-move/restore shape as the mobile nav sheet in theodyx-nav.js. */
-  var gateInerted = [], activeGate = null, gateFocusPrev = null, gateKeysBound = false;
-  var FOCUSABLE = 'a[href],button:not([disabled]),select:not([disabled]),textarea:not([disabled]),input:not([disabled]):not([type="hidden"]),[tabindex]:not([tabindex="-1"])';
-
-  function isVisible(el) { return !!(el && (el.offsetWidth || el.offsetHeight || (el.getClientRects && el.getClientRects().length))); }
   function focusEl(el, scroll) {
     if (!el) return false;
     if (scroll) { try { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (x) {} }
     try { el.focus({ preventScroll: true }); } catch (x) { try { el.focus(); } catch (y) {} }
     return document.activeElement === el;
   }
-  function gateFocusables(gate) {
-    return qsa(FOCUSABLE, gate).filter(function (el) { return isVisible(el) && !el.hasAttribute('inert'); });
-  }
-  function setGateInert(gate) {
-    releaseGateInert();
-    var n = document.body.firstElementChild;
-    while (n) {
-      if (n !== gate && !n.contains(gate) && !/^(SCRIPT|STYLE|LINK|TEMPLATE|NOSCRIPT)$/.test(n.tagName) && !n.hasAttribute('inert')) {
-        n.setAttribute('inert', ''); n.setAttribute('aria-hidden', 'true'); gateInerted.push(n);
-      }
-      n = n.nextElementSibling;
-    }
-  }
-  function releaseGateInert() {
-    gateInerted.forEach(function (n) { n.removeAttribute('inert'); n.removeAttribute('aria-hidden'); });
-    gateInerted = [];
-  }
-  /* Tab guard: inert already keeps the rest of the page out of the sequence in modern engines,
-   * this makes the wrap deterministic (and covers browsers without inert). */
-  function onGateKeydown(e) {
-    if (!activeGate || e.key !== 'Tab') return;
-    var f = gateFocusables(activeGate);
-    if (!f.length) { e.preventDefault(); focusEl(activeGate); return; }
-    var first = f[0], last = f[f.length - 1], a = document.activeElement;
-    if (!activeGate.contains(a)) { e.preventDefault(); focusEl(e.shiftKey ? last : first); return; }
-    if (e.shiftKey && (a === first || a === activeGate)) { e.preventDefault(); focusEl(last); }
-    else if (!e.shiftKey && a === last) { e.preventDefault(); focusEl(first); }
-  }
-  function onGateFocusIn(e) {
-    if (!activeGate || activeGate.contains(e.target)) return;
-    var f = gateFocusables(activeGate);
-    focusEl(f[0] || activeGate);
-  }
-  function bindGateKeys() {
-    if (gateKeysBound) return; gateKeysBound = true;
-    document.addEventListener('keydown', onGateKeydown, true);
-    document.addEventListener('focusin', onGateFocusIn, true);
-  }
-  function openGate(gate, prefer) {
-    if (!gate || activeGate === gate) return;
-    if (!activeGate) gateFocusPrev = document.activeElement;
-    activeGate = gate;
-    if (!gate.hasAttribute('tabindex')) gate.setAttribute('tabindex', '-1');
-    gate.removeAttribute('aria-hidden'); gate.removeAttribute('inert');
-    setGateInert(gate);
-    bindGateKeys();
-    focusEl(prefer && isVisible(prefer) ? prefer : gate);
-  }
-  /* Only moves focus if a gate was actually open, so an ordinary reload of an already-cleared
-   * session never steals focus from the top of the document. */
-  function closeGates(moveFocusTo) {
-    var had = !!activeGate;
-    activeGate = null;
-    releaseGateInert();
-    if (!had) return;
-    if (moveFocusTo && isVisible(moveFocusTo)) focusEl(moveFocusTo);
-    else if (gateFocusPrev && document.contains(gateFocusPrev) && isVisible(gateFocusPrev)) focusEl(gateFocusPrev);
-    gateFocusPrev = null;
-  }
 
-  function applyGateState() {
-    var safety = $('sc-gate-safety'), age = $('sc-gate-age'), u14 = $('sc-gate-u14');
-    hide(safety); hide(age); hide(u14);
-    if (!gates.trust) { show(safety, 'flex'); lockScroll(true); showApp(false); openGate(safety, null); return; }
-    if (!gates.ageResolved) { show(age, 'flex'); lockScroll(true); showApp(false); openGate(age, $('sc-age-select')); return; }
-    lockScroll(false);
-    /* KB-06: hand focus to the thing the gate was hiding — the form when eligible, the
-     * ineligibility heading when not (the form stays display:none on that branch). */
-    if (gates.eligible) { showApp(true); hide(u14); initTurnstile(); initQR(); closeGates($('sc-email')); }
-    else {
-      showApp(false); show(u14, 'block');
-      var h = qs('#sc-gate-u14 .sc-h2') || qs('#sc-gate-u14 h2');
-      if (h && !h.hasAttribute('tabindex')) h.setAttribute('tabindex', '-1');
-      closeGates(h);
+  /* --------------------------------------------------------------- hero
+   * LAND-01: the first viewport has to answer "what is this and what do I do next". The native
+   * page ships <section class="sc-hero"><h1 class="sc-hero-title"> and nothing else, so the eyebrow,
+   * the one-sentence offer and the CTA are added around that heading. The preboot reserves the band's
+   * height, so the three nodes land inside space that was already painted (no shift). */
+  function buildHero() {
+    var hero = qs('.sc-hero'); if (!hero || hero.dataset.thxHero) return;
+    hero.dataset.thxHero = '1';
+    /* The h1 is the LCP element. It is never detached or re-parented — moving a node resets its
+       paint, which is how the old build ended up with a 2.3 s elementRenderDelay (SPEED-02). The
+       three new nodes are inserted around it, into a band whose box the page-head preboot already
+       painted. */
+    var h1 = qs('.sc-hero-title', hero) || qs('h1', hero);
+    var eb = document.createElement('span'); eb.className = 'sc-hero-eyebrow'; eb.textContent = T('sc.hero.eyebrow');
+    if (h1) hero.insertBefore(eb, h1); else hero.appendChild(eb);
+    var sub = document.createElement('p'); sub.className = 'sc-hero-sub'; sub.textContent = T('sc.hero.sub');
+    if (h1 && h1.nextSibling) hero.insertBefore(sub, h1.nextSibling); else hero.appendChild(sub);
+    if (!$('sc-hero-cta')) {
+      var cta = document.createElement('a');
+      cta.id = 'sc-hero-cta'; cta.className = 'thxo-btn sc-hero-cta';
+      cta.href = '#sc-form-you'; cta.textContent = T('sc.hero.cta');
+      on(cta, 'click', function (e) {
+        var t = $('sc-form-you'); if (!t) return;
+        e.preventDefault();
+        try { t.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (x) { t.scrollIntoView(); }
+        var f = $('sc-email'); if (f) setTimeout(function () { focusEl(f); }, 420);
+      });
+      hero.insertBefore(cta, sub.nextSibling);
     }
   }
 
-  function wireGates() {
-    on($('sc-gate-safety-ok'), 'click', function () { gates.trust = true; persistGates(); applyGateState(); });
-    var go = $('sc-gate-age-go');
-    on(go, 'click', function () {
-      var sel = $('sc-age-select'); if (!sel || !sel.value) return;
-      var c = sel.value;
-      if (c === 'under' || c === 'prefer') { gates.eligible = false; gates.age = null; }
-      else { var age = parseInt(c, 10); gates.age = age; gates.eligible = age >= MIN_AGE; }
-      gates.ageResolved = true; persistGates();
-      if (window.__thxTrack) window.__thxTrack(gates.eligible ? 'age_eligible' : 'age_ineligible', null, true);
-      applyGateState();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+  /* -------------------------------------------------------------- safety
+   * The statement used to be a full-screen role="dialog" overlay that a paid click hit before any
+   * offer or form (LAND-01) and that gated LCP on the deferred bundle (SPEED-02). It is now an
+   * ordinary section above the form; the acknowledgement moved to a required checkbox in the consent
+   * block. The copy is lifted verbatim out of the native #sc-gate-safety when it is on the page, so
+   * the mailto links and the legal wording survive untouched. */
+  function buildSafety() {
+    if ($('sc-safety')) return;
+    var host = $('sc-form-you'); if (!host || !host.parentNode) return;
+    var old = $('sc-gate-safety');
+    var sec = document.createElement('section');
+    sec.id = 'sc-safety'; sec.className = 'sc-section sc-app-sans sc-safety';
+    sec.setAttribute('aria-labelledby', 'sc-safety-h');
+    var eb = document.createElement('span'); eb.className = 'sc-safety-eyebrow';
+    eb.textContent = (old && (qs('.sc-gate-eyebrow', old) || {}).textContent) || T('sc.safety.eyebrow');
+    var h = document.createElement('h2'); h.className = 'sc-h2 sc-safety-h'; h.id = 'sc-safety-h';
+    h.textContent = (old && (qs('.sc-gate-h', old) || {}).textContent) || T('sc.safety.title');
+    sec.appendChild(eb); sec.appendChild(h);
+    var body = old && qs('.sc-gate-body', old);
+    if (body) { body.classList.remove('sc-gate-body'); body.classList.add('sc-safety-body'); sec.appendChild(body); }
+    else { var p = document.createElement('p'); p.className = 'sc-safety-body'; p.textContent = T('sc.safety.body'); sec.appendChild(p); }
+    host.parentNode.insertBefore(sec, host);
+    /* the overlays are retired, not merely hidden — nothing should be able to reveal them again */
+    ['sc-gate-safety', 'sc-gate-age'].forEach(function (id) { var n = $(id); if (n && n.parentNode) n.parentNode.removeChild(n); });
+  }
+
+  /* the acknowledgement, as a required checkbox that blocks submit exactly like the consent box */
+  function buildSafetyAck() {
+    if ($('sc-safety-ack')) return;
+    var consent = $('sc-consent'); if (!consent) return;
+    var lab = qs('label[for="sc-consent"]'); if (!lab || !lab.parentNode) return;
+    var wrap = document.createElement('label');
+    wrap.className = 'sc-consent sc-consent--ack'; wrap.setAttribute('for', 'sc-safety-ack');
+    var box = document.createElement('input');
+    box.type = 'checkbox'; box.id = 'sc-safety-ack'; box.className = 'sc-check'; box.required = true;
+    var txt = document.createElement('span'); txt.className = 'sc-consent-text';
+    var star = document.createElement('span'); star.className = 'sc-req'; star.setAttribute('aria-hidden', 'true'); star.textContent = '* ';
+    txt.appendChild(star);
+    txt.appendChild(document.createTextNode(T('sc.safety.ack')));
+    var link = document.createElement('a'); link.href = '#sc-safety'; link.className = 'sc-ack-link'; link.textContent = T('sc.safety.title');
+    on(link, 'click', function (e) { var t = $('sc-safety'); if (!t) return; e.preventDefault(); try { t.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (x) { t.scrollIntoView(); } });
+    txt.appendChild(document.createTextNode(' — '));
+    txt.appendChild(link);
+    wrap.appendChild(box); wrap.appendChild(txt);
+    lab.parentNode.insertBefore(wrap, lab);
+    on(box, 'change', function () {
+      if (box.checked) { gates.trust = true; persistGates(); trk('age_acknowledged', null, true); clearFieldMsg('sc-safety-ack'); }
+      else { gates.trust = false; persistGates(); }
     });
-    var sel = $('sc-age-select');
-    on(sel, 'change', function () { if (go) go.disabled = !sel.value; });
-    if (go && sel) go.disabled = !sel.value;
+    if (gates.trust) box.checked = true;
+  }
+
+  /* ----------------------------------------------------------------- age
+   * FORMS-04: #sc-dob is the single source of truth. There is no second answer to contradict it, so
+   * there is nothing to be locked out by — editing the date re-evaluates and the page re-opens.
+   * Two ineligible states, deliberately different:
+   *   html.sc-u14     the tab already answered "under 14" on an earlier load. The preboot stamps it
+   *                   before paint, the form sections never render, and #sc-gate-u14 stands in their
+   *                   place with a button back to the date field. No shift, no dead end.
+   *   html.sc-inelig  decided live, while the visitor is typing. The form stays exactly where it is;
+   *                   only the submit row is replaced by the same note, so the date stays editable. */
+  var bootU14 = document.documentElement.classList.contains('sc-u14');
+
+  function u14Note() {
+    var note = $('sc-gate-u14'); if (!note) return null;
+    if (note.dataset.thxU14) return note;
+    note.dataset.thxU14 = '1';
+    var h = qs('.sc-h2', note) || qs('h2', note);
+    if (h && !h.hasAttribute('tabindex')) h.setAttribute('tabindex', '-1');
+    var back = document.createElement('button');
+    back.type = 'button'; back.id = 'sc-u14-change'; back.className = 'sc-gate-btn sc-u14-change';
+    back.textContent = T('sc.u14.change');
+    on(back, 'click', unlockU14);
+    note.appendChild(back);
+    return note;
+  }
+  /* park the note where it reads as the submit row's replacement, not as a section after the form */
+  function inlineNote() {
+    var note = u14Note(), form = $('sc-form-consent'); if (!note || !form) return;
+    if (note.dataset.thxInline) return;
+    var anchor = $('sc-submit');
+    if (anchor && anchor.parentNode) { anchor.parentNode.insertBefore(note, anchor); note.dataset.thxInline = '1'; note.className = 'sc-u14-inline sc-app-sans'; }
+  }
+  function unlockU14() {
+    gates.ageResolved = false; gates.eligible = false; gates.age = null; persistGates();
+    document.documentElement.classList.remove('sc-u14');
+    bootU14 = false;
+    inlineNote();
+    var d = $('sc-dob'); if (d) { d.value = ''; focusEl(d, true); }
+    initTurnstile(); initQR();
+  }
+
+  function dobAge() { var v = val('sc-dob'); return /^\d{4}-\d{2}-\d{2}$/.test(v) ? ageFromDob(v) : null; }
+  function setIneligible(on) {
+    var d = document.documentElement;
+    if (on) { inlineNote(); d.classList.add('sc-inelig'); } else d.classList.remove('sc-inelig');
+  }
+  /* announce=true when the visitor caused it (blur / submit); false for the silent boot pass */
+  function evaluateAge(announce) {
+    if (bootU14) return null;                       /* the locked screen owns the state until unlocked */
+    var a = dobAge();
+    if (a == null) {
+      if (gates.ageResolved) { gates.ageResolved = false; gates.eligible = false; gates.age = null; persistGates(); }
+      setIneligible(false); return null;
+    }
+    var elig = a >= MIN_AGE, changed = (!gates.ageResolved || gates.eligible !== elig || gates.age !== a);
+    gates.age = a; gates.eligible = elig; gates.ageResolved = true;
+    if (changed) persistGates();
+    trk(elig ? 'age_eligible' : 'age_ineligible', null, true);
+    setIneligible(!elig);
+    if (!elig) { if (announce) { markBad('sc-dob'); setFieldMsg('sc-dob', T('sc.err.age', { n: MIN_AGE })); } }
+    else clearFieldMsg('sc-dob');
+    return a;
   }
 
   /* --------------------------------------------------------- form persist */
@@ -441,6 +473,7 @@
     on(remove, 'click', function () { reset(true); });
     on(input, 'change', function () {
       var file = input.files && input.files[0]; if (!file) return;
+      trk('upload_added', dropId);
       remove.hidden = true;
       if (file.size > MAX_UPLOAD_BYTES) {
         drop.classList.add('is-error');
@@ -522,8 +555,8 @@
       box.dataset.thxRendered = '1';
     } catch (e) { turnstileFallback(); }
   }
-  /* Behind the age gate there is nothing to verify, so the Turnstile bundle waits for the gate to
-   * clear (applyGateState) or for the first field focus, whichever happens first. */
+  /* There is nothing to verify until someone is actually filling the form in, so the Turnstile
+   * form to be reachable (init) or for the first field focus, whichever happens first. */
   function wireTurnstileOnFocus() {
     function once(e) {
       var t = e.target;
@@ -583,7 +616,7 @@
   function fieldMsgHost(id) {
     if (id === 'sc-rep') return $('sc-rep');
     if (id === 'sc-turnstile') return $('sc-turnstile');
-    if (id === 'sc-consent') { var lab = qs('label[for="sc-consent"]'); return (lab && lab.parentNode) || null; }
+    if (id === 'sc-consent' || id === 'sc-safety-ack') { var lab = qs('label[for="' + id + '"]'); return (lab && lab.parentNode) || null; }
     var e = $(id); if (!e) return null;
     return (e.closest && e.closest('.sc-field')) || e.parentNode;
   }
@@ -600,7 +633,8 @@
     if (!p) {
       p = document.createElement('p'); p.id = mid; p.className = 'sc-field-err';
       /* the consent host is the whole form — put the message under the checkbox, not under submit */
-      var after = (id === 'sc-consent') ? ($('sc-consent-note') || qs('label[for="sc-consent"]')) : null;
+      var after = (id === 'sc-consent') ? ($('sc-consent-note') || qs('label[for="sc-consent"]'))
+        : (id === 'sc-safety-ack') ? qs('label[for="sc-safety-ack"]') : null;
       if (after && after.parentNode === host) host.insertBefore(p, after.nextSibling); else host.appendChild(p);
     }
     p.textContent = msg;
@@ -618,6 +652,19 @@
       });
       if (p.parentNode) p.parentNode.removeChild(p);
     });
+  }
+  /* FORMS-03 needs a single-field eraser: clearFieldMsgs() wipes the whole form, which is right at
+   * submit time and wrong on blur, when only the field just left may change. */
+  function clearFieldMsg(id) {
+    var mid = fieldMsgId(id), p = $(mid);
+    if (p) {
+      qsa('[aria-describedby~="' + mid + '"]').forEach(function (el) {
+        var rest = (el.getAttribute('aria-describedby') || '').split(/\s+/).filter(function (t) { return t && t !== mid; });
+        if (rest.length) el.setAttribute('aria-describedby', rest.join(' ')); else el.removeAttribute('aria-describedby');
+      });
+      if (p.parentNode) p.parentNode.removeChild(p);
+    }
+    fieldControls(id).forEach(function (e) { e.classList.remove('sc-input--error'); e.removeAttribute('aria-invalid'); });
   }
   function clearErr() {
     var box = $('sc-err');
@@ -668,7 +715,60 @@
     fieldControls(id).forEach(function (e) { e.classList.add('sc-input--error'); e.setAttribute('aria-invalid', 'true'); });
   }
 
+  /* -------------------------------------------------- inline validation (FORMS-03)
+   * One rule per field, shared by blur and by submit, so the two can never disagree. Blur writes
+   * only the field's own message — the #sc-err summary stays a submit-time affordance. Once a field
+   * is marked bad it re-validates on input, so the error clears as the visitor fixes it. */
+  function fieldError(id) {
+    if (id === 'sc-email') { var e = val('sc-email'); return isEmail(e) ? null : T('sc.err.email'); }
+    if (id === 'sc-firstName') return val('sc-firstName') ? null : T('sc.err.first');
+    if (id === 'sc-lastName') return val('sc-lastName') ? null : T('sc.err.last');
+    if (id === 'sc-dob') {
+      var v = val('sc-dob'); if (!/^\d{4}-\d{2}-\d{2}$/.test(v)) return T('sc.err.dob');
+      var a = ageFromDob(v); return (a != null && a < MIN_AGE) ? T('sc.err.age', { n: MIN_AGE }) : null;
+    }
+    if (id === 'sc-country') return val('sc-country') ? null : T('sc.err.country');
+    if (id === 'sc-platform') return val('sc-platform') ? null : T('sc.err.platform');
+    if (id === 'sc-rep') { var r = currentRepresented(); return (r === 'yes' || r === 'no') ? null : T('sc.err.rep'); }
+    if (id === 'sc-representedBy') return (currentRepresented() === 'yes' && !val('sc-representedBy')) ? T('sc.err.repby') : null;
+    if (id === 'sc-otherPlatform') return (val('sc-platform') === 'other' && !val('sc-otherPlatform')) ? T('sc.err.other') : null;
+    if (id === 'sc-link1' || id === 'sc-link2' || id === 'sc-link3') { var l = val(id); return (l && !isUrl(l)) ? T('sc.err.links') : null; }
+    if (id === 'sc-consent') { var c = $('sc-consent'); return (c && c.checked) ? null : T('sc.err.consent'); }
+    if (id === 'sc-safety-ack') { var k = $('sc-safety-ack'); return (k && k.checked) ? null : T('sc.err.safety'); }
+    return null;
+  }
+  function validateField(id) {
+    var msg = fieldError(id);
+    if (msg) { markBad(id); setFieldMsg(id, msg); } else clearFieldMsg(id);
+    return msg;
+  }
+  function isBad(id) { return fieldControls(id).some(function (e) { return e.getAttribute('aria-invalid') === 'true'; }); }
+  var INLINE_BLUR = ['sc-email', 'sc-firstName', 'sc-lastName', 'sc-dob', 'sc-representedBy', 'sc-otherPlatform', 'sc-link1', 'sc-link2', 'sc-link3'];
+  var INLINE_CHANGE = ['sc-country', 'sc-platform', 'sc-consent', 'sc-safety-ack'];
+  function wireInlineValidation() {
+    INLINE_BLUR.forEach(function (id) {
+      var e = $(id); if (!e || e.dataset.thxInline) return; e.dataset.thxInline = '1';
+      on(e, 'blur', function () { if (id === 'sc-dob') { evaluateAge(true); if (!dobAge()) validateField(id); } else validateField(id); });
+      on(e, 'input', function () { if (isBad(id)) validateField(id); });
+    });
+    INLINE_CHANGE.forEach(function (id) {
+      var e = $(id); if (!e || e.dataset.thxInline) return; e.dataset.thxInline = '1';
+      on(e, 'change', function () { if (id === 'sc-safety-ack' || id === 'sc-consent') { if (e.checked) clearFieldMsg(id); else if (isBad(id)) validateField(id); } else validateField(id); });
+    });
+    qsa('#sc-rep [data-val]').forEach(function (b) { on(b, 'click', function () { if (isBad('sc-rep')) validateField('sc-rep'); }); });
+  }
+
   /* -------------------------------------------------------------- submit */
+  var UTM_KEYS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'];
+  function readUtm() {
+    var o = {}, any = false;
+    try {
+      var q = new URLSearchParams(location.search);
+      UTM_KEYS.forEach(function (k) { var v = q.get(k); if (v) { o[k] = String(v).slice(0, 64); any = true; } });
+      if (!any) { var st = sessionStorage.getItem('thx_utm_v1'); if (st) { var j = JSON.parse(st); if (j && typeof j === 'object') UTM_KEYS.forEach(function (k) { if (j[k]) o[k] = String(j[k]).slice(0, 64); }); } }
+    } catch (e) {}
+    return o;
+  }
   function collectAndValidate() {
     clearErr();
     var errs = [];
@@ -678,12 +778,11 @@
     if (!isEmail(email)) { markBad('sc-email'); errs.push(['sc-email', T('sc.err.email')]); }
     var firstName = need('sc-firstName', T('sc.err.first'));
     var lastName = need('sc-lastName', T('sc.err.last'));
+    /* FORMS-04: the date is the only age answer there is, so there is no second one to disagree
+       with — the ±1 cross-check against the old entry gate is gone with the gate. */
     var dob = val('sc-dob');
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(dob)) { markBad('sc-dob'); errs.push(['sc-dob', T('sc.err.dob')]); }
-    else { var dobAge = ageFromDob(dob);
-      if (dobAge != null && dobAge < MIN_AGE) { markBad('sc-dob'); errs.push(['sc-dob', T('sc.err.age', { n: MIN_AGE })]); }
-      else if (dobAge != null && gates.age != null && Math.abs(dobAge - gates.age) > 1) { markBad('sc-dob'); errs.push(['sc-dob', T('sc.err.dobmatch')]); }
-    }
+    var dobErr = fieldError('sc-dob');
+    if (dobErr) { markBad('sc-dob'); errs.push(['sc-dob', dobErr]); }
     var country = val('sc-country'); if (!country) { markBad('sc-country'); errs.push(['sc-country', T('sc.err.country')]); }
     var city = val('sc-city'); // optional
     var platform = val('sc-platform'); if (!platform) { markBad('sc-platform'); errs.push(['sc-platform', T('sc.err.platform')]); }
@@ -696,6 +795,7 @@
     var links = ['sc-link1', 'sc-link2', 'sc-link3'].map(val).filter(Boolean);
     for (var i = 0; i < links.length; i++) { if (!isUrl(links[i])) { errs.push(['sc-link1', T('sc.err.links')]); break; } }
 
+    var ack = $('sc-safety-ack'); if (!ack || !ack.checked) { markBad('sc-safety-ack'); errs.push(['sc-safety-ack', T('sc.err.safety')]); }
     var consent = $('sc-consent'); if (!consent || !consent.checked) { markBad('sc-consent'); errs.push(['sc-consent', T('sc.err.consent')]); }
     if (!turnstileToken) { errs.push(['sc-turnstile', tsUnavailable() ? T('sc.err.tsfallback', { email: SCOUTING_EMAIL }) : T('sc.err.turnstile')]); }
 
@@ -722,6 +822,13 @@
     if (mediaKitKey) payload.mediaKitKey = mediaKitKey;
     var samples = sampleKeys.filter(Boolean); if (samples.length) payload.sampleKeys = samples;
     var notes = val('sc-notes'); if (notes) payload.notes = notes;
+    /* UTM-05: the application row can be credited to a campaign. session joins it to funnel_events,
+       landingPath says which page converted, utm comes from the head beacon's sessionStorage copy
+       (so an in-site click that stripped the query string still carries the campaign) and falls back
+       to the live URL. The worker stores them; nothing here is PII. */
+    try { var sid = sessionStorage.getItem('thx_sid_v1'); if (sid) payload.session = sid; } catch (e) {}
+    payload.landingPath = location.pathname || '/scouting';
+    payload.utm = readUtm();
     return payload;
   }
 
@@ -766,6 +873,10 @@
 
   function onSuccess() {
     try { sessionStorage.removeItem(SS_FORM); } catch (e) {}
+    /* INST-02 / FORMS-02 / UTM-04: the conversion is emitted here, where the worker has already
+       answered ok — never inferred from whether a position:fixed panel looks visible. */
+    trk('application_submitted', null, true);
+    trk('success_view', null, true);
     showApp(false);
     var success = $('sc-success');
     if (success) { show(success, 'flex'); var hh = qs('.sc-success-title', success); if (hh) { try { hh.focus(); } catch (e) {} } }
@@ -787,7 +898,7 @@
     var css = [
       ':root{--sc-ink:#0E0E0F;--sc-paper:#F2F1EC;--sc-dark:#0a0a0c;--sc-mute:rgba(14,14,15,0.7);--sc-mute-ink:rgba(242,241,236,0.6);--sc-hair:rgba(14,14,15,0.16);--sc-hair-ink:rgba(242,241,236,0.2);--sc-line:rgba(14,14,15,0.55);--sc-err:#8A1F1B;}',
       '.sc-app-sans{font-family:"Objectivity","Archivo","Helvetica Neue",Arial,sans-serif;}',
-      '#sc-form-you,#sc-form-work,#sc-form-consent{display:none;background:var(--sc-paper);color:var(--sc-ink);font-family:"Objectivity","Archivo","Helvetica Neue",Arial,sans-serif;}',
+      '#sc-form-you,#sc-form-work,#sc-form-consent{background:var(--sc-paper);color:var(--sc-ink);font-family:"Objectivity","Archivo","Helvetica Neue",Arial,sans-serif;}',
       '.sc-section{max-width:760px;margin:0 auto;padding:64px 20px;}',
       '@media(min-width:640px){.sc-section{padding:96px 32px;}}',
       '#sc-form-work{background:rgba(14,14,15,0.02);border-top:1px solid var(--sc-hair);}',
@@ -825,12 +936,18 @@
       '.sc-consent-text{font-size:15px;line-height:1.6;}',
       '.sc-consent-text a{color:var(--sc-ink);text-decoration:underline;text-underline-offset:2px;}',
       '#sc-turnstile{margin-top:28px;}',
-      /* mirror of <style id="sc-gate-preboot"> in the page head: the root class decides what is
-         on screen, so the script never has to write display:none after first paint */
-      '.sc-intro,#sc-form-you,#sc-form-work,#sc-form-consent{display:none;}',
-      'html.sc-open .sc-intro{display:block;}',
-      'html.sc-open #sc-form-you,html.sc-open #sc-form-work,html.sc-open #sc-form-consent{display:block;}',
+      /* Mirror of <style id="sc-gate-preboot"> in the page head. Phase 10 inverts it: the offer and
+         the form are the default state, and the root class only ever takes something away. The
+         html:not() prefix is not decoration — the page's own native <style> block sits in the body,
+         after this sheet, and declares #sc-form-*{display:none}, so the default has to out-specify
+         it rather than merely follow it. */
+      'html:not(.sc-u14) #sc-form-you,html:not(.sc-u14) #sc-form-work,html:not(.sc-u14) #sc-form-consent{display:block;}',
+      'html.sc-u14 #sc-form-you,html.sc-u14 #sc-form-work,html.sc-u14 #sc-form-consent{display:none;}',
       'html.sc-u14 #sc-gate-u14{display:block;}',
+      /* live ineligibility: the form stays put, the submit row is what gets replaced */
+      'html.sc-inelig #sc-gate-u14{display:block;}',
+      'html.sc-inelig #sc-submit,html.sc-inelig #sc-turnstile{display:none;}',
+      'html.sc-done .sc-intro,html.sc-done #sc-safety,html.sc-done #sc-form-you,html.sc-done #sc-form-work,html.sc-done #sc-form-consent,html.sc-done #sc-gate-u14{display:none!important;}',
       /* reserve the QR box so the code does not push the intro around when it renders */
       '#sc-qr{width:120px;height:120px;}',
       '.sc-err{display:none;margin-top:22px;border-inline-start:2px solid var(--sc-err);padding-inline-start:16px;color:var(--sc-err);font-size:15px;line-height:1.5;}',
@@ -848,9 +965,9 @@
       '.sc-pics-note{margin-bottom:32px;}',
       '.sc-serif{font-family:"Cormorant","Cormorant Garamond",Georgia,serif;font-style:italic;font-size:clamp(20px,2.4vw,30px);line-height:1.3;margin-top:24px;}',
       /* gates + success overlays */
-      '#sc-gate-safety,#sc-gate-age,#sc-success{display:none;position:fixed;inset:0;z-index:9000;overflow-y:auto;background:var(--sc-ink);color:var(--sc-paper);font-family:"Objectivity","Archivo",sans-serif;}',
-      '#sc-gate-age{background:rgba(14,14,15,0.92);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);align-items:center;justify-content:center;}',
-      '#sc-gate-safety{align-items:center;justify-content:center;}',
+      /* LAND-01: the two black overlays are gone. #sc-success is the one panel that still earns a
+         fixed layer — it is shown only after the worker has accepted the application. */
+      '#sc-success{display:none;position:fixed;inset:0;z-index:9000;overflow-y:auto;background:var(--sc-ink);color:var(--sc-paper);font-family:"Objectivity","Archivo",sans-serif;}',
       '.sc-gate-inner{max-width:640px;margin:0 auto;padding:64px 28px;width:100%;}',
       '.sc-gate-inner--center{text-align:center;max-width:440px;}',
       '.sc-gate-eyebrow{font-family:"Space Mono","Mono",ui-monospace,monospace;font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--sc-mute-ink);margin-bottom:24px;display:block;}',
@@ -861,18 +978,21 @@
       '.sc-gate-btn{margin-top:40px;background:var(--sc-paper);color:var(--sc-ink);border:1px solid var(--sc-paper);padding:16px 32px;font-family:"Space Mono","Mono",ui-monospace,monospace;font-size:13px;letter-spacing:0.16em;text-transform:uppercase;cursor:pointer;transition:all .16s ease;}',
       '.sc-gate-btn:hover:not(:disabled){background:transparent;color:var(--sc-paper);}',
       '.sc-gate-btn:disabled{opacity:.5;cursor:not-allowed;}',
-      '.sc-gate-field{max-width:300px;margin:36px auto 0;text-align:start;}',
-      '.sc-gate-field .sc-label{color:var(--sc-paper);}',
-      '#sc-age-select{color:var(--sc-paper);border-bottom-color:var(--sc-hair-ink);}',
-      '#sc-age-select option{color:#111;}',
-      '#sc-gate-u14{display:none;}',
       '#sc-success .sc-gate-inner{min-height:70vh;display:flex;flex-direction:column;justify-content:center;}',
       '.sc-success-title{font-family:"Objectivity","Archivo",sans-serif;font-weight:800;font-size:clamp(40px,7vw,96px);line-height:1;margin:0;}',
       /* ---- v1.2.0 editorial pass: charcoal hero, no ghost, black headings, more air ---- */
       /* Hero: short charcoal band, thin uppercase wordmark, drop the giant THEODYX ghost */
-      '.sc-hero{background:#000000!important;min-height:0!important;height:auto!important;display:flex!important;align-items:flex-end!important;padding:clamp(80px,11vw,128px) clamp(22px,6vw,72px) clamp(56px,7vw,84px)!important;}',
+      /* Phase 10: the band keeps the exact height the page-head preboot reserved for it. If this
+         sheet dropped it back to min-height:0 the hero would shrink the moment the script landed and
+         drag the whole page up with it — measured at 0.116 CLS on a 390 px viewport. */
+      '.sc-hero{background:#000000!important;position:relative!important;min-height:clamp(470px,50vw,620px)!important;height:auto!important;display:flex!important;flex-direction:column!important;align-items:flex-start!important;justify-content:flex-start!important;gap:clamp(14px,1.6vw,20px)!important;padding:calc(clamp(80px,11vw,128px) + 34px) clamp(22px,6vw,72px) clamp(56px,7vw,84px)!important;}',
       '.sc-hero-ghost{display:none!important;}',
-      '.sc-hero-title{color:#F2F1EC!important;font-family:"Archivo","Objectivity",sans-serif!important;font-weight:300!important;font-size:clamp(46px,9vw,124px)!important;letter-spacing:0.012em!important;line-height:0.96!important;margin:0!important;text-transform:uppercase!important;}',
+      /* 46px overflowed the hero's own padding at 360 px, and the resulting one-line/two-line
+         ambiguity was the last shift left on the page: the webfont swap re-laid the wordmark for
+         0.035 CLS. At 42 px it fits on one line at every width, and with line-height fixed at 0.96
+         the metric-matched fallback and the real face occupy the same box. Declared identically in
+         the page-head preboot, so first paint already has these metrics. */
+      '.sc-hero-title{color:#F2F1EC!important;font-family:"Archivo","Theodyx Sans Fallback","Objectivity",sans-serif!important;font-weight:300!important;font-size:clamp(42px,9vw,124px)!important;letter-spacing:0.012em!important;line-height:0.96!important;margin:0!important;text-transform:uppercase!important;}',
       /* Intro: airy, black heading, text left / QR right */
       '.sc-intro{background:var(--sc-paper)!important;padding:clamp(64px,8vw,108px) clamp(22px,6vw,72px) clamp(48px,6vw,76px)!important;}',
       '.sc-intro .sc-eyebrow{font-family:"Space Mono","Mono",ui-monospace,monospace!important;font-size:11px!important;letter-spacing:0.22em!important;text-transform:uppercase!important;color:var(--sc-mute)!important;margin-bottom:clamp(28px,4vw,40px)!important;}',
@@ -945,9 +1065,37 @@
       '.sc-sr-only{position:absolute!important;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0;}',
       /* F-17 */
       '.sc-consent-note{margin:10px 0 0;font-size:14px;line-height:1.6;color:var(--sc-mute);}',
-      /* KB-01: the gate itself takes focus so the dialog copy is announced — but a 2 px ring
-         around a full-screen overlay is noise, and it is not reachable by Tab. */
-      '#sc-gate-safety:focus,#sc-gate-age:focus{outline:none;}'
+
+      /* ---------------------- Phase 10: the offer, above the fold (LAND-01) ----------------------
+         The hero band reserves its own height in the page-head preboot, so the eyebrow, sentence and
+         CTA that this file adds land inside space that was already painted. Content is bottom-aligned,
+         so any spare reserved height reads as air above the wordmark rather than as a jump. */
+      /* the eyebrow is taken out of flow and its 34 px band is reserved by the hero's padding-top,
+         in this sheet and in the page-head preboot alike — so the h1 (the LCP element) occupies the
+         same pixels before and after this file runs, and the band's height never changes. */
+      '.sc-hero-eyebrow{position:absolute;top:clamp(80px,11vw,128px);inset-inline-start:clamp(22px,6vw,72px);font-family:"Space Mono","Mono",ui-monospace,monospace;font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:rgba(242,241,236,0.72);margin:0;}',
+      '.sc-hero-sub{font-family:"Objectivity","Archivo",sans-serif;font-size:clamp(16px,1.6vw,20px);line-height:1.5;color:rgba(242,241,236,0.86);margin:0;max-width:46ch;}',
+      'a.sc-hero-cta{display:inline-flex;align-items:center;justify-content:center;min-height:48px;margin-top:clamp(6px,1vw,12px);padding:14px 26px;border-radius:20px;background:#F2F1EC;color:#0E0E0F;border:1px solid #F2F1EC;font-family:"Objectivity","Archivo",sans-serif;font-size:16px;line-height:1;text-decoration:none;transition:background .16s ease,color .16s ease;}',
+      'a.sc-hero-cta:hover{background:transparent;color:#F2F1EC;}',
+      'a.sc-hero-cta:focus-visible{outline:2px solid #F2F1EC;outline-offset:3px;}',
+
+      /* the safety statement, demoted from a full-screen dialog to an ordinary section above the form */
+      '#sc-safety{background:var(--sc-ink);color:var(--sc-paper);}',
+      '#sc-safety .sc-h2{color:var(--sc-paper)!important;}',
+      '.sc-safety-eyebrow{display:block;font-family:"Space Mono","Mono",ui-monospace,monospace;font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--sc-mute-ink);margin-bottom:clamp(20px,3vw,28px);}',
+      '.sc-safety-body{font-family:"Objectivity","Archivo",sans-serif;font-size:clamp(15px,1.4vw,17px);line-height:1.72;color:var(--sc-paper);margin:0;max-width:62ch;}',
+      '.sc-safety-body a{color:var(--sc-paper);text-decoration:underline;text-underline-offset:2px;}',
+
+      /* the acknowledgement checkbox, styled as a sibling of the consent box */
+      '.sc-consent--ack{margin-bottom:20px;}',
+      '.sc-ack-link{color:var(--sc-ink);text-decoration:underline;text-underline-offset:2px;}',
+
+      /* the ineligibility note in its two homes: standing in for the form on a returning tab, and
+         standing in for the submit row while the visitor is still typing */
+      '.sc-u14-inline{margin:8px 0 0;padding:24px 0 0;border-top:1px solid var(--sc-hair);}',
+      '.sc-u14-inline .sc-h2{font-size:clamp(22px,2.6vw,30px)!important;}',
+      '.sc-u14-change{background:var(--sc-ink);color:var(--sc-paper);border:1px solid var(--sc-ink);margin-top:24px;}',
+      '.sc-u14-change:hover:not(:disabled){background:transparent;color:var(--sc-ink);}'
     ].join('\n');
     var style = document.createElement('style');
     style.id = 'sc-css';
@@ -959,14 +1107,14 @@
   /* If the native elements aren't on the page, inject them. If they already
    * exist (native Designer build), this is a no-op and we just wire them. */
   var FRAG_FORMS = [
+'<section class="sc-hero"><span class="sc-hero-eyebrow">'+T('sc.hero.eyebrow')+'</span><h1 class="sc-hero-title">Our Scouting</h1><p class="sc-hero-sub">'+T('sc.hero.sub')+'</p><a id="sc-hero-cta" class="thxo-btn sc-hero-cta" href="#sc-form-you">'+T('sc.hero.cta')+'</a></section>',
+'<section id="sc-safety" class="sc-section sc-app-sans sc-safety" aria-labelledby="sc-safety-h"><span class="sc-safety-eyebrow">Theodyx — Safety</span><h2 class="sc-h2 sc-safety-h" id="sc-safety-h">Your safety comes first.</h2><p class="sc-safety-body">Safety is our top priority. Protecting aspiring creatives — including young individuals — from online predators is of the utmost importance. If you would like to confirm an email or communication is from an official Theodyx representative or affiliate, email <a href="mailto:scouting@theodyx.com">scouting@theodyx.com</a> and we will be glad to confirm. Theodyx never asks for photos in the nude or lingerie and never requires any kind of payment. If something doesn’t feel right, please don’t hesitate to contact us at <a href="mailto:scouting@theodyx.com">scouting@theodyx.com</a>.</p></section>',
 '<section id="sc-form-you" class="sc-section sc-app-sans" aria-label="'+T('sc.sec.you')+'"><div class="sc-eyebrow">'+T('sc.eyebrow.you')+'</div><h2 class="sc-h2">'+T('sc.h2.you')+'</h2><form class="sc-form" novalidate><div class="sc-grid"><div class="sc-field sc-full"><label class="sc-label" for="sc-email">'+T('sc.lbl.email')+'</label><input id="sc-email" class="sc-input" type="email" autocomplete="email" inputmode="email" required placeholder="'+T('sc.ph.email')+'"></div><div class="sc-field"><label class="sc-label" for="sc-firstName">'+T('sc.lbl.firstName')+'</label><input id="sc-firstName" class="sc-input" type="text" autocomplete="given-name" required></div><div class="sc-field"><label class="sc-label" for="sc-lastName">'+T('sc.lbl.lastName')+'</label><input id="sc-lastName" class="sc-input" type="text" autocomplete="family-name" required></div><div class="sc-field"><label class="sc-label" for="sc-dob">'+T('sc.lbl.dob')+'</label><input id="sc-dob" class="sc-input" type="date" autocomplete="bday" required></div><div class="sc-field"><label class="sc-label" for="sc-platform">'+T('sc.lbl.platform')+'</label><select id="sc-platform" class="sc-select" required></select></div><div class="sc-field"><label class="sc-label" for="sc-country">'+T('sc.lbl.country')+'</label><select id="sc-country" class="sc-select" autocomplete="country-name" required></select></div><div class="sc-field"><label class="sc-label" for="sc-state">'+T('sc.lbl.state')+'</label><input id="sc-state" class="sc-input" type="text" autocomplete="address-level1" placeholder="'+T('sc.ph.state')+'"></div><div class="sc-field"><label class="sc-label" for="sc-city">'+T('sc.lbl.city')+'</label><input id="sc-city" class="sc-input" type="text" autocomplete="address-level2" placeholder="'+T('sc.ph.city')+'"></div><div class="sc-field"><label class="sc-label" for="sc-instagram">'+T('sc.lbl.instagram')+'</label><input id="sc-instagram" class="sc-input" type="text" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="'+T('sc.ph.handle')+'"></div><div class="sc-field"><label class="sc-label" for="sc-tiktok">'+T('sc.lbl.tiktok')+'</label><input id="sc-tiktok" class="sc-input" type="text" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="'+T('sc.ph.handle')+'"></div><div class="sc-field"><label class="sc-label" for="sc-youtube">'+T('sc.lbl.youtube')+'</label><input id="sc-youtube" class="sc-input" type="text" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="'+T('sc.ph.youtube')+'"></div><div class="sc-field" id="sc-other-wrap"><label class="sc-label" for="sc-otherPlatform">'+T('sc.lbl.otherPlatform')+'</label><input id="sc-otherPlatform" class="sc-input" type="text" placeholder="'+T('sc.ph.otherPlatform')+'"><label class="sc-label sc-label--stack" for="sc-otherHandle">Handle on that platform</label><input id="sc-otherHandle" class="sc-input" type="text"></div><div class="sc-field sc-full" id="sc-rep"><span class="sc-legend" id="sc-rep-legend">'+T('sc.legend.rep')+'</span><div class="sc-chips" role="group" aria-labelledby="sc-rep-legend"><button type="button" id="sc-rep-no" class="sc-chip" data-val="no" data-on="false" aria-pressed="false">'+T('sc.no')+'</button><button type="button" id="sc-rep-yes" class="sc-chip" data-val="yes" data-on="false" aria-pressed="false">'+T('sc.yes')+'</button></div></div><div class="sc-field sc-full" id="sc-representedBy-wrap"><label class="sc-label" for="sc-representedBy">'+T('sc.lbl.representedBy')+'</label><input id="sc-representedBy" class="sc-input" type="text" placeholder="'+T('sc.ph.representedBy')+'"></div><div class="sc-field sc-full"><label class="sc-label" for="sc-notes">'+T('sc.lbl.notes')+'</label><textarea id="sc-notes" class="sc-textarea" rows="4" placeholder="Anything we should know? (optional)"></textarea></div></div></form></section>',
 '<section id="sc-form-work" class="sc-section sc-app-sans" aria-label="'+T('sc.sec.work')+'"><div class="sc-eyebrow">'+T('sc.eyebrow.work')+'</div><h2 class="sc-h2">'+T('sc.h2.work')+'</h2><p class="sc-text">'+T('sc.text.work')+'</p><form class="sc-form" novalidate><div class="sc-grid3"><div class="sc-field"><label class="sc-label" for="sc-link1">'+T('sc.lbl.link1')+'</label><input id="sc-link1" class="sc-input" type="url" inputmode="url" placeholder="https://…"></div><div class="sc-field"><label class="sc-label" for="sc-link2">'+T('sc.lbl.link2')+'</label><input id="sc-link2" class="sc-input" type="url" inputmode="url" placeholder="https://…"></div><div class="sc-field"><label class="sc-label" for="sc-link3">'+T('sc.lbl.link3')+'</label><input id="sc-link3" class="sc-input" type="url" inputmode="url" placeholder="https://…"></div></div><div class="sc-block"><label class="sc-label">Media kit (PDF) <span class="sc-opt">'+T('sc.optional')+'</span></label><div id="sc-mediakit" class="sc-drop sc-drop--kit" data-main="+ Upload PDF"></div></div><div class="sc-block--divider"><p class="sc-label">Your pictures</p><p class="sc-text sc-pics-note">Keep these natural — please avoid baggy clothing, make-up, or smiling. The photos you submit shouldn’t be filtered, re-touched, or professionally taken.</p><div class="sc-grid3"><div class="sc-field"><label class="sc-label">Headshot <span class="sc-opt">'+T('sc.optional')+'</span></label><div id="sc-pic0" class="sc-drop" data-main="+ Add image"></div></div><div class="sc-field"><label class="sc-label">Profile <span class="sc-opt">'+T('sc.optional')+'</span></label><div id="sc-pic1" class="sc-drop" data-main="+ Add image"></div></div><div class="sc-field"><label class="sc-label">Full length <span class="sc-opt">'+T('sc.optional')+'</span></label><div id="sc-pic2" class="sc-drop" data-main="+ Add image"></div></div></div></div></form></section>',
 '<section id="sc-form-consent" class="sc-section sc-app-sans" aria-label="'+T('sc.sec.consent')+'"><form class="sc-form" novalidate><label class="sc-consent" for="sc-consent"><input id="sc-consent" class="sc-check" type="checkbox" required><span class="sc-consent-text">I agree to Theodyx’s <a href="/policies/privacy-policy" target="_blank" rel="noopener noreferrer">Privacy Policy</a> and consent to be contacted about representation. I understand this is an application, not an offer of representation.</span></label><div class="sc-honey" aria-hidden="true"><label for="sc-company">Company</label><input id="sc-company" name="company" type="text" tabindex="-1" autocomplete="off"></div><div id="sc-turnstile"></div><div id="sc-err" class="sc-err" role="alert"></div><button id="sc-submit" type="button" class="sc-submit">'+T('sc.submit')+'</button></form></section>',
 '<section id="sc-gate-u14" class="sc-section sc-app-sans" aria-label="A note"><div class="sc-eyebrow">A note</div><h2 class="sc-h2">Thank you for your interest in joining Theodyx.</h2><p class="sc-text">We are invested in protecting the privacy of our applicants. For this reason, we are unfortunately unable to accept applications from anyone under 14 at this time. We look forward to receiving your future application.</p></section>'
   ];
   var FRAG_BODY = [
-'<div id="sc-gate-safety" role="dialog" aria-modal="true" aria-label="Safety"><div class="sc-gate-inner"><span class="sc-gate-eyebrow">Theodyx — Safety</span><h2 class="sc-gate-h">Your safety comes first.</h2><p class="sc-gate-body">Safety is our top priority. Protecting aspiring creatives — including young individuals — from online predators is of the utmost importance. If you would like to confirm an email or communication is from an official Theodyx representative or affiliate, email <a href="mailto:scouting@theodyx.com">scouting@theodyx.com</a> and we will be glad to confirm. Theodyx never asks for photos in the nude or lingerie and never requires any kind of payment. If something doesn’t feel right, please don’t hesitate to contact us at <a href="mailto:scouting@theodyx.com">scouting@theodyx.com</a>.</p><button id="sc-gate-safety-ok" type="button" class="sc-gate-btn">Acknowledged</button></div></div>',
-'<div id="sc-gate-age" role="dialog" aria-modal="true" aria-label="Age"><form class="sc-form sc-gate-inner sc-gate-inner--center" novalidate><span class="sc-gate-eyebrow">One quick question</span><h2 class="sc-gate-h">How old are you?</h2><div class="sc-gate-field"><label class="sc-label" for="sc-age-select">Select your age</label><select id="sc-age-select" class="sc-select"></select></div><button id="sc-gate-age-go" type="button" class="sc-gate-btn" disabled>Continue</button><p class="sc-gate-note">You must be 14 or older to apply directly.</p></form></div>',
 '<div id="sc-success" role="dialog" aria-modal="true" aria-label="'+T('sc.success.eyebrow')+'"><div class="sc-gate-inner"><span class="sc-gate-eyebrow">'+T('sc.success.eyebrow')+'</span><h2 class="sc-success-title" tabindex="-1">'+T('sc.success.title')+'</h2><p class="sc-gate-body">'+T('sc.success.body')+'</p><a href="/" class="sc-gate-btn sc-home-btn">'+T('sc.home')+'</a></div></div>'
   ];
   function elFromHTML(html) { var t = document.createElement('template'); t.innerHTML = html.trim(); return t.content.firstChild; }
@@ -1011,23 +1159,50 @@
   }
 
   /* ----------------------------------------------------------------- init */
+  /* ------------------------------------------------------------- funnel
+   * The four page-level listeners that used to live in the /scouting footer beacon. They emit
+   * through window.__thxTrack, so they inherit the head's session id, UTM fallback, GPC and consent
+   * gating instead of forking them (INST-03/04/06, UTM-02). No page view is emitted here — the
+   * head's landing_view already carries path=/scouting. */
+  function wireFunnel() {
+    document.addEventListener('input', function (e) {
+      var t = e.target; if (t && t.id && t.id.indexOf('sc-') === 0) trk('form_started', null, true);
+    }, true);
+  }
+
+  /* ----------------------------------------------------------------- init */
   function init() {
     injectCSS();
     ensureDom();
+    buildHero();
     enhanceIntro();
+    buildSafety();
     ensureFooter();
-    fillCountries(); fillPlatforms(); fillAges();
-    var dobIn = $('sc-dob'); if (dobIn && !dobIn.max) { var ty = new Date(); dobIn.max = (ty.getFullYear() - MIN_AGE) + '-' + String(ty.getMonth() + 1).padStart(2, '0') + '-' + String(ty.getDate()).padStart(2, '0'); dobIn.min = (ty.getFullYear() - 100) + '-01-01'; }
+    fillCountries(); fillPlatforms();
+    /* no future birthdates; an under-14 date is allowed in and answered honestly, because the
+       ineligible message is the point — a max that silently refuses the date is the dead end. */
+    var dobIn = $('sc-dob');
+    if (dobIn && !dobIn.max) { var ty = new Date(); dobIn.max = ty.getFullYear() + '-' + String(ty.getMonth() + 1).padStart(2, '0') + '-' + String(ty.getDate()).padStart(2, '0'); dobIn.min = (ty.getFullYear() - 100) + '-01-01'; }
     enhanceSemantics();
-    wireGates();
+    buildSafetyAck();
     wireRepresented(); wirePlatform();
     wireUploads();
     wirePersist();
-    var btn = $('sc-submit'); if (btn) { if (!btn.getAttribute('data-label')) btn.setAttribute('data-label', (btn.textContent || 'Submit application').trim()); on(btn, 'click', function (e) { e.preventDefault(); doSubmit(); }); }
+    wireFunnel();
+    var btn = $('sc-submit');
+    if (btn) {
+      if (!btn.getAttribute('data-label')) btn.setAttribute('data-label', (btn.textContent || 'Submit application').trim());
+      on(btn, 'click', function (e) { e.preventDefault(); trk('submit_attempt', null, true); doSubmit(); });
+    }
     neutralizeForms();
     hydrateForm();
+    wireInlineValidation();
     wireTurnstileOnFocus();
-    applyGateState();   /* clears the gate -> loads Turnstile and (desktop only) the QR */
+    u14Note();
+    if (bootU14) return;      /* the locked screen owns the page until "Update your date of birth" */
+    inlineNote();
+    evaluateAge(false);       /* silent: re-apply a stored under-14 answer without shouting at anyone */
+    initQR();
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
