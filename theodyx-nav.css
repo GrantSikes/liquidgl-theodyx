@@ -1,11 +1,12 @@
-/*! theodyx-nav.css v4.5.2 (2026-09-04) — clear liquid-glass nav. The bar is one continuous lens: transparent glass
- * whose whole surface bends what is behind it (Chromium: SVG displacement in backdrop-filter, strongest at the
- * bevel, per-channel dispersion), a specular rim lit from the pill's own geometry, a colour bleed that takes on the
- * hues around it, and colour enhancement. The words, the logo and the burger share ONE ink — pure white or pure
- * black — chosen from what is behind all of them; a faint scrim appears only when the backdrop disagrees with
- * itself. The expanded mobile sheet is frosted for legibility. */
+/*! theodyx-nav.css v4.9.0 (2026-09-05) — frosted liquid-glass nav. The bar is one continuous lens: frosted glass (blur 8,
+ * saturate 1.3) whose whole surface bends what is behind it (Chromium: SVG displacement in backdrop-filter, strongest at
+ * the bevel, per-channel dispersion), a specular rim lit from the pill's own geometry and a soft colour bleed that takes
+ * on the hues around it. The words, the logo and the burger share ONE ink — pure white or pure black — chosen from what
+ * is behind all of them, and ONE adaptive frost (.thx-nav-frost, white under dark ink / black under light ink) whose
+ * alpha the script solves so every word clears AA; 4.9.0 retired the per-element plates and the scrim, so the pill is one
+ * piece of glass at every scroll position. The expanded mobile sheet is frosted for legibility. */
 :root{--thx-nav-w:min(1180px,calc(100% - 2rem - env(safe-area-inset-left,0px) - env(safe-area-inset-right,0px)));--thx-nav-top:max(12px,env(safe-area-inset-top,0px));--thx-nav-h:56px;--thx-nav-r:999px;
---thx-nav-blur:1.2px;--thx-nav-rim:7px;--thx-nav-sat:1.55;--thx-nav-bleed:.6;--thx-nav-bleed-blur:30px;--thx-scrim-dark:rgba(0,0,0,.20);--thx-scrim-light:rgba(255,255,255,.26);
+--thx-nav-blur:8px;--thx-nav-rim:7px;--thx-nav-sat:1.25;--thx-nav-bleed:.32;--thx-nav-bleed-blur:24px;--thx-frost:.18;
 --thx-ink-light:#ffffff;--thx-ink-dark:#0c0a10;
 --thx-nav-ease:cubic-bezier(.22,1,.36,1);--thx-nav-font:"Google Sans Flex","Google Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;--thx-sbw:0px}
 html{scroll-padding-top:calc(var(--thx-nav-h) + var(--thx-nav-top) + 16px)}
@@ -15,15 +16,16 @@ html{scroll-padding-top:calc(var(--thx-nav-h) + var(--thx-nav-top) + 16px)}
 .thx-nav,.thx-nav *{box-sizing:border-box}
 .thx-nav{--thx-ink-light:#fff;--thx-ink-dark:#000} /* pure black or pure white, never a tint — scoped so no page-level variable can shift it */
 /* --- glass body: clear, colour-enhanced, lensed at the rim --- */
-.thx-nav-glass{position:absolute;inset:0;border-radius:inherit;background:rgba(255,255,255,.035);
+.thx-nav-glass{position:absolute;inset:0;border-radius:inherit;background:transparent;
 box-shadow:inset 0 1px 0 0 rgba(255,255,255,.62),inset 0 -1px 0 0 rgba(255,255,255,.16),inset 0 0 0 1px rgba(255,255,255,.22),inset 0 0 0 1.5px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.10),0 14px 44px rgba(0,0,0,.16);
 -webkit-backdrop-filter:blur(var(--thx-nav-blur)) saturate(var(--thx-nav-sat)) contrast(1.03) brightness(1.02);backdrop-filter:blur(var(--thx-nav-blur)) saturate(var(--thx-nav-sat)) contrast(1.03) brightness(1.02);
 pointer-events:none;z-index:0;overflow:hidden;transition:background-color 360ms var(--thx-nav-ease)} /* 4.8.0 (Phase 11 EASE-07): the shadow snaps - a shadow transition over a backdrop-filter repaints the blur */
-/* legibility scrim: only while the words disagree about the backdrop (mixed) and the chosen ink still fails somewhere */
-.thx-nav[data-scrim="dark"] .thx-nav-glass{background:var(--thx-scrim-dark)}
-.thx-nav[data-scrim="light"] .thx-nav-glass{background:var(--thx-scrim-light)}
-/* colour bleed: the glass picks up the colours around it — blurred, saturated, masked to the outer body so the centre stays clear */
-.thx-nav-tint{position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:0;opacity:var(--thx-nav-bleed);-webkit-backdrop-filter:blur(var(--thx-nav-bleed-blur)) saturate(2.2) brightness(1.04);backdrop-filter:blur(var(--thx-nav-bleed-blur)) saturate(2.2) brightness(1.04);-webkit-mask:radial-gradient(70% 140% at 50% 50%,transparent 26%,#000 88%);mask:radial-gradient(70% 140% at 50% 50%,transparent 26%,#000 88%);transition:opacity 320ms var(--thx-nav-ease)}
+/* 4.9.0 frost: ONE adaptive tint over the whole surface - white under dark ink, black under light ink - whose alpha the script solves from the elected ink's worst word (base .18, cap .64). It replaced the per-element plates and the scrim. */
+.thx-nav-frost{position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:1;background:rgba(255,255,255,var(--thx-frost,.18));transition:background-color 360ms var(--thx-nav-ease)}
+.thx-nav[data-ink="light"] .thx-nav-frost{background:rgba(0,0,0,var(--thx-frost,.18))}
+.thx-nav[data-open="true"] .thx-nav-frost{display:none}
+/* colour bleed: the glass picks up the colours around it — blurred, gently saturated, masked to the outer body so the centre stays clear */
+.thx-nav-tint{position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:0;opacity:var(--thx-nav-bleed);-webkit-backdrop-filter:blur(var(--thx-nav-bleed-blur)) saturate(1.5) brightness(1.04);backdrop-filter:blur(var(--thx-nav-bleed-blur)) saturate(1.5) brightness(1.04);-webkit-mask:radial-gradient(70% 140% at 50% 50%,transparent 26%,#000 88%);mask:radial-gradient(70% 140% at 50% 50%,transparent 26%,#000 88%);transition:opacity 320ms var(--thx-nav-ease)}
 .thx-nav.is-lite .thx-nav-tint,.thx-nav[data-open="true"] .thx-nav-tint,.thx-nav:not(.is-refract):not(.is-gl) .thx-nav-tint{display:none} /* 4.8.0 (Phase 11 SIG-07): the tint is a second 30px blur; without the lens it made the fallback the slow path */
 .thx-nav.is-refract .thx-nav-glass{backdrop-filter:url(#thx-lens) contrast(1.03) brightness(1.02);inset:calc(-1 * var(--thx-lens-pad-t,11px)) calc(-1 * var(--thx-lens-pad,46px)) calc(-1 * var(--thx-lens-pad,46px)) calc(-1 * var(--thx-lens-pad,46px));border-radius:0;clip-path:inset(var(--thx-lens-pad-t,11px) var(--thx-lens-pad,46px) var(--thx-lens-pad,46px) var(--thx-lens-pad,46px) round var(--thx-nav-r));box-shadow:none} /* enlarged capture (the lens samples outside the pill), clipped back to the pill; the top pad stays inside the viewport */
 .thx-nav.is-refract.is-lite .thx-nav-glass{backdrop-filter:url(#thx-lens-lite) contrast(1.03) brightness(1.02)}
@@ -57,12 +59,6 @@ pointer-events:none;z-index:0;overflow:hidden;transition:background-color 360ms 
 .thx-nav-menu a,.thx-nav-logo,.thx-nav-burger{color:var(--thx-ink-light);text-shadow:none} /* 4.8.0 (Phase 11 EASE-02): no transition shorthand here — it reset the logo/menu longhands above (hover scale + fill snapped) */
 .thx-nav[data-ink="dark"] .thx-nav-menu a,.thx-nav[data-ink="dark"] .thx-nav-logo,.thx-nav[data-ink="dark"] .thx-nav-burger{color:var(--thx-ink-dark)}
 .thx-nav[data-ink="light"] .thx-nav-menu a,.thx-nav[data-ink="light"] .thx-nav-logo,.thx-nav[data-ink="light"] .thx-nav-burger{color:var(--thx-ink-light)}
-.thx-nav-menu{position:relative;z-index:0}.thx-nav-menu::before{content:"";position:absolute;inset:0;border-radius:999px;background:#fff;opacity:var(--thx-plate,0);transition:opacity 240ms var(--thx-nav-ease);pointer-events:none;z-index:-1} /* 4.8.0 (Phase 11 SIG-01): ONE plate behind the whole menu, quantised by the script; the mark and burger keep their own */
-.thx-nav-menu[data-plate="dark"]::before{background:#000}
-.thx-nav .thx-nav-logo[data-plate="light"],.thx-nav .thx-nav-burger[data-plate="light"]{background-color:rgba(255,255,255,var(--thx-plate,.5))}
-.thx-nav .thx-nav-logo[data-plate="dark"],.thx-nav .thx-nav-burger[data-plate="dark"]{background-color:rgba(0,0,0,var(--thx-plate,.5))}
-.thx-nav[data-open="true"] .thx-nav-menu::before{opacity:0}.thx-nav[data-open="true"] .thx-nav-logo[data-plate],.thx-nav[data-open="true"] .thx-nav-burger[data-plate]{background-color:transparent}
-@media (prefers-reduced-transparency:reduce){.thx-nav-menu::before{display:none}.thx-nav .thx-nav-logo[data-plate],.thx-nav .thx-nav-burger[data-plate]{background-color:transparent!important}}
 .thx-nav a:focus-visible,.thx-nav button:focus-visible{outline:2px solid #000;outline-offset:2px;border-radius:999px;box-shadow:0 0 0 4px #fff,0 0 0 6px #000} /* Phase 9 KB-02/C-03: two-tone ring, cannot vanish against any ink or surface */
 /* --- burger --- */
 .thx-nav-burger{display:none;width:44px;height:44px;border:0;border-radius:999px;background:transparent;cursor:pointer;padding:0;align-items:center;justify-content:center;flex-direction:column;gap:5px;transition:background-color 200ms,color 240ms}
@@ -108,8 +104,8 @@ html.thx-nav-lock{overflow:hidden;padding-inline-end:var(--thx-sbw)}html.thx-nav
 .thx-nav.is-gl-stale .thx-nav-gl{opacity:0;transition-duration:140ms} /* the bar has run off the rasterised strip: CSS blur glass covers until the next capture */
 .thx-nav.is-gl.is-gl-stale .thx-nav-glass{visibility:visible!important}
 /* --- fallbacks --- */
-@media (prefers-reduced-transparency:reduce){.thx-nav-glass,.thx-nav.is-refract .thx-nav-glass{-webkit-backdrop-filter:none;backdrop-filter:none;background:#0c0a10;box-shadow:0 1px 0 0 rgba(0,0,0,.08),0 8px 24px rgba(0,0,0,.18)}.thx-nav-rim,.thx-nav-tint,.thx-nav-glass::before,.thx-nav-glass::after{display:none}.thx-nav .thx-nav-menu a,.thx-nav .thx-nav-logo,.thx-nav .thx-nav-burger{color:#fff!important}}
+@media (prefers-reduced-transparency:reduce){.thx-nav-glass,.thx-nav.is-refract .thx-nav-glass{-webkit-backdrop-filter:none;backdrop-filter:none;background:#0c0a10;box-shadow:0 1px 0 0 rgba(0,0,0,.08),0 8px 24px rgba(0,0,0,.18)}.thx-nav-rim,.thx-nav-tint,.thx-nav-frost,.thx-nav-glass::before,.thx-nav-glass::after{display:none}.thx-nav .thx-nav-menu a,.thx-nav .thx-nav-logo,.thx-nav .thx-nav-burger{color:#fff!important}}
 @media (prefers-reduced-motion:reduce){.thx-nav,.thx-nav *,.thx-nav *::before,.thx-nav *::after{transition:none!important;animation:none!important}.thx-nav-glass::after{display:none}}
-@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.thx-nav-glass{background:rgba(12,10,16,.92)}.thx-nav-rim,.thx-nav-tint{display:none}.thx-nav .thx-nav-menu a,.thx-nav .thx-nav-logo,.thx-nav .thx-nav-burger{color:#fff!important}}
-@media (forced-colors:active){.thx-nav-glass{background:Canvas;-webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:none;border:1px solid CanvasText}.thx-nav-rim,.thx-nav-tint{display:none}.thx-nav,.thx-nav .thx-nav-menu a,.thx-nav .thx-nav-logo,.thx-nav .thx-nav-burger{color:CanvasText;text-shadow:none}.thx-nav-glass::before,.thx-nav-glass::after{display:none}.thx-nav-menu a,.thx-nav-list a{color:LinkText}.thx-nav-cta{background:ButtonFace;color:ButtonText;border:1px solid ButtonText}}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.thx-nav-glass{background:rgba(12,10,16,.92)}.thx-nav-rim,.thx-nav-tint,.thx-nav-frost{display:none}.thx-nav .thx-nav-menu a,.thx-nav .thx-nav-logo,.thx-nav .thx-nav-burger{color:#fff!important}}
+@media (forced-colors:active){.thx-nav-glass{background:Canvas;-webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:none;border:1px solid CanvasText}.thx-nav-rim,.thx-nav-tint,.thx-nav-frost{display:none}.thx-nav,.thx-nav .thx-nav-menu a,.thx-nav .thx-nav-logo,.thx-nav .thx-nav-burger{color:CanvasText;text-shadow:none}.thx-nav-glass::before,.thx-nav-glass::after{display:none}.thx-nav-menu a,.thx-nav-list a{color:LinkText}.thx-nav-cta{background:ButtonFace;color:ButtonText;border:1px solid ButtonText}}
 .hero-v1{padding-top:72px!important}

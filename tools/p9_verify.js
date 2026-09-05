@@ -57,8 +57,8 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     check('SEM-21: footer cookie control is a <button aria-haspopup="dialog">', footBtn && footBtn.tag === 'BUTTON' && footBtn.haspopup === 'dialog', footBtn);
     // nav plates engage on this page
     await page.evaluate(() => window.scrollTo(0, 1100)); await sleep(300); await page.evaluate(() => window.__thxNav && window.__thxNav.reink()); await sleep(900); await page.evaluate(() => window.__thxNav && window.__thxNav.reink()); await sleep(500);
-    const plates = await page.evaluate(() => { const m = document.querySelector('#thx-nav .thx-nav-menu'); const api = window.__thxNav; return { menu: m ? (m.style.getPropertyValue('--thx-plate') || '0') : null, inks: api && api.inks ? api.inks().map(s => s.plate) : [] }; });
-    check('C-01: the menu plate engages over the dark band at scrollY 1100 (nav 4.8.0: one plate behind the menu)', parseFloat(plates.menu) >= 0.3 || plates.inks.some(p => p >= 0.3), plates);
+    const plates = await page.evaluate(() => { const n = document.getElementById('thx-nav'); const api = window.__thxNav; return { ink: n.getAttribute('data-ink'), frost: n.style.getPropertyValue('--thx-frost') || '0', inks: api && api.inks ? api.inks().map(s => s.plate || 0) : [] }; });
+    check('C-01: over the dark band at scrollY 1100 the nav wears light ink or frosts above its base (nav 4.9.0: one whole-surface frost)', plates.ink === 'light' || parseFloat(plates.frost) > 0.2 || plates.inks.some(p => p >= 0.3), plates);
     const vids = await page.evaluate(() => [...document.querySelectorAll('video[data-thx-lazy]')].map(v => v.getAttribute('crossorigin')));
     check('lazy videos carry crossorigin=anonymous (frames readable by the sampler)', vids.length === 2 && vids.every(v => v === 'anonymous'), vids);
     check('/our-capabilities: no console/page errors', errors.length === 0, errors.slice(0, 3));

@@ -81,7 +81,7 @@ async function textContrast(page, sel) {
     const inks = await page.evaluate(() => { const n = document.getElementById('thx-nav'); const root = n.dataset.ink; return [...document.querySelectorAll('#thx-nav .thx-nav-logo, #thx-nav .thx-nav-menu a')].map(e => e.dataset.ink || root || 'n/a'); });
     const scrim = await page.evaluate(() => document.getElementById('thx-nav').dataset.scrim || '');
     const flips = await page.evaluate(() => [...document.querySelectorAll('#thx-nav .thx-nav-logo, #thx-nav .thx-nav-menu a')].map(e => e.hasAttribute('data-ink')));
-    const plates = await page.evaluate(() => { const ul = document.querySelector('#thx-nav .thx-nav-menu'); const lg = document.querySelector('#thx-nav .thx-nav-logo'); return [lg ? (lg.style.getPropertyValue('--thx-plate') || '0') : '0', ul ? ('menu:' + (ul.style.getPropertyValue('--thx-plate') || '0')) : '0']; });
+    const plates = await page.evaluate(() => { const n = document.getElementById('thx-nav'); const ul = n.querySelector('.thx-nav-menu'); const lg = n.querySelector('.thx-nav-logo'); const fr = n.style.getPropertyValue('--thx-frost'); return fr ? ['frost:' + fr] : [lg ? (lg.style.getPropertyValue('--thx-plate') || '0') : '0', ul ? ('menu:' + (ul.style.getPropertyValue('--thx-plate') || '0')) : '0']; }); /* 4.9.0: one whole-surface frost replaces the plates */
     const mixedFlags = await page.evaluate(() => { const N = window.__thxNav; const viaApi = N && N.inks ? N.inks() : null; return [...document.querySelectorAll('#thx-nav .thx-nav-logo, #thx-nav .thx-nav-menu a')].map((e, i) => e.dataset.inkMixed === '1' || !!(viaApi && viaApi[i] && viaApi[i].mixed)); });
     inks.forEach(i => inkSet.add(i));
     const per = [];
