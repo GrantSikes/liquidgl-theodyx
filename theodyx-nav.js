@@ -1,4 +1,4 @@
-/*! theodyx-nav.js v4.5.3 (2026-09-03) — behaviours for the clear liquid-glass nav (#thx-nav).
+/*! theodyx-nav.js v4.6.0 (2026-09-05) — behaviours for the clear liquid-glass nav (#thx-nav).
  * One unanimous ink (every word, the logo and the burger flip together between pure white and pure black, chosen
  * from what is behind all of them), whole-surface lens (continuous refraction profile from the pill geometry, per-
  * channel dispersion, geometry-lit specular rim, colour bleed; Chromium, capability + frame-budget gated), pointer
@@ -91,7 +91,16 @@
     var s = y > 80;
     if (s !== scrolled) { scrolled = s; nav.classList.toggle('is-scrolled', s); }
     progTick(y);
-    if (nav.getAttribute('data-open') !== 'true') reink();
+    if (nav.getAttribute('data-open') !== 'true') reinkSoon();
+  }
+  /* 4.6.0 (Phase 8): the ink sampler ran on every scroll frame (18-54 elementsFromPoint hit-tests + 72-281 getComputedStyle
+   * reads per frame). It now runs at most every REINK_MS while scrolling, plus one trailing run after the last scroll event,
+   * so the settled ink is still exact; the hysteresis + 300 ms dwell inside reinkInner already smooth the transitions. */
+  var REINK_MS = 100, reinkT = 0, lastReink = 0;
+  function reinkSoon() {
+    var t = now();
+    if (t - lastReink >= REINK_MS) { lastReink = t; reink(); }
+    clearTimeout(reinkT); reinkT = setTimeout(function () { lastReink = now(); reink(); }, REINK_MS + 40);
   }
   var fallbackT = 0;
   function sched() { if (!ticking) { ticking = true; raf(onScroll); clearTimeout(fallbackT); fallbackT = setTimeout(function () { if (ticking) onScroll(); }, 140); } }
@@ -422,7 +431,7 @@
   /* Tunables (live: __thxNav.lens({scale:70,...})). Profile T(d) over distance d from the rounded edge: a rim term
    * (smoothstep^rimK over the outer rimW*h, the bevel) plus a body term that runs all the way to the centre line
    * (sign < 0 = the centre magnifies like a thick slab), so the whole surface bends — no flat inset panel. */
-  var LENS = { scale: 112, rim: 0.9, rimW: 0.58, rimK: 1.25, body: -0.6, bodyK: 1.5, disp: 0.34, dispW: 0.4, dispBody: 0.05, sat: 1.9, blur: 0.45, spec: 0.5, specW: 0.24, bleed: 0.9, bleedBlur: 40, light: [-0.55, -0.83], light2: [0.55, 0.83] }; /* 4.4: turned up — deeper centre magnification, wider bevel, more dispersion, saturation and colour bleed. 4.5: dispersion lives at the edge — disp fades in over the outer dispW of the bevel, dispBody is a whisper in the body — one map per channel, so text under the body no longer splits into three colours */
+  var LENS = { scale: 112, rim: 0.9, rimW: 0.58, rimK: 1.25, body: -0.6, bodyK: 1.5, disp: 0.34, dispW: 0.4, dispBody: 0.05, sat: 1.9, blur: 0.45, spec: 0.5, specW: 0.24, bleed: 0.9, bleedBlur: 20, light: [-0.55, -0.83], light2: [0.55, 0.83] }; /* 4.4: turned up — deeper centre magnification, wider bevel, more dispersion, saturation and colour bleed. 4.5: dispersion lives at the edge — disp fades in over the outer dispW of the bevel, dispBody is a whisper in the body — one map per channel, so text under the body no longer splits into three colours */
   var mapW = 0, mapH = 0, mapURLs = ['', '', ''], mapRetry = 0;
   var svgNS = 'http://www.w3.org/2000/svg';
   function fe(name, attrs) { var e = document.createElementNS(svgNS, name); for (var k in attrs) e.setAttribute(k, attrs[k]); return e; }
@@ -556,7 +565,10 @@
       }
     })(last);
   }
-  if (refractOK) { buildMap(); frameBudget(); window.addEventListener('resize', function () { raf(function () { buildMap(); }); }, { passive: true }); window.addEventListener('load', function () { buildMap(); }); if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { buildMap(); }); }
+  /* 4.6.0 (Phase 8): the first lens build (two pixel loops + four PNG encodes, 100-166 ms on a phone) was the page's only
+   * long task at load; it now runs after first paint in an idle slot. The CSS blur glass covers the bar until then. */
+  function idle(fn) { if (window.requestIdleCallback) requestIdleCallback(fn, { timeout: 900 }); else setTimeout(fn, 120); }
+  if (refractOK) { raf(function () { idle(function () { buildMap(); }); }); frameBudget(); window.addEventListener('resize', function () { raf(function () { buildMap(); }); }, { passive: true }); window.addEventListener('load', function () { buildMap(); }); if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { buildMap(); }); }
   API.lens = function (opts) {
     if (opts && typeof opts === 'object') { for (var k in opts) if (k in LENS) LENS[k] = opts[k]; if (refractOK) buildMap(true); }
     return { on: nav.classList.contains('is-refract'), lite: nav.classList.contains('is-lite'), map: [mapW, mapH], params: JSON.parse(JSON.stringify(LENS)) };
