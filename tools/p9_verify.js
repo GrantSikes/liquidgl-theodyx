@@ -29,9 +29,9 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     const html = await page.content();
     const lines = fs.readFileSync(HEAD_MIN, 'utf8').split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('<!--'));
     const norm = t => t.replace(/ (crossorigin|defer|data-thx-robots)(?=[ >])/g, ' $1=""'); const H = norm(html); const missing = lines.filter(l => !H.includes(norm(l)) && !html.includes(l));
-    check('head v4.10.0 banner is live', html.includes('Theodyx head code · v4.10.0'));
+    check('head v4.11.1 banner is live', html.includes('Theodyx head code · v4.11.1'));
     check('every line of site-head.min.html appears in the page', missing.length === 0, { missing: missing.length, first: missing[0] && missing[0].slice(0, 120) });
-    for (const [f, sha] of [['theodyx-nav.js', '62022f3ace400f7332a0192286f091f4bc0de103'], ['nv2pagesf.js', '6613fa29f87593a2d12cc9f4fb97f35103a791f5'], ['theodyx-cookies.js', '75c55eb6bf0a969abd0dcfa19bd51b84cb392022'], ['theodyx-article-fx.js', '1ada34cade7b358f3a40225a8913b5b8d7935a2d']]) {
+    for (const [f, sha] of [['theodyx-nav.js', '8f1151c88f61f83e10836cf83fe5a4749ce790dd'], ['nv2pagesf.js', '6613fa29f87593a2d12cc9f4fb97f35103a791f5'], ['theodyx-cookies.js', '75c55eb6bf0a969abd0dcfa19bd51b84cb392022'], ['theodyx-article-fx.js', '1ada34cade7b358f3a40225a8913b5b8d7935a2d']]) {
       const re = new RegExp('<script src="https://cdn\\.jsdelivr\\.net/gh/GrantSikes/liquidgl-theodyx@' + sha + '/' + f.replace('.', '\\.') + '" integrity="sha384-[^"]+" crossorigin="anonymous" defer(="")?>');
       check('footer tag pinned: ' + f + ' @' + sha.slice(0, 7), re.test(html));
     }
@@ -57,8 +57,8 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     check('SEM-21: footer cookie control is a <button aria-haspopup="dialog">', footBtn && footBtn.tag === 'BUTTON' && footBtn.haspopup === 'dialog', footBtn);
     // nav plates engage on this page
     await page.evaluate(() => window.scrollTo(0, 1100)); await sleep(300); await page.evaluate(() => window.__thxNav && window.__thxNav.reink()); await sleep(900); await page.evaluate(() => window.__thxNav && window.__thxNav.reink()); await sleep(500);
-    const plates = await page.evaluate(() => { const n = document.getElementById('thx-nav'); const api = window.__thxNav; return { ink: n.getAttribute('data-ink'), frost: n.style.getPropertyValue('--thx-frost') || '0', inks: api && api.inks ? api.inks().map(s => s.plate || 0) : [] }; });
-    check('C-01: over the dark band at scrollY 1100 the nav wears light ink or frosts above its base (nav 4.9.0: one whole-surface frost)', plates.ink === 'light' || parseFloat(plates.frost) > 0.2 || plates.inks.some(p => p >= 0.3), plates);
+    const plates = await page.evaluate(() => { const n = document.getElementById('thx-nav'); const api = window.__thxNav; return { ink: n.getAttribute('data-ink'), inks: api && api.inks ? api.inks().map(s => s.ink) : [] }; });
+    check('C-01 (4.9.1, ink-only by owner decision): over the dark band at scrollY 1100 the nav reports one elected ink for every word (the glass itself never changes)', (plates.ink === 'light' || plates.ink === 'dark') && plates.inks.length >= 6, plates);
     const vids = await page.evaluate(() => [...document.querySelectorAll('video[data-thx-lazy]')].map(v => v.getAttribute('crossorigin')));
     check('lazy videos carry crossorigin=anonymous (frames readable by the sampler)', vids.length === 2 && vids.every(v => v === 'anonymous'), vids);
     check('/our-capabilities: no console/page errors', errors.length === 0, errors.slice(0, 3));

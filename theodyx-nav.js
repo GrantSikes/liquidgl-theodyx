@@ -1,8 +1,8 @@
-/*! theodyx-nav.js v4.9.1 (2026-09-05) — behaviours for the clear liquid-glass nav (#thx-nav).
+/*! theodyx-nav.js v4.9.2 (2026-09-05) — behaviours for the clear liquid-glass nav (#thx-nav).
  * One unanimous ink (every word, the logo and the burger flip together between pure white and pure black, chosen
  * from what is behind all of them: the ink whose worst word still reads best, with hysteresis and a dwell). 4.9.1:
  * the glass itself never changes - the per-word/menu plates and the legibility scrim of 4.7-4.8 are gone; only the
- * words change colour (owner decision 2026-09-05). Whole-surface lens (continuous refraction profile from the pill geometry, per-
+ * words change colour (owner decision 2026-09-05); 4.9.2: the majority flip is no longer vetoed by the maximin hysteresis. Whole-surface lens (continuous refraction profile from the pill geometry, per-
  * channel dispersion, geometry-lit specular rim, colour bleed; Chromium, capability + frame-budget gated), pointer
  * highlight with a spring, scroll condense, accessible mobile sheet (focus trap, Escape, inert, iOS-safe scroll lock), skip link
  * target, legacy first-section clearance, conversion hooks. No dependencies. */
@@ -11,7 +11,7 @@
   if (window.__thxNav) return;
   var nav = document.getElementById('thx-nav');
   if (!nav) return;
-  var API = window.__thxNav = { v: '4.9.1' };
+  var API = window.__thxNav = { v: '4.9.2' };
   var I18N = window.__thxI18n; function T(k) { return (I18N && I18N.t) ? I18N.t(k) : ({ 'nav.open': 'Open menu', 'nav.close': 'Close menu' })[k] || k; } /* Phase 6: locale runtime (nv2pagesf) keyed by <html lang> */
   var doc = document.documentElement, body = document.body;
   var glass = nav.querySelector('.thx-nav-glass');
@@ -460,10 +460,14 @@
       else want = worstD > worstL ? 'dark' : 'light';
       /* 4.8.0 (Phase 11 SIG-01): when a majority of the words fail AA in the elected ink and fewer would fail in the other, flip the
        * whole bar - white words over a dark band are the answer. */
-      if (failD !== undefined) { var fw = want === 'dark' ? failD : failL, fo = want === 'dark' ? failL : failD; if (n >= 3 && fw * 2 >= n && fo < fw) want = want === 'dark' ? 'light' : 'dark'; }
+      var maj = false;
+      if (failD !== undefined) { var fw = want === 'dark' ? failD : failL, fo = want === 'dark' ? failL : failD; if (n >= 3 && fw * 2 >= n && fo < fw) { want = want === 'dark' ? 'light' : 'dark'; maj = true; } }
       if (want !== ink) {
         var better = want === 'dark' ? worstD / Math.max(0.01, worstL) : worstL / Math.max(0.01, worstD);
-        if (better < 1.15 || t0 - inkT < 600) want = ink;          /* hysteresis + dwell (4.9.1: 600 ms - a moving hero frame must not flip the words) */
+        /* hysteresis + dwell (4.9.1: 600 ms - a moving hero frame must not flip the words). 4.9.2: the majority flip answers only to the
+         * dwell - when both inks lose a word (a black band under four words, cream under the mark), the ratio of two catastrophic
+         * worsts is noise, and the ink that saves more words must win. */
+        if ((!maj && better < 1.15) || t0 - inkT < 600) want = ink;
       }
     }
     if (want !== ink) { ink = want; inkT = t0; }
