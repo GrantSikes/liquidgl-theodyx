@@ -1,4 +1,4 @@
-/*! theodyx-article-fx v1.6.2 — Theodyx publication template reading chrome.
+/*! theodyx-article-fx v1.6.3 — Theodyx publication template reading chrome.
    CONTRACT: enhancement-only. All content is native Webflow DOM; this script only
    (1) links existing <sup>N</sup> footnote markers to the Notes & sources list (dedicated .art-notes section, or legacy in-body h6+ol),
    (2) injects an "In this report" TOC from the article headings (h2, falling back to h3 then h4; 3+ entries) across EVERY
@@ -15,15 +15,17 @@
    Removing this script degrades gracefully; content stays fully Designer-editable. */
 (function () {
   /* Phase 6: strings come from the locale runtime (nv2pagesf carries the dictionary; English fallback here); the visible date renders through Intl inside <time datetime> */
-  var I = window.__thxI18n, EN = { 'art.note': 'Note {n}', 'art.backref': 'Back to reference {n}', 'art.toc': 'In this report', 'art.readmin': '{n} min read' };
-  function T(k, v) { if (I && I.t) return I.t(k, v); var s = EN[k] || k; if (v) for (var p in v) s = s.split('{' + p + '}').join(v[p]); return s; }
+  /* 1.6.3: the locale runtime (nv2pagesf) is a deferred script now, so it is not on window while this file evaluates; resolve it lazily. */
+  var EN = { 'art.note': 'Note {n}', 'art.backref': 'Back to reference {n}', 'art.toc': 'In this report', 'art.readmin': '{n} min read' };
+  function I18() { var r = window.__thxI18n; return (r && r.t) ? r : null; }
+  function T(k, v) { var I = I18(); if (I && I.t) return I.t(k, v); var s = EN[k] || k; if (v) for (var p in v) s = s.split('{' + p + '}').join(v[p]); return s; }
   function timeWrap(el, shown, iso) {
     try {
       if (!iso || el.querySelector('time')) return;
       var w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null), n;
       while ((n = w.nextNode())) {
         var i = n.nodeValue.indexOf(shown); if (i < 0) continue;
-        var t = document.createElement('time'); t.setAttribute('datetime', iso); t.textContent = I ? I.date(iso) : shown;
+        var t = document.createElement('time'); t.setAttribute('datetime', iso); t.textContent = I18() ? I18().date(iso) : shown;
         var after = n.splitText(i); after.nodeValue = after.nodeValue.slice(shown.length); n.parentNode.insertBefore(t, after); return;
       }
     } catch (e) {}
@@ -203,7 +205,7 @@
     if (box) {
       var ps = box.querySelectorAll('.thx-ml-t');
       if (ps.length && /^\d+$/.test(txt(ps[0]))) ps[0].textContent = String(min);
-      else if (ps.length && /^\d+\s*min/i.test(txt(ps[0]))) ps[0].textContent = T('art.readmin', { n: I ? I.num(min) : String(min) });
+      else if (ps.length && /^\d+\s*min/i.test(txt(ps[0]))) ps[0].textContent = T('art.readmin', { n: I18() ? I18().num(min) : String(min) });
     }
     return min;
   }
