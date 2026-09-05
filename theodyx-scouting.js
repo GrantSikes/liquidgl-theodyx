@@ -1,4 +1,4 @@
-/* theodyx-scouting 2.0.0 — Phase 10 campaign readiness. The two full-screen modal gates are gone:
+/* theodyx-scouting 2.0.1 — Phase 10 campaign readiness. The two full-screen modal gates are gone:
  * the safety statement is an inline <section id="sc-safety"> above the form and its acknowledgement
  * is a required checkbox in the consent block; age comes only from #sc-dob, evaluated on blur and
  * on submit, so a mistyped date is always correctable (FORMS-04). The first viewport now carries the
@@ -262,7 +262,7 @@
     bootU14 = false;
     inlineNote();
     var d = $('sc-dob'); if (d) { d.value = ''; focusEl(d, true); }
-    initTurnstile(); initQR();
+    initTurnstile();
   }
 
   function dobAge() { var v = val('sc-dob'); return /^\d{4}-\d{2}-\d{2}$/.test(v) ? ageFromDob(v) : null; }
@@ -880,6 +880,7 @@
     showApp(false);
     var success = $('sc-success');
     if (success) { show(success, 'flex'); var hh = qs('.sc-success-title', success); if (hh) { try { hh.focus(); } catch (e) {} } }
+    try { initQR(); } catch (e) {}
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -1202,7 +1203,7 @@
     if (bootU14) return;      /* the locked screen owns the page until "Update your date of birth" */
     inlineNote();
     evaluateAge(false);       /* silent: re-apply a stored under-14 answer without shouting at anyone */
-    initQR();
+    /* 2.0.1: the QR library loads only once the success panel is shown (Phase 8 budget: nothing before success) */
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
