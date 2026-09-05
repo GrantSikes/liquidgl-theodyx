@@ -1,3 +1,5 @@
+/* theodyx-scouting 1.9.0 — first paint matches the final gate state (no CLS), Turnstile and the
+ * QR load only once they are actually needed, and the QR vendor is our own SRI-pinned copy. */
 (function () {
   'use strict';
   if (window.__thxScouting) return;
@@ -11,7 +13,8 @@
   var API_BASE = 'https://theodyx-scouting-api.theodyx.workers.dev';
   var TURNSTILE_SITE_KEY = '0x4AAAAAADp3wmr_gUgr_SNb';
   var TURNSTILE_SRC = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
-  var QR_SRC = 'https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs@04f46c6a0708418cb7b96fc563eacae0fbf77674/qrcode.min.js';
+  var QR_SRC = 'https://cdn.jsdelivr.net/gh/GrantSikes/liquidgl-theodyx@4fd766127f1588e11846fead994117da4d50cabe/vendor/qrcode.min.js';
+  var QR_SRI = 'sha384-UE+eaQRn+KiuCh1sYLD51yNjGFekkZ5qoo2J9LvSo1leawRjhShWe7VY8obiE5D4';
   var MIN_AGE = 14;
   var MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
   var SCOUTING_EMAIL = 'scouting@theodyx.com';
@@ -48,10 +51,11 @@
   function loadJSON(key) { try { return JSON.parse(sessionStorage.getItem(key) || 'null'); } catch (e) { return null; } }
   function saveJSON(key, obj) { try { sessionStorage.setItem(key, JSON.stringify(obj)); } catch (e) {} }
 
-  function loadScriptOnce(src, cb) {
+  function loadScriptOnce(src, cb, integrity) {
     if (qs('script[src="' + src + '"]')) { if (cb) cb(); return; }
     var s = document.createElement('script');
     s.src = src; s.async = true; s.defer = true;
+    if (integrity) { s.integrity = integrity; s.crossOrigin = 'anonymous'; }
     if (cb) s.onload = cb;
     document.head.appendChild(s);
   }
@@ -61,6 +65,20 @@
     var g = loadJSON(SS_GATES) || {};
     return { trust: !!g.trust, ageResolved: !!g.ageResolved, eligible: !!g.eligible, age: g.age == null ? null : g.age };
   })();
+  /* The page head carries <style id="sc-gate-preboot"> plus a two-line inline script that reads
+   * the very same SS_GATES keys and stamps sc-open / sc-u14 / sc-gated on <html> before first
+   * paint, so the gated sections are already in their final state when the pixels land. Stamping
+   * again here (module scope, before init) keeps the script correct on its own if that head
+   * snippet is ever missing — worst case the class lands a frame late instead of never. */
+  function gateClass() { return (gates.trust && gates.ageResolved) ? (gates.eligible ? 'sc-open' : 'sc-u14') : 'sc-gated'; }
+  function stampRoot() {
+    var d = document.documentElement, c = gateClass();
+    if (d.classList.contains(c)) return;
+    d.classList.remove('sc-open', 'sc-u14', 'sc-gated');
+    d.classList.add(c);
+  }
+  stampRoot();
+
   var mediaKitKey;            // string | undefined
   var sampleKeys = [undefined, undefined, undefined];
   var turnstileToken = '';
@@ -108,7 +126,19 @@
   function lockScroll(lock) { document.body.style.overflow = lock ? 'hidden' : ''; }
 
   var APP_SECTIONS = ['sc-form-you', 'sc-form-work', 'sc-form-consent'];
-  function showApp(disp) { var intro = qs('.sc-intro'); if (intro) intro.style.display = disp ? 'block' : 'none'; APP_SECTIONS.forEach(function (id) { var e = $(id); if (e) e.style.display = disp ? 'block' : 'none'; }); }
+  /* Reveal-only. Hiding is done by the class on <html> (preboot style in the page head, mirrored
+   * in injectCSS below), never by writing display:none over something that was visible at first
+   * paint — that write is exactly what used to shove the footer up ~635px. */
+  function showApp(disp) {
+    var d = document.documentElement;
+    /* Hiding is driven by disp, not by the gate keys: onSuccess() calls showApp(false) with every
+     * gate still cleared, and the app has to fold away behind the success panel just as before. */
+    var c = disp ? 'sc-open' : ((gates.trust && gates.ageResolved && !gates.eligible) ? 'sc-u14' : 'sc-gated');
+    d.classList.remove('sc-open', 'sc-u14', 'sc-gated');
+    d.classList.add(c);
+    var intro = qs('.sc-intro'); if (intro) intro.style.display = disp ? 'block' : '';
+    APP_SECTIONS.forEach(function (id) { var e = $(id); if (e) e.style.display = disp ? 'block' : ''; });
+  }
 
   function applyGateState() {
     var safety = $('sc-gate-safety'), age = $('sc-gate-age'), u14 = $('sc-gate-u14');
@@ -116,7 +146,7 @@
     if (!gates.trust) { show(safety, 'flex'); lockScroll(true); showApp(false); return; }
     if (!gates.ageResolved) { show(age, 'flex'); lockScroll(true); showApp(false); return; }
     lockScroll(false);
-    if (gates.eligible) { showApp(true); hide(u14); }
+    if (gates.eligible) { showApp(true); hide(u14); initTurnstile(); initQR(); }
     else { showApp(false); show(u14, 'block'); }
   }
 
@@ -263,20 +293,38 @@
       });
     } catch (e) {}
   }
+  /* Behind the age gate there is nothing to verify, so the Turnstile bundle waits for the gate to
+   * clear (applyGateState) or for the first field focus, whichever happens first. */
+  function wireTurnstileOnFocus() {
+    function once(e) {
+      var t = e.target;
+      if (!t || !t.closest || !t.closest('#sc-form-you, #sc-form-work, #sc-form-consent')) return;
+      document.removeEventListener('focusin', once, true);
+      initTurnstile();
+    }
+    document.addEventListener('focusin', once, true);
+  }
   function initTurnstile() {
     var box = $('sc-turnstile'); if (!box) return;
+    if (box.dataset.thxTsBoot) return; box.dataset.thxTsBoot = '1';
     loadScriptOnce(TURNSTILE_SRC, renderTurnstile);
     if (window.turnstile) renderTurnstile();
     else { var n = 0, iv = setInterval(function () { if (window.turnstile) { clearInterval(iv); renderTurnstile(); } else if (++n > 50) clearInterval(iv); }, 200); }
   }
 
   /* ---------------------------------------------------------------- QR */
+  /* The QR is the desktop-only "carry on from your phone" code inside .sc-intro, so it is only
+   * ever shown once the gate is clear and the viewport is wide. Load the library at that point —
+   * never on a phone, never behind the gate. */
   function initQR() {
     var box = $('sc-qr'); if (!box) return;
+    if (box.dataset.thxQrBoot) return;
+    if (box.offsetParent === null && getComputedStyle(box).display === 'none') return;
+    box.dataset.thxQrBoot = '1';
     loadScriptOnce(QR_SRC, function () {
       if (!window.QRCode || box.dataset.thxQr) return; box.dataset.thxQr = '1';
       try { new window.QRCode(box, { text: PAGE_URL, width: 120, height: 120, colorDark: '#0E0E0F', colorLight: '#F2F1EC', correctLevel: window.QRCode.CorrectLevel.M }); } catch (e) {}
-    });
+    }, QR_SRI);
   }
 
   /* -------------------------------------------------------------- errors */
@@ -445,6 +493,14 @@
       '.sc-consent-text{font-size:15px;line-height:1.6;}',
       '.sc-consent-text a{color:var(--sc-ink);text-decoration:underline;text-underline-offset:2px;}',
       '#sc-turnstile{margin-top:28px;}',
+      /* mirror of <style id="sc-gate-preboot"> in the page head: the root class decides what is
+         on screen, so the script never has to write display:none after first paint */
+      '.sc-intro,#sc-form-you,#sc-form-work,#sc-form-consent{display:none;}',
+      'html.sc-open .sc-intro{display:block;}',
+      'html.sc-open #sc-form-you,html.sc-open #sc-form-work,html.sc-open #sc-form-consent{display:block;}',
+      'html.sc-u14 #sc-gate-u14{display:block;}',
+      /* reserve the QR box so the code does not push the intro around when it renders */
+      '#sc-qr{width:120px;height:120px;}',
       '.sc-err{display:none;margin-top:22px;border-inline-start:2px solid var(--sc-err);padding-inline-start:16px;color:var(--sc-err);font-size:15px;line-height:1.5;}',
       '.sc-submit{margin-top:28px;width:100%;max-width:420px;display:inline-flex;align-items:center;justify-content:center;gap:10px;background:var(--sc-ink);color:var(--sc-paper);border:1px solid var(--sc-ink);padding:18px 28px;font-family:"Space Mono","Mono",ui-monospace,monospace;font-size:13px;letter-spacing:0.16em;text-transform:uppercase;cursor:pointer;transition:all .16s ease;}',
       '.sc-submit:hover:not(:disabled){background:var(--sc-paper);color:var(--sc-ink);}',
@@ -599,9 +655,8 @@
     var btn = $('sc-submit'); if (btn) { if (!btn.getAttribute('data-label')) btn.setAttribute('data-label', (btn.textContent || 'Submit application').trim()); on(btn, 'click', function (e) { e.preventDefault(); doSubmit(); }); }
     neutralizeForms();
     hydrateForm();
-    initTurnstile();
-    initQR();
-    applyGateState();
+    wireTurnstileOnFocus();
+    applyGateState();   /* clears the gate -> loads Turnstile and (desktop only) the QR */
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
