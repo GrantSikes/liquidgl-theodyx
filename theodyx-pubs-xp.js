@@ -1,11 +1,16 @@
-/*! theodyx-pubs-xp v1.3.1 — Publications reading-experience composer.
+/*! theodyx-pubs-xp v1.4.0 — Publications reading-experience composer.
    Runs LAST on the Publications template (after articlefx/ethos/ethosx/r2media).
    (1) weaves the media bands into the reading flow: carousel 1 ~top-middle,
        divider at the article midpoint (splits the body into two sheets),
        carousel 2 ~middle-bottom; notes/disclaimer follow the second half.
-   (2) reveal choreography, carousel dots, divider parallax, magnetic CTA,
-       share row. All gated on prefers-reduced-motion; composer is desktop+mobile,
-       motion is desktop-only. Enhancement-only: no CMS content is created here.
+   (2) carousel dots + arrows, magnetic CTA, share row. Enhancement-only: no CMS
+       content is created here.
+   Phase 11 motion: REVEAL-03/REVEAL-08 the .xp-rvl scroll-reveal system, its 3.5 s
+   timer and its catch() safety net are gone - article blocks are visible at once;
+   INV-03/ACT-08 the 5 s carousel autoplay, its progress ring and the pause plumbing
+   that only served it are gone (arrows/dots/swipe/keyboard remain); INV-04 the
+   divider scroll-parallax is gone; ACT-07 the dots carry a border + forced-colors
+   block; every glide honours prefers-reduced-motion live.
    re-hosted from Webflow on 2026-09-05; source of truth is now this repo. */
 (function(){
 if(window.__thxXp)return;window.__thxXp=1;
@@ -13,6 +18,7 @@ var ready=function(f){document.readyState==='loading'?document.addEventListener(
 ready(function(){try{
 var q=function(s,r){return[].slice.call((r||document).querySelectorAll(s))};
 var MOB=matchMedia('(max-width:767px)').matches||matchMedia('(pointer:coarse)').matches,RED=matchMedia('(prefers-reduced-motion: reduce)').matches;
+var red=function(){return matchMedia('(prefers-reduced-motion: reduce)').matches};
 var body=document.querySelector('.thx-read-body');
 var col=document.querySelector('.thx-read-col');
 var read=document.querySelector('.thx-read');
@@ -83,13 +89,35 @@ var before=host.querySelector('.art-notes')||host.querySelector('.art-disclaimer
 if(before)host.insertBefore(sh,before);else host.appendChild(sh);
 }catch(e){}
 
-/* ---------- 3. carousel system: dots + owned 5s autoplay + progress ring (OpenAI-style) ----------
-   Retires the legacy ethosx autoplay (thxStop preset) and rebinds the arrows
-   (cloned to strip old listeners). The next-arrow carries a conic progress
-   ring that fills over 5s; hover pauses, arrows/dots reset the timer,
-   horizontal wheel/swipe stops autoplay for good. */
+/* ---------- 3. carousel system: dots + arrows, reader-driven (Phase 11) ----------
+   INV-03 / ACT-08: the 5 s autoplay, its progress ring and the hover/wheel/touch
+   pause plumbing that existed only to stop it are gone. The carousel moves for
+   arrows, dots, swipe, native scroll-snap and the focusable container's arrow
+   keys - nothing advances on its own, so it needs no pause control.
+   ACT-07: the dots carry a 1px border and a forced-colors block so the current
+   slide stays distinguishable when the fills are overridden, and the 9 px of ink
+   now sits inside a 24x24 target (WCAG 2.5.8). */
 try{
+if(!document.getElementById('thx-xp-dots-css')){
+  var dst=document.createElement('style');dst.id='thx-xp-dots-css';
+  dst.textContent='html body .xp-dots{gap:0}'
+    /* WCAG 2.5.8: the dot is 9px of ink inside a 24x24 target. */
+    +'html body .xp-dots button{width:24px;height:24px;min-width:24px;min-height:24px;padding:0;border:0;background:none;display:inline-flex;align-items:center;justify-content:center;transform:none}'
+    +'html body .xp-dots button::before{content:"";display:block;box-sizing:border-box;width:9px;height:9px;border-radius:50%;border:1px solid rgba(0,0,0,.55);background:rgba(0,0,0,.12);transition:transform .24s cubic-bezier(.22,1,.36,1),background-color .24s cubic-bezier(.22,1,.36,1)}'
+    +'html body .xp-dots button.on{background:none;transform:none}'
+    +'html body .xp-dots button.on::before{background:#000;border-color:#000;transform:scale(1.3)}'
+    +'html body .xp-dots button:hover::before{transform:scale(1.25);background:rgba(0,0,0,.4)}'
+    +'html body .xp-dots button.on:hover::before{transform:scale(1.4);background:#000}'
+    +'html body .xp-dots button:active::before{transform:scale(.92)}'
+    +'html body .xp-dots button.on:active::before{transform:scale(1.15)}'
+    +'@media (forced-colors:active){html body .xp-dots button::before{forced-color-adjust:none;border:1px solid ButtonText;background:ButtonFace}'
+    +'html body .xp-dots button.on::before{background:Highlight;border-color:Highlight}'
+    +'html body .xp-dots button:hover::before{border-color:Highlight}}'
+    +'@media (prefers-reduced-motion:reduce){html body .xp-dots button::before{transition:none}}';
+  (document.body||document.documentElement).appendChild(dst);
+}
 q('.ethx-car').forEach(function(car){
+  /* keeps any cached copy of the legacy ethosx autoplay a no-op */
   car.dataset.thxStop='1';
   var slides=q('.ethx-slide',car).filter(function(s){return getComputedStyle(s).display!=='none'});
   /* AXE-03: the scroll container is a named, keyboard-reachable group. */
@@ -97,18 +125,18 @@ q('.ethx-car').forEach(function(car){
   car.setAttribute('role','group');
   car.setAttribute('aria-label','Image carousel, '+slides.length+' slide'+(slides.length===1?'':'s'));
   if(slides.length<2)return;
-  var DUR=5000,stopped=RED,paused=false,hold=0,t0=performance.now(),running=false,ring=null;
   var max=function(){return car.scrollWidth-car.clientWidth};
   var pts=function(){var r=car.getBoundingClientRect();return slides.map(function(el){var sr=el.getBoundingClientRect();return Math.max(0,Math.min(sr.left-r.left+car.scrollLeft-(car.clientWidth-sr.width)/2,max()))})};
-  var glide=function(to,dur){var prev=car.style.scrollSnapType;car.style.scrollSnapType='none';var from=car.scrollLeft,dd=to-from,ts=performance.now();(function step(now){var p=Math.min(1,((now||performance.now())-ts)/(dur||600));var e=p<.5?2*p*p:1-Math.pow(-2*p+2,2)/2;car.scrollLeft=from+dd*e;if(p<1)requestAnimationFrame(step);else{car.scrollLeft=to;car.style.scrollSnapType=prev}})()};
+  /* RM: an animated glide is motion; under reduced motion the carousel jumps. */
+  var glide=function(to,dur){if(red()){car.scrollLeft=to;return}var prev=car.style.scrollSnapType;car.style.scrollSnapType='none';var from=car.scrollLeft,dd=to-from,ts=performance.now();(function step(now){var p=Math.min(1,((now||performance.now())-ts)/(dur||600));var e=p<.5?2*p*p:1-Math.pow(-2*p+2,2)/2;car.scrollLeft=from+dd*e;if(p<1)requestAnimationFrame(step);else{car.scrollLeft=to;car.style.scrollSnapType=prev}})()};
   var idx=function(){var p=pts(),cur=car.scrollLeft,i=0,bd=1e9;p.forEach(function(x,k){var d=Math.abs(x-cur);if(d<bd){bd=d;i=k}});return i};
   /* dots */
   var dots=document.createElement('div');dots.className='xp-dots';
-  slides.forEach(function(_,i){var b=document.createElement('button');b.type='button';b.setAttribute('aria-label','Slide '+(i+1));b.addEventListener('click',function(){t0=performance.now();glide(pts()[i],500)});dots.appendChild(b)});
+  slides.forEach(function(_,i){var b=document.createElement('button');b.type='button';b.setAttribute('aria-label','Slide '+(i+1));b.addEventListener('click',function(){glide(pts()[i],500)});dots.appendChild(b)});
   car.insertAdjacentElement('afterend',dots);
   var mark=function(){var i=idx();q('button',dots).forEach(function(b,k){b.classList.toggle('on',k===i)})};
   car.addEventListener('scroll',function(){requestAnimationFrame(mark)},{passive:true});mark();
-  /* arrows: strip legacy listeners, glyph in a clipper span, next-arrow gets the ring */
+  /* arrows: strip legacy listeners, glyph in a clipper span */
   var arr=car.previousElementSibling;
   if(arr&&(' '+arr.className+' ').indexOf(' ethx-arrows ')>-1){
     q('a',arr).forEach(function(a){
@@ -118,54 +146,11 @@ q('.ethx-car').forEach(function(car){
       var dir=(t.indexOf('←')>-1)?-1:1;
       /* SEM-08 / AXE-10: the clone carries the accessible name, not the glyph. */
       c.setAttribute('aria-label',dir===1?'Next slide':'Previous slide');
-      if(dir===1){c.classList.add('xp-next');ring=c}
-      c.addEventListener('click',function(e){e.preventDefault();t0=performance.now();var p=pts(),i=idx(),n=Math.max(0,Math.min(p.length-1,i+dir));glide(p[n],600)});
+      c.addEventListener('click',function(e){e.preventDefault();var p=pts(),i=idx(),n=Math.max(0,Math.min(p.length-1,i+dir));glide(p[n],600)});
     });
-  }
-  /* real intent stops autoplay for good */
-  var stop=function(){if(stopped)return;stopped=true;if(ring){ring.classList.add('xp-ringoff');ring.style.setProperty('--xp-p','0deg')}};
-  car.addEventListener('wheel',function(e){if(Math.abs(e.deltaX)>Math.abs(e.deltaY))stop()},{passive:true});
-  var tx=0,ty=0;
-  car.addEventListener('touchstart',function(e){var tt=e.touches[0];tx=tt.clientX;ty=tt.clientY},{passive:true});
-  car.addEventListener('touchmove',function(e){var tt=e.touches[0];if(Math.abs(tt.clientX-tx)>Math.abs(tt.clientY-ty)+4)stop()},{passive:true});
-  car.addEventListener('mouseenter',function(){if(!paused){paused=true;hold=performance.now()-t0}});
-  car.addEventListener('mouseleave',function(){if(paused){paused=false;t0=performance.now()-hold}});
-  /* rAF loop, viewport-gated */
-  var loop=function(now){
-    if(!running||stopped)return;
-    if(!paused){
-      var el2=now-t0;
-      if(el2>DUR*2){t0=now}
-      else if(el2>=DUR){var p=pts(),i=idx(),n=(i+1>=p.length||p[i]>=max()-4)?0:i+1;glide(p[n],700);t0=now;if(ring)ring.style.setProperty('--xp-p','0deg')}
-      else if(ring)ring.style.setProperty('--xp-p',Math.round(el2/DUR*360)+'deg');
-    }
-    requestAnimationFrame(loop);
-  };
-  if(!stopped){
-    var vio=new IntersectionObserver(function(es){es.forEach(function(o){if(o.isIntersecting){if(!running){running=true;t0=performance.now();requestAnimationFrame(loop)}}else{running=false}})},{threshold:0.2});
-    vio.observe(car);
   }
 });
 }catch(e){}
-
-/* ---------- 4. reveal choreography (desktop, motion-ok) ---------- */
-if(!MOB&&!RED){try{
-var targets=[];
-q('.thx-read-body > h2,.thx-read-body > h3,.thx-read-body > figure,.thx-read-body > blockquote,.thx-toc,#thxartkt,.art-notes,.xp-share').forEach(function(el){targets.push(el)});
-q('.xp-band').forEach(function(b){if(!b.querySelector('.ethx-rvl'))targets.push(b)});
-targets.forEach(function(el){el.classList.add('xp-rvl')});
-var io=new IntersectionObserver(function(es){es.forEach(function(o){if(o.isIntersecting){var el=o.target;el.classList.add('xp-in');io.unobserve(el);setTimeout(function(){el.classList.remove('xp-rvl','xp-in')},900)}})},{threshold:0.06,rootMargin:'0px 0px -4% 0px'});
-targets.forEach(function(el){io.observe(el)});
-setTimeout(function(){q('.xp-rvl').forEach(function(el){el.classList.add('xp-in')})},3500);
-}catch(e){q('.xp-rvl').forEach(function(el){el.classList.add('xp-in')})}}
-
-/* ---------- 5. divider parallax ---------- */
-if(!MOB&&!RED){try{
-var dimg=divider?divider.querySelector('img'):null;
-if(dimg&&vis(divider)){var tick=false;
-var par=function(){tick=false;var r=divider.getBoundingClientRect();if(r.bottom<0||r.top>innerHeight)return;var p=Math.max(0,Math.min(1,1-(r.top+r.height/2)/(innerHeight||1)));dimg.style.transform='scale('+(1.1-0.1*p).toFixed(4)+') translateZ(0)'};
-addEventListener('scroll',function(){if(!tick){tick=true;requestAnimationFrame(par)}},{passive:true});par()}
-}catch(e){}}
 
 /* ---------- 7. rail auto-hide over full-bleed media ----------
    The divider is sticky (its rect pins forever), so its zone is the EXPOSED
@@ -189,6 +174,6 @@ q('.ethx-cta .thxo-btn').forEach(function(b){
   b.addEventListener('pointerleave',function(){b.style.transform=''});
 });
 }catch(e){}}
-/*thx-pubs-xp-1.3.2-a11y*/
+/*thx-pubs-xp-1.4.0-p11motion*/
 }catch(e){}});
 })();

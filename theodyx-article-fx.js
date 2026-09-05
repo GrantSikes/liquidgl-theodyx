@@ -1,4 +1,4 @@
-/*! theodyx-article-fx v1.7.0 — Theodyx publication template reading chrome.
+/*! theodyx-article-fx v1.8.0 — Theodyx publication template reading chrome.
    CONTRACT: enhancement-only. All content is native Webflow DOM; this script only
    (1) links existing <sup>N</sup> footnote markers to the Notes & sources list (dedicated .art-notes section, or legacy in-body h6+ol),
    (2) injects an "In this report" TOC from the article headings (h2, falling back to h3 then h4; 3+ entries) across EVERY
@@ -16,7 +16,10 @@
    1.7.0 (Phase 9 accessibility): KB-07 footnote <li> targets hold focus; KB-08 TOC headings hold focus and are focused after the
    jump; C-08 the breadcrumb separators are decorative; SEM-19 the TOC carries one accessible name; SEM-20 CMS body sections are
    exposed (aria-level) as siblings of "Key takeaways"/"Notes & sources" rather than children of the takeaways box; SEM-01 (interim) the hero is a named region and
-   the Keep-reading band is named by its own heading; SEM-07 footnote markers are real <sup> links named "Footnote N: <source>". */
+   the Keep-reading band is named by its own heading; SEM-07 footnote markers are real <sup> links named "Footnote N: <source>".
+   1.8.0 (Phase 11 motion): EASE-07 the Keep-reading cards transition transform and opacity only — the Webflow page CSS transitions
+   box-shadow, which repaints the card's full bounding box plus its blur radius every frame; the raised shadow now snaps and only the
+   lift animates, on the spring curve at 280 ms, and both are switched off under prefers-reduced-motion. */
 (function () {
   /* Phase 6: strings come from the locale runtime (nv2pagesf carries the dictionary; English fallback here); the visible date renders through Intl inside <time datetime> */
   /* 1.6.3: the locale runtime (nv2pagesf) is a deferred script now, so it is not on window while this file evaluates; resolve it lazily. */
@@ -444,6 +447,20 @@
     try { jsonld(min); } catch (e) {}
     try { progress(); } catch (e) {}
   }
+  /* EASE-07 (Phase 11): card hover animates transform/opacity only. Webflow page CSS ships
+     `.thx-rel-card{transition:transform .2s,box-shadow .2s}`; the card is `overflow:hidden`, so a
+     pseudo-element shadow would be clipped — drop box-shadow from the transition list instead and
+     keep the lift on the spring curve. */
+  try {
+    if (!document.getElementById('thx-relcard-motion-css')) {
+      var rcs = document.createElement('style'); rcs.id = 'thx-relcard-motion-css';
+      rcs.textContent = 'html body a.thx-rel-card{transition:transform .28s cubic-bezier(.22,1,.36,1),opacity .28s cubic-bezier(.22,1,.36,1)!important}'
+        + 'html body a.thx-rel-card:active{transform:translateY(-2px) scale(.99)}'
+        + '@media (prefers-reduced-motion:reduce){html body a.thx-rel-card{transition:none!important}html body a.thx-rel-card:hover,html body a.thx-rel-card:active{transform:none}}';
+      (document.head || document.documentElement).appendChild(rcs);
+    }
+  } catch (e) {}
+
   /* SEM-20 as early as this file evaluates, so the level is right before any assistive tech reads the page */
   try { if (document.body) retag(); } catch (e) {}
   ready(function () {
