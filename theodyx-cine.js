@@ -1,4 +1,4 @@
-/* Theodyx Cine v5.0.1 — homepage cinematic. Library-free. Modules removable via CFG.
+/* Theodyx Cine v5.0.2 — homepage cinematic. Library-free. Modules removable via CFG.
    Intro: typed line -> word constellation builds center-screen -> family spotlight ->
    gravitational collapse -> "what it means to be Human." -> video emerges. No blur anywhere. */
 (function(){
@@ -30,17 +30,8 @@ function init(){
   var video=document.querySelector('.hero-media video, video.hero-video');
   if(video){try{video.muted=true;video.play().catch(function(){});}catch(e){}}
 
-  if(CFG.autoSound&&video){
-    try{
-      var armFn=function(){
-        document.removeEventListener('pointerdown',armFn,true);
-        document.removeEventListener('keydown',armFn,true);
-        video.muted=false;video.play().catch(function(){});
-      };
-      document.addEventListener('pointerdown',armFn,true);
-      document.addEventListener('keydown',armFn,true);
-    }catch(e){}
-  }
+  /* 5.0.2 (Phase 9 F-01): the gesture auto-unmute is gone - audio only ever starts from the hero's own mute button
+     (theodyx-home-fx). A first keystroke or tap must never turn sound on. CFG.autoSound is ignored. */
 
   var hero=document.querySelector('section.hero, .hero');
   var media=document.querySelector('.hero-media');

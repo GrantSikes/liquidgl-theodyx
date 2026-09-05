@@ -1,4 +1,4 @@
-/*! theodyx-nav.js v4.7.0 (2026-09-05) — behaviours for the clear liquid-glass nav (#thx-nav).
+/*! theodyx-nav.js v4.7.1 (2026-09-05) — behaviours for the clear liquid-glass nav (#thx-nav).
  * One unanimous ink (every word, the logo and the burger flip together between pure white and pure black, chosen
  * from what is behind all of them) plus, since 4.7.0, a per-word plate: any word the elected ink still fails gets
  * its own soft plate sized from its worst sampled backdrop (or, when that plate would flatten the glass, its own ink), whole-surface lens (continuous refraction profile from the pill geometry, per-
@@ -123,6 +123,19 @@
   var sampler = document.createElement('canvas'); sampler.width = 24; sampler.height = 6;
   var sctx = null; try { sctx = sampler.getContext('2d', { willReadFrequently: true }); } catch (e) { sctx = null; }
   var corsImgs = {};   /* src -> Image (CORS clone) */
+  function corsLoad(src, done) {
+    /* 4.7.1: the browser may already hold this URL as a no-CORS response (the <img>/preload fetch); R2 sends
+     * Access-Control-Allow-Origin only when an Origin header is present, so re-using that cache entry for a CORS
+     * read fails with a console error. cache:'reload' forces a fresh CORS fetch; the blob feeds an Image. */
+    var im = new Image(); im.decoding = 'async'; corsImgs[src] = im;
+    var fail = function () { im.__thxFail = true; };
+    if (typeof fetch === 'function' && typeof URL !== 'undefined' && URL.createObjectURL) {
+      fetch(src, { mode: 'cors', cache: 'reload', credentials: 'omit' }).then(function (r) { if (!r.ok) throw new Error(r.status); return r.blob(); })
+        .then(function (b) { im.onload = function () { if (done) done(); }; im.onerror = fail; im.src = URL.createObjectURL(b); })
+        .catch(function () { im.crossOrigin = 'anonymous'; im.onload = function () { if (done) done(); }; im.onerror = fail; im.src = src; });
+    } else { im.crossOrigin = 'anonymous'; im.onload = function () { if (done) done(); }; im.onerror = fail; im.src = src; }
+    return im;
+  }
   var tickCache = null; /* per-tick memo: element -> stats */
   function readPixels() {
     var px = sctx.getImageData(0, 0, 24, 6).data, n = 0, s = 0, s2 = 0;
@@ -172,7 +185,7 @@
         /* frames unavailable (no CORS on the media, or not loaded yet): use the poster as a stand-in for the scene */
         var ps = el.poster || el.getAttribute('poster'); if (!ps) return null;
         var pim = corsImgs[ps];
-        if (!pim) { pim = new Image(); pim.crossOrigin = 'anonymous'; pim.decoding = 'async'; pim.src = ps; corsImgs[ps] = pim; pim.onload = function () { reink(); }; pim.onerror = function () { pim.__thxFail = true; }; }
+        if (!pim) pim = corsLoad(ps, reink);
         if (pim.__thxFail || !pim.complete || !pim.naturalWidth) return null;
         try { var smp = smallCopy(pim, pim.naturalWidth, pim.naturalHeight, true); if (!smp || smp === 'tainted') return null; if (!drawRegion(smp.c, smp.w, smp.h, mr, r, fit)) return null; var st = readPixels(); st.sd = Math.max(st.sd, 0.12); return st; } catch (e) { return null; }
       }
@@ -185,7 +198,7 @@
         var im = el;
         if (!el.crossOrigin && new URL(src, location.href).origin !== location.origin) {
           im = corsImgs[src];
-          if (!im) { im = new Image(); im.crossOrigin = 'anonymous'; im.decoding = 'async'; im.src = src; corsImgs[src] = im; im.onload = function () { reink(); }; im.onerror = function () { im.__thxFail = true; }; }
+          if (!im) im = corsLoad(src, reink);
           if (im.__thxFail || !im.complete || !im.naturalWidth) return null;
         } else if (!el.complete || !el.naturalWidth) return null;
         var smi = smallCopy(im, im.naturalWidth, im.naturalHeight, true);
@@ -202,8 +215,7 @@
     try {
       document.querySelectorAll('video[poster]').forEach(function (v) {
         var ps = v.poster || v.getAttribute('poster'); if (!ps || corsImgs[ps]) return;
-        var pim = new Image(); pim.crossOrigin = 'anonymous'; pim.decoding = 'async'; corsImgs[ps] = pim;
-        pim.onerror = function () { pim.__thxFail = true; }; pim.src = ps;
+        corsLoad(ps, null);
       });
     } catch (e) {}
   }
@@ -212,7 +224,7 @@
     if (!sctx || el.__thxTainted) return null;
     var m = bgi.match(/url\((['"]?)(.*?)\1\)/); if (!m) return null;
     var src = m[2]; var im = corsImgs[src];
-    if (!im) { im = new Image(); im.crossOrigin = 'anonymous'; im.decoding = 'async'; im.src = src; corsImgs[src] = im; im.onload = function () { reink(); }; im.onerror = function () { im.__thxFail = true; }; }
+    if (!im) im = corsLoad(src, reink);
     if (im.__thxFail || !im.complete || !im.naturalWidth) return null;
     var key = Math.round(r.left) + ':' + Math.round(r.width);
     var per = tickCache.get(el); if (!per) { per = {}; tickCache.set(el, per); }
