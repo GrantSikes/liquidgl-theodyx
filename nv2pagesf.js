@@ -1,4 +1,4 @@
-/*! nv2pagesf 1.74.0 (2026-09-05, Phase 10 ERR-02): the 404 recovery cards get their styling back — .thx-rel-* rules re-injected scoped under #thx-404 (lost in the 1.7x rewrite, which left four bodyless .thx-404 selectors behind), a light kicker instead of the dark-on-dark inline colour, and the Designer ._404-number block clamped so it stops dwarfing the injected H1 */
+/*! nv2pagesf 1.75.0 (2026-09-05, Phase 11 ACT-09: the footer language block is hidden entirely while there is one locale) — 1.74.0 (2026-09-05, Phase 10 ERR-02): the 404 recovery cards get their styling back — .thx-rel-* rules re-injected scoped under #thx-404 (lost in the 1.7x rewrite, which left four bodyless .thx-404 selectors behind), a light kicker instead of the dark-on-dark inline colour, and the Designer ._404-number block clamped so it stops dwarfing the injected H1 */
 /*! nv2pagesf 1.73.0 (2026-09-05, Phase 9): footer language slot hidden while one locale exists and labelled by its visible label (SEM-18); /contact form outcome wrappers carry live-region roles (SEM-03) */
 /*! nv2pagesf 1.72.0 (2026-09-04, Phase 7): 404 page uses -p-800 thumbnails, lazy data-bg, role=img + alt, h1 + main landmark, direct article paths */
 /*! theodyx-i18n 1.0.0 (2026-09-04, Phase 6) — locale runtime for script-injected UI. Source of truth is <html lang>, which the server sets per locale (Webflow Localization); matched by language prefix (en-US → en, pt-BR → pt); every key falls back to English. Never consults the browser's language list, never rewrites page text: the anchor navigates, the server decides. Consumers register their own strings with add(). */
@@ -72,7 +72,8 @@ if(document.body)imo();if(document.readyState!=='loading')imo();else document.ad
     var lab = document.querySelector('.footer-lang-label');
     var L = localeList();
     /* SEM-18: with one published locale the slot stays empty, and an empty labelled <ul> is announced as "Language, list, 0 items" */
-    if (L.length < 2) { slot.hidden = true; return; }
+    if (L.length < 2) { slot.hidden = true; var fl = slot.closest('.footer-lang'); if (fl) fl.hidden = true; return; } /* Phase 11 ACT-09: hide the label too - a visible "Language" over an empty list is a dead affordance */
+    var fl2 = slot.closest('.footer-lang'); if (fl2) fl2.hidden = false;
     slot.hidden = false;
     if (lab && !lab.id) lab.id = 'thx-lang-label';
     var cur = I.base, wrap = document.createElement('nav'); wrap.className = 'thx-lang'; wrap.setAttribute('data-thx-noi18n', '1');

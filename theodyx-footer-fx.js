@@ -19,7 +19,8 @@
       '[data-thx-anim="footer"] .thx-glow{position:absolute;top:-34%;left:50%;transform:translateX(-50%);width:120%;height:74%;background:radial-gradient(50% 62% at 50% 0,rgba(120,148,246,.20),rgba(168,124,255,.10) 46%,transparent 72%);pointer-events:none}',
       '[data-thx-anim="footer"] .thx-top{position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(120,148,246,.6),rgba(168,124,255,.65),rgba(255,143,177,.5),transparent)}',
       '[data-thx-anim="footer-wordmark"] .thx-grad{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:"Google Sans Flex","Google Sans",system-ui,sans-serif;font-weight:800;font-size:clamp(56px,17.4vw,236px);line-height:1;letter-spacing:-.04em;white-space:nowrap;background:linear-gradient(106deg,#b9854a,#ecd6a0 46%,#c79a5e 82%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;opacity:.96;transition:opacity .7s ease;pointer-events:none}',
-      '[data-thx-anim="footer-wordmark"] canvas{position:absolute;inset:0;display:block;width:100%;height:100%;opacity:0;transition:opacity .7s ease}',
+      '[data-thx-anim="footer-wordmark"] canvas{position:absolute;inset:0;display:block;width:100%;height:100%;opacity:0;transition:opacity .7s var(--thx-ease-ambient,cubic-bezier(.19,1,.22,1))}',
+      '@media (forced-colors:active){[data-thx-anim="footer-wordmark"] canvas{display:none!important}[data-thx-anim="footer-wordmark"] .thx-grad{opacity:1!important;background:none;-webkit-text-fill-color:CanvasText;color:CanvasText}}',
       '@media(max-width:600px){[data-thx-anim="footer-wordmark"] .thx-grad{font-size:clamp(44px,17.6vw,104px)}}'
     ].join('');
     if (!document.getElementById('thx-footer-fx-css')) {
@@ -188,6 +189,7 @@
     function mount(node, grad, word) { if (word && typeof word === 'string') WORD = word;
       var inst = null, running = false, raf = 0, reduce = false, tries = 0, started = false, inView = false, done = false, shown = false;
       try { reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
+      try { if (window.matchMedia('(forced-colors: active)').matches) reduce = true; } catch (e) {} /* Phase 11 RM-04: forced colours cannot remap canvas pixels; keep the DOM wordmark */
       node.__thxMode = 'init';
       if (reduce) { node.__thxMode = 'reduced'; return; }   // honour reduced-motion: keep the static gradient wordmark, no swarm
       function loop(now) { if (!running) return; try { inst && inst.frame && inst.frame(now || performance.now()); } catch (e) {} raf = requestAnimationFrame(loop); }
