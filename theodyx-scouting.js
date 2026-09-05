@@ -1,11 +1,16 @@
-/* theodyx-scouting 1.9.0 — first paint matches the final gate state (no CLS), Turnstile and the
- * QR load only once they are actually needed, and the QR vendor is our own SRI-pinned copy. */
+/* theodyx-scouting 1.10.0 — Phase 9 accessibility: the safety and age gates are real modals (they
+ * take focus, everything else goes inert + aria-hidden, Tab is trapped, focus is restored on
+ * clear); submit renders a full error summary of links with per-field messages wired through
+ * aria-describedby; required / autocomplete / group semantics are declared; uploads are real
+ * buttons that announce their state; Turnstile has a labelled box and an email fallback route.
+ * First paint still matches the final gate state (no CLS), and Turnstile and the QR still load
+ * only once they are actually needed, from our own SRI-pinned copy. */
 (function () {
   'use strict';
   if (window.__thxScouting) return;
   window.__thxScouting = true;
   /* theodyx-scouting i18n (Phase 6): every user-facing string goes through T(); dictionaries (en/es/pt/fr) register with the site locale runtime, keyed by <html lang>. The safety statement and the age gate stay English on purpose: legal copy is translated by people, not scripts. */
-  var SCD = {"en": {"sc.lbl.email": "Email", "sc.lbl.firstName": "First name", "sc.lbl.lastName": "Last name", "sc.lbl.dob": "Date of birth", "sc.lbl.platform": "Primary platform", "sc.lbl.country": "Country", "sc.lbl.state": "State / Region", "sc.lbl.city": "City", "sc.lbl.instagram": "Instagram handle", "sc.lbl.tiktok": "TikTok handle", "sc.lbl.youtube": "YouTube channel", "sc.lbl.otherPlatform": "Other platform", "sc.lbl.representedBy": "Represented by", "sc.lbl.notes": "Anything else?", "sc.lbl.link1": "post / video 1", "sc.lbl.link2": "post / video 2", "sc.lbl.link3": "post / video 3", "sc.lbl.pictures": "Your pictures", "sc.ph.email": "you@email.com", "sc.ph.state": "State, province, or region", "sc.ph.city": "Where are you based?", "sc.ph.handle": "yourhandle", "sc.ph.youtube": "@channel or URL", "sc.ph.otherPlatform": "e.g. Substack, Twitch", "sc.ph.representedBy": "Agency / manager", "sc.ph.country": "Select your country…", "sc.ph.select": "Select…", "sc.eyebrow.you": "01 — You", "sc.h2.you": "Tell us who you are", "sc.eyebrow.work": "02 — Work", "sc.h2.work": "Show us your work", "sc.text.work": "Upload the media you’re proudest of — a few links, or a media kit. Optional, but it helps our team get to know you better.", "sc.sec.you": "About you", "sc.sec.work": "Your work", "sc.sec.consent": "Consent and submit", "sc.legend.rep": "Are you currently represented? *", "sc.yes": "Yes", "sc.no": "No", "sc.optional": "(optional)", "sc.drop.upload": "+ Upload", "sc.drop.max": "≤ 10 MB", "sc.drop.toobig": "Files must be 10 MB or smaller.", "sc.drop.another": "Tap to try another", "sc.drop.again": "Tap to try again", "sc.drop.uploading": "Uploading…", "sc.drop.remove": "Remove", "sc.err.uploadnet": "Upload failed. Check your connection.", "sc.err.upload": "Upload failed. Please try again.", "sc.err.email": "Enter a valid email address.", "sc.err.first": "First name is required.", "sc.err.last": "Last name is required.", "sc.err.dob": "Enter your date of birth.", "sc.err.age": "You must be {n} or older to apply.", "sc.err.dobmatch": "Your date of birth doesn’t match the age you gave earlier.", "sc.err.country": "Select your country.", "sc.err.platform": "Select your main platform.", "sc.err.rep": "Let us know if you’re represented.", "sc.err.repby": "Who represents you?", "sc.err.other": "Name the platform.", "sc.err.links": "Enter valid links (https://…).", "sc.err.consent": "Please agree to continue.", "sc.err.turnstile": "Please complete the verification, then submit.", "sc.err.fields": "Please check the highlighted fields.", "sc.err.rate": "Too many attempts. Please try again later, or email {email}.", "sc.submit": "Submit application", "sc.submitting": "Submitting…", "sc.success.eyebrow": "Application received", "sc.success.title": "Thank you.", "sc.success.body": "Your application is in. Thank you for taking the time to apply.", "sc.home": "Return home"}, "es": {"sc.lbl.email": "Correo electrónico", "sc.lbl.firstName": "Nombre", "sc.lbl.lastName": "Apellidos", "sc.lbl.dob": "Fecha de nacimiento", "sc.lbl.platform": "Plataforma principal", "sc.lbl.country": "País", "sc.lbl.state": "Estado / Región", "sc.lbl.city": "Ciudad", "sc.lbl.instagram": "Usuario de Instagram", "sc.lbl.tiktok": "Usuario de TikTok", "sc.lbl.youtube": "Canal de YouTube", "sc.lbl.otherPlatform": "Otra plataforma", "sc.lbl.representedBy": "Representado por", "sc.lbl.notes": "¿Algo más?", "sc.lbl.link1": "publicación / vídeo 1", "sc.lbl.link2": "publicación / vídeo 2", "sc.lbl.link3": "publicación / vídeo 3", "sc.lbl.pictures": "Tus fotos", "sc.ph.email": "tu@correo.com", "sc.ph.state": "Estado, provincia o región", "sc.ph.city": "¿Dónde vives?", "sc.ph.handle": "tuusuario", "sc.ph.youtube": "@canal o URL", "sc.ph.otherPlatform": "p. ej., Substack, Twitch", "sc.ph.representedBy": "Agencia / representante", "sc.ph.country": "Selecciona tu país…", "sc.ph.select": "Selecciona…", "sc.eyebrow.you": "01 — Tú", "sc.h2.you": "Cuéntanos quién eres", "sc.eyebrow.work": "02 — Trabajo", "sc.h2.work": "Muéstranos tu trabajo", "sc.text.work": "Sube el contenido del que estés más orgulloso: unos enlaces o un media kit. Es opcional, pero ayuda a nuestro equipo a conocerte mejor.", "sc.sec.you": "Sobre ti", "sc.sec.work": "Tu trabajo", "sc.sec.consent": "Consentimiento y envío", "sc.legend.rep": "¿Tienes representación actualmente? *", "sc.yes": "Sí", "sc.no": "No", "sc.optional": "(opcional)", "sc.drop.upload": "+ Subir", "sc.drop.max": "≤ 10 MB", "sc.drop.toobig": "Los archivos deben pesar 10 MB o menos.", "sc.drop.another": "Toca para probar con otro", "sc.drop.again": "Toca para intentarlo de nuevo", "sc.drop.uploading": "Subiendo…", "sc.drop.remove": "Quitar", "sc.err.uploadnet": "Error al subir el archivo. Comprueba tu conexión.", "sc.err.upload": "Error al subir el archivo. Inténtalo de nuevo.", "sc.err.email": "Introduce una dirección de correo válida.", "sc.err.first": "El nombre es obligatorio.", "sc.err.last": "Los apellidos son obligatorios.", "sc.err.dob": "Introduce tu fecha de nacimiento.", "sc.err.age": "Debes tener {n} años o más para solicitar.", "sc.err.dobmatch": "Tu fecha de nacimiento no coincide con la edad que indicaste antes.", "sc.err.country": "Selecciona tu país.", "sc.err.platform": "Selecciona tu plataforma principal.", "sc.err.rep": "Dinos si tienes representación.", "sc.err.repby": "¿Quién te representa?", "sc.err.other": "Indica la plataforma.", "sc.err.links": "Introduce enlaces válidos (https://…).", "sc.err.consent": "Acepta para continuar.", "sc.err.turnstile": "Completa la verificación y luego envía.", "sc.err.fields": "Revisa los campos marcados.", "sc.err.rate": "Demasiados intentos. Inténtalo más tarde o escribe a {email}.", "sc.submit": "Enviar solicitud", "sc.submitting": "Enviando…", "sc.success.eyebrow": "Solicitud recibida", "sc.success.title": "Gracias.", "sc.success.body": "Tu solicitud ha sido enviada. Gracias por tomarte el tiempo de presentarla.", "sc.home": "Volver al inicio"}, "pt": {"sc.lbl.email": "E-mail", "sc.lbl.firstName": "Nome", "sc.lbl.lastName": "Sobrenome", "sc.lbl.dob": "Data de nascimento", "sc.lbl.platform": "Plataforma principal", "sc.lbl.country": "País", "sc.lbl.state": "Estado / Região", "sc.lbl.city": "Cidade", "sc.lbl.instagram": "Usuário do Instagram", "sc.lbl.tiktok": "Usuário do TikTok", "sc.lbl.youtube": "Canal do YouTube", "sc.lbl.otherPlatform": "Outra plataforma", "sc.lbl.representedBy": "Representado por", "sc.lbl.notes": "Mais alguma coisa?", "sc.lbl.link1": "publicação / vídeo 1", "sc.lbl.link2": "publicação / vídeo 2", "sc.lbl.link3": "publicação / vídeo 3", "sc.lbl.pictures": "Suas fotos", "sc.ph.email": "voce@email.com", "sc.ph.state": "Estado, província ou região", "sc.ph.city": "Onde você mora?", "sc.ph.handle": "seuusuario", "sc.ph.youtube": "@canal ou URL", "sc.ph.otherPlatform": "ex.: Substack, Twitch", "sc.ph.representedBy": "Agência / empresário", "sc.ph.country": "Selecione seu país…", "sc.ph.select": "Selecione…", "sc.eyebrow.you": "01 — Você", "sc.h2.you": "Conte quem você é", "sc.eyebrow.work": "02 — Trabalho", "sc.h2.work": "Mostre o seu trabalho", "sc.text.work": "Envie o conteúdo de que mais se orgulha: alguns links ou um media kit. É opcional, mas ajuda a nossa equipe a conhecer você melhor.", "sc.sec.you": "Sobre você", "sc.sec.work": "Seu trabalho", "sc.sec.consent": "Consentimento e envio", "sc.legend.rep": "Você tem representação atualmente? *", "sc.yes": "Sim", "sc.no": "Não", "sc.optional": "(opcional)", "sc.drop.upload": "+ Enviar", "sc.drop.max": "≤ 10 MB", "sc.drop.toobig": "Os arquivos devem ter no máximo 10 MB.", "sc.drop.another": "Toque para tentar outro", "sc.drop.again": "Toque para tentar novamente", "sc.drop.uploading": "Enviando…", "sc.drop.remove": "Remover", "sc.err.uploadnet": "Falha no envio. Verifique sua conexão.", "sc.err.upload": "Falha no envio. Tente novamente.", "sc.err.email": "Insira um e-mail válido.", "sc.err.first": "O nome é obrigatório.", "sc.err.last": "O sobrenome é obrigatório.", "sc.err.dob": "Insira sua data de nascimento.", "sc.err.age": "Você precisa ter {n} anos ou mais para se candidatar.", "sc.err.dobmatch": "Sua data de nascimento não corresponde à idade informada antes.", "sc.err.country": "Selecione seu país.", "sc.err.platform": "Selecione sua plataforma principal.", "sc.err.rep": "Diga se você tem representação.", "sc.err.repby": "Quem representa você?", "sc.err.other": "Informe a plataforma.", "sc.err.links": "Insira links válidos (https://…).", "sc.err.consent": "Aceite para continuar.", "sc.err.turnstile": "Conclua a verificação e depois envie.", "sc.err.fields": "Verifique os campos destacados.", "sc.err.rate": "Muitas tentativas. Tente novamente mais tarde ou escreva para {email}.", "sc.submit": "Enviar candidatura", "sc.submitting": "Enviando…", "sc.success.eyebrow": "Candidatura recebida", "sc.success.title": "Obrigado.", "sc.success.body": "Sua candidatura foi enviada. Obrigado por dedicar seu tempo.", "sc.home": "Voltar ao início"}, "fr": {"sc.lbl.email": "E-mail", "sc.lbl.firstName": "Prénom", "sc.lbl.lastName": "Nom", "sc.lbl.dob": "Date de naissance", "sc.lbl.platform": "Plateforme principale", "sc.lbl.country": "Pays", "sc.lbl.state": "État / Région", "sc.lbl.city": "Ville", "sc.lbl.instagram": "Identifiant Instagram", "sc.lbl.tiktok": "Identifiant TikTok", "sc.lbl.youtube": "Chaîne YouTube", "sc.lbl.otherPlatform": "Autre plateforme", "sc.lbl.representedBy": "Représenté par", "sc.lbl.notes": "Autre chose ?", "sc.lbl.link1": "publication / vidéo 1", "sc.lbl.link2": "publication / vidéo 2", "sc.lbl.link3": "publication / vidéo 3", "sc.lbl.pictures": "Vos photos", "sc.ph.email": "vous@email.com", "sc.ph.state": "État, province ou région", "sc.ph.city": "Où êtes-vous basé(e) ?", "sc.ph.handle": "votreidentifiant", "sc.ph.youtube": "@chaîne ou URL", "sc.ph.otherPlatform": "ex. : Substack, Twitch", "sc.ph.representedBy": "Agence / manager", "sc.ph.country": "Sélectionnez votre pays…", "sc.ph.select": "Sélectionnez…", "sc.eyebrow.you": "01 — Vous", "sc.h2.you": "Dites-nous qui vous êtes", "sc.eyebrow.work": "02 — Travail", "sc.h2.work": "Montrez-nous votre travail", "sc.text.work": "Partagez les contenus dont vous êtes le plus fier : quelques liens ou un kit média. Facultatif, mais cela aide notre équipe à mieux vous connaître.", "sc.sec.you": "À propos de vous", "sc.sec.work": "Votre travail", "sc.sec.consent": "Consentement et envoi", "sc.legend.rep": "Êtes-vous actuellement représenté(e) ? *", "sc.yes": "Oui", "sc.no": "Non", "sc.optional": "(facultatif)", "sc.drop.upload": "+ Importer", "sc.drop.max": "≤ 10 Mo", "sc.drop.toobig": "Les fichiers doivent faire 10 Mo ou moins.", "sc.drop.another": "Touchez pour en essayer un autre", "sc.drop.again": "Touchez pour réessayer", "sc.drop.uploading": "Envoi…", "sc.drop.remove": "Retirer", "sc.err.uploadnet": "Échec de l’envoi. Vérifiez votre connexion.", "sc.err.upload": "Échec de l’envoi. Veuillez réessayer.", "sc.err.email": "Saisissez une adresse e-mail valide.", "sc.err.first": "Le prénom est obligatoire.", "sc.err.last": "Le nom est obligatoire.", "sc.err.dob": "Saisissez votre date de naissance.", "sc.err.age": "Vous devez avoir {n} ans ou plus pour postuler.", "sc.err.dobmatch": "Votre date de naissance ne correspond pas à l’âge indiqué précédemment.", "sc.err.country": "Sélectionnez votre pays.", "sc.err.platform": "Sélectionnez votre plateforme principale.", "sc.err.rep": "Indiquez si vous êtes représenté(e).", "sc.err.repby": "Qui vous représente ?", "sc.err.other": "Indiquez la plateforme.", "sc.err.links": "Saisissez des liens valides (https://…).", "sc.err.consent": "Veuillez accepter pour continuer.", "sc.err.turnstile": "Veuillez terminer la vérification, puis envoyer.", "sc.err.fields": "Veuillez vérifier les champs signalés.", "sc.err.rate": "Trop de tentatives. Réessayez plus tard ou écrivez à {email}.", "sc.submit": "Envoyer ma candidature", "sc.submitting": "Envoi…", "sc.success.eyebrow": "Candidature reçue", "sc.success.title": "Merci.", "sc.success.body": "Votre candidature est envoyée. Merci d’avoir pris le temps de postuler.", "sc.home": "Retour à l’accueil"}};
+  var SCD = {"en": {"sc.lbl.email": "Email", "sc.lbl.firstName": "First name", "sc.lbl.lastName": "Last name", "sc.lbl.dob": "Date of birth", "sc.lbl.platform": "Primary platform", "sc.lbl.country": "Country", "sc.lbl.state": "State / Region", "sc.lbl.city": "City", "sc.lbl.instagram": "Instagram handle", "sc.lbl.tiktok": "TikTok handle", "sc.lbl.youtube": "YouTube channel", "sc.lbl.otherPlatform": "Other platform", "sc.lbl.representedBy": "Represented by", "sc.lbl.notes": "Anything else?", "sc.lbl.link1": "post / video 1", "sc.lbl.link2": "post / video 2", "sc.lbl.link3": "post / video 3", "sc.lbl.pictures": "Your pictures", "sc.ph.email": "you@email.com", "sc.ph.state": "State, province, or region", "sc.ph.city": "Where are you based?", "sc.ph.handle": "yourhandle", "sc.ph.youtube": "@channel or URL", "sc.ph.otherPlatform": "e.g. Substack, Twitch", "sc.ph.representedBy": "Agency / manager", "sc.ph.country": "Select your country…", "sc.ph.select": "Select…", "sc.eyebrow.you": "01 — You", "sc.h2.you": "Tell us who you are", "sc.eyebrow.work": "02 — Work", "sc.h2.work": "Show us your work", "sc.text.work": "Upload the media you’re proudest of — a few links, or a media kit. Optional, but it helps our team get to know you better.", "sc.sec.you": "About you", "sc.sec.work": "Your work", "sc.sec.consent": "Consent and submit", "sc.legend.rep": "Are you currently represented? *", "sc.yes": "Yes", "sc.no": "No", "sc.optional": "(optional)", "sc.drop.upload": "+ Upload", "sc.drop.max": "≤ 10 MB", "sc.drop.toobig": "Files must be 10 MB or smaller.", "sc.drop.another": "Tap to try another", "sc.drop.again": "Tap to try again", "sc.drop.uploading": "Uploading…", "sc.drop.remove": "Remove", "sc.err.uploadnet": "Upload failed. Check your connection.", "sc.err.upload": "Upload failed. Please try again.", "sc.err.email": "Enter a valid email address.", "sc.err.first": "First name is required.", "sc.err.last": "Last name is required.", "sc.err.dob": "Enter your date of birth.", "sc.err.age": "You must be {n} or older to apply.", "sc.err.dobmatch": "Your date of birth doesn’t match the age you gave earlier.", "sc.err.country": "Select your country.", "sc.err.platform": "Select your main platform.", "sc.err.rep": "Let us know if you’re represented.", "sc.err.repby": "Who represents you?", "sc.err.other": "Name the platform.", "sc.err.links": "Enter valid links (https://…).", "sc.err.consent": "Please agree to continue.", "sc.err.turnstile": "Please complete the verification, then submit.", "sc.err.fields": "Please check the highlighted fields.", "sc.err.rate": "Too many attempts. Please try again later, or email {email}.", "sc.submit": "Submit application", "sc.submitting": "Submitting…", "sc.success.eyebrow": "Application received", "sc.success.title": "Thank you.", "sc.success.body": "Your application is in. Thank you for taking the time to apply.", "sc.home": "Return home", "sc.req.note": "Fields marked * are required.", "sc.err.summary": "Please fix the following:", "sc.qr.label": "Scan to continue this application on your phone", "sc.ts.label": "Verification", "sc.err.tsfallback": "Verification isn’t available in this browser — email {email} and we’ll take your application by email.", "sc.a11y.uploading": "Uploading {name} — {pct}%", "sc.a11y.uploaded": "{name} uploaded.", "sc.a11y.removed": "File removed.", "sc.a11y.removeFile": "Remove {name}"}, "es": {"sc.lbl.email": "Correo electrónico", "sc.lbl.firstName": "Nombre", "sc.lbl.lastName": "Apellidos", "sc.lbl.dob": "Fecha de nacimiento", "sc.lbl.platform": "Plataforma principal", "sc.lbl.country": "País", "sc.lbl.state": "Estado / Región", "sc.lbl.city": "Ciudad", "sc.lbl.instagram": "Usuario de Instagram", "sc.lbl.tiktok": "Usuario de TikTok", "sc.lbl.youtube": "Canal de YouTube", "sc.lbl.otherPlatform": "Otra plataforma", "sc.lbl.representedBy": "Representado por", "sc.lbl.notes": "¿Algo más?", "sc.lbl.link1": "publicación / vídeo 1", "sc.lbl.link2": "publicación / vídeo 2", "sc.lbl.link3": "publicación / vídeo 3", "sc.lbl.pictures": "Tus fotos", "sc.ph.email": "tu@correo.com", "sc.ph.state": "Estado, provincia o región", "sc.ph.city": "¿Dónde vives?", "sc.ph.handle": "tuusuario", "sc.ph.youtube": "@canal o URL", "sc.ph.otherPlatform": "p. ej., Substack, Twitch", "sc.ph.representedBy": "Agencia / representante", "sc.ph.country": "Selecciona tu país…", "sc.ph.select": "Selecciona…", "sc.eyebrow.you": "01 — Tú", "sc.h2.you": "Cuéntanos quién eres", "sc.eyebrow.work": "02 — Trabajo", "sc.h2.work": "Muéstranos tu trabajo", "sc.text.work": "Sube el contenido del que estés más orgulloso: unos enlaces o un media kit. Es opcional, pero ayuda a nuestro equipo a conocerte mejor.", "sc.sec.you": "Sobre ti", "sc.sec.work": "Tu trabajo", "sc.sec.consent": "Consentimiento y envío", "sc.legend.rep": "¿Tienes representación actualmente? *", "sc.yes": "Sí", "sc.no": "No", "sc.optional": "(opcional)", "sc.drop.upload": "+ Subir", "sc.drop.max": "≤ 10 MB", "sc.drop.toobig": "Los archivos deben pesar 10 MB o menos.", "sc.drop.another": "Toca para probar con otro", "sc.drop.again": "Toca para intentarlo de nuevo", "sc.drop.uploading": "Subiendo…", "sc.drop.remove": "Quitar", "sc.err.uploadnet": "Error al subir el archivo. Comprueba tu conexión.", "sc.err.upload": "Error al subir el archivo. Inténtalo de nuevo.", "sc.err.email": "Introduce una dirección de correo válida.", "sc.err.first": "El nombre es obligatorio.", "sc.err.last": "Los apellidos son obligatorios.", "sc.err.dob": "Introduce tu fecha de nacimiento.", "sc.err.age": "Debes tener {n} años o más para solicitar.", "sc.err.dobmatch": "Tu fecha de nacimiento no coincide con la edad que indicaste antes.", "sc.err.country": "Selecciona tu país.", "sc.err.platform": "Selecciona tu plataforma principal.", "sc.err.rep": "Dinos si tienes representación.", "sc.err.repby": "¿Quién te representa?", "sc.err.other": "Indica la plataforma.", "sc.err.links": "Introduce enlaces válidos (https://…).", "sc.err.consent": "Acepta para continuar.", "sc.err.turnstile": "Completa la verificación y luego envía.", "sc.err.fields": "Revisa los campos marcados.", "sc.err.rate": "Demasiados intentos. Inténtalo más tarde o escribe a {email}.", "sc.submit": "Enviar solicitud", "sc.submitting": "Enviando…", "sc.success.eyebrow": "Solicitud recibida", "sc.success.title": "Gracias.", "sc.success.body": "Tu solicitud ha sido enviada. Gracias por tomarte el tiempo de presentarla.", "sc.home": "Volver al inicio", "sc.req.note": "Los campos marcados con * son obligatorios.", "sc.err.summary": "Corrige lo siguiente:", "sc.qr.label": "Escanea para continuar esta solicitud en tu teléfono", "sc.ts.label": "Verificación", "sc.err.tsfallback": "La verificación no está disponible en este navegador: escribe a {email} y recibiremos tu solicitud por correo.", "sc.a11y.uploading": "Subiendo {name}: {pct}%", "sc.a11y.uploaded": "{name} se ha subido.", "sc.a11y.removed": "Archivo eliminado.", "sc.a11y.removeFile": "Quitar {name}"}, "pt": {"sc.lbl.email": "E-mail", "sc.lbl.firstName": "Nome", "sc.lbl.lastName": "Sobrenome", "sc.lbl.dob": "Data de nascimento", "sc.lbl.platform": "Plataforma principal", "sc.lbl.country": "País", "sc.lbl.state": "Estado / Região", "sc.lbl.city": "Cidade", "sc.lbl.instagram": "Usuário do Instagram", "sc.lbl.tiktok": "Usuário do TikTok", "sc.lbl.youtube": "Canal do YouTube", "sc.lbl.otherPlatform": "Outra plataforma", "sc.lbl.representedBy": "Representado por", "sc.lbl.notes": "Mais alguma coisa?", "sc.lbl.link1": "publicação / vídeo 1", "sc.lbl.link2": "publicação / vídeo 2", "sc.lbl.link3": "publicação / vídeo 3", "sc.lbl.pictures": "Suas fotos", "sc.ph.email": "voce@email.com", "sc.ph.state": "Estado, província ou região", "sc.ph.city": "Onde você mora?", "sc.ph.handle": "seuusuario", "sc.ph.youtube": "@canal ou URL", "sc.ph.otherPlatform": "ex.: Substack, Twitch", "sc.ph.representedBy": "Agência / empresário", "sc.ph.country": "Selecione seu país…", "sc.ph.select": "Selecione…", "sc.eyebrow.you": "01 — Você", "sc.h2.you": "Conte quem você é", "sc.eyebrow.work": "02 — Trabalho", "sc.h2.work": "Mostre o seu trabalho", "sc.text.work": "Envie o conteúdo de que mais se orgulha: alguns links ou um media kit. É opcional, mas ajuda a nossa equipe a conhecer você melhor.", "sc.sec.you": "Sobre você", "sc.sec.work": "Seu trabalho", "sc.sec.consent": "Consentimento e envio", "sc.legend.rep": "Você tem representação atualmente? *", "sc.yes": "Sim", "sc.no": "Não", "sc.optional": "(opcional)", "sc.drop.upload": "+ Enviar", "sc.drop.max": "≤ 10 MB", "sc.drop.toobig": "Os arquivos devem ter no máximo 10 MB.", "sc.drop.another": "Toque para tentar outro", "sc.drop.again": "Toque para tentar novamente", "sc.drop.uploading": "Enviando…", "sc.drop.remove": "Remover", "sc.err.uploadnet": "Falha no envio. Verifique sua conexão.", "sc.err.upload": "Falha no envio. Tente novamente.", "sc.err.email": "Insira um e-mail válido.", "sc.err.first": "O nome é obrigatório.", "sc.err.last": "O sobrenome é obrigatório.", "sc.err.dob": "Insira sua data de nascimento.", "sc.err.age": "Você precisa ter {n} anos ou mais para se candidatar.", "sc.err.dobmatch": "Sua data de nascimento não corresponde à idade informada antes.", "sc.err.country": "Selecione seu país.", "sc.err.platform": "Selecione sua plataforma principal.", "sc.err.rep": "Diga se você tem representação.", "sc.err.repby": "Quem representa você?", "sc.err.other": "Informe a plataforma.", "sc.err.links": "Insira links válidos (https://…).", "sc.err.consent": "Aceite para continuar.", "sc.err.turnstile": "Conclua a verificação e depois envie.", "sc.err.fields": "Verifique os campos destacados.", "sc.err.rate": "Muitas tentativas. Tente novamente mais tarde ou escreva para {email}.", "sc.submit": "Enviar candidatura", "sc.submitting": "Enviando…", "sc.success.eyebrow": "Candidatura recebida", "sc.success.title": "Obrigado.", "sc.success.body": "Sua candidatura foi enviada. Obrigado por dedicar seu tempo.", "sc.home": "Voltar ao início", "sc.req.note": "Os campos marcados com * são obrigatórios.", "sc.err.summary": "Corrija o seguinte:", "sc.qr.label": "Escaneie para continuar esta candidatura no seu telefone", "sc.ts.label": "Verificação", "sc.err.tsfallback": "A verificação não está disponível neste navegador — escreva para {email} e receberemos sua candidatura por e-mail.", "sc.a11y.uploading": "Enviando {name}: {pct}%", "sc.a11y.uploaded": "{name} enviado.", "sc.a11y.removed": "Arquivo removido.", "sc.a11y.removeFile": "Remover {name}"}, "fr": {"sc.lbl.email": "E-mail", "sc.lbl.firstName": "Prénom", "sc.lbl.lastName": "Nom", "sc.lbl.dob": "Date de naissance", "sc.lbl.platform": "Plateforme principale", "sc.lbl.country": "Pays", "sc.lbl.state": "État / Région", "sc.lbl.city": "Ville", "sc.lbl.instagram": "Identifiant Instagram", "sc.lbl.tiktok": "Identifiant TikTok", "sc.lbl.youtube": "Chaîne YouTube", "sc.lbl.otherPlatform": "Autre plateforme", "sc.lbl.representedBy": "Représenté par", "sc.lbl.notes": "Autre chose ?", "sc.lbl.link1": "publication / vidéo 1", "sc.lbl.link2": "publication / vidéo 2", "sc.lbl.link3": "publication / vidéo 3", "sc.lbl.pictures": "Vos photos", "sc.ph.email": "vous@email.com", "sc.ph.state": "État, province ou région", "sc.ph.city": "Où êtes-vous basé(e) ?", "sc.ph.handle": "votreidentifiant", "sc.ph.youtube": "@chaîne ou URL", "sc.ph.otherPlatform": "ex. : Substack, Twitch", "sc.ph.representedBy": "Agence / manager", "sc.ph.country": "Sélectionnez votre pays…", "sc.ph.select": "Sélectionnez…", "sc.eyebrow.you": "01 — Vous", "sc.h2.you": "Dites-nous qui vous êtes", "sc.eyebrow.work": "02 — Travail", "sc.h2.work": "Montrez-nous votre travail", "sc.text.work": "Partagez les contenus dont vous êtes le plus fier : quelques liens ou un kit média. Facultatif, mais cela aide notre équipe à mieux vous connaître.", "sc.sec.you": "À propos de vous", "sc.sec.work": "Votre travail", "sc.sec.consent": "Consentement et envoi", "sc.legend.rep": "Êtes-vous actuellement représenté(e) ? *", "sc.yes": "Oui", "sc.no": "Non", "sc.optional": "(facultatif)", "sc.drop.upload": "+ Importer", "sc.drop.max": "≤ 10 Mo", "sc.drop.toobig": "Les fichiers doivent faire 10 Mo ou moins.", "sc.drop.another": "Touchez pour en essayer un autre", "sc.drop.again": "Touchez pour réessayer", "sc.drop.uploading": "Envoi…", "sc.drop.remove": "Retirer", "sc.err.uploadnet": "Échec de l’envoi. Vérifiez votre connexion.", "sc.err.upload": "Échec de l’envoi. Veuillez réessayer.", "sc.err.email": "Saisissez une adresse e-mail valide.", "sc.err.first": "Le prénom est obligatoire.", "sc.err.last": "Le nom est obligatoire.", "sc.err.dob": "Saisissez votre date de naissance.", "sc.err.age": "Vous devez avoir {n} ans ou plus pour postuler.", "sc.err.dobmatch": "Votre date de naissance ne correspond pas à l’âge indiqué précédemment.", "sc.err.country": "Sélectionnez votre pays.", "sc.err.platform": "Sélectionnez votre plateforme principale.", "sc.err.rep": "Indiquez si vous êtes représenté(e).", "sc.err.repby": "Qui vous représente ?", "sc.err.other": "Indiquez la plateforme.", "sc.err.links": "Saisissez des liens valides (https://…).", "sc.err.consent": "Veuillez accepter pour continuer.", "sc.err.turnstile": "Veuillez terminer la vérification, puis envoyer.", "sc.err.fields": "Veuillez vérifier les champs signalés.", "sc.err.rate": "Trop de tentatives. Réessayez plus tard ou écrivez à {email}.", "sc.submit": "Envoyer ma candidature", "sc.submitting": "Envoi…", "sc.success.eyebrow": "Candidature reçue", "sc.success.title": "Merci.", "sc.success.body": "Votre candidature est envoyée. Merci d’avoir pris le temps de postuler.", "sc.home": "Retour à l’accueil", "sc.req.note": "Les champs marqués d’un * sont obligatoires.", "sc.err.summary": "Veuillez corriger les points suivants :", "sc.qr.label": "Scannez pour continuer cette candidature sur votre téléphone", "sc.ts.label": "Vérification", "sc.err.tsfallback": "La vérification n’est pas disponible dans ce navigateur — écrivez à {email} et nous recevrons votre candidature par e-mail.", "sc.a11y.uploading": "Envoi de {name} : {pct} %", "sc.a11y.uploaded": "{name} envoyé.", "sc.a11y.removed": "Fichier supprimé.", "sc.a11y.removeFile": "Retirer {name}"}};
   var __I = window.__thxI18n; if (__I) { for (var __lc in SCD) __I.add(__lc, SCD[__lc]); }
   function T(k, v) { if (__I && __I.t) return __I.t(k, v); var s = SCD.en[k] || k; if (v) for (var p in v) s = s.split('{' + p + '}').join(v[p]); return s; }
 
@@ -13,6 +18,7 @@
   var API_BASE = 'https://theodyx-scouting-api.theodyx.workers.dev';
   var TURNSTILE_SITE_KEY = '0x4AAAAAADp3wmr_gUgr_SNb';
   var TURNSTILE_SRC = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
+  var TURNSTILE_TIMEOUT_MS = 10000;
   var QR_SRC = 'https://cdn.jsdelivr.net/gh/GrantSikes/liquidgl-theodyx@4fd766127f1588e11846fead994117da4d50cabe/vendor/qrcode.min.js';
   var QR_SRI = 'sha384-UE+eaQRn+KiuCh1sYLD51yNjGFekkZ5qoo2J9LvSo1leawRjhShWe7VY8obiE5D4';
   var MIN_AGE = 14;
@@ -140,18 +146,100 @@
     APP_SECTIONS.forEach(function (id) { var e = $(id); if (e) e.style.display = disp ? 'block' : ''; });
   }
 
+  /* ---------------------------------------------- modal gates (KB-01/SEM-02)
+   * The safety and age overlays declare role="dialog" aria-modal="true", so they have to behave
+   * like modals: take focus when they open, put every other top-level node inert + aria-hidden,
+   * cycle Tab inside themselves, and hand focus on to the thing they were guarding when they
+   * clear. Same setInert()/focus-move/restore shape as the mobile nav sheet in theodyx-nav.js. */
+  var gateInerted = [], activeGate = null, gateFocusPrev = null, gateKeysBound = false;
+  var FOCUSABLE = 'a[href],button:not([disabled]),select:not([disabled]),textarea:not([disabled]),input:not([disabled]):not([type="hidden"]),[tabindex]:not([tabindex="-1"])';
+
+  function isVisible(el) { return !!(el && (el.offsetWidth || el.offsetHeight || (el.getClientRects && el.getClientRects().length))); }
+  function focusEl(el, scroll) {
+    if (!el) return false;
+    if (scroll) { try { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (x) {} }
+    try { el.focus({ preventScroll: true }); } catch (x) { try { el.focus(); } catch (y) {} }
+    return document.activeElement === el;
+  }
+  function gateFocusables(gate) {
+    return qsa(FOCUSABLE, gate).filter(function (el) { return isVisible(el) && !el.hasAttribute('inert'); });
+  }
+  function setGateInert(gate) {
+    releaseGateInert();
+    var n = document.body.firstElementChild;
+    while (n) {
+      if (n !== gate && !n.contains(gate) && !/^(SCRIPT|STYLE|LINK|TEMPLATE|NOSCRIPT)$/.test(n.tagName) && !n.hasAttribute('inert')) {
+        n.setAttribute('inert', ''); n.setAttribute('aria-hidden', 'true'); gateInerted.push(n);
+      }
+      n = n.nextElementSibling;
+    }
+  }
+  function releaseGateInert() {
+    gateInerted.forEach(function (n) { n.removeAttribute('inert'); n.removeAttribute('aria-hidden'); });
+    gateInerted = [];
+  }
+  /* Tab guard: inert already keeps the rest of the page out of the sequence in modern engines,
+   * this makes the wrap deterministic (and covers browsers without inert). */
+  function onGateKeydown(e) {
+    if (!activeGate || e.key !== 'Tab') return;
+    var f = gateFocusables(activeGate);
+    if (!f.length) { e.preventDefault(); focusEl(activeGate); return; }
+    var first = f[0], last = f[f.length - 1], a = document.activeElement;
+    if (!activeGate.contains(a)) { e.preventDefault(); focusEl(e.shiftKey ? last : first); return; }
+    if (e.shiftKey && (a === first || a === activeGate)) { e.preventDefault(); focusEl(last); }
+    else if (!e.shiftKey && a === last) { e.preventDefault(); focusEl(first); }
+  }
+  function onGateFocusIn(e) {
+    if (!activeGate || activeGate.contains(e.target)) return;
+    var f = gateFocusables(activeGate);
+    focusEl(f[0] || activeGate);
+  }
+  function bindGateKeys() {
+    if (gateKeysBound) return; gateKeysBound = true;
+    document.addEventListener('keydown', onGateKeydown, true);
+    document.addEventListener('focusin', onGateFocusIn, true);
+  }
+  function openGate(gate, prefer) {
+    if (!gate || activeGate === gate) return;
+    if (!activeGate) gateFocusPrev = document.activeElement;
+    activeGate = gate;
+    if (!gate.hasAttribute('tabindex')) gate.setAttribute('tabindex', '-1');
+    gate.removeAttribute('aria-hidden'); gate.removeAttribute('inert');
+    setGateInert(gate);
+    bindGateKeys();
+    focusEl(prefer && isVisible(prefer) ? prefer : gate);
+  }
+  /* Only moves focus if a gate was actually open, so an ordinary reload of an already-cleared
+   * session never steals focus from the top of the document. */
+  function closeGates(moveFocusTo) {
+    var had = !!activeGate;
+    activeGate = null;
+    releaseGateInert();
+    if (!had) return;
+    if (moveFocusTo && isVisible(moveFocusTo)) focusEl(moveFocusTo);
+    else if (gateFocusPrev && document.contains(gateFocusPrev) && isVisible(gateFocusPrev)) focusEl(gateFocusPrev);
+    gateFocusPrev = null;
+  }
+
   function applyGateState() {
     var safety = $('sc-gate-safety'), age = $('sc-gate-age'), u14 = $('sc-gate-u14');
     hide(safety); hide(age); hide(u14);
-    if (!gates.trust) { show(safety, 'flex'); lockScroll(true); showApp(false); return; }
-    if (!gates.ageResolved) { show(age, 'flex'); lockScroll(true); showApp(false); return; }
+    if (!gates.trust) { show(safety, 'flex'); lockScroll(true); showApp(false); openGate(safety, null); return; }
+    if (!gates.ageResolved) { show(age, 'flex'); lockScroll(true); showApp(false); openGate(age, $('sc-age-select')); return; }
     lockScroll(false);
-    if (gates.eligible) { showApp(true); hide(u14); initTurnstile(); initQR(); }
-    else { showApp(false); show(u14, 'block'); }
+    /* KB-06: hand focus to the thing the gate was hiding — the form when eligible, the
+     * ineligibility heading when not (the form stays display:none on that branch). */
+    if (gates.eligible) { showApp(true); hide(u14); initTurnstile(); initQR(); closeGates($('sc-email')); }
+    else {
+      showApp(false); show(u14, 'block');
+      var h = qs('#sc-gate-u14 .sc-h2') || qs('#sc-gate-u14 h2');
+      if (h && !h.hasAttribute('tabindex')) h.setAttribute('tabindex', '-1');
+      closeGates(h);
+    }
   }
 
   function wireGates() {
-    on($('sc-gate-safety-ok'), 'click', function () { gates.trust = true; persistGates(); applyGateState(); var a = $('sc-age-select'); if (a) a.focus(); });
+    on($('sc-gate-safety-ok'), 'click', function () { gates.trust = true; persistGates(); applyGateState(); });
     var go = $('sc-gate-age-go');
     on(go, 'click', function () {
       var sel = $('sc-age-select'); if (!sel || !sel.value) return;
@@ -213,6 +301,76 @@
   }
   function wirePlatform() { var sel = $('sc-platform'); on(sel, 'change', function () { onPlatformChange(); persistForm(); }); }
 
+  /* ------------------------------------------------- declared semantics
+   * The page ships as a native Webflow build, so ensureDom() is a no-op there and every attribute
+   * below has to be applied to the live DOM rather than only to the injected fragments. All of it
+   * is idempotent and guarded, so it is safe on both builds. */
+  var REQUIRED_IDS = ['sc-email', 'sc-firstName', 'sc-lastName', 'sc-dob', 'sc-platform', 'sc-country', 'sc-consent'];
+
+  /* F-17: keep a short label on the checkbox and move the trailing sentence into a described-by
+   * note, so the accessible name stops being a 40-word paragraph. */
+  function splitConsentLabel() {
+    var lab = qs('label[for="sc-consent"]'); if (!lab || lab.dataset.thxSplit) return;
+    var txt = qs('.sc-consent-text', lab), box = $('sc-consent');
+    if (!txt || !box || $('sc-consent-note')) return;
+    var marker = 'I understand', node = null, idx = -1, t;
+    var walk = document.createTreeWalker(txt, NodeFilter.SHOW_TEXT, null, false);
+    while ((t = walk.nextNode())) { var i = t.nodeValue.indexOf(marker); if (i !== -1) { node = t; idx = i; break; } }
+    if (!node) return;                                   /* translated copy — leave it alone */
+    lab.dataset.thxSplit = '1';
+    var tail = node.nodeValue.slice(idx);
+    node.nodeValue = node.nodeValue.slice(0, idx);
+    var after = [], seen = false, w2 = document.createTreeWalker(txt, NodeFilter.SHOW_TEXT, null, false), n2;
+    while ((n2 = w2.nextNode())) { if (seen) after.push(n2); else if (n2 === node) seen = true; }
+    after.forEach(function (n) { tail += n.nodeValue; n.nodeValue = ''; });
+    var note = document.createElement('p');
+    note.id = 'sc-consent-note'; note.className = 'sc-consent-note';
+    note.textContent = tail.replace(/\s+/g, ' ').trim();
+    lab.parentNode.insertBefore(note, lab.nextSibling);
+    var d = box.getAttribute('aria-describedby') || '';
+    if (d.split(/\s+/).indexOf('sc-consent-note') === -1) box.setAttribute('aria-describedby', d ? d + ' sc-consent-note' : 'sc-consent-note');
+  }
+
+  function enhanceSemantics() {
+    splitConsentLabel();                 /* before the asterisk, so it lands on the short label */
+    /* F-08 — the fields enforced on submit; say so before the user gets there */
+    REQUIRED_IDS.forEach(function (id) {
+      var el = $(id); if (!el) return;
+      el.required = true; el.setAttribute('required', '');
+      var lab = qs('label[for="' + id + '"]');
+      if (lab && !qs('.sc-req', lab)) {
+        var star = document.createElement('span');
+        star.className = 'sc-req'; star.setAttribute('aria-hidden', 'true');
+        var ct = qs('.sc-consent-text', lab);
+        if (ct) { star.textContent = '* '; ct.insertBefore(star, ct.firstChild); }  /* leads the sentence */
+        else { star.textContent = ' *'; lab.appendChild(star); }
+      }
+    });
+    var you = $('sc-form-you');
+    if (you && !$('sc-req-note')) {
+      var note = document.createElement('p');
+      note.id = 'sc-req-note'; note.className = 'sc-req-note'; note.textContent = T('sc.req.note');
+      var frm = qs('form', you);
+      if (frm) frm.parentNode.insertBefore(note, frm); else you.appendChild(note);
+    }
+    /* F-10 */
+    var dob = $('sc-dob'); if (dob && !dob.getAttribute('autocomplete')) dob.setAttribute('autocomplete', 'bday');
+    var ctry = $('sc-country'); if (ctry && !ctry.getAttribute('autocomplete')) ctry.setAttribute('autocomplete', 'country-name');
+    /* F-11 — the chip pair is a named group, and both chips can carry an invalid state */
+    var rep = $('sc-rep');
+    if (rep) {
+      var lg = qs('.sc-legend', rep);
+      if (lg && !lg.id) lg.id = 'sc-rep-legend';
+      var chips = qs('.sc-chips', rep);
+      if (chips && lg) { chips.setAttribute('role', 'group'); chips.setAttribute('aria-labelledby', lg.id); }
+      qsa('[data-val]', rep).forEach(function (b) { if (!b.id) b.id = 'sc-rep-' + b.getAttribute('data-val'); });
+    }
+    /* SEM-22 — a dialog is not a live region */
+    var suc = $('sc-success');
+    if (suc) { suc.removeAttribute('aria-live'); suc.setAttribute('aria-modal', 'true'); }
+    ensureTurnstileBox();
+  }
+
   /* ------------------------------------------------------------- uploads */
   function uploadFile(file, onProgress) {
     return new Promise(function (resolve) {
@@ -241,31 +399,74 @@
     return '<span class="sc-drop-main">' + main + '</span><span class="sc-drop-sub">' + T('sc.drop.max') + '</span>';
   }
 
+  /* F-13: the zone is a real <button> (not a div with role="button" holding a nested link), the
+   * Remove control is a sibling button outside it, and every state change is written into a
+   * visually-hidden role="status" so progress, success and failure are actually announced. */
+  function srSay(node, msg) { if (node) { node.textContent = ''; node.textContent = msg; } }
+
   function wireDrop(dropId, accept, onKey) {
     var drop = $(dropId); if (!drop || drop.dataset.thxWired) return;
+    var main = drop.getAttribute('data-main') || T('sc.drop.upload');
+    if (drop.tagName !== 'BUTTON') {
+      var btn = document.createElement('button');
+      btn.type = 'button'; btn.className = drop.className; btn.setAttribute('data-main', main);
+      drop.removeAttribute('id');
+      drop.parentNode.insertBefore(btn, drop);
+      drop.parentNode.removeChild(drop);
+      btn.id = dropId;
+      drop = btn;
+    }
     drop.dataset.thxWired = '1';
-    drop.setAttribute('role', 'button'); drop.setAttribute('tabindex', '0');
-    drop.setAttribute('aria-label', (drop.getAttribute('data-main') || 'Upload') + ' — file upload');
-    if (!drop.innerHTML.trim()) setDropState(drop, idleDropHTML(drop));
+    drop.removeAttribute('role'); drop.removeAttribute('tabindex');
+    drop.setAttribute('aria-label', main + ' — file upload');
+    var wrap = document.createElement('div'); wrap.className = 'sc-drop-wrap';
+    drop.parentNode.insertBefore(wrap, drop);
+    wrap.appendChild(drop);
+    var remove = document.createElement('button');
+    remove.type = 'button'; remove.className = 'sc-drop-remove'; remove.textContent = T('sc.drop.remove'); remove.hidden = true;
+    var status = document.createElement('span');
+    status.className = 'sc-sr-only'; status.setAttribute('role', 'status');
     var input = document.createElement('input');
-    input.type = 'file'; input.accept = accept; input.style.display = 'none';
-    drop.appendChild(input);
-    function reset() { drop.classList.remove('is-done'); setDropState(drop, idleDropHTML(drop)); drop.appendChild(input); onKey(undefined); }
-    on(drop, 'click', function (e) { if (e.target && e.target.getAttribute && e.target.getAttribute('data-remove') === '1') { e.stopPropagation(); reset(); return; } input.click(); });
-    on(drop, 'keydown', function (e) { if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') { if (e.target && e.target.getAttribute && e.target.getAttribute('data-remove') === '1') return; e.preventDefault(); input.click(); } });
+    input.type = 'file'; input.accept = accept; input.className = 'sc-drop-input';
+    wrap.appendChild(remove); wrap.appendChild(status); wrap.appendChild(input);
+    setDropState(drop, idleDropHTML(drop));
+
+    function reset(say) {
+      drop.classList.remove('is-done'); drop.classList.remove('is-error');
+      setDropState(drop, idleDropHTML(drop));
+      remove.hidden = true; input.value = ''; onKey(undefined);
+      if (say) { srSay(status, T('sc.a11y.removed')); focusEl(drop); }
+    }
+    on(drop, 'click', function () { input.click(); });
+    on(remove, 'click', function () { reset(true); });
     on(input, 'change', function () {
       var file = input.files && input.files[0]; if (!file) return;
-      if (file.size > MAX_UPLOAD_BYTES) { drop.classList.add('is-error'); setDropState(drop, '<span class="sc-drop-main" style="color:#8A1F1B">' + T('sc.drop.toobig') + '</span><span class="sc-drop-sub">' + T('sc.drop.another') + '</span>'); return; }
+      remove.hidden = true;
+      if (file.size > MAX_UPLOAD_BYTES) {
+        drop.classList.add('is-error');
+        setDropState(drop, '<span class="sc-drop-main sc-drop-main--err">' + T('sc.drop.toobig') + '</span><span class="sc-drop-sub">' + T('sc.drop.another') + '</span>');
+        srSay(status, T('sc.drop.toobig')); return;
+      }
       drop.classList.remove('is-error');
       setDropState(drop, '<span class="sc-drop-main">' + T('sc.drop.uploading') + ' <b class="sc-pct">0%</b></span><span class="sc-drop-sub">' + escapeHtml(file.name) + '</span>');
-      uploadFile(file, function (pct) { var p = qs('.sc-pct', drop); if (p) p.textContent = pct + '%'; }).then(function (res) {
+      var lastStep = -1;
+      srSay(status, T('sc.a11y.uploading', { name: file.name, pct: 0 }));
+      uploadFile(file, function (pct) {
+        var p = qs('.sc-pct', drop); if (p) p.textContent = pct + '%';
+        var step = Math.floor(pct / 25) * 25;              /* throttled: 0 / 25 / 50 / 75 / 100 */
+        if (step !== lastStep) { lastStep = step; srSay(status, T('sc.a11y.uploading', { name: file.name, pct: step })); }
+      }).then(function (res) {
         if (res.ok) {
           drop.classList.add('is-done');
-          setDropState(drop, '<span class="sc-drop-main">✓ ' + escapeHtml(file.name) + '</span><span class="sc-drop-sub"><a href="#" data-remove="1" class="sc-drop-remove">' + T('sc.drop.remove') + '</a></span>');
+          setDropState(drop, '<span class="sc-drop-main">✓ ' + escapeHtml(file.name) + '</span>');
+          remove.hidden = false;
+          remove.setAttribute('aria-label', T('sc.a11y.removeFile', { name: file.name }));
+          srSay(status, T('sc.a11y.uploaded', { name: file.name }));
           onKey(res.key);
         } else {
           drop.classList.add('is-error');
-          setDropState(drop, '<span class="sc-drop-main" style="color:#8A1F1B">' + escapeHtml(res.error) + '</span><span class="sc-drop-sub">' + T('sc.drop.again') + '</span>');
+          setDropState(drop, '<span class="sc-drop-main sc-drop-main--err">' + escapeHtml(res.error) + '</span><span class="sc-drop-sub">' + T('sc.drop.again') + '</span>');
+          srSay(status, res.error);
         }
       });
     });
@@ -279,19 +480,47 @@
     wireDrop('sc-pic2', 'image/png,image/jpeg,image/webp', function (k) { sampleKeys[2] = k; });
   }
 
-  /* ----------------------------------------------------------- turnstile */
+  /* ----------------------------------------------------------- turnstile
+   * F-06: the widget gets a named container with a reserved height, a message slot that is a real
+   * focusable node (so an error can point at something), and — if the challenge never renders —
+   * an email route out instead of an instruction the user cannot follow. */
+  function ensureTurnstileBox() {
+    var box = $('sc-turnstile'); if (!box) return null;
+    if (box.dataset.thxTsBox) return box;
+    box.dataset.thxTsBox = '1';
+    box.setAttribute('role', 'group');
+    box.setAttribute('aria-label', T('sc.ts.label'));
+    var w = document.createElement('div'); w.id = 'sc-turnstile-widget'; w.className = 'sc-ts-widget';
+    var m = document.createElement('p'); m.id = 'sc-turnstile-msg'; m.className = 'sc-ts-msg';
+    m.setAttribute('role', 'status'); m.setAttribute('tabindex', '-1');
+    box.appendChild(w); box.appendChild(m);
+    return box;
+  }
+  function tsUnavailable() { var m = $('sc-turnstile-msg'); return !!(m && m.dataset.thxFallback); }
+  function turnstileFallback() {
+    var m = $('sc-turnstile-msg'); if (!m || m.dataset.thxFallback) return;
+    m.dataset.thxFallback = '1';
+    while (m.firstChild) m.removeChild(m.firstChild);
+    var parts = String(T('sc.err.tsfallback')).split('{email}');
+    m.appendChild(document.createTextNode(parts[0]));
+    var a = document.createElement('a'); a.href = 'mailto:' + SCOUTING_EMAIL; a.textContent = SCOUTING_EMAIL;
+    m.appendChild(a);
+    if (parts.length > 1) m.appendChild(document.createTextNode(parts[1]));
+    m.classList.add('is-on');
+  }
   function renderTurnstile() {
-    var box = $('sc-turnstile'); if (!box) return;
+    var box = ensureTurnstileBox(); if (!box) return;
     if (!window.turnstile) { return; }
-    if (box.dataset.thxRendered) return; box.dataset.thxRendered = '1';
+    if (box.dataset.thxRendered) return;
     try {
-      window.turnstile.render(box, {
+      window.turnstile.render($('sc-turnstile-widget') || box, {
         sitekey: TURNSTILE_SITE_KEY, theme: 'light',
         callback: function (t) { turnstileToken = t; clearErr(); },
         'expired-callback': function () { turnstileToken = ''; },
-        'error-callback': function () { turnstileToken = ''; }
+        'error-callback': function () { turnstileToken = ''; turnstileFallback(); }
       });
-    } catch (e) {}
+      box.dataset.thxRendered = '1';
+    } catch (e) { turnstileFallback(); }
   }
   /* Behind the age gate there is nothing to verify, so the Turnstile bundle waits for the gate to
    * clear (applyGateState) or for the first field focus, whichever happens first. */
@@ -305,11 +534,17 @@
     document.addEventListener('focusin', once, true);
   }
   function initTurnstile() {
-    var box = $('sc-turnstile'); if (!box) return;
+    var box = ensureTurnstileBox(); if (!box) return;
     if (box.dataset.thxTsBoot) return; box.dataset.thxTsBoot = '1';
     loadScriptOnce(TURNSTILE_SRC, renderTurnstile);
     if (window.turnstile) renderTurnstile();
     else { var n = 0, iv = setInterval(function () { if (window.turnstile) { clearInterval(iv); renderTurnstile(); } else if (++n > 50) clearInterval(iv); }, 200); }
+    /* blocked, broken or never painted — offer the email route rather than a 0 px dead end */
+    setTimeout(function () {
+      if (turnstileToken) return;
+      var w = $('sc-turnstile-widget'), f = w && w.querySelector('iframe');
+      if (!f || !f.offsetHeight) turnstileFallback();
+    }, TURNSTILE_TIMEOUT_MS);
   }
 
   /* ---------------------------------------------------------------- QR */
@@ -324,17 +559,114 @@
     loadScriptOnce(QR_SRC, function () {
       if (!window.QRCode || box.dataset.thxQr) return; box.dataset.thxQr = '1';
       try { new window.QRCode(box, { text: PAGE_URL, width: 120, height: 120, colorDark: '#0E0E0F', colorLight: '#F2F1EC', correctLevel: window.QRCode.CorrectLevel.M }); } catch (e) {}
+      /* the library appends an unlabelled <img>: the box carries the name, the graphic is decorative */
+      function labelQR() {
+        qsa('img,canvas', box).forEach(function (n) { n.setAttribute('alt', ''); n.setAttribute('aria-hidden', 'true'); });
+        box.setAttribute('role', 'img');
+        box.setAttribute('aria-label', T('sc.qr.label'));
+      }
+      labelQR(); setTimeout(labelQR, 400);
     }, QR_SRI);
   }
 
-  /* -------------------------------------------------------------- errors */
-  function clearErr() { var box = $('sc-err'); if (box) { box.style.display = 'none'; box.textContent = ''; } qsa('.sc-input--error').forEach(function (e) { e.classList.remove('sc-input--error'); e.removeAttribute('aria-invalid'); }); }
-  function showErr(msg, firstBadId) {
-    var box = $('sc-err');
-    if (box) { box.textContent = msg; box.style.display = 'block'; }
-    if (firstBadId) { var e = $(firstBadId); if (e) { e.scrollIntoView({ behavior: 'smooth', block: 'center' }); try { e.focus(); } catch (x) {} } }
+  /* -------------------------------------------------------------- errors
+   * F-05/SEM-23 + F-09: every message is rendered twice — once beside its own field, tied to the
+   * control with aria-describedby, and once in #sc-err as an error summary of links. The whole
+   * errs list is shown, not just the first one, and focus lands on the summary. */
+  function fieldMsgId(id) { return id + '-err'; }
+  /* the controls a message belongs to — the represented question is a pair of chips, not one input */
+  function fieldControls(id) {
+    if (id === 'sc-rep') return qsa('#sc-rep [data-val]');
+    if (id === 'sc-turnstile') return [];
+    var e = $(id); return e ? [e] : [];
   }
-  function markBad(id) { var e = $(id); if (e) { e.classList.add('sc-input--error'); e.setAttribute('aria-invalid', 'true'); } }
+  function fieldMsgHost(id) {
+    if (id === 'sc-rep') return $('sc-rep');
+    if (id === 'sc-turnstile') return $('sc-turnstile');
+    if (id === 'sc-consent') { var lab = qs('label[for="sc-consent"]'); return (lab && lab.parentNode) || null; }
+    var e = $(id); if (!e) return null;
+    return (e.closest && e.closest('.sc-field')) || e.parentNode;
+  }
+  /* where the summary link should send the keyboard: always a real focusable node (F-06) */
+  function errAnchorTarget(id) {
+    if (id === 'sc-rep') return qs('#sc-rep [data-val]');
+    if (id === 'sc-turnstile') return $('sc-turnstile-msg') || $('sc-submit');
+    return $(id) || $('sc-submit');
+  }
+  function setFieldMsg(id, msg) {
+    if (id === 'sc-turnstile' && tsUnavailable()) return;   /* the fallback line already says it */
+    var host = fieldMsgHost(id); if (!host) return;
+    var mid = fieldMsgId(id), p = $(mid);
+    if (!p) {
+      p = document.createElement('p'); p.id = mid; p.className = 'sc-field-err';
+      /* the consent host is the whole form — put the message under the checkbox, not under submit */
+      var after = (id === 'sc-consent') ? ($('sc-consent-note') || qs('label[for="sc-consent"]')) : null;
+      if (after && after.parentNode === host) host.insertBefore(p, after.nextSibling); else host.appendChild(p);
+    }
+    p.textContent = msg;
+    fieldControls(id).forEach(function (el) {
+      var d = el.getAttribute('aria-describedby') || '';
+      if (d.split(/\s+/).indexOf(mid) === -1) el.setAttribute('aria-describedby', d ? d + ' ' + mid : mid);
+    });
+  }
+  function clearFieldMsgs() {
+    qsa('.sc-field-err').forEach(function (p) {
+      var mid = p.id;
+      qsa('[aria-describedby~="' + mid + '"]').forEach(function (el) {
+        var rest = (el.getAttribute('aria-describedby') || '').split(/\s+/).filter(function (t) { return t && t !== mid; });
+        if (rest.length) el.setAttribute('aria-describedby', rest.join(' ')); else el.removeAttribute('aria-describedby');
+      });
+      if (p.parentNode) p.parentNode.removeChild(p);
+    });
+  }
+  function clearErr() {
+    var box = $('sc-err');
+    if (box) { box.style.display = 'none'; while (box.firstChild) box.removeChild(box.firstChild); }
+    qsa('.sc-input--error').forEach(function (e) { e.classList.remove('sc-input--error'); });
+    qsa('#sc-form-you [aria-invalid],#sc-form-work [aria-invalid],#sc-form-consent [aria-invalid]').forEach(function (e) { e.removeAttribute('aria-invalid'); });
+    clearFieldMsgs();
+  }
+  function errSummaryHead(box) {
+    while (box.firstChild) box.removeChild(box.firstChild);
+    var h = document.createElement('p');
+    h.id = 'sc-err-title'; h.className = 'sc-err-title'; h.setAttribute('tabindex', '-1');
+    box.appendChild(h);
+    return h;
+  }
+  function showErrList(errs) {
+    var box = $('sc-err'); if (!box || !errs.length) return;
+    var h = errSummaryHead(box);
+    h.textContent = T('sc.err.summary');
+    var ul = document.createElement('ul'); ul.className = 'sc-err-list';
+    errs.forEach(function (pair) {
+      var id = pair[0], msg = pair[1];
+      setFieldMsg(id, msg);
+      var li = document.createElement('li'), t = errAnchorTarget(id);
+      if (t) {
+        if (!t.id) t.id = id + '-anchor';
+        var a = document.createElement('a');
+        a.href = '#' + t.id; a.textContent = msg;
+        a.addEventListener('click', function (ev) { ev.preventDefault(); focusEl(t, true); });
+        li.appendChild(a);
+      } else { li.textContent = msg; }
+      ul.appendChild(li);
+    });
+    box.appendChild(ul);
+    box.style.display = 'block';
+    focusEl(h, true);
+  }
+  /* single-message form (server-side outcomes) — same summary box, same focus behaviour */
+  function showErr(msg, firstBadId) {
+    if (firstBadId) { showErrList([[firstBadId, msg]]); return; }
+    var box = $('sc-err'); if (!box) return;
+    var h = errSummaryHead(box);
+    h.textContent = msg;
+    box.style.display = 'block';
+    focusEl(h, true);
+  }
+  function markBad(id) {
+    fieldControls(id).forEach(function (e) { e.classList.add('sc-input--error'); e.setAttribute('aria-invalid', 'true'); });
+  }
 
   /* -------------------------------------------------------------- submit */
   function collectAndValidate() {
@@ -355,7 +687,7 @@
     var country = val('sc-country'); if (!country) { markBad('sc-country'); errs.push(['sc-country', T('sc.err.country')]); }
     var city = val('sc-city'); // optional
     var platform = val('sc-platform'); if (!platform) { markBad('sc-platform'); errs.push(['sc-platform', T('sc.err.platform')]); }
-    var rep = currentRepresented(); if (rep !== 'yes' && rep !== 'no') { errs.push(['sc-rep', T('sc.err.rep')]); }
+    var rep = currentRepresented(); if (rep !== 'yes' && rep !== 'no') { markBad('sc-rep'); errs.push(['sc-rep', T('sc.err.rep')]); }
     var representedBy = val('sc-representedBy');
     if (rep === 'yes' && !representedBy) { markBad('sc-representedBy'); errs.push(['sc-representedBy', T('sc.err.repby')]); }
     var otherPlatform = val('sc-otherPlatform');
@@ -364,10 +696,10 @@
     var links = ['sc-link1', 'sc-link2', 'sc-link3'].map(val).filter(Boolean);
     for (var i = 0; i < links.length; i++) { if (!isUrl(links[i])) { errs.push(['sc-link1', T('sc.err.links')]); break; } }
 
-    var consent = $('sc-consent'); if (!consent || !consent.checked) { errs.push(['sc-consent', T('sc.err.consent')]); }
-    if (!turnstileToken) { errs.push(['sc-turnstile', T('sc.err.turnstile')]); }
+    var consent = $('sc-consent'); if (!consent || !consent.checked) { markBad('sc-consent'); errs.push(['sc-consent', T('sc.err.consent')]); }
+    if (!turnstileToken) { errs.push(['sc-turnstile', tsUnavailable() ? T('sc.err.tsfallback', { email: SCOUTING_EMAIL }) : T('sc.err.turnstile')]); }
 
-    if (errs.length) { showErr(errs[0][1], errs[0][0].indexOf('sc-rep') === 0 ? null : errs[0][0]); return null; }
+    if (errs.length) { showErrList(errs); return null; }
 
     var payload = {
       email: email, firstName: firstName, lastName: lastName, dob: dob,
@@ -419,7 +751,7 @@
           showErr(first ? data.fieldErrors[first] : T('sc.err.fields'), id);
         } else if (data && data.error === 'turnstile') {
           turnstileToken = ''; if (window.turnstile) try { window.turnstile.reset(); } catch (e) {}
-          showErr('Please complete the verification, then submit.', 'sc-turnstile');
+          showErr(tsUnavailable() ? T('sc.err.tsfallback', { email: SCOUTING_EMAIL }) : T('sc.err.turnstile'), 'sc-turnstile');
         } else if (data && data.error === 'rate_limited') {
           showErr(T('sc.err.rate', { email: SCOUTING_EMAIL }));
         } else {
@@ -453,7 +785,7 @@
   function injectCSS() {
     if ($('sc-css')) return;
     var css = [
-      ':root{--sc-ink:#0E0E0F;--sc-paper:#F2F1EC;--sc-dark:#0a0a0c;--sc-mute:rgba(14,14,15,0.7);--sc-mute-ink:rgba(242,241,236,0.6);--sc-hair:rgba(14,14,15,0.16);--sc-hair-ink:rgba(242,241,236,0.2);--sc-line:rgba(14,14,15,0.28);--sc-err:#8A1F1B;}',
+      ':root{--sc-ink:#0E0E0F;--sc-paper:#F2F1EC;--sc-dark:#0a0a0c;--sc-mute:rgba(14,14,15,0.7);--sc-mute-ink:rgba(242,241,236,0.6);--sc-hair:rgba(14,14,15,0.16);--sc-hair-ink:rgba(242,241,236,0.2);--sc-line:rgba(14,14,15,0.55);--sc-err:#8A1F1B;}',
       '.sc-app-sans{font-family:"Objectivity","Archivo","Helvetica Neue",Arial,sans-serif;}',
       '#sc-form-you,#sc-form-work,#sc-form-consent{display:none;background:var(--sc-paper);color:var(--sc-ink);font-family:"Objectivity","Archivo","Helvetica Neue",Arial,sans-serif;}',
       '.sc-section{max-width:760px;margin:0 auto;padding:64px 20px;}',
@@ -577,7 +909,45 @@
       /* consent text was rendering white on cream */
       '.sc-consent-text,.sc-consent-text *{color:var(--sc-ink)!important;}',
       /* success "Return home" button (anchor styled as gate button) */
-      '.sc-home-btn{display:inline-block;text-decoration:none!important;margin-top:clamp(28px,4vw,44px);}'
+      '.sc-home-btn{display:inline-block;text-decoration:none!important;margin-top:clamp(28px,4vw,44px);}',
+      /* ------------------------- Phase 9 accessibility -------------------------
+         C-04: the fields, chips and dropzones were bounded by a 1.89:1 hairline. Both the page's
+         compiled Webflow CSS and the native <style> block state that colour literally, and the
+         native block sits in the body (after this sheet), so the lift is stated explicitly.
+         #sc-age-select is excluded — it sits on the dark gate and takes the ink-side hairline. */
+      ':root{--sc-line:rgba(14,14,15,0.55)!important;}',
+      '.sc-input:not(:focus),.sc-textarea:not(:focus),.sc-select:not(:focus):not(#sc-age-select){border-bottom-color:rgba(14,14,15,0.55)!important;}',
+      '.sc-chip:not([data-on="true"]){border-color:rgba(14,14,15,0.55)!important;}',
+      '.sc-drop{border-color:rgba(14,14,15,0.55)!important;}',
+      '.sc-chip.sc-input--error{border-color:var(--sc-err)!important;}',
+      /* C-05: placeholders were 2.61:1 */
+      '.sc-input::placeholder,.sc-textarea::placeholder{color:rgba(14,14,15,0.62)!important;}',
+      /* F-08 */
+      '.sc-req-note{font-family:"Space Mono","Mono",ui-monospace,monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--sc-mute);margin:0 0 28px;}',
+      '.sc-req{color:var(--sc-err);}',
+      /* F-05 / F-09 — error summary + per-field messages */
+      '.sc-field-err{margin:8px 0 0;font-size:14px;line-height:1.45;color:var(--sc-err);}',
+      '.sc-err-title{margin:0 0 8px;font-weight:600;color:var(--sc-err);}',
+      '.sc-err-list{margin:0;padding-inline-start:20px;}',
+      '.sc-err-list li{margin:4px 0;}',
+      '.sc-err-list a{color:var(--sc-err);text-decoration:underline;text-underline-offset:2px;}',
+      /* F-06 — reserved, labelled verification box with a visible message slot */
+      '#sc-turnstile{margin-top:28px;min-height:70px;}',
+      '.sc-ts-msg{display:none;margin:10px 0 0;font-size:14px;line-height:1.5;color:var(--sc-err);}',
+      '.sc-ts-msg.is-on{display:block;}',
+      '.sc-ts-msg a{color:var(--sc-err);text-decoration:underline;text-underline-offset:2px;}',
+      /* F-13 — button dropzone, sibling Remove button, hidden status region */
+      '.sc-drop-wrap{display:flex;flex-direction:column;align-items:stretch;gap:8px;}',
+      'button.sc-drop{width:100%;font:inherit;color:inherit;background:transparent;}',
+      '.sc-drop-input{display:none!important;}',
+      '.sc-drop-main--err{color:var(--sc-err);}',
+      'button.sc-drop-remove{align-self:flex-start;background:none;border:0;padding:2px 0;font-family:"Space Mono","Mono",ui-monospace,monospace;font-size:11px;color:var(--sc-ink);text-decoration:underline;text-underline-offset:2px;cursor:pointer;}',
+      '.sc-sr-only{position:absolute!important;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0;}',
+      /* F-17 */
+      '.sc-consent-note{margin:10px 0 0;font-size:14px;line-height:1.6;color:var(--sc-mute);}',
+      /* KB-01: the gate itself takes focus so the dialog copy is announced — but a 2 px ring
+         around a full-screen overlay is noise, and it is not reachable by Tab. */
+      '#sc-gate-safety:focus,#sc-gate-age:focus{outline:none;}'
     ].join('\n');
     var style = document.createElement('style');
     style.id = 'sc-css';
@@ -589,15 +959,15 @@
   /* If the native elements aren't on the page, inject them. If they already
    * exist (native Designer build), this is a no-op and we just wire them. */
   var FRAG_FORMS = [
-'<section id="sc-form-you" class="sc-section sc-app-sans" aria-label="'+T('sc.sec.you')+'"><div class="sc-eyebrow">'+T('sc.eyebrow.you')+'</div><h2 class="sc-h2">'+T('sc.h2.you')+'</h2><form class="sc-form" novalidate><div class="sc-grid"><div class="sc-field sc-full"><label class="sc-label" for="sc-email">'+T('sc.lbl.email')+'</label><input id="sc-email" class="sc-input" type="email" autocomplete="email" inputmode="email" placeholder="'+T('sc.ph.email')+'"></div><div class="sc-field"><label class="sc-label" for="sc-firstName">'+T('sc.lbl.firstName')+'</label><input id="sc-firstName" class="sc-input" type="text" autocomplete="given-name"></div><div class="sc-field"><label class="sc-label" for="sc-lastName">'+T('sc.lbl.lastName')+'</label><input id="sc-lastName" class="sc-input" type="text" autocomplete="family-name"></div><div class="sc-field"><label class="sc-label" for="sc-dob">'+T('sc.lbl.dob')+'</label><input id="sc-dob" class="sc-input" type="date"></div><div class="sc-field"><label class="sc-label" for="sc-platform">'+T('sc.lbl.platform')+'</label><select id="sc-platform" class="sc-select"></select></div><div class="sc-field"><label class="sc-label" for="sc-country">'+T('sc.lbl.country')+'</label><select id="sc-country" class="sc-select"></select></div><div class="sc-field"><label class="sc-label" for="sc-state">'+T('sc.lbl.state')+'</label><input id="sc-state" class="sc-input" type="text" autocomplete="address-level1" placeholder="'+T('sc.ph.state')+'"></div><div class="sc-field"><label class="sc-label" for="sc-city">'+T('sc.lbl.city')+'</label><input id="sc-city" class="sc-input" type="text" autocomplete="address-level2" placeholder="'+T('sc.ph.city')+'"></div><div class="sc-field"><label class="sc-label" for="sc-instagram">'+T('sc.lbl.instagram')+'</label><input id="sc-instagram" class="sc-input" type="text" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="'+T('sc.ph.handle')+'"></div><div class="sc-field"><label class="sc-label" for="sc-tiktok">'+T('sc.lbl.tiktok')+'</label><input id="sc-tiktok" class="sc-input" type="text" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="'+T('sc.ph.handle')+'"></div><div class="sc-field"><label class="sc-label" for="sc-youtube">'+T('sc.lbl.youtube')+'</label><input id="sc-youtube" class="sc-input" type="text" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="'+T('sc.ph.youtube')+'"></div><div class="sc-field" id="sc-other-wrap"><label class="sc-label" for="sc-otherPlatform">'+T('sc.lbl.otherPlatform')+'</label><input id="sc-otherPlatform" class="sc-input" type="text" placeholder="'+T('sc.ph.otherPlatform')+'"><label class="sc-label sc-label--stack" for="sc-otherHandle">Handle on that platform</label><input id="sc-otherHandle" class="sc-input" type="text"></div><div class="sc-field sc-full" id="sc-rep"><span class="sc-legend">'+T('sc.legend.rep')+'</span><div class="sc-chips"><button type="button" class="sc-chip" data-val="no" data-on="false" aria-pressed="false">'+T('sc.no')+'</button><button type="button" class="sc-chip" data-val="yes" data-on="false" aria-pressed="false">'+T('sc.yes')+'</button></div></div><div class="sc-field sc-full" id="sc-representedBy-wrap"><label class="sc-label" for="sc-representedBy">'+T('sc.lbl.representedBy')+'</label><input id="sc-representedBy" class="sc-input" type="text" placeholder="'+T('sc.ph.representedBy')+'"></div><div class="sc-field sc-full"><label class="sc-label" for="sc-notes">'+T('sc.lbl.notes')+'</label><textarea id="sc-notes" class="sc-textarea" rows="4" placeholder="Anything we should know? (optional)"></textarea></div></div></form></section>',
+'<section id="sc-form-you" class="sc-section sc-app-sans" aria-label="'+T('sc.sec.you')+'"><div class="sc-eyebrow">'+T('sc.eyebrow.you')+'</div><h2 class="sc-h2">'+T('sc.h2.you')+'</h2><form class="sc-form" novalidate><div class="sc-grid"><div class="sc-field sc-full"><label class="sc-label" for="sc-email">'+T('sc.lbl.email')+'</label><input id="sc-email" class="sc-input" type="email" autocomplete="email" inputmode="email" required placeholder="'+T('sc.ph.email')+'"></div><div class="sc-field"><label class="sc-label" for="sc-firstName">'+T('sc.lbl.firstName')+'</label><input id="sc-firstName" class="sc-input" type="text" autocomplete="given-name" required></div><div class="sc-field"><label class="sc-label" for="sc-lastName">'+T('sc.lbl.lastName')+'</label><input id="sc-lastName" class="sc-input" type="text" autocomplete="family-name" required></div><div class="sc-field"><label class="sc-label" for="sc-dob">'+T('sc.lbl.dob')+'</label><input id="sc-dob" class="sc-input" type="date" autocomplete="bday" required></div><div class="sc-field"><label class="sc-label" for="sc-platform">'+T('sc.lbl.platform')+'</label><select id="sc-platform" class="sc-select" required></select></div><div class="sc-field"><label class="sc-label" for="sc-country">'+T('sc.lbl.country')+'</label><select id="sc-country" class="sc-select" autocomplete="country-name" required></select></div><div class="sc-field"><label class="sc-label" for="sc-state">'+T('sc.lbl.state')+'</label><input id="sc-state" class="sc-input" type="text" autocomplete="address-level1" placeholder="'+T('sc.ph.state')+'"></div><div class="sc-field"><label class="sc-label" for="sc-city">'+T('sc.lbl.city')+'</label><input id="sc-city" class="sc-input" type="text" autocomplete="address-level2" placeholder="'+T('sc.ph.city')+'"></div><div class="sc-field"><label class="sc-label" for="sc-instagram">'+T('sc.lbl.instagram')+'</label><input id="sc-instagram" class="sc-input" type="text" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="'+T('sc.ph.handle')+'"></div><div class="sc-field"><label class="sc-label" for="sc-tiktok">'+T('sc.lbl.tiktok')+'</label><input id="sc-tiktok" class="sc-input" type="text" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="'+T('sc.ph.handle')+'"></div><div class="sc-field"><label class="sc-label" for="sc-youtube">'+T('sc.lbl.youtube')+'</label><input id="sc-youtube" class="sc-input" type="text" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="'+T('sc.ph.youtube')+'"></div><div class="sc-field" id="sc-other-wrap"><label class="sc-label" for="sc-otherPlatform">'+T('sc.lbl.otherPlatform')+'</label><input id="sc-otherPlatform" class="sc-input" type="text" placeholder="'+T('sc.ph.otherPlatform')+'"><label class="sc-label sc-label--stack" for="sc-otherHandle">Handle on that platform</label><input id="sc-otherHandle" class="sc-input" type="text"></div><div class="sc-field sc-full" id="sc-rep"><span class="sc-legend" id="sc-rep-legend">'+T('sc.legend.rep')+'</span><div class="sc-chips" role="group" aria-labelledby="sc-rep-legend"><button type="button" id="sc-rep-no" class="sc-chip" data-val="no" data-on="false" aria-pressed="false">'+T('sc.no')+'</button><button type="button" id="sc-rep-yes" class="sc-chip" data-val="yes" data-on="false" aria-pressed="false">'+T('sc.yes')+'</button></div></div><div class="sc-field sc-full" id="sc-representedBy-wrap"><label class="sc-label" for="sc-representedBy">'+T('sc.lbl.representedBy')+'</label><input id="sc-representedBy" class="sc-input" type="text" placeholder="'+T('sc.ph.representedBy')+'"></div><div class="sc-field sc-full"><label class="sc-label" for="sc-notes">'+T('sc.lbl.notes')+'</label><textarea id="sc-notes" class="sc-textarea" rows="4" placeholder="Anything we should know? (optional)"></textarea></div></div></form></section>',
 '<section id="sc-form-work" class="sc-section sc-app-sans" aria-label="'+T('sc.sec.work')+'"><div class="sc-eyebrow">'+T('sc.eyebrow.work')+'</div><h2 class="sc-h2">'+T('sc.h2.work')+'</h2><p class="sc-text">'+T('sc.text.work')+'</p><form class="sc-form" novalidate><div class="sc-grid3"><div class="sc-field"><label class="sc-label" for="sc-link1">'+T('sc.lbl.link1')+'</label><input id="sc-link1" class="sc-input" type="url" inputmode="url" placeholder="https://…"></div><div class="sc-field"><label class="sc-label" for="sc-link2">'+T('sc.lbl.link2')+'</label><input id="sc-link2" class="sc-input" type="url" inputmode="url" placeholder="https://…"></div><div class="sc-field"><label class="sc-label" for="sc-link3">'+T('sc.lbl.link3')+'</label><input id="sc-link3" class="sc-input" type="url" inputmode="url" placeholder="https://…"></div></div><div class="sc-block"><label class="sc-label">Media kit (PDF) <span class="sc-opt">'+T('sc.optional')+'</span></label><div id="sc-mediakit" class="sc-drop sc-drop--kit" data-main="+ Upload PDF"></div></div><div class="sc-block--divider"><p class="sc-label">Your pictures</p><p class="sc-text sc-pics-note">Keep these natural — please avoid baggy clothing, make-up, or smiling. The photos you submit shouldn’t be filtered, re-touched, or professionally taken.</p><div class="sc-grid3"><div class="sc-field"><label class="sc-label">Headshot <span class="sc-opt">'+T('sc.optional')+'</span></label><div id="sc-pic0" class="sc-drop" data-main="+ Add image"></div></div><div class="sc-field"><label class="sc-label">Profile <span class="sc-opt">'+T('sc.optional')+'</span></label><div id="sc-pic1" class="sc-drop" data-main="+ Add image"></div></div><div class="sc-field"><label class="sc-label">Full length <span class="sc-opt">'+T('sc.optional')+'</span></label><div id="sc-pic2" class="sc-drop" data-main="+ Add image"></div></div></div></div></form></section>',
-'<section id="sc-form-consent" class="sc-section sc-app-sans" aria-label="'+T('sc.sec.consent')+'"><form class="sc-form" novalidate><label class="sc-consent" for="sc-consent"><input id="sc-consent" class="sc-check" type="checkbox"><span class="sc-consent-text">I agree to Theodyx’s <a href="/policies/privacy-policy" target="_blank" rel="noopener noreferrer">Privacy Policy</a> and consent to be contacted about representation. I understand this is an application, not an offer of representation.</span></label><div class="sc-honey" aria-hidden="true"><label for="sc-company">Company</label><input id="sc-company" name="company" type="text" tabindex="-1" autocomplete="off"></div><div id="sc-turnstile"></div><div id="sc-err" class="sc-err" role="alert"></div><button id="sc-submit" type="button" class="sc-submit">'+T('sc.submit')+'</button></form></section>',
+'<section id="sc-form-consent" class="sc-section sc-app-sans" aria-label="'+T('sc.sec.consent')+'"><form class="sc-form" novalidate><label class="sc-consent" for="sc-consent"><input id="sc-consent" class="sc-check" type="checkbox" required><span class="sc-consent-text">I agree to Theodyx’s <a href="/policies/privacy-policy" target="_blank" rel="noopener noreferrer">Privacy Policy</a> and consent to be contacted about representation. I understand this is an application, not an offer of representation.</span></label><div class="sc-honey" aria-hidden="true"><label for="sc-company">Company</label><input id="sc-company" name="company" type="text" tabindex="-1" autocomplete="off"></div><div id="sc-turnstile"></div><div id="sc-err" class="sc-err" role="alert"></div><button id="sc-submit" type="button" class="sc-submit">'+T('sc.submit')+'</button></form></section>',
 '<section id="sc-gate-u14" class="sc-section sc-app-sans" aria-label="A note"><div class="sc-eyebrow">A note</div><h2 class="sc-h2">Thank you for your interest in joining Theodyx.</h2><p class="sc-text">We are invested in protecting the privacy of our applicants. For this reason, we are unfortunately unable to accept applications from anyone under 14 at this time. We look forward to receiving your future application.</p></section>'
   ];
   var FRAG_BODY = [
 '<div id="sc-gate-safety" role="dialog" aria-modal="true" aria-label="Safety"><div class="sc-gate-inner"><span class="sc-gate-eyebrow">Theodyx — Safety</span><h2 class="sc-gate-h">Your safety comes first.</h2><p class="sc-gate-body">Safety is our top priority. Protecting aspiring creatives — including young individuals — from online predators is of the utmost importance. If you would like to confirm an email or communication is from an official Theodyx representative or affiliate, email <a href="mailto:scouting@theodyx.com">scouting@theodyx.com</a> and we will be glad to confirm. Theodyx never asks for photos in the nude or lingerie and never requires any kind of payment. If something doesn’t feel right, please don’t hesitate to contact us at <a href="mailto:scouting@theodyx.com">scouting@theodyx.com</a>.</p><button id="sc-gate-safety-ok" type="button" class="sc-gate-btn">Acknowledged</button></div></div>',
 '<div id="sc-gate-age" role="dialog" aria-modal="true" aria-label="Age"><form class="sc-form sc-gate-inner sc-gate-inner--center" novalidate><span class="sc-gate-eyebrow">One quick question</span><h2 class="sc-gate-h">How old are you?</h2><div class="sc-gate-field"><label class="sc-label" for="sc-age-select">Select your age</label><select id="sc-age-select" class="sc-select"></select></div><button id="sc-gate-age-go" type="button" class="sc-gate-btn" disabled>Continue</button><p class="sc-gate-note">You must be 14 or older to apply directly.</p></form></div>',
-'<div id="sc-success" role="dialog" aria-live="polite" aria-label="'+T('sc.success.eyebrow')+'"><div class="sc-gate-inner"><span class="sc-gate-eyebrow">'+T('sc.success.eyebrow')+'</span><h2 class="sc-success-title" tabindex="-1">'+T('sc.success.title')+'</h2><p class="sc-gate-body">'+T('sc.success.body')+'</p><a href="/" class="sc-gate-btn sc-home-btn">'+T('sc.home')+'</a></div></div>'
+'<div id="sc-success" role="dialog" aria-modal="true" aria-label="'+T('sc.success.eyebrow')+'"><div class="sc-gate-inner"><span class="sc-gate-eyebrow">'+T('sc.success.eyebrow')+'</span><h2 class="sc-success-title" tabindex="-1">'+T('sc.success.title')+'</h2><p class="sc-gate-body">'+T('sc.success.body')+'</p><a href="/" class="sc-gate-btn sc-home-btn">'+T('sc.home')+'</a></div></div>'
   ];
   function elFromHTML(html) { var t = document.createElement('template'); t.innerHTML = html.trim(); return t.content.firstChild; }
   function ensureDom() {
@@ -648,6 +1018,7 @@
     ensureFooter();
     fillCountries(); fillPlatforms(); fillAges();
     var dobIn = $('sc-dob'); if (dobIn && !dobIn.max) { var ty = new Date(); dobIn.max = (ty.getFullYear() - MIN_AGE) + '-' + String(ty.getMonth() + 1).padStart(2, '0') + '-' + String(ty.getDate()).padStart(2, '0'); dobIn.min = (ty.getFullYear() - 100) + '-01-01'; }
+    enhanceSemantics();
     wireGates();
     wireRepresented(); wirePlatform();
     wireUploads();
