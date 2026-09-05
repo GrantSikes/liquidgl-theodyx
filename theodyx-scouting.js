@@ -1,4 +1,5 @@
-/* theodyx-scouting 2.1.0 — Phase 11 motion. EASE-03: no control transitions `all` any more —
+/* theodyx-scouting 2.1.1 — Phase 11 motion. EASE-03: no control transitions `all` any more —
+ * 2.1.1: EASE-10 - the intro photo's grayscale-to-colour hover eases over --thx-dur-base on the house curve instead of 550 ms linear-ish ease (filter repaints the whole element; 550 ms sat over the UI ceiling).
  * the chips, the submit, the gate/consent buttons, the inputs and the dropzones each name the
  * properties their own state rules change (transform/opacity, plus colour where colour IS the
  * feedback) on one spring token, --sc-ease: cubic-bezier(.22,1,.36,1), at 140-160 ms; no layout
@@ -1092,7 +1093,7 @@
       '.sc-photo::before,.sc-photo::after{content:"";position:absolute;inset:0;background:#fbfbf9;box-shadow:0 18px 40px -28px rgba(0,0,0,.55);z-index:-1;}',
       '.sc-photo::before{transform:rotate(-5.5deg) translateY(8px);}',
       '.sc-photo::after{transform:rotate(3.5deg) translate(4px,4px);}',
-      '.sc-photo img{display:block;width:clamp(216px,25vw,296px);aspect-ratio:3/4;object-fit:cover;filter:grayscale(1) contrast(1.03);transition:filter .55s ease;}',
+      '.sc-photo img{display:block;width:clamp(216px,25vw,296px);aspect-ratio:3/4;object-fit:cover;filter:grayscale(1) contrast(1.03);transition:filter var(--thx-dur-base,320ms) var(--sc-ease,cubic-bezier(.22,1,.36,1));}',
       '.sc-photo:hover img{filter:grayscale(0) contrast(1);}',
       '@media(max-width:700px){.sc-photo{align-self:center;margin-top:8px;}}',
       /* QR is "continue on your phone" — pointless on a phone; desktop only */
