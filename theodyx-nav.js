@@ -1,4 +1,8 @@
-/*! theodyx-nav.js v4.12.0 (2026-09-06) — behaviours for the clear liquid-glass nav (#thx-nav).
+/*! theodyx-nav.js v4.12.1 (2026-09-06) — behaviours for the clear liquid-glass nav (#thx-nav).
+ * 4.12.1: the ink sampler reads the scene where the lens actually pulls it from. With dispersion 1.2 over the whole bevel the
+ * content under a word's edge comes from up to ~60 px outside the pill, so a sample taken straight under the word elected the
+ * wrong ink at hard boundaries (Home y=650: white words over a bright band the lens had pulled in); each of the nine sample
+ * points (and the media region it reads) is now displaced along the pill normal by the lens profile's own reference-channel term.
  * 4.12.0 (owner, 2026-09-06): the words change TOGETHER - the per-word ink of 4.11.1 is gone (it flipped three of five words by
  * their mean luminance over the Home cards and left "Clients" black across a dark photograph while "Partners" stayed white);
  * each group (mark / menu / burger) holds its ink for 3 s after a flip (INK_HOLD, "a 3 second timer for background adjust") and
@@ -27,7 +31,7 @@
   if (window.__thxNav) return;
   var nav = document.getElementById('thx-nav');
   if (!nav) return;
-  var API = window.__thxNav = { v: '4.12.0' };
+  var API = window.__thxNav = { v: '4.12.1' };
   var I18N = window.__thxI18n; function T(k) { return (I18N && I18N.t) ? I18N.t(k) : ({ 'nav.open': 'Open menu', 'nav.close': 'Close menu' })[k] || k; } /* Phase 6: locale runtime (nv2pagesf) keyed by <html lang> */
   var doc = document.documentElement, body = document.body;
   var glass = nav.querySelector('.thx-nav-glass');
@@ -482,7 +486,10 @@
       var pts = [[0.15, 0.18], [0.5, 0.18], [0.85, 0.18], [0.15, 0.5], [0.5, 0.5], [0.85, 0.5], [0.15, 0.84], [0.5, 0.84], [0.85, 0.84]];
       var Ls = [], sds = [];
       for (var p = 0; p < pts.length; p++) {
-        var st; try { st = pointStats(r.left + r.width * pts[p][0], r.top + r.height * pts[p][1], r); } catch (e) { st = null; }
+        var sx = r.left + r.width * pts[p][0], sy = r.top + r.height * pts[p][1], rr = r;
+        var dsp = lensSource(sx, sy); /* 4.12.1: read the scene where the lens pulls it from (the media region moves with the point) */
+        if (dsp) { sx += dsp[0]; sy += dsp[1]; rr = { left: r.left + dsp[0], top: r.top + dsp[1], right: r.right + dsp[0], bottom: r.bottom + dsp[1], width: r.width, height: r.height }; }
+        var st; try { st = pointStats(sx, sy, rr); } catch (e) { st = null; }
         if (!st) continue;
         if (st.forced) { forced = st.forced; break; }
         Ls.push(st.L); sds.push(st.sd || 0); if (st.media) anyMedia = true;
@@ -535,6 +542,7 @@
   API.inks = function () { return inkState.map(function (s) { var g = (s.el === logo) ? 'logo' : (s.el === burger) ? 'burger' : 'menu'; return { text: (s.el.textContent || s.el.getAttribute('aria-label') || '').trim().slice(0, 24), ink: GROUPS[g].ink, group: g, L: s.L, Lmin: s.Lmin, Lmax: s.Lmax, mixed: s.mixed }; }); };
   API.ink = function () { return { ink: ink, tone: tone, logo: GROUPS.logo.ink, menu: GROUPS.menu.ink, burger: GROUPS.burger.ink, split: { logo: GROUPS.logo.split, menu: GROUPS.menu.split, burger: GROUPS.burger.split }, hold: INK_HOLD }; };
   API.tickMs = function () { return lastTickMs; };
+  API.lensSource = lensSource;
   API.debugPoint = function (x, y, w) { tickCache = new Map(); var pe = nav.style.pointerEvents; nav.style.pointerEvents = 'none'; var r = { left: x - (w || 60) / 2, top: y - 8, width: w || 60, height: 16, right: x + (w || 60) / 2, bottom: y + 8 }; var st; try { st = pointStats(x, y, r); } finally { nav.style.pointerEvents = pe; } tickCache = null; return st; };
   API.setTone = function (t) { tone = t === 'light' ? 'light' : 'dark'; nav.setAttribute('data-tone', tone); };
   window.addEventListener('thx-nav-retone', reink);
@@ -588,6 +596,36 @@
     mapImg = document.getElementById('thx-lens-map'); mapImgLite = document.getElementById('thx-lens-map-lite');
     return true;
   }
+  /* 4.12.1: the pill geometry and the reference (green) channel of the lens profile, shared by the map builder and the ink sampler */
+  var lensGeom = null, lensRectTick = -1, lensRect = null;
+  function pillGeo(px, py, w, h, R) {
+    var cx = px - w / 2, cy = py - h / 2;
+    var qx = Math.abs(cx) - (w / 2 - R), qy = Math.abs(cy) - (h / 2 - R);
+    var ox = Math.max(qx, 0), oy = Math.max(qy, 0);
+    var outside = Math.sqrt(ox * ox + oy * oy), inside = Math.min(Math.max(qx, qy), 0);
+    var dist = R - (outside + inside);
+    var nx = 0, ny = 0;
+    if (qx > 0 || qy > 0) { var len = outside || 1; nx = (ox / len) * (cx < 0 ? -1 : 1); ny = (oy / len) * (cy < 0 ? -1 : 1); }
+    else if (qx > qy) { nx = cx < 0 ? -1 : 1; } else { ny = cy < 0 ? -1 : 1; }
+    return [dist, nx, ny];
+  }
+  function lensT(dist, P, h) {
+    var H = h / 2, Rb = Math.max(12, h * P.rimW);
+    var tr = Math.max(0, Math.min(1, 1 - dist / Rb)); tr = tr * tr * (3 - 2 * tr); tr = Math.pow(tr, P.rimK);
+    var tb = Math.max(0, Math.min(1, 1 - dist / H)); tb = Math.pow(tb, P.bodyK);
+    return Math.max(-1, Math.min(1, tr * P.rim + tb * P.body));
+  }
+  /* where the lens shows the scene from, for a viewport point (x,y) under the pill; null when the lens is off or the point is outside the pill */
+  function lensSource(x, y) {
+    if (!lensGeom || !nav.classList.contains('is-refract')) return null;
+    if (lensRectTick !== tickId) { lensRect = nav.getBoundingClientRect(); lensRectTick = tickId; }
+    var G = lensGeom, g = pillGeo(x - lensRect.left, y - lensRect.top, G.w, G.h, G.R), dist = g[0];
+    if (dist <= 0) return null;
+    var T = lensT(dist, G.P, G.h);
+    if (T > 0 && g[2] < 0) { var reach = 2 * (G.padT + dist) / (G.scale * -g[2]); if (T > reach) T = reach; }
+    if (!T) return null;
+    return [g[1] * T * G.scale / 2, g[2] * T * G.scale / 2];
+  }
   function buildMap(force) {
     if (!refractOK) return;
     var nr = nav.getBoundingClientRect();
@@ -613,17 +651,7 @@
     var H = h / 2, Rb = Math.max(12, h * P.rimW);
     var L1 = P.light, L2 = P.light2;
     /* signed distance to the rounded-rect edge (positive inside) + outward normal, for a point (px,py) relative to the pill's top-left */
-    function geo(px, py) {
-      var cx = px - w / 2, cy = py - h / 2;
-      var qx = Math.abs(cx) - (w / 2 - R), qy = Math.abs(cy) - (h / 2 - R);
-      var ox = Math.max(qx, 0), oy = Math.max(qy, 0);
-      var outside = Math.sqrt(ox * ox + oy * oy), inside = Math.min(Math.max(qx, qy), 0);
-      var dist = R - (outside + inside);
-      var nx = 0, ny = 0;
-      if (qx > 0 || qy > 0) { var len = outside || 1; nx = (ox / len) * (cx < 0 ? -1 : 1); ny = (oy / len) * (cy < 0 ? -1 : 1); }
-      else if (qx > qy) { nx = cx < 0 ? -1 : 1; } else { ny = cy < 0 ? -1 : 1; }
-      return [dist, nx, ny];
-    }
+    function geo(px, py) { return pillGeo(px, py, w, h, R); }
     /* 1. displacement map over the enlarged box */
     var cw = Math.min(W, 880), ch = Math.min(Hh, 176);
     var c = document.createElement('canvas'); c.width = cw; c.height = ch;
@@ -672,6 +700,8 @@
     }
     if (!buildFilters(W, Hh, P)) { refractOK = false; return; }
     nav.classList.add('is-refract'); nav.classList.toggle('is-lite', lite);
+    lensGeom = { w: w, h: h, R: R, padT: padT, scale: P.scale, P: P }; lensRectTick = -1;
+    reinkFresh(); /* the map moved where the words read the scene from */
   }
   /* colour bleed: the glass takes on the colours around it (blurred, saturated, masked to the outer body) */
   var tint = nav.querySelector('.thx-nav-tint');

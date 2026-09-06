@@ -6,13 +6,13 @@ let pass = 0, fail = 0; const check = (n, ok, d) => { console.log((ok ? 'PASS ' 
 (async () => {
   const browser = await chromium.launch({ headless: true, args: ['--enable-gpu', '--use-angle=metal', '--ignore-gpu-blocklist'] });
   const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, userAgent: UA }); const page = await ctx.newPage();
-  await page.route(/theodyx-nav\.js/, r => r.fulfill({ status: 200, contentType: 'application/javascript', body: fs.readFileSync(ROOT + 'theodyx-nav.js', 'utf8') }));
-  await page.route(u => /theodyx\.com/.test(u.hostname) && !/\.(js|css|png|jpe?g|webp|woff2?|svg|mp4|ico|json|xml)(\?|$)/.test(u.pathname), async route => { if (route.request().resourceType() !== 'document') return route.continue(); const res = await route.fetch(); let html = await res.text(); html = html.replace(/(<script[^>]*theodyx-nav\.js[^>]*?)\s+integrity="[^"]*"/, '$1'); route.fulfill({ response: res, body: html, headers: { ...res.headers(), 'content-type': 'text/html; charset=utf-8' } }); });
-  await page.goto('https://www.theodyx.com/', { waitUntil: 'load' }); await sleep(2500);
-  await page.addStyleTag({ content: fs.readFileSync(ROOT + 'theodyx-nav.css', 'utf8') });
+  if (!process.env.LIVE) await page.route(/theodyx-nav\.js/, r => r.fulfill({ status: 200, contentType: 'application/javascript', body: fs.readFileSync(ROOT + 'theodyx-nav.js', 'utf8') }));
+  if (!process.env.LIVE) await page.route(u => /theodyx\.com/.test(u.hostname) && !/\.(js|css|png|jpe?g|webp|woff2?|svg|mp4|ico|json|xml)(\?|$)/.test(u.pathname), async route => { if (route.request().resourceType() !== 'document') return route.continue(); const res = await route.fetch(); let html = await res.text(); html = html.replace(/(<script[^>]*theodyx-nav\.js[^>]*?)\s+integrity="[^"]*"/, '$1'); route.fulfill({ response: res, body: html, headers: { ...res.headers(), 'content-type': 'text/html; charset=utf-8' } }); });
+  await page.goto((process.env.ORIGIN || 'https://www.theodyx.com') + '/', { waitUntil: 'load' }); await sleep(2500);
+  if (!process.env.LIVE) await page.addStyleTag({ content: fs.readFileSync(ROOT + 'theodyx-nav.css', 'utf8') });
   await page.evaluate(() => document.querySelectorAll('video').forEach(v => { try { v.pause(); } catch (e) {} }));
   const v = await page.evaluate(() => ({ v: window.__thxNav.v, hold: window.__thxNav.ink().hold, words: [...document.querySelectorAll('.thx-nav-menu a')].filter(a => a.hasAttribute('data-ink')).length }));
-  check('nav 4.12.0 loaded, hold = 3000, no per-word data-ink', v.v === '4.12.0' && v.hold === 3000 && v.words === 0, v);
+  check('nav 4.12.x loaded, hold = 3000, no per-word data-ink', /^4\.12\./.test(v.v) && v.hold === 3000 && v.words === 0, v);
   // find a white band and the black footer
   const yWhite = await page.evaluate(() => { const h = [...document.querySelectorAll('h1,h2,h3')].find(e => /Make something only you can/i.test(e.textContent)); return Math.round(h.getBoundingClientRect().top + window.scrollY - 200); });
   const yBlack = await page.evaluate(() => { const f = document.querySelector('footer'); return Math.round(f.getBoundingClientRect().top + window.scrollY + 300); });

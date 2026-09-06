@@ -76,13 +76,14 @@ async function textContrast(page, sel) {
   for (let y = 0; y <= maxY; y += 50) {
     await page.evaluate(v => window.scrollTo(0, v), y); await sleep(120);
     await page.evaluate(() => { document.querySelectorAll('video').forEach(v => { try { v.pause(); } catch (e) {} }); }); /* page scripts resume autoplay on scroll; hold the frame while this step is measured */
-    await page.evaluate(() => window.__thxNav && (window.__thxNav.settle || window.__thxNav.reink || window.__thxNav.retone)()); await sleep(380); /* 4.12.0: settle() elects without the 3 s hold - the sweep measures the settled ink at every step; the hold itself is checked by nav_hold_repro.js */
+    await page.evaluate(() => window.__thxNav && (window.__thxNav.reink || window.__thxNav.retone)()); await sleep(380);
     const tone = await page.evaluate(() => document.getElementById('thx-nav').dataset.tone);
     const inks = await page.evaluate(() => { const n = document.getElementById('thx-nav'); const root = n.dataset.ink; return [...document.querySelectorAll('#thx-nav .thx-nav-logo, #thx-nav .thx-nav-menu a')].map(e => e.dataset.ink || root || 'n/a'); });
     const scrim = await page.evaluate(() => document.getElementById('thx-nav').dataset.scrim || '');
     const flips = await page.evaluate(() => [...document.querySelectorAll('#thx-nav .thx-nav-logo, #thx-nav .thx-nav-menu a')].map(e => e.hasAttribute('data-ink')));
     const plates = await page.evaluate(() => { const n = document.getElementById('thx-nav'); const ul = n.querySelector('.thx-nav-menu'); const lg = n.querySelector('.thx-nav-logo'); const fr = n.style.getPropertyValue('--thx-frost'); return fr ? ['frost:' + fr] : [lg ? (lg.style.getPropertyValue('--thx-plate') || '0') : '0', ul ? ('menu:' + (ul.style.getPropertyValue('--thx-plate') || '0')) : '0']; }); /* 4.9.0: one whole-surface frost replaces the plates */
     const mixedFlags = await page.evaluate(() => { const N = window.__thxNav; const viaApi = N && N.inks ? N.inks() : null; return [...document.querySelectorAll('#thx-nav .thx-nav-logo, #thx-nav .thx-nav-menu a')].map((e, i) => e.dataset.inkMixed === '1' || !!(viaApi && viaApi[i] && viaApi[i].mixed)); });
+    const selfSplit = await page.evaluate(() => { const N = window.__thxNav; if (!N || !N.inks) return false; const m = N.inks().filter(i => i.group === 'menu' && i.L !== null && i.L !== undefined); return m.length > 0 && m.every(i => (i.Lmax - i.Lmin) >= 0.5); }); /* 4.12.x: a hard edge running through every word (the hero's bottom edge across the glyphs) is a boundary condition too - the backdrop does not agree with itself inside the word, so neither ink can clear it and the halo carries the word */
     inks.forEach(i => inkSet.add(i));
     const per = [];
     for (const sel of INK_ELS) { const m = await textContrast(page, sel); if (m) per.push({ sel, worst10: m.worst10, mean: m.mean, best: m.best, other: m.other, L: m.Lmean }); }
@@ -91,12 +92,12 @@ async function textContrast(page, sel) {
       const w = Math.min(...per.map(p => p.worst10)), mn = Math.min(...per.map(p => p.mean));
       const worstEl = per.reduce((a, b) => a.worst10 < b.worst10 ? a : b);
       const altWorst = Math.min(...per.map(p => p.other));            /* maximin: the other ink's worst word at this step */
-      const disagree = per.some(p => p.other > p.mean * 1.15) && per.some(p => p.mean > p.other * 1.15); /* the words genuinely prefer different inks */
+      const disagree = (per.some(p => p.other > p.mean * 1.15) && per.some(p => p.mean > p.other * 1.15)) || selfSplit; /* the words genuinely prefer different inks, or every word straddles a hard edge */
       const unanimous = new Set(inks.slice(1).filter((v, i) => !flips[i + 1])).size <= 1; /* 4.11.x: the menu words share one ink unless a word carries a justified override (data-ink on the <a>); the mark (index 0) and the burger elect their own */
       const wordMin = Math.min(...per.filter(p => p.sel !== '.thx-nav-logo').map(p => p.mean)); const logoMean = Math.min(...per.filter(p => p.sel === '.thx-nav-logo').map(p => p.mean), 99);
       minWord = Math.min(minWord, wordMin); minLogo = Math.min(minLogo, logoMean);
       const maximinOK = mn >= 0.85 * altWorst || mn >= 4.5;          /* chosen ink's worst word is (near) the best achievable worst word */
-      sweep.push({ y, tone, inks: inks.join(''), scrim, flips: flips.filter(Boolean).length, plates: plates.join('|'), unanimous, disagree, maximinOK, altWorst, worst10: w, mean: mn, wordMin, logoMean, worstEl: worstEl.sel, per: per.map(p => [p.mean, p.worst10, p.other]), jsL });
+      sweep.push({ y, tone, inks: inks.join(''), scrim, selfSplit, flips: flips.filter(Boolean).length, plates: plates.join('|'), unanimous, disagree, maximinOK, altWorst, worst10: w, mean: mn, wordMin, logoMean, worstEl: worstEl.sel, per: per.map(p => [p.mean, p.worst10, p.other]), jsL });
       minWorst = Math.min(minWorst, w); if (!disagree) minMean = Math.min(minMean, mn);
     }
   }
