@@ -92,7 +92,7 @@ async function textContrast(page, sel) {
       const worstEl = per.reduce((a, b) => a.worst10 < b.worst10 ? a : b);
       const altWorst = Math.min(...per.map(p => p.other));            /* maximin: the other ink's worst word at this step */
       const disagree = per.some(p => p.other > p.mean * 1.15) && per.some(p => p.mean > p.other * 1.15); /* the words genuinely prefer different inks */
-      const unanimous = new Set(inks.slice(1)).size === 1; /* 4.11.0: the menu words share one ink; the mark (index 0) and the burger elect their own */
+      const unanimous = new Set(inks.slice(1).filter((v, i) => !flips[i + 1])).size <= 1; /* 4.11.x: the menu words share one ink unless a word carries a justified override (data-ink on the <a>); the mark (index 0) and the burger elect their own */
       const wordMin = Math.min(...per.filter(p => p.sel !== '.thx-nav-logo').map(p => p.mean)); const logoMean = Math.min(...per.filter(p => p.sel === '.thx-nav-logo').map(p => p.mean), 99);
       minWord = Math.min(minWord, wordMin); minLogo = Math.min(minLogo, logoMean);
       const maximinOK = mn >= 0.85 * altWorst || mn >= 4.5;          /* chosen ink's worst word is (near) the best achievable worst word */

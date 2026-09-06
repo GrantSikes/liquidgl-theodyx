@@ -1,4 +1,4 @@
-/*! theodyx-nav.js v4.11.0 (2026-09-05) — behaviours for the clear liquid-glass nav (#thx-nav).
+/*! theodyx-nav.js v4.11.1 (2026-09-05) — behaviours for the clear liquid-glass nav (#thx-nav).
  * One unanimous ink (every word, the logo and the burger flip together between pure white and pure black, chosen
  * from what is behind all of them: the ink whose worst word still reads best, with hysteresis and a dwell). Owner
  * decisions (2026-09-05): the glass itself never changes - no plates, no scrim, no frost, no blur; only the words
@@ -10,6 +10,7 @@
  * bar into the pill. 4.11.0: the mark, the menu and the burger each elect their own ink by counting the sample points that
  * would fail AA (a white gutter under the menu can no longer keep the mark black over a black band, and a split backdrop no
  * longer blanks half the bar); desktop lens rim .9, dispersion .45, bleed .9 at 1.6 - between yesterday and the turned-up set.
+ * 4.11.1: one menu word may carry its own ink when the menu's ink leaves it unreadable and the other ink would clear AA there.
  * Whole-surface lens (continuous refraction profile from the pill geometry, per-channel dispersion,
  * geometry-lit specular rim, colour bleed; Chromium, capability + frame-budget gated), pointer highlight with a spring,
  * scroll condense, accessible mobile sheet (focus trap, Escape, inert, iOS-safe scroll lock), skip link target, legacy
@@ -19,7 +20,7 @@
   if (window.__thxNav) return;
   var nav = document.getElementById('thx-nav');
   if (!nav) return;
-  var API = window.__thxNav = { v: '4.11.0' };
+  var API = window.__thxNav = { v: '4.11.1' };
   var I18N = window.__thxI18n; function T(k) { return (I18N && I18N.t) ? I18N.t(k) : ({ 'nav.open': 'Open menu', 'nav.close': 'Close menu' })[k] || k; } /* Phase 6: locale runtime (nv2pagesf) keyed by <html lang> */
   var doc = document.documentElement, body = document.body;
   var glass = nav.querySelector('.thx-nav-glass');
@@ -440,6 +441,7 @@
   var GROUPS = { logo: { ink: 'light', inkT: 0, primed: false, els: logo ? [logo] : [] }, menu: { ink: 'light', inkT: 0, primed: false, els: [] }, burger: { ink: 'light', inkT: 0, primed: false, els: burger ? [burger] : [] } };
   nav.querySelectorAll('.thx-nav-menu a').forEach(function (a) { GROUPS.menu.els.push(a); });
   var groupEls = { logo: logo, menu: nav.querySelector('.thx-nav-menu'), burger: burger };
+  (function () { var st = document.createElement('style'); st.id = 'thx-nav-word-ink'; st.textContent = '.thx-nav .thx-nav-menu a[data-ink="dark"][data-ink]{color:var(--thx-ink-dark)}.thx-nav .thx-nav-menu a[data-ink="light"][data-ink]{color:var(--thx-ink-light)}'; document.head.appendChild(st); })(); /* 4.11.1: per-word override rules outrank the group rule by specificity, whatever the stylesheet order */
   function electGroup(G, acc, t0) {
     var want = G.ink;
     if (!acc.pts) return;
@@ -502,6 +504,21 @@
       if (forced) { G.ink = forced === 'light' ? 'dark' : 'light'; G.primed = true; }
       else { A2.meanLe = A2.wsum ? A2.wL / A2.wsum : 0.5; electGroup(G, A2, t0); }
       if (groupEls[k]) groupEls[k].setAttribute('data-ink', G.ink);
+    }
+    /* 4.11.1: a single menu word may carry its own ink, but only when the menu's ink leaves it unreadable (< 2.5:1 on its mean) while the
+     * other ink reads at least 3:1 and 1.8x better there - the boundary case where four words sit on the dark video and one on the white page.
+     * Word overrides answer to their own 600 ms dwell so a boundary crossing cannot strobe them. */
+    var menuInk = GROUPS.menu.ink;
+    for (var wi = 0; wi < inkState.length; wi++) {
+      var ws = inkState[wi], wel = ws.el;
+      if (wel === logo || wel === burger || ws.tick !== tickId || ws.L === null || ws.L === undefined) { if (wel !== logo && wel !== burger && wel.hasAttribute('data-ink')) wel.removeAttribute('data-ink'); continue; }
+      var wLe = cal(ws.L), wcd = contrast(wLe, 'dark'), wcl = contrast(wLe, 'light');
+      var own = menuInk === 'light' ? (wcl < 2.5 && wcd >= Math.max(3, wcl * 1.8) ? 'dark' : '') : (wcd < 2.5 && wcl >= Math.max(3, wcd * 1.8) ? 'light' : '');
+      var cur = wel.getAttribute('data-ink') || '';
+      if (own !== cur) {
+        if (t0 - (ws.ovT || 0) < 600 && !forced) { clearTimeout(dwellT); dwellT = setTimeout(reink, 600 - (t0 - (ws.ovT || 0)) + 30); continue; }
+        ws.ovT = t0; if (own) wel.setAttribute('data-ink', own); else wel.removeAttribute('data-ink');
+      }
     }
     /* the bar-level ink (progress hairline, API consumers) follows the menu on desktop and the mark on phones */
     var lead = (groupEls.menu && groupEls.menu.offsetParent) ? GROUPS.menu.ink : GROUPS.logo.ink;
