@@ -95,7 +95,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     check('GATE: an empty submit explains itself and stays open', empty.open && empty.msg.length > 3, empty);
     await gateFill(page, y22 + '-06-15'); await page.click('#sc-gate-age-go'); await sleep(700);
     const passed = await page.evaluate(() => ({ gone: getComputedStyle(document.getElementById('sc-gate-age')).display === 'none', gated: document.documentElement.classList.contains('sc-gated'), dob: document.getElementById('sc-dob').value, formsOpen: ['sc-form-you', 'sc-form-work', 'sc-form-consent'].every(i => getComputedStyle(document.getElementById(i)).display === 'block'), inert: [...document.body.children].filter(e => e.hasAttribute('inert')).length, ack: document.getElementById('sc-safety-ack') && document.getElementById('sc-safety-ack').checked }));
-    check('GATE: an adult date closes it, carries the date into #sc-dob, opens the form, releases the page and does not pre-tick the acknowledgement', passed.gone && !passed.gated && passed.dob === y22 + '-06-15' && passed.formsOpen && passed.inert === 0 && passed.ack === false, passed);
+    check('GATE: an adult date closes it, carries the date into #sc-dob, opens the form, releases the page (2.4.0: no acknowledgement checkbox exists - the statement was acknowledged on its own stage)', passed.gone && !passed.gated && passed.dob === y22 + '-06-15' && passed.formsOpen && passed.inert === 0 && passed.ack !== true, passed);
     const g = await page.evaluate(() => {
       const safety = document.getElementById('sc-safety'), you = document.getElementById('sc-form-you');
       return {
@@ -104,8 +104,8 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
         ack: (() => { const a = document.getElementById('sc-safety-ack'); return a ? { required: a.required, label: !!document.querySelector('label[for="sc-safety-ack"]') } : null; })()
       };
     });
-    check('LAND-01: the safety statement is a named inline section above the form', g.safetyInline && g.safetyNamed === 'sc-safety-h', g);
-    check('F-08b: the safety acknowledgement is a required, labelled checkbox', !!(g.ack && g.ack.required && g.ack.label), g.ack);
+    check('LAND-01 (2.4.0): the safety statement is its own stage before the page, not an inline section', !g.safetyInline, g); /* owner 2026-09-06: the inline section is retired */
+    /* F-08b retired with the inline section (owner 2026-09-06): the acknowledgement is the Acknowledged button on the safety stage, stored as gates.trust */
     // the acknowledgement blocks submit exactly like the consent box
     await page.click('#sc-submit'); await sleep(500);
     const blocked = await page.evaluate(() => ({
