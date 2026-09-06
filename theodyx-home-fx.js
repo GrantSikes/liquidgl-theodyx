@@ -1,12 +1,12 @@
-/* theodyx-home-fx.js 1.3.0 — Theodyx HOME page ANIMATION ONLY.
+/* theodyx-home-fx.js 1.4.0 — Theodyx HOME page ANIMATION ONLY.
  * Contract: may only append/read inside [data-thx-anim] / [data-thx-reveal] elements,
  * plus the hero control buttons it already owns.
  * MUST NOT: set hrefs, hide/move/restyle content, inject text content,
  * or query anything outside its mount elements.
- * Phase 9 a11y (1.1.0): the hero never unmutes itself (audio only from the mute button);
- * a Pause/Play control with aria-pressed; no auto-start under prefers-reduced-motion;
- * the mute control is withdrawn when the source carries no audio track; ARIA names for
- * the hero video and the hero wordmark. ARIA-only attributes — no visual change.
+ * Phase 9 a11y (1.1.0): a Pause/Play control with aria-pressed; no auto-start under
+ * prefers-reduced-motion; ARIA names for the hero video and the hero wordmark. Its two audio
+ * clauses — "never unmutes itself" and "withdraw the mute control when the source carries no
+ * audio track" — are SUPERSEDED by 1.4.0 below; the a11y intent behind the first is preserved.
  * Phase 10 perf (1.2.0, SPEED-04): the hero MP4 no longer competes with the LCP. The markup
  * carries data-thx-src (no src) and preload="none"; this file paints a real eager, high-priority
  * <img class="hero-poster"> over the video, waits for the largest-contentful-paint entry (or
@@ -24,6 +24,28 @@
  * to it, do not extend [data-thx-reveal] to any element below the hero, and do not add scroll- or
  * pointer-driven motion to this file — the mosaic's pointer input feeds a shader, it never moves
  * a hit target.
+ * Sound + controls (1.4.0): the hero film has an audio track again (the R2 loop renditions were
+ * cut without one, so every mute toggle was a no-op). Three fixes, all of them here — this file is
+ * the ONLY owner of the hero <video>; theodyx-cine must never mute, load or play it.
+ *   1. Sound on touch. Autoplay is muted because browsers require it, then the FIRST genuine
+ *      pointer gesture anywhere on the page unmutes and keeps it playing. Phase 9 removed this
+ *      because it also fired on Tab; 1.4.0 restores it on POINTER input only — pointerdown /
+ *      touchstart, and click only when e.detail > 0. A keyboard-activated click (Enter or Space
+ *      on a link or button) reports detail === 0, so it never unmutes, and Tab / focus / keydown
+ *      are not listened to at all. Once the user works the mute button the choice is theirs for
+ *      good, in both directions. prefers-reduced-motion still gates MOTION (no source is fetched
+ *      until Play) but never gates sound.
+ *   2. The mute control is no longer withdrawn. The old heuristic dropped it whenever
+ *      webkitAudioDecodedByteCount stayed 0 past 0.35 s — but a MUTED video decodes no audio, so
+ *      it read every muted-autoplay hero as silent and hid the one button that could unmute it.
+ *      That is why the phone had no working mute control. The source now always carries audio.
+ *   3. Fullscreen works on iPhone. iOS Safari has NO element-level Fullscreen API — video
+ *      .requestFullscreen, .webkitRequestFullscreen AND container .requestFullscreen are all
+ *      undefined there (verified in WebKit). The old handler was
+ *      (v.requestFullscreen || v.webkitRequestFullscreen || function(){}).call(v), so on a phone
+ *      it invoked the no-op and the button did nothing, silently. iOS exposes the video-only
+ *      webkitEnterFullscreen() instead; the cascade below prefers the standard API, falls back to
+ *      that, and the button now toggles out of fullscreen as well as into it.
  * Modules: media-mosaic (WebGL wordmark), hero-video controls, hero wordmark, hero reveal. */
 (function () {
   "use strict";
@@ -388,10 +410,106 @@
       mu.setAttribute('aria-label', muted ? 'Unmute video' : 'Mute video');
       mu.setAttribute('aria-pressed', muted ? 'true' : 'false');
     }
-    if (fs) fs.addEventListener('click', function (e) { e.preventDefault(); try { (v.requestFullscreen || v.webkitRequestFullscreen || function () {}).call(v); } catch (err) {} });
-    /* F-01 — audio starts here and nowhere else. There is no document-level gesture path. */
-    if (mu) mu.addEventListener('click', function (e) { e.preventDefault(); attachSrc(); v.muted = !v.muted; if (!v.muted) v.volume = 1; try { v.play().catch(function () {}); } catch (err) {} icons(v.muted); });
-    icons(true);
+    /* ── 1.4.0 (3): fullscreen that also works on a phone ──────────────
+       Prefer the standard element API; fall back to the container; and on iOS — where none of
+       those exist — use the video-only webkitEnterFullscreen(). That call throws
+       InvalidStateError before metadata has loaded, so make sure a source is on the wire and
+       retry once on loadedmetadata. The button toggles: press again to leave fullscreen. */
+    function fsActive() {
+      return !!(document.fullscreenElement || document.webkitFullscreenElement || v.webkitDisplayingFullscreen);
+    }
+    function exitFull() {
+      try {
+        if (v.webkitDisplayingFullscreen && v.webkitExitFullscreen) { v.webkitExitFullscreen(); return; }
+        var fn = document.exitFullscreen || document.webkitExitFullscreen;
+        if (fn) { var p = fn.call(document); if (p && p['catch']) p['catch'](function () {}); }
+      } catch (e) {}
+    }
+    function enterFull() {
+      var std = v.requestFullscreen || v.webkitRequestFullscreen;
+      if (!std && typeof v.webkitEnterFullscreen === 'function') {
+        attachSrc();
+        try { v.webkitEnterFullscreen(); return; } catch (e) {}
+        v.addEventListener('loadedmetadata', function once() {
+          v.removeEventListener('loadedmetadata', once);
+          try { v.webkitEnterFullscreen(); } catch (e2) {}
+        });
+        return;
+      }
+      var target = std ? v : hv;
+      var fn = target.requestFullscreen || target.webkitRequestFullscreen;
+      if (!fn) return;
+      try { var p = fn.call(target); if (p && p['catch']) p['catch'](function () {}); } catch (e) {}
+    }
+    function fsIcons() {
+      if (!fs) return;
+      var on = fsActive();
+      fs.setAttribute('aria-label', on ? 'Exit fullscreen video' : 'Fullscreen video');
+      fs.setAttribute('aria-pressed', on ? 'true' : 'false');
+    }
+    if (fs) {
+      fs.addEventListener('click', function (e) {
+        e.preventDefault();
+        if (fsActive()) exitFull(); else enterFull();
+        setTimeout(fsIcons, 60);
+      });
+      ['fullscreenchange', 'webkitfullscreenchange'].forEach(function (t) { document.addEventListener(t, fsIcons); });
+      ['webkitbeginfullscreen', 'webkitendfullscreen'].forEach(function (t) { v.addEventListener(t, fsIcons); });
+      fsIcons();
+    }
+
+    /* ── 1.4.0 (1): sound ───────────────────────────────────────────────
+       The loop always starts muted — every browser requires that to autoplay. The first genuine
+       POINTER gesture on the page is a user activation, so audio may start there. Keyboard input
+       never reaches this path (see the header): Tab must not make the page talk. */
+    var userChose = false;   // the mute button has been pressed — the user owns the state now
+    var wantSound = false;   // a pointer gesture has asked for audio
+
+    function applySound() {
+      if (!wantSound || userChose || !attached) return;
+      if (!v.muted) return;
+      v.muted = false; v.volume = 1;
+      icons(false);
+      var p = null;
+      try { p = v.play(); } catch (e) {}
+      if (p && p['catch']) p['catch'](function () {
+        /* the UA refused audible playback — go back to muted rather than leave a frozen frame */
+        v.muted = true; icons(true);
+        try { var q = v.play(); if (q && q['catch']) q['catch'](function () {}); } catch (e) {}
+      });
+    }
+
+    function pointerGesture(e) {
+      if (!e || !e.isTrusted) return;                    // synthetic events are not consent
+      if (e.type === 'click' && !(e.detail > 0)) return; // keyboard-activated click: detail === 0
+      kick();                                            // a tap also resumes a suspended loop
+      if (userChose || wantSound) return;                // already settled
+      var t = e.target;
+      /* the hero's own mute / pause controls speak for themselves — never double-handle them */
+      if (t && t.closest && t.closest('[data-hero-mute],[data-hero-pause]')) return;
+      wantSound = true;
+      applySound();
+    }
+    ['pointerdown', 'touchstart', 'click'].forEach(function (t) {
+      document.addEventListener(t, pointerGesture, { capture: true, passive: true });
+    });
+    /* reduced motion fetches nothing until Play, so the gesture may land before a source exists;
+       re-apply the moment playback actually begins. */
+    v.addEventListener('play', applySound);
+    v.addEventListener('canplay', applySound);
+
+    /* the mute button — explicit, sticky, and correct in both directions */
+    if (mu) mu.addEventListener('click', function (e) {
+      e.preventDefault();
+      userChose = true;
+      attachSrc();
+      v.muted = !v.muted;
+      if (!v.muted) { v.volume = 1; userPaused = false; }
+      try { var p = v.play(); if (p && p['catch']) p['catch'](function () {}); } catch (err) {}
+      icons(v.muted);
+    });
+    v.addEventListener('volumechange', function () { icons(v.muted); });
+    icons(v.muted);
 
     /* F-03 — Pause / Play. */
     var pb = null;
@@ -426,32 +544,12 @@
       pIcons();
     }
 
-    /* AXE-08 — this loop has no audio stream (ffprobe: one h264 stream, no audio), so the
-       "Unmute video" control promises something that cannot happen. Withdraw it whenever the
-       source is measurably audio-less; if nothing can be measured, leave the control alone. */
-    var muGone = false;
-    function dropMute() {
-      if (!mu || muGone) return; muGone = true;
-      mu.setAttribute('hidden', ''); mu.style.display = 'none';
-      mu.setAttribute('aria-hidden', 'true'); mu.tabIndex = -1;
-    }
-    function resolveAudio() {
-      if (muGone || !mu) return;
-      try {
-        if (typeof v.mozHasAudio === 'boolean') { if (!v.mozHasAudio) dropMute(); return; }
-        if (v.audioTracks && typeof v.audioTracks.length === 'number') { if (!v.audioTracks.length) dropMute(); return; }
-        if (typeof v.webkitAudioDecodedByteCount === 'number') {
-          if (v.webkitAudioDecodedByteCount > 0) return;          // audio is being decoded — keep it
-          if (v.currentTime > 0.35) dropMute();                   // played, and nothing decoded
-        }
-      } catch (e) {}
-    }
-    v.addEventListener('loadedmetadata', resolveAudio);
-    v.addEventListener('timeupdate', resolveAudio);
-    [1200, 3000, 6000].forEach(function (t) { setTimeout(resolveAudio, t); });
+    /* 1.4.0 (2): the mute-withdrawal heuristic that used to live here is GONE. It hid the button
+       whenever webkitAudioDecodedByteCount stayed 0 past 0.35 s — but a muted video decodes no
+       audio at all, so it read the muted-autoplay hero as silent and removed the only control
+       that could turn sound on. The source carries an audio track; the button always stands. */
 
-    function kick() { if (!autoOK() || !attached) return; if (v.paused) { try { v.play().catch(function () {}); } catch (e) {} } }
-    document.addEventListener('touchstart', kick, { once: true, capture: true });
+    function kick() { if (!autoOK() || !attached) return; if (v.paused) { try { var p = v.play(); if (p && p['catch']) p['catch'](function () {}); } catch (e) {} } }
     document.addEventListener('visibilitychange', function () { if (!document.hidden) kick(); });
   }
 

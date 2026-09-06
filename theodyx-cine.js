@@ -1,4 +1,4 @@
-/* Theodyx Cine v5.1.0 — homepage cinematic. Library-free. Modules removable via CFG.
+/* Theodyx Cine v5.2.0 — homepage cinematic. Library-free. Modules removable via CFG.
    Phase 11 (motion) 5.1.0: no section on Home animates on scroll any more. The reveals v3 and
    parallax modules are deleted outright (REVEAL-01, REVEAL-02, REVEAL-08, INV-01, INV-02,
    EASE-04, ACT-12) together with the CSS they injected and the no-JS safety net that only
@@ -8,7 +8,10 @@
    house spring token. Net effect on Home: this file installs zero scroll listeners and zero
    rAF loops. The one orchestrated entrance left on the page is the hero [data-thx-reveal].
    Intro: typed line -> word constellation builds center-screen -> family spotlight ->
-   gravitational collapse -> "what it means to be Human." -> video emerges. No blur anywhere. */
+   gravitational collapse -> "what it means to be Human." -> video emerges. No blur anywhere.
+   5.2.0 (hero audio): comments only, plus the removal of the dead CFG.autoSound flag. The hero's
+   sound policy moved to theodyx-home-fx 1.4.0, which unmutes on the first genuine pointer gesture
+   (never on keyboard). cine still owns none of it — it must never mute, load or play the video. */
 (function(){
 if(location.pathname!=='/'&&location.pathname!=='')return;
 if(window.__thxCineInit)return;window.__thxCineInit=1;
@@ -20,7 +23,6 @@ var CFG={
      here depends on it. If it is ever turned back on, only first-viewport images are promoted. */
   eagerImages:false,
   heroIntro:false,    // page loads straight into the video (constellation kept behind this flag)
-  autoSound:true,
   scrollZoom:false,   // no intro -> hero stays in its native designed state
   /* 5.1.0 (Phase 11): `reveals` and `parallax` are gone, not just switched off — their blocks
      are deleted below. Nothing on Home may animate on scroll. */
@@ -45,8 +47,10 @@ function init(){
      keeps a reference for the heroIntro teardown; it must never mute, load or play it here. */
   var video=document.querySelector('.hero-media video, video.hero-video');
 
-  /* 5.0.2 (Phase 9 F-01): the gesture auto-unmute is gone - audio only ever starts from the hero's own mute button
-     (theodyx-home-fx). A first keystroke or tap must never turn sound on. CFG.autoSound is ignored. */
+  /* 5.2.0: this file has no audio path of any kind, and must never grow one. Sound is decided in
+     theodyx-home-fx 1.4.0 alone: muted autoplay, then unmute on the first genuine pointer gesture,
+     never on keyboard input, and never again once the user has worked the mute button themselves.
+     The dead CFG.autoSound flag (ignored since 5.0.2) is removed rather than left to mislead. */
 
   var hero=document.querySelector('section.hero, .hero');
   var media=document.querySelector('.hero-media');
