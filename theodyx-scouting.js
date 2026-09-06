@@ -1,5 +1,23 @@
-/* theodyx-scouting 2.1.2 — Phase 11 motion. EASE-03: no control transitions `all` any more —
+/* theodyx-scouting 2.2.0 — age verification, restored. The owner's call overrides the Phase 10
+ * decision that retired the gates: nobody reaches the application form without first confirming a
+ * date of birth. One centred dialog goes up in the same synchronous task this script starts in —
+ * role="dialog" aria-modal="true", labelled by its own heading, focus trapped, Escape deliberately
+ * unbound (an age check is not dismissible), every other <body> child `inert`, the page scroll
+ * locked, and html.sc-gated hiding the three form sections so there is no flash of an un-gated
+ * form. The dialog states the safety statement verbatim (cloned from the page's own copy) above the
+ * date field, so nobody answers the question without having read it. 14+ closes the dialog, carries
+ * the date into #sc-dob and emits age_eligible + age_acknowledged; under 14 emits age_ineligible and
+ * lands in the existing html.sc-u14 state, whose "Update your date of birth" button re-opens the
+ * dialog rather than unlocking an unguarded form; an empty or impossible date is explained inline in
+ * a role="status" node and nothing moves. A pass is stored in the session (SS_GATES.gatePassed), so
+ * a reload does not re-ask and a new session does. Entrance is transform/opacity only, 240 ms on the
+ * house curve, and prefers-reduced-motion drops it; forced-colors gets system colours.
+ * Everything Phase 10 and Phase 11 built is untouched: the inline safety section and its required
+ * acknowledgement checkbox both stay (the gate is in addition to them, not instead of them), the
+ * single window.__thxTrack data layer, the offer above the fold, drag-and-drop uploads, the explicit
+ * !important transitions, the QR-on-success loader.
  * 2.1.1/2.1.2: EASE-10 - the intro photo's grayscale-to-colour hover eases over --thx-dur-base on the house curve instead of 550 ms ease (filter repaints the whole element; 550 ms sat over the UI ceiling). !important because the page's own <style id="sc-native-css"> embed (body, later in the cascade) restates the 550 ms rule.
+ * 2.1.0 — Phase 11 motion. EASE-03: no control transitions `all` any more —
  * the chips, the submit, the gate/consent buttons, the inputs and the dropzones each name the
  * properties their own state rules change (transform/opacity, plus colour where colour IS the
  * feedback) on one spring token, --sc-ease: cubic-bezier(.22,1,.36,1), at 140-160 ms; no layout
@@ -8,12 +26,13 @@
  * and a dropped file runs the identical accept/10 MB/status-announcement path as the picker;
  * click and keyboard still open the picker. prefers-reduced-motion drops the movement, and
  * forced-colors gets a Highlight outline for the drag state.
- * 2.0.1 — Phase 10 campaign readiness. The two full-screen modal gates are gone:
+ * 2.0.1 — Phase 10 campaign readiness. The two full-screen modal gates were retired here (2.2.0
+ * brings the age one back, as a single dialog):
  * the safety statement is an inline <section id="sc-safety"> above the form and its acknowledgement
- * is a required checkbox in the consent block; age comes only from #sc-dob, evaluated on blur and
+ * is a required checkbox in the consent block; age comes from #sc-dob, evaluated on blur and
  * on submit, so a mistyped date is always correctable (FORMS-04). The first viewport now carries the
  * offer — eyebrow, headline, one sentence and a CTA — instead of a black overlay (LAND-01), and
- * nothing is hidden at first paint any more (SPEED-02). Every funnel event goes through the site
+ * Every funnel event goes through the site
  * head's window.__thxTrack, the single data layer (INST-02/03/04/06, FORMS-02, UTM-02/04), and the
  * submission carries session + landingPath + utm so a paid click can be credited (UTM-05).
  * Phase 9 accessibility is preserved throughout: error summary, aria-invalid/aria-describedby,
@@ -24,6 +43,16 @@
   window.__thxScouting = true;
   /* theodyx-scouting i18n (Phase 6): every user-facing string goes through T(); dictionaries (en/es/pt/fr) register with the site locale runtime, keyed by <html lang>. sc.safety.body carries the same English sentence in all four dictionaries on purpose: it is legal safety copy and is translated by people, not scripts — the key exists in every locale so a human translation drops straight in. */
   var SCD = {"en": {"sc.lbl.email": "Email", "sc.lbl.firstName": "First name", "sc.lbl.lastName": "Last name", "sc.lbl.dob": "Date of birth", "sc.lbl.platform": "Primary platform", "sc.lbl.country": "Country", "sc.lbl.state": "State / Region", "sc.lbl.city": "City", "sc.lbl.instagram": "Instagram handle", "sc.lbl.tiktok": "TikTok handle", "sc.lbl.youtube": "YouTube channel", "sc.lbl.otherPlatform": "Other platform", "sc.lbl.representedBy": "Represented by", "sc.lbl.notes": "Anything else?", "sc.lbl.link1": "post / video 1", "sc.lbl.link2": "post / video 2", "sc.lbl.link3": "post / video 3", "sc.lbl.pictures": "Your pictures", "sc.ph.email": "you@email.com", "sc.ph.state": "State, province, or region", "sc.ph.city": "Where are you based?", "sc.ph.handle": "yourhandle", "sc.ph.youtube": "@channel or URL", "sc.ph.otherPlatform": "e.g. Substack, Twitch", "sc.ph.representedBy": "Agency / manager", "sc.ph.country": "Select your country…", "sc.ph.select": "Select…", "sc.eyebrow.you": "01 — You", "sc.h2.you": "Tell us who you are", "sc.eyebrow.work": "02 — Work", "sc.h2.work": "Show us your work", "sc.text.work": "Upload the media you’re proudest of — a few links, or a media kit. Optional, but it helps our team get to know you better.", "sc.sec.you": "About you", "sc.sec.work": "Your work", "sc.sec.consent": "Consent and submit", "sc.legend.rep": "Are you currently represented? *", "sc.yes": "Yes", "sc.no": "No", "sc.optional": "(optional)", "sc.drop.upload": "+ Upload", "sc.drop.max": "≤ 10 MB", "sc.drop.toobig": "Files must be 10 MB or smaller.", "sc.drop.another": "Tap to try another", "sc.drop.again": "Tap to try again", "sc.drop.uploading": "Uploading…", "sc.drop.remove": "Remove", "sc.err.uploadnet": "Upload failed. Check your connection.", "sc.err.upload": "Upload failed. Please try again.", "sc.err.email": "Enter a valid email address.", "sc.err.first": "First name is required.", "sc.err.last": "Last name is required.", "sc.err.dob": "Enter your date of birth.", "sc.err.age": "You must be {n} or older to apply.", "sc.err.dobmatch": "Your date of birth doesn’t match the age you gave earlier.", "sc.err.country": "Select your country.", "sc.err.platform": "Select your main platform.", "sc.err.rep": "Let us know if you’re represented.", "sc.err.repby": "Who represents you?", "sc.err.other": "Name the platform.", "sc.err.links": "Enter valid links (https://…).", "sc.err.consent": "Please agree to continue.", "sc.err.turnstile": "Please complete the verification, then submit.", "sc.err.fields": "Please check the highlighted fields.", "sc.err.rate": "Too many attempts. Please try again later, or email {email}.", "sc.submit": "Submit application", "sc.submitting": "Submitting…", "sc.success.eyebrow": "Application received", "sc.success.title": "Thank you.", "sc.success.body": "Your application is in. Thank you for taking the time to apply.", "sc.home": "Return home", "sc.req.note": "Fields marked * are required.", "sc.err.summary": "Please fix the following:", "sc.qr.label": "Scan to continue this application on your phone", "sc.ts.label": "Verification", "sc.err.tsfallback": "Verification isn’t available in this browser — email {email} and we’ll take your application by email.", "sc.a11y.uploading": "Uploading {name} — {pct}%", "sc.a11y.uploaded": "{name} uploaded.", "sc.a11y.removed": "File removed.", "sc.a11y.removeFile": "Remove {name}", "sc.hero.eyebrow": "For creators", "sc.hero.sub": "Theodyx is scouting the next class of creators. Every application is read by a person — and there are no fees, ever.", "sc.hero.cta": "Apply to be scouted", "sc.safety.eyebrow": "Theodyx — Safety", "sc.safety.title": "Your safety comes first.", "sc.safety.body": "Safety is our top priority. Protecting aspiring creatives — including young individuals — from online predators is of the utmost importance. If you would like to confirm an email or communication is from an official Theodyx representative or affiliate, email scouting@theodyx.com and we will be glad to confirm. Theodyx never asks for photos in the nude or lingerie and never requires any kind of payment. If something doesn’t feel right, please don’t hesitate to contact us at scouting@theodyx.com.", "sc.safety.ack": "I have read the safety statement", "sc.err.safety": "Please confirm you have read the safety statement.", "sc.u14.change": "Update your date of birth"}, "es": {"sc.lbl.email": "Correo electrónico", "sc.lbl.firstName": "Nombre", "sc.lbl.lastName": "Apellidos", "sc.lbl.dob": "Fecha de nacimiento", "sc.lbl.platform": "Plataforma principal", "sc.lbl.country": "País", "sc.lbl.state": "Estado / Región", "sc.lbl.city": "Ciudad", "sc.lbl.instagram": "Usuario de Instagram", "sc.lbl.tiktok": "Usuario de TikTok", "sc.lbl.youtube": "Canal de YouTube", "sc.lbl.otherPlatform": "Otra plataforma", "sc.lbl.representedBy": "Representado por", "sc.lbl.notes": "¿Algo más?", "sc.lbl.link1": "publicación / vídeo 1", "sc.lbl.link2": "publicación / vídeo 2", "sc.lbl.link3": "publicación / vídeo 3", "sc.lbl.pictures": "Tus fotos", "sc.ph.email": "tu@correo.com", "sc.ph.state": "Estado, provincia o región", "sc.ph.city": "¿Dónde vives?", "sc.ph.handle": "tuusuario", "sc.ph.youtube": "@canal o URL", "sc.ph.otherPlatform": "p. ej., Substack, Twitch", "sc.ph.representedBy": "Agencia / representante", "sc.ph.country": "Selecciona tu país…", "sc.ph.select": "Selecciona…", "sc.eyebrow.you": "01 — Tú", "sc.h2.you": "Cuéntanos quién eres", "sc.eyebrow.work": "02 — Trabajo", "sc.h2.work": "Muéstranos tu trabajo", "sc.text.work": "Sube el contenido del que estés más orgulloso: unos enlaces o un media kit. Es opcional, pero ayuda a nuestro equipo a conocerte mejor.", "sc.sec.you": "Sobre ti", "sc.sec.work": "Tu trabajo", "sc.sec.consent": "Consentimiento y envío", "sc.legend.rep": "¿Tienes representación actualmente? *", "sc.yes": "Sí", "sc.no": "No", "sc.optional": "(opcional)", "sc.drop.upload": "+ Subir", "sc.drop.max": "≤ 10 MB", "sc.drop.toobig": "Los archivos deben pesar 10 MB o menos.", "sc.drop.another": "Toca para probar con otro", "sc.drop.again": "Toca para intentarlo de nuevo", "sc.drop.uploading": "Subiendo…", "sc.drop.remove": "Quitar", "sc.err.uploadnet": "Error al subir el archivo. Comprueba tu conexión.", "sc.err.upload": "Error al subir el archivo. Inténtalo de nuevo.", "sc.err.email": "Introduce una dirección de correo válida.", "sc.err.first": "El nombre es obligatorio.", "sc.err.last": "Los apellidos son obligatorios.", "sc.err.dob": "Introduce tu fecha de nacimiento.", "sc.err.age": "Debes tener {n} años o más para solicitar.", "sc.err.dobmatch": "Tu fecha de nacimiento no coincide con la edad que indicaste antes.", "sc.err.country": "Selecciona tu país.", "sc.err.platform": "Selecciona tu plataforma principal.", "sc.err.rep": "Dinos si tienes representación.", "sc.err.repby": "¿Quién te representa?", "sc.err.other": "Indica la plataforma.", "sc.err.links": "Introduce enlaces válidos (https://…).", "sc.err.consent": "Acepta para continuar.", "sc.err.turnstile": "Completa la verificación y luego envía.", "sc.err.fields": "Revisa los campos marcados.", "sc.err.rate": "Demasiados intentos. Inténtalo más tarde o escribe a {email}.", "sc.submit": "Enviar solicitud", "sc.submitting": "Enviando…", "sc.success.eyebrow": "Solicitud recibida", "sc.success.title": "Gracias.", "sc.success.body": "Tu solicitud ha sido enviada. Gracias por tomarte el tiempo de presentarla.", "sc.home": "Volver al inicio", "sc.req.note": "Los campos marcados con * son obligatorios.", "sc.err.summary": "Corrige lo siguiente:", "sc.qr.label": "Escanea para continuar esta solicitud en tu teléfono", "sc.ts.label": "Verificación", "sc.err.tsfallback": "La verificación no está disponible en este navegador: escribe a {email} y recibiremos tu solicitud por correo.", "sc.a11y.uploading": "Subiendo {name}: {pct}%", "sc.a11y.uploaded": "{name} se ha subido.", "sc.a11y.removed": "Archivo eliminado.", "sc.a11y.removeFile": "Quitar {name}", "sc.hero.eyebrow": "Para creadores", "sc.hero.sub": "Theodyx está buscando a la próxima generación de creadores. Cada solicitud la lee una persona, y nunca hay comisiones.", "sc.hero.cta": "Solicita ser descubierto", "sc.safety.eyebrow": "Theodyx — Seguridad", "sc.safety.title": "Tu seguridad es lo primero.", "sc.safety.body": "Safety is our top priority. Protecting aspiring creatives — including young individuals — from online predators is of the utmost importance. If you would like to confirm an email or communication is from an official Theodyx representative or affiliate, email scouting@theodyx.com and we will be glad to confirm. Theodyx never asks for photos in the nude or lingerie and never requires any kind of payment. If something doesn’t feel right, please don’t hesitate to contact us at scouting@theodyx.com.", "sc.safety.ack": "He leído la declaración de seguridad", "sc.err.safety": "Confirma que has leído la declaración de seguridad.", "sc.u14.change": "Actualiza tu fecha de nacimiento"}, "pt": {"sc.lbl.email": "E-mail", "sc.lbl.firstName": "Nome", "sc.lbl.lastName": "Sobrenome", "sc.lbl.dob": "Data de nascimento", "sc.lbl.platform": "Plataforma principal", "sc.lbl.country": "País", "sc.lbl.state": "Estado / Região", "sc.lbl.city": "Cidade", "sc.lbl.instagram": "Usuário do Instagram", "sc.lbl.tiktok": "Usuário do TikTok", "sc.lbl.youtube": "Canal do YouTube", "sc.lbl.otherPlatform": "Outra plataforma", "sc.lbl.representedBy": "Representado por", "sc.lbl.notes": "Mais alguma coisa?", "sc.lbl.link1": "publicação / vídeo 1", "sc.lbl.link2": "publicação / vídeo 2", "sc.lbl.link3": "publicação / vídeo 3", "sc.lbl.pictures": "Suas fotos", "sc.ph.email": "voce@email.com", "sc.ph.state": "Estado, província ou região", "sc.ph.city": "Onde você mora?", "sc.ph.handle": "seuusuario", "sc.ph.youtube": "@canal ou URL", "sc.ph.otherPlatform": "ex.: Substack, Twitch", "sc.ph.representedBy": "Agência / empresário", "sc.ph.country": "Selecione seu país…", "sc.ph.select": "Selecione…", "sc.eyebrow.you": "01 — Você", "sc.h2.you": "Conte quem você é", "sc.eyebrow.work": "02 — Trabalho", "sc.h2.work": "Mostre o seu trabalho", "sc.text.work": "Envie o conteúdo de que mais se orgulha: alguns links ou um media kit. É opcional, mas ajuda a nossa equipe a conhecer você melhor.", "sc.sec.you": "Sobre você", "sc.sec.work": "Seu trabalho", "sc.sec.consent": "Consentimento e envio", "sc.legend.rep": "Você tem representação atualmente? *", "sc.yes": "Sim", "sc.no": "Não", "sc.optional": "(opcional)", "sc.drop.upload": "+ Enviar", "sc.drop.max": "≤ 10 MB", "sc.drop.toobig": "Os arquivos devem ter no máximo 10 MB.", "sc.drop.another": "Toque para tentar outro", "sc.drop.again": "Toque para tentar novamente", "sc.drop.uploading": "Enviando…", "sc.drop.remove": "Remover", "sc.err.uploadnet": "Falha no envio. Verifique sua conexão.", "sc.err.upload": "Falha no envio. Tente novamente.", "sc.err.email": "Insira um e-mail válido.", "sc.err.first": "O nome é obrigatório.", "sc.err.last": "O sobrenome é obrigatório.", "sc.err.dob": "Insira sua data de nascimento.", "sc.err.age": "Você precisa ter {n} anos ou mais para se candidatar.", "sc.err.dobmatch": "Sua data de nascimento não corresponde à idade informada antes.", "sc.err.country": "Selecione seu país.", "sc.err.platform": "Selecione sua plataforma principal.", "sc.err.rep": "Diga se você tem representação.", "sc.err.repby": "Quem representa você?", "sc.err.other": "Informe a plataforma.", "sc.err.links": "Insira links válidos (https://…).", "sc.err.consent": "Aceite para continuar.", "sc.err.turnstile": "Conclua a verificação e depois envie.", "sc.err.fields": "Verifique os campos destacados.", "sc.err.rate": "Muitas tentativas. Tente novamente mais tarde ou escreva para {email}.", "sc.submit": "Enviar candidatura", "sc.submitting": "Enviando…", "sc.success.eyebrow": "Candidatura recebida", "sc.success.title": "Obrigado.", "sc.success.body": "Sua candidatura foi enviada. Obrigado por dedicar seu tempo.", "sc.home": "Voltar ao início", "sc.req.note": "Os campos marcados com * são obrigatórios.", "sc.err.summary": "Corrija o seguinte:", "sc.qr.label": "Escaneie para continuar esta candidatura no seu telefone", "sc.ts.label": "Verificação", "sc.err.tsfallback": "A verificação não está disponível neste navegador — escreva para {email} e receberemos sua candidatura por e-mail.", "sc.a11y.uploading": "Enviando {name}: {pct}%", "sc.a11y.uploaded": "{name} enviado.", "sc.a11y.removed": "Arquivo removido.", "sc.a11y.removeFile": "Remover {name}", "sc.hero.eyebrow": "Para criadores", "sc.hero.sub": "A Theodyx está descobrindo a próxima geração de criadores. Cada candidatura é lida por uma pessoa — e nunca há taxas.", "sc.hero.cta": "Candidate-se para ser descoberto", "sc.safety.eyebrow": "Theodyx — Segurança", "sc.safety.title": "Sua segurança vem primeiro.", "sc.safety.body": "Safety is our top priority. Protecting aspiring creatives — including young individuals — from online predators is of the utmost importance. If you would like to confirm an email or communication is from an official Theodyx representative or affiliate, email scouting@theodyx.com and we will be glad to confirm. Theodyx never asks for photos in the nude or lingerie and never requires any kind of payment. If something doesn’t feel right, please don’t hesitate to contact us at scouting@theodyx.com.", "sc.safety.ack": "Li a declaração de segurança", "sc.err.safety": "Confirme que leu a declaração de segurança.", "sc.u14.change": "Atualize sua data de nascimento"}, "fr": {"sc.lbl.email": "E-mail", "sc.lbl.firstName": "Prénom", "sc.lbl.lastName": "Nom", "sc.lbl.dob": "Date de naissance", "sc.lbl.platform": "Plateforme principale", "sc.lbl.country": "Pays", "sc.lbl.state": "État / Région", "sc.lbl.city": "Ville", "sc.lbl.instagram": "Identifiant Instagram", "sc.lbl.tiktok": "Identifiant TikTok", "sc.lbl.youtube": "Chaîne YouTube", "sc.lbl.otherPlatform": "Autre plateforme", "sc.lbl.representedBy": "Représenté par", "sc.lbl.notes": "Autre chose ?", "sc.lbl.link1": "publication / vidéo 1", "sc.lbl.link2": "publication / vidéo 2", "sc.lbl.link3": "publication / vidéo 3", "sc.lbl.pictures": "Vos photos", "sc.ph.email": "vous@email.com", "sc.ph.state": "État, province ou région", "sc.ph.city": "Où êtes-vous basé(e) ?", "sc.ph.handle": "votreidentifiant", "sc.ph.youtube": "@chaîne ou URL", "sc.ph.otherPlatform": "ex. : Substack, Twitch", "sc.ph.representedBy": "Agence / manager", "sc.ph.country": "Sélectionnez votre pays…", "sc.ph.select": "Sélectionnez…", "sc.eyebrow.you": "01 — Vous", "sc.h2.you": "Dites-nous qui vous êtes", "sc.eyebrow.work": "02 — Travail", "sc.h2.work": "Montrez-nous votre travail", "sc.text.work": "Partagez les contenus dont vous êtes le plus fier : quelques liens ou un kit média. Facultatif, mais cela aide notre équipe à mieux vous connaître.", "sc.sec.you": "À propos de vous", "sc.sec.work": "Votre travail", "sc.sec.consent": "Consentement et envoi", "sc.legend.rep": "Êtes-vous actuellement représenté(e) ? *", "sc.yes": "Oui", "sc.no": "Non", "sc.optional": "(facultatif)", "sc.drop.upload": "+ Importer", "sc.drop.max": "≤ 10 Mo", "sc.drop.toobig": "Les fichiers doivent faire 10 Mo ou moins.", "sc.drop.another": "Touchez pour en essayer un autre", "sc.drop.again": "Touchez pour réessayer", "sc.drop.uploading": "Envoi…", "sc.drop.remove": "Retirer", "sc.err.uploadnet": "Échec de l’envoi. Vérifiez votre connexion.", "sc.err.upload": "Échec de l’envoi. Veuillez réessayer.", "sc.err.email": "Saisissez une adresse e-mail valide.", "sc.err.first": "Le prénom est obligatoire.", "sc.err.last": "Le nom est obligatoire.", "sc.err.dob": "Saisissez votre date de naissance.", "sc.err.age": "Vous devez avoir {n} ans ou plus pour postuler.", "sc.err.dobmatch": "Votre date de naissance ne correspond pas à l’âge indiqué précédemment.", "sc.err.country": "Sélectionnez votre pays.", "sc.err.platform": "Sélectionnez votre plateforme principale.", "sc.err.rep": "Indiquez si vous êtes représenté(e).", "sc.err.repby": "Qui vous représente ?", "sc.err.other": "Indiquez la plateforme.", "sc.err.links": "Saisissez des liens valides (https://…).", "sc.err.consent": "Veuillez accepter pour continuer.", "sc.err.turnstile": "Veuillez terminer la vérification, puis envoyer.", "sc.err.fields": "Veuillez vérifier les champs signalés.", "sc.err.rate": "Trop de tentatives. Réessayez plus tard ou écrivez à {email}.", "sc.submit": "Envoyer ma candidature", "sc.submitting": "Envoi…", "sc.success.eyebrow": "Candidature reçue", "sc.success.title": "Merci.", "sc.success.body": "Votre candidature est envoyée. Merci d’avoir pris le temps de postuler.", "sc.home": "Retour à l’accueil", "sc.req.note": "Les champs marqués d’un * sont obligatoires.", "sc.err.summary": "Veuillez corriger les points suivants :", "sc.qr.label": "Scannez pour continuer cette candidature sur votre téléphone", "sc.ts.label": "Vérification", "sc.err.tsfallback": "La vérification n’est pas disponible dans ce navigateur — écrivez à {email} et nous recevrons votre candidature par e-mail.", "sc.a11y.uploading": "Envoi de {name} : {pct} %", "sc.a11y.uploaded": "{name} envoyé.", "sc.a11y.removed": "Fichier supprimé.", "sc.a11y.removeFile": "Retirer {name}", "sc.hero.eyebrow": "Pour les créateurs", "sc.hero.sub": "Theodyx recherche la prochaine génération de créateurs. Chaque candidature est lue par une personne — et il n’y a jamais de frais.", "sc.hero.cta": "Postuler pour être repéré(e)", "sc.safety.eyebrow": "Theodyx — Sécurité", "sc.safety.title": "Votre sécurité avant tout.", "sc.safety.body": "Safety is our top priority. Protecting aspiring creatives — including young individuals — from online predators is of the utmost importance. If you would like to confirm an email or communication is from an official Theodyx representative or affiliate, email scouting@theodyx.com and we will be glad to confirm. Theodyx never asks for photos in the nude or lingerie and never requires any kind of payment. If something doesn’t feel right, please don’t hesitate to contact us at scouting@theodyx.com.", "sc.safety.ack": "J’ai lu la déclaration de sécurité", "sc.err.safety": "Veuillez confirmer que vous avez lu la déclaration de sécurité.", "sc.u14.change": "Modifier votre date de naissance"}};
+  /* 2.2.0 — the age gate's own strings, kept in their own object so the Phase 6 dictionary above
+     stays byte-identical. The safety statement itself is sc.safety.body: legal copy, English in
+     every locale until a person translates it. */
+  var SCD_GATE = {
+    "en": {"sc.gate.eyebrow": "Theodyx \u2014 Safety", "sc.gate.title": "Before you apply", "sc.gate.dob": "Your date of birth", "sc.gate.go": "Continue", "sc.gate.note": "You must be {n} or older to apply directly. We use your date of birth only to check that."},
+    "es": {"sc.gate.eyebrow": "Theodyx \u2014 Seguridad", "sc.gate.title": "Antes de solicitar", "sc.gate.dob": "Tu fecha de nacimiento", "sc.gate.go": "Continuar", "sc.gate.note": "Debes tener {n} a\u00f1os o m\u00e1s para solicitar directamente. Solo usamos tu fecha de nacimiento para comprobarlo."},
+    "pt": {"sc.gate.eyebrow": "Theodyx \u2014 Seguran\u00e7a", "sc.gate.title": "Antes de se candidatar", "sc.gate.dob": "Sua data de nascimento", "sc.gate.go": "Continuar", "sc.gate.note": "Voc\u00ea precisa ter {n} anos ou mais para se candidatar diretamente. Usamos sua data de nascimento apenas para verificar isso."},
+    "fr": {"sc.gate.eyebrow": "Theodyx \u2014 S\u00e9curit\u00e9", "sc.gate.title": "Avant de postuler", "sc.gate.dob": "Votre date de naissance", "sc.gate.go": "Continuer", "sc.gate.note": "Vous devez avoir {n} ans ou plus pour postuler directement. Nous utilisons votre date de naissance uniquement pour le v\u00e9rifier."}
+  };
+  for (var __gl in SCD_GATE) { if (!SCD[__gl]) SCD[__gl] = {}; for (var __gk in SCD_GATE[__gl]) SCD[__gl][__gk] = SCD_GATE[__gl][__gk]; }
   var __I = window.__thxI18n; if (__I) { for (var __lc in SCD) __I.add(__lc, SCD[__lc]); }
   function T(k, v) { if (__I && __I.t) return __I.t(k, v); var s = SCD.en[k] || k; if (v) for (var p in v) s = s.split('{' + p + '}').join(v[p]); return s; }
 
@@ -82,7 +111,14 @@
   /* state */
   var gates = (function () {
     var g = loadJSON(SS_GATES) || {};
-    return { trust: !!g.trust, ageResolved: !!g.ageResolved, eligible: !!g.eligible, age: g.age == null ? null : g.age };
+    /* 2.2.0 adds gatePassed + dob: the age dialog has been answered in THIS session (either way),
+       so a reload does not re-ask and a new session does. trust stays what it always was — the
+       inline safety checkbox — and the gate deliberately does not pre-tick it. */
+    return {
+      trust: !!g.trust, ageResolved: !!g.ageResolved, eligible: !!g.eligible,
+      age: g.age == null ? null : g.age,
+      gatePassed: !!g.gatePassed, dob: typeof g.dob === 'string' ? g.dob : ''
+    };
   })();
   /* The page head carries <style id="sc-gate-preboot"> plus a two-line inline script reading the
    * very same SS_GATES keys. Phase 10 inverts the default: nothing is hidden at first paint, and the
@@ -91,10 +127,27 @@
   function rootClass() { return (gates.ageResolved && !gates.eligible) ? 'sc-u14' : ''; }
   function stampRoot() {
     var d = document.documentElement, c = rootClass();
-    d.classList.remove('sc-open', 'sc-gated', 'sc-done');   /* 1.x leftovers, if any linger */
+    d.classList.remove('sc-open', 'sc-done');
     if (c) d.classList.add(c); else d.classList.remove('sc-u14');
+    /* 2.2.0: sc-gated means "the age dialog has not been answered in this session". It hides the
+       three form sections, so the form cannot be seen or reached while the dialog is up. */
+    if (gates.gatePassed) d.classList.remove('sc-gated'); else d.classList.add('sc-gated');
   }
   stampRoot();
+
+  /* 2.2.0 — the gate goes up as early as this file runs, not at DOMContentLoaded and not at the end
+   * of init(): the stylesheet and the dialog are both inserted in this same synchronous task, so the
+   * next paint after the script executes already shows the dialog over a form that is both hidden
+   * (html.sc-gated) and inert. The page <head> can hide it half a beat earlier still — see the
+   * sc-gate-preboot note in injectCSS(). */
+  function bootGate() {
+    if (gates.gatePassed) return;
+    injectCSS();
+    if (document.body) openAgeGate();
+    else document.addEventListener('DOMContentLoaded', function () { if (!gates.gatePassed) openAgeGate(); });
+  }
+  /* the call itself is the last statement in this file, below — the gate's own `var`s have to have
+     been initialised before it runs, and it still runs in this same synchronous task, before init(). */
 
   var mediaKitKey;            // string | undefined
   var sampleKeys = [undefined, undefined, undefined];
@@ -152,6 +205,224 @@
     return document.activeElement === el;
   }
 
+  /* ------------------------------------------------- age gate (2.2.0)
+   * One dialog, asked before anything else on the page can be touched. It is a real modal:
+   * role="dialog" aria-modal="true", named by its own <h2>, focus trapped inside it, every other
+   * <body> child inert, the scroll locked, and Escape deliberately unbound — an age check is not a
+   * thing you dismiss. The safety statement is stated inside it, cloned from the page's own copy,
+   * so the question is never answered by someone who has not read it. Same setInert()/focus-move/
+   * restore shape as the mobile nav sheet in theodyx-nav.js and as the 1.10.0 gates this replaces. */
+  var gateInerted = [], activeGate = null, gateFocusPrev = null, gateKeysBound = false;
+  var FOCUSABLE = 'a[href],button:not([disabled]),select:not([disabled]),textarea:not([disabled]),input:not([disabled]):not([type="hidden"]),[tabindex]:not([tabindex="-1"])';
+  var HAS_INERT = ('inert' in document.documentElement);
+
+  function isVisible(el) { return !!(el && (el.offsetWidth || el.offsetHeight || (el.getClientRects && el.getClientRects().length))); }
+  function lockScroll(lock) { try { document.body.style.overflow = lock ? 'hidden' : ''; } catch (e) {} }
+  function gateFocusables(gate) {
+    return qsa(FOCUSABLE, gate).filter(function (el) { return isVisible(el) && !el.hasAttribute('inert'); });
+  }
+  /* inert is what actually holds the page back: it blocks pointer and keyboard alike and takes the
+   * subtree out of the accessibility tree on its own. aria-hidden is added only where inert is not
+   * supported — stating both on a modern engine is exactly what trips axe's aria-hidden-focus. */
+  function setGateInert(gate) {
+    releaseGateInert();
+    var n = document.body.firstElementChild;
+    while (n) {
+      if (n !== gate && !n.contains(gate) && !/^(SCRIPT|STYLE|LINK|TEMPLATE|NOSCRIPT)$/.test(n.tagName) && !n.hasAttribute('inert')) {
+        n.setAttribute('inert', '');
+        if (!HAS_INERT) n.setAttribute('aria-hidden', 'true');
+        gateInerted.push(n);
+      }
+      n = n.nextElementSibling;
+    }
+  }
+  function releaseGateInert() {
+    gateInerted.forEach(function (n) { n.removeAttribute('inert'); n.removeAttribute('aria-hidden'); });
+    gateInerted = [];
+  }
+  /* Tab guard: inert already keeps the rest of the page out of the sequence in modern engines,
+   * this makes the wrap deterministic (and covers browsers without inert). Escape is not handled,
+   * and no other key is: the only way out of this dialog is to answer it. */
+  function onGateKeydown(e) {
+    if (!activeGate || e.key !== 'Tab') return;
+    var f = gateFocusables(activeGate);
+    if (!f.length) { e.preventDefault(); focusEl(activeGate); return; }
+    var first = f[0], last = f[f.length - 1], a = document.activeElement;
+    if (!activeGate.contains(a)) { e.preventDefault(); focusEl(e.shiftKey ? last : first); return; }
+    if (e.shiftKey && (a === first || a === activeGate)) { e.preventDefault(); focusEl(last); }
+    else if (!e.shiftKey && a === last) { e.preventDefault(); focusEl(first); }
+  }
+  function onGateFocusIn(e) {
+    if (!activeGate || activeGate.contains(e.target)) return;
+    var f = gateFocusables(activeGate);
+    focusEl(f[0] || activeGate);
+  }
+  function bindGateKeys() {
+    if (gateKeysBound) return; gateKeysBound = true;
+    document.addEventListener('keydown', onGateKeydown, true);
+    document.addEventListener('focusin', onGateFocusIn, true);
+  }
+  function openGate(gate, prefer) {
+    if (!gate || activeGate === gate) return;
+    if (!activeGate) gateFocusPrev = document.activeElement;
+    activeGate = gate;
+    if (!gate.hasAttribute('tabindex')) gate.setAttribute('tabindex', '-1');
+    gate.removeAttribute('aria-hidden'); gate.removeAttribute('inert');
+    setGateInert(gate);
+    bindGateKeys();
+    focusEl(prefer && isVisible(prefer) ? prefer : gate);
+  }
+  /* Only moves focus if a gate was actually open, so an ordinary reload of an already-cleared
+   * session never steals focus from the top of the document. */
+  function closeGates(moveFocusTo) {
+    var had = !!activeGate;
+    activeGate = null;
+    releaseGateInert();
+    if (!had) return;
+    if (moveFocusTo && isVisible(moveFocusTo)) focusEl(moveFocusTo);
+    else if (gateFocusPrev && document.contains(gateFocusPrev) && isVisible(gateFocusPrev)) focusEl(gateFocusPrev);
+    gateFocusPrev = null;
+  }
+
+  /* The statement, word for word: the page's native #sc-gate-safety copy is cloned (mailto links and
+   * all) before buildSafety() moves the original into the inline #sc-safety section. */
+  function gateSafetyBody() {
+    var old = $('sc-gate-safety'), body = old && qs('.sc-gate-body', old);
+    if (body) { var c = body.cloneNode(true); c.className = 'sc-gate-body'; c.removeAttribute('id'); return c; }
+    var p = document.createElement('p'); p.className = 'sc-gate-body'; p.textContent = T('sc.safety.body'); return p;
+  }
+
+  /* The native page still ships an (empty, display:none) #sc-gate-age div left over from 1.x, and the
+   * page's own <style id="sc-native-css"> block still positions it. Reuse that node — same id, same
+   * overlay treatment — and rebuild its contents around a date field instead of the old age select. */
+  function mountAgeGate() {
+    if (!document.body) return null;
+    var g = $('sc-gate-age');
+    if (g && g.dataset.thxGate) return g;
+    if (!g) { g = document.createElement('div'); g.id = 'sc-gate-age'; }
+    if (g.parentNode !== document.body) document.body.appendChild(g);   /* a direct child of <body>, so setGateInert() can reach its siblings */
+    while (g.firstChild) g.removeChild(g.firstChild);
+    g.dataset.thxGate = '1';
+    g.setAttribute('role', 'dialog');
+    g.setAttribute('aria-modal', 'true');
+    g.removeAttribute('aria-label');                 /* the heading is the name, not a one-word label */
+    g.setAttribute('aria-labelledby', 'sc-gate-title');
+    g.setAttribute('tabindex', '-1');
+
+    var form = document.createElement('form');
+    form.className = 'sc-gate-inner sc-gate-form';   /* not .sc-form: neutralizeForms() must not touch it */
+    form.setAttribute('novalidate', '');
+
+    var eb = document.createElement('span'); eb.className = 'sc-gate-eyebrow'; eb.textContent = T('sc.gate.eyebrow');
+    var h = document.createElement('h2'); h.className = 'sc-gate-h'; h.id = 'sc-gate-title'; h.textContent = T('sc.gate.title');
+    form.appendChild(eb); form.appendChild(h);
+    form.appendChild(gateSafetyBody());
+
+    var field = document.createElement('div'); field.className = 'sc-gate-field';
+    var lab = document.createElement('label'); lab.className = 'sc-label'; lab.setAttribute('for', 'sc-gate-dob');
+    lab.textContent = T('sc.gate.dob');
+    var inp = document.createElement('input');
+    inp.type = 'date'; inp.id = 'sc-gate-dob'; inp.className = 'sc-gate-input';
+    inp.setAttribute('autocomplete', 'bday');
+    inp.setAttribute('aria-describedby', 'sc-gate-msg sc-gate-note');
+    var ty = new Date();
+    inp.max = ty.getFullYear() + '-' + String(ty.getMonth() + 1).padStart(2, '0') + '-' + String(ty.getDate()).padStart(2, '0');
+    inp.min = (ty.getFullYear() - 100) + '-01-01';
+    field.appendChild(lab); field.appendChild(inp);
+    form.appendChild(field);
+
+    /* role="status" and empty from the start, so the live region exists before it has anything to say */
+    var msg = document.createElement('p'); msg.id = 'sc-gate-msg'; msg.className = 'sc-gate-err';
+    msg.setAttribute('role', 'status');
+    form.appendChild(msg);
+
+    var go = document.createElement('button');
+    go.type = 'submit'; go.id = 'sc-gate-age-go'; go.className = 'sc-gate-btn'; go.textContent = T('sc.gate.go');
+    form.appendChild(go);                             /* never disabled: an empty submit has to be able to explain itself */
+
+    var note = document.createElement('p'); note.id = 'sc-gate-note'; note.className = 'sc-gate-note';
+    note.textContent = T('sc.gate.note', { n: MIN_AGE });
+    form.appendChild(note);
+
+    g.appendChild(form);
+    on(form, 'submit', function (e) { e.preventDefault(); gateSubmit(); });
+    on(inp, 'input', function () {
+      if (inp.getAttribute('aria-invalid') !== 'true') return;
+      inp.removeAttribute('aria-invalid'); inp.classList.remove('is-bad'); gateMsg('');
+    });
+    return g;
+  }
+
+  function gateMsg(text) {
+    var m = $('sc-gate-msg'); if (!m) return;
+    m.textContent = text || '';
+    if (text) m.classList.add('is-on'); else m.classList.remove('is-on');
+  }
+
+  function openAgeGate() {
+    var g = mountAgeGate(); if (!g) return;
+    var d = document.documentElement;
+    d.classList.add('sc-gated'); d.classList.remove('sc-inelig');
+    g.classList.add('is-open');
+    g.style.removeProperty('display');
+    lockScroll(true);
+    gateMsg('');
+    openGate(g, null);   /* the dialog itself takes focus, so its heading and the safety copy are read out */
+  }
+
+  function closeAgeGate() {
+    var g = $('sc-gate-age');
+    if (g) { g.classList.remove('is-open'); g.style.display = 'none'; }
+    document.documentElement.classList.remove('sc-gated');
+    lockScroll(false);
+  }
+
+  function gateSubmit() {
+    var inp = $('sc-gate-dob'); if (!inp) return;
+    var v = String(inp.value || '').trim();
+    var a = /^\d{4}-\d{2}-\d{2}$/.test(v) ? ageFromDob(v) : null;
+    if (a == null || a < 0 || a > 120) {              /* empty, unparsed, in the future, or not a lifetime */
+      inp.setAttribute('aria-invalid', 'true'); inp.classList.add('is-bad');
+      gateMsg(T('sc.err.dob'));
+      focusEl(inp);
+      return;
+    }
+    inp.removeAttribute('aria-invalid'); inp.classList.remove('is-bad'); gateMsg('');
+    gates.age = a; gates.eligible = a >= MIN_AGE; gates.ageResolved = true; gates.gatePassed = true; gates.dob = v;
+    persistGates();
+    if (gates.eligible) { trk('age_eligible', null, true); trk('age_acknowledged', null, true); passGate(v); }
+    else { trk('age_ineligible', null, true); blockGate(); }
+  }
+
+  /* 14+: the dialog goes, the date it collected becomes #sc-dob's value (asking twice would be rude
+   * and would give the two answers a chance to disagree), and focus lands on the first field. */
+  function passGate(dob) {
+    closeAgeGate();
+    var d = document.documentElement;
+    d.classList.remove('sc-u14', 'sc-inelig');
+    bootU14 = false;
+    var f = $('sc-dob');
+    if (f) { f.value = dob; persistForm(); }
+    inlineNote();
+    evaluateAge(false);       /* silent: age_eligible has already been emitted by gateSubmit() */
+    closeGates($('sc-email') || $('sc-form-you'));
+  }
+
+  /* Under 14: the existing locked state, exactly as a returning under-14 session gets it. */
+  function blockGate() {
+    closeAgeGate();
+    document.documentElement.classList.remove('sc-inelig');
+    bootU14 = true;
+    var note = u14Note();
+    restoreU14Home();         /* html.sc-u14 hides #sc-form-consent, so the note cannot stay parked inside it */
+    stampRoot();              /* -> html.sc-u14: the form sections go, #sc-gate-u14 stands in their place */
+    var h = note && (qs('.sc-h2', note) || qs('h2', note));
+    closeGates(h || note);
+    /* scroll to the note, not to the top: it stands where the form used to, and the hero above it
+       still says "apply". The note is the answer, so the note is what the page should be showing. */
+    if (h || note) focusEl(h || note, true);
+  }
+
   /* --------------------------------------------------------------- hero
    * LAND-01: the first viewport has to answer "what is this and what do I do next". The native
    * page ships <section class="sc-hero"><h1 class="sc-hero-title"> and nothing else, so the eyebrow,
@@ -205,8 +476,9 @@
     if (body) { body.classList.remove('sc-gate-body'); body.classList.add('sc-safety-body'); sec.appendChild(body); }
     else { var p = document.createElement('p'); p.className = 'sc-safety-body'; p.textContent = T('sc.safety.body'); sec.appendChild(p); }
     host.parentNode.insertBefore(sec, host);
-    /* the overlays are retired, not merely hidden — nothing should be able to reveal them again */
-    ['sc-gate-safety', 'sc-gate-age'].forEach(function (id) { var n = $(id); if (n && n.parentNode) n.parentNode.removeChild(n); });
+    /* 2.2.0: only the safety overlay is retired — its copy now lives here and (cloned) inside the
+       age dialog. #sc-gate-age is that dialog's own node and is left exactly where it is. */
+    var oldSafety = $('sc-gate-safety'); if (oldSafety && oldSafety.parentNode) oldSafety.parentNode.removeChild(oldSafety);
   }
 
   /* the acknowledgement, as a required checkbox that blocks submit exactly like the consent box */
@@ -236,8 +508,9 @@
   }
 
   /* ----------------------------------------------------------------- age
-   * FORMS-04: #sc-dob is the single source of truth. There is no second answer to contradict it, so
-   * there is nothing to be locked out by — editing the date re-evaluates and the page re-opens.
+   * FORMS-04: #sc-dob is still the single source of truth once the gate has cleared — the dialog
+   * writes into it rather than keeping a second answer beside it, so the two can never disagree, and
+   * editing the date re-evaluates and the page re-opens.
    * Two ineligible states, deliberately different:
    *   html.sc-u14     the tab already answered "under 14" on an earlier load. The preboot stamps it
    *                   before paint, the form sections never render, and #sc-gate-u14 stands in their
@@ -246,10 +519,14 @@
    *                   only the submit row is replaced by the same note, so the date stays editable. */
   var bootU14 = document.documentElement.classList.contains('sc-u14');
 
+  var u14Home = null;
   function u14Note() {
     var note = $('sc-gate-u14'); if (!note) return null;
     if (note.dataset.thxU14) return note;
     note.dataset.thxU14 = '1';
+    /* where the page put it. inlineNote() parks it inside #sc-form-consent, and html.sc-u14 hides
+       that whole section — so the under-14 branch has to be able to put it back. */
+    u14Home = { parent: note.parentNode, next: note.nextSibling, cls: note.className };
     var h = qs('.sc-h2', note) || qs('h2', note);
     if (h && !h.hasAttribute('tabindex')) h.setAttribute('tabindex', '-1');
     var back = document.createElement('button');
@@ -266,13 +543,26 @@
     var anchor = $('sc-submit');
     if (anchor && anchor.parentNode) { anchor.parentNode.insertBefore(note, anchor); note.dataset.thxInline = '1'; note.className = 'sc-u14-inline sc-app-sans'; }
   }
+  function restoreU14Home() {
+    var note = $('sc-gate-u14'); if (!note || !u14Home || !u14Home.parent) return;
+    if (note.parentNode !== u14Home.parent) {
+      u14Home.parent.insertBefore(note, (u14Home.next && u14Home.next.parentNode === u14Home.parent) ? u14Home.next : null);
+    }
+    note.className = u14Home.cls;
+    note.removeAttribute('data-thx-inline');
+  }
+  /* 2.2.0: the way back in is the gate, not an unguarded form. The stored answer is dropped, the
+     date field is emptied, and the dialog asks again. */
   function unlockU14() {
-    gates.ageResolved = false; gates.eligible = false; gates.age = null; persistGates();
-    document.documentElement.classList.remove('sc-u14');
+    gates.ageResolved = false; gates.eligible = false; gates.age = null; gates.gatePassed = false; gates.dob = '';
+    persistGates();
+    document.documentElement.classList.remove('sc-u14', 'sc-inelig');
     bootU14 = false;
-    inlineNote();
-    var d = $('sc-dob'); if (d) { d.value = ''; focusEl(d, true); }
-    initTurnstile();
+    var d = $('sc-dob'); if (d) { d.value = ''; persistForm(); }
+    restoreU14Home();
+    var gi = $('sc-gate-dob');
+    if (gi) { gi.value = ''; gi.removeAttribute('aria-invalid'); gi.classList.remove('is-bad'); }
+    openAgeGate();
   }
 
   function dobAge() { var v = val('sc-dob'); return /^\d{4}-\d{2}-\d{2}$/.test(v) ? ageFromDob(v) : null; }
@@ -1010,11 +1300,22 @@
       '.sc-consent-text{font-size:15px;line-height:1.6;}',
       '.sc-consent-text a{color:var(--sc-ink);text-decoration:underline;text-underline-offset:2px;}',
       '#sc-turnstile{margin-top:28px;}',
-      /* Mirror of <style id="sc-gate-preboot"> in the page head. Phase 10 inverts it: the offer and
+      /* Mirror of <style id="sc-gate-preboot"> in the page head. Phase 10 inverted it: the offer and
          the form are the default state, and the root class only ever takes something away. The
          html:not() prefix is not decoration — the page's own native <style> block sits in the body,
          after this sheet, and declares #sc-form-*{display:none}, so the default has to out-specify
-         it rather than merely follow it. */
+         it rather than merely follow it.
+         2.2.0 adds a second root class, html.sc-gated (stated at the very end of this sheet), which
+         hides the same three sections while the age dialog is unanswered. This file stamps it in its
+         first synchronous task, which is as early as a deferred script can act — but the page has
+         already painted by then on a slow connection. To close that window the page head needs one
+         extra rule in <style id="sc-gate-preboot">:
+             html.sc-gated #sc-form-you,html.sc-gated #sc-form-work,html.sc-gated #sc-form-consent{display:none!important}
+         and one extra line in the two-line preboot script beside it, which already reads the same
+         sessionStorage key:
+             if(!g.gatePassed)document.documentElement.classList.add('sc-gated');
+         That pair fails closed: if this file never loads, the form stays hidden and nobody reaches
+         it without an age check — which for an age check is the right way round. */
       'html:not(.sc-u14) #sc-form-you,html:not(.sc-u14) #sc-form-work,html:not(.sc-u14) #sc-form-consent{display:block;}',
       'html.sc-u14 #sc-form-you,html.sc-u14 #sc-form-work,html.sc-u14 #sc-form-consent{display:none;}',
       'html.sc-u14 #sc-gate-u14{display:block;}',
@@ -1203,6 +1504,53 @@
       /* forced colours drop author backgrounds, so the drag state needs a system-colour outline */
       '@media (forced-colors: active){',
       '.sc-drop.is-over{outline:3px solid Highlight;outline-offset:-5px;}',
+      '}',
+
+      /* ------------------------- 2.2.0: the age-verification gate -------------------------
+         Last in the sheet on purpose: html.sc-gated has to out-rank the open-by-default rule
+         stated above (and the identical one in the page head's <style id="sc-gate-preboot">),
+         and #sc-gate-age.is-open has to out-rank the page's own <style id="sc-native-css">
+         embed, which sits in the body and declares #sc-gate-age{display:none}. */
+      'html.sc-gated #sc-form-you,html.sc-gated #sc-form-work,html.sc-gated #sc-form-consent{display:none!important;}',
+      '#sc-gate-age{display:none;}',
+      '#sc-gate-age.is-open{display:flex;position:fixed;inset:0;z-index:9500;overflow-y:auto;align-items:flex-start;justify-content:center;padding:24px 20px;background:rgba(10,10,12,0.82);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);color:var(--sc-paper);font-family:"Objectivity","Archivo",sans-serif;}',
+      '#sc-gate-age:focus{outline:none;}',
+      /* margin:auto centres the card when there is room and refuses to clip its top when there is
+         not — which align-items:center would do on a 390 px viewport. */
+      '#sc-gate-age .sc-gate-inner{margin:auto;width:100%;max-width:560px;padding:clamp(30px,5vw,44px);background:var(--sc-ink);border:1px solid rgba(242,241,236,0.22);text-align:start;}',
+      '#sc-gate-age.is-open .sc-gate-inner{animation:sc-gate-in 240ms var(--sc-ease,cubic-bezier(.22,1,.36,1)) both;}',
+      '@keyframes sc-gate-in{from{opacity:0;transform:translate3d(0,12px,0) scale(.985);}to{opacity:1;transform:none;}}',
+      '#sc-gate-age .sc-gate-eyebrow{margin-bottom:16px;}',
+      '#sc-gate-age .sc-gate-h{font-size:clamp(26px,3.4vw,38px);margin:0;}',
+      '#sc-gate-age .sc-gate-body{font-size:15px;line-height:1.65;margin-top:20px;}',
+      '.sc-gate-field{max-width:320px;margin:30px 0 0;}',
+      '.sc-gate-field .sc-label{display:block;font-family:"Space Mono","Mono",ui-monospace,monospace;font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:var(--sc-paper)!important;margin-bottom:8px;}',
+      '.sc-gate-input{width:100%;background:transparent;border:0;border-bottom:1px solid rgba(242,241,236,0.55);border-radius:0;padding:8px 0 10px;font-family:inherit;font-size:17px;color:var(--sc-paper);color-scheme:dark;-webkit-appearance:none;appearance:none;transition:border-color 160ms var(--sc-ease,cubic-bezier(.22,1,.36,1));}',
+      '.sc-gate-input:focus{outline:none;border-bottom-color:var(--sc-paper);border-bottom-width:1.5px;}',
+      '.sc-gate-input:focus-visible{outline:2px solid var(--sc-paper);outline-offset:4px;}',
+      '.sc-gate-input.is-bad{border-bottom-color:#FFB4AE;}',
+      '#sc-gate-msg{display:none;margin:14px 0 0;font-size:14px;line-height:1.5;color:#FFB4AE;}',
+      '#sc-gate-msg.is-on{display:block;}',
+      '#sc-gate-age .sc-gate-btn{margin-top:28px;}',
+      '#sc-gate-age .sc-gate-btn:focus-visible{outline:2px solid var(--sc-paper);outline-offset:3px;}',
+      '#sc-gate-age .sc-gate-note{margin-top:20px;}',
+      /* the statement is long and it is not going to be shortened — it is the point of the dialog.
+         On a phone it is set a step tighter so the date field is one short scroll away, not two. */
+      '@media(max-width:480px){',
+      '#sc-gate-age.is-open{padding:16px 12px;}',
+      '#sc-gate-age .sc-gate-inner{padding:26px 22px;}',
+      '#sc-gate-age .sc-gate-body{font-size:14px;line-height:1.6;margin-top:16px;}',
+      '.sc-gate-field{margin-top:24px;}',
+      '}',
+      '@media (prefers-reduced-motion: reduce){',
+      '#sc-gate-age.is-open .sc-gate-inner{animation:none;}',
+      '.sc-gate-input{transition-duration:1ms!important;}',
+      '}',
+      '@media (forced-colors: active){',
+      '#sc-gate-age.is-open{background:Canvas;-webkit-backdrop-filter:none;backdrop-filter:none;}',
+      '#sc-gate-age .sc-gate-inner{background:Canvas;border:1px solid CanvasText;}',
+      '#sc-gate-age .sc-gate-eyebrow,#sc-gate-age .sc-gate-note,#sc-gate-msg{color:CanvasText;}',
+      '.sc-gate-input{border-bottom-color:CanvasText;color:CanvasText;}',
       '}'
     ].join('\n');
     var style = document.createElement('style');
@@ -1274,7 +1622,9 @@
    * head's landing_view already carries path=/scouting. */
   function wireFunnel() {
     document.addEventListener('input', function (e) {
-      var t = e.target; if (t && t.id && t.id.indexOf('sc-') === 0) trk('form_started', null, true);
+      var t = e.target; if (!t || !t.id || t.id.indexOf('sc-') !== 0) return;
+      if (t.id.indexOf('sc-gate-') === 0) return;   /* 2.2.0: answering the age dialog is not a form start */
+      trk('form_started', null, true);
     }, true);
   }
 
@@ -1308,10 +1658,22 @@
     wireTurnstileOnFocus();
     u14Note();
     if (bootU14) return;      /* the locked screen owns the page until "Update your date of birth" */
+    if (!gates.gatePassed) {
+      /* 2.2.0: the dialog went up before init() and owns focus until it is answered. It is re-opened
+         idempotently here, and the inert sweep is re-run because ensureDom() may have appended
+         #sc-success to <body> after the first sweep walked it. */
+      openAgeGate();
+      if (activeGate) setGateInert(activeGate);
+      return;
+    }
+    /* a session that already cleared the gate: the date it gave is the form's date */
+    if (gates.dob && !val('sc-dob')) { var dd = $('sc-dob'); if (dd) { dd.value = gates.dob; persistForm(); } }
     inlineNote();
     evaluateAge(false);       /* silent: re-apply a stored under-14 answer without shouting at anyone */
     /* 2.0.1: the QR library loads only once the success panel is shown (Phase 8 budget: nothing before success) */
   }
+
+  bootGate();   /* the dialog goes up here, in this same task, before init() touches anything */
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
