@@ -1,17 +1,22 @@
-/*! theodyx-nav.js v4.10.0 (2026-09-05) — behaviours for the clear liquid-glass nav (#thx-nav).
+/*! theodyx-nav.js v4.10.1 (2026-09-05) — behaviours for the clear liquid-glass nav (#thx-nav).
  * One unanimous ink (every word, the logo and the burger flip together between pure white and pure black, chosen
- * from what is behind all of them: the ink whose worst word still reads best, with hysteresis and a dwell). 4.9.1:
- * the glass itself never changes - the per-word/menu plates and the legibility scrim of 4.7-4.8 are gone; only the
- * words change colour (owner decision 2026-09-05); 4.9.2: the majority flip is no longer vetoed by the maximin hysteresis; 4.9.3: the first election is never gated by the dwell (no white-on-white flash at load); 4.9.4: a flip vetoed by the dwell is re-checked when the dwell expires. Whole-surface lens (continuous refraction profile from the pill geometry, per-
- * channel dispersion, geometry-lit specular rim, colour bleed; Chromium, capability + frame-budget gated), pointer
- * highlight with a spring, scroll condense, accessible mobile sheet (focus trap, Escape, inert, iOS-safe scroll lock), skip link
- * target, legacy first-section clearance, conversion hooks. No dependencies. */
+ * from what is behind all of them: the ink whose worst word still reads best, with hysteresis and a dwell). Owner
+ * decisions (2026-09-05): the glass itself never changes - no plates, no scrim, no frost, no blur; only the words
+ * change colour. 4.9.2-4.9.4: the majority flip is not vetoed by the hysteresis ratio, the first election is never
+ * gated by the dwell, and a flip the dwell vetoed is re-checked when the dwell expires. 4.10.0: light effects up
+ * (dispersion .55, specular .8, bleed 1.0 at 26 px) and the lens takes the scene's true colours (saturate 1.1, was 1.9 -
+ * the warm hero read as a neon slab); phones get their own lens profile (no centre magnification, a whisper of inward
+ * bevel) because the old one refracted body text into a doubled mess under the mark and pulled the section above the
+ * bar into the pill. Whole-surface lens (continuous refraction profile from the pill geometry, per-channel dispersion,
+ * geometry-lit specular rim, colour bleed; Chromium, capability + frame-budget gated), pointer highlight with a spring,
+ * scroll condense, accessible mobile sheet (focus trap, Escape, inert, iOS-safe scroll lock), skip link target, legacy
+ * first-section clearance, conversion hooks. No dependencies. */
 (function () {
   'use strict';
   if (window.__thxNav) return;
   var nav = document.getElementById('thx-nav');
   if (!nav) return;
-  var API = window.__thxNav = { v: '4.10.0' };
+  var API = window.__thxNav = { v: '4.10.1' };
   var I18N = window.__thxI18n; function T(k) { return (I18N && I18N.t) ? I18N.t(k) : ({ 'nav.open': 'Open menu', 'nav.close': 'Close menu' })[k] || k; } /* Phase 6: locale runtime (nv2pagesf) keyed by <html lang> */
   var doc = document.documentElement, body = document.body;
   var glass = nav.querySelector('.thx-nav-glass');
@@ -212,7 +217,7 @@
         /* frames unavailable (no CORS on the media, or not loaded yet): use the poster as a stand-in for the scene */
         var ps = el.poster || el.getAttribute('poster'); if (!ps) return null;
         var pim = corsImgs[ps];
-        if (!pim) pim = corsLoad(ps, reink);
+        if (!pim) pim = corsLoad(ps, reinkFresh);
         if (pim.__thxFail || !pim.complete || !pim.naturalWidth) return null;
         try { var smp = smallCopy(pim, pim.naturalWidth, pim.naturalHeight, true); if (!smp || smp === 'tainted') return null; if (!drawRegion(smp.c, smp.w, smp.h, mr, r, fit)) return null; var st = readPixels(); st.sd = Math.max(st.sd, 0.12); return st; } catch (e) { return null; }
       }
@@ -225,7 +230,7 @@
         var im = el;
         if (!el.crossOrigin && new URL(src, location.href).origin !== location.origin) {
           im = corsImgs[src];
-          if (!im) im = corsLoad(src, reink);
+          if (!im) im = corsLoad(src, reinkFresh);
           if (im.__thxFail || !im.complete || !im.naturalWidth) return null;
         } else if (!el.complete || !el.naturalWidth) return null;
         var smi = smallCopy(im, im.naturalWidth, im.naturalHeight, true);
@@ -251,7 +256,7 @@
     if (!sctx || el.__thxTainted) return null;
     var m = bgi.match(/url\((['"]?)(.*?)\1\)/); if (!m) return null;
     var src = m[2]; var im = corsImgs[src];
-    if (!im) im = corsLoad(src, reink);
+    if (!im) im = corsLoad(src, reinkFresh);
     if (im.__thxFail || !im.complete || !im.naturalWidth) return null;
     var key = Math.round(r.left) + ':' + Math.round(r.width);
     var per = tickCache.get(el); if (!per) { per = {}; tickCache.set(el, per); }
@@ -412,6 +417,10 @@
   var cal = function (L) { return Math.min(1, L * 1.3 + 0.01); }; /* calibrated against rendered pixels through the glass: sampler underreads ~12% and the glass lifts the backdrop ~15% */
   function contrast(L, which) { return which === 'light' ? 1.05 / (L + 0.05) : (L + 0.05) / 0.05; }
   nav.setAttribute('data-ink', ink);
+  /* 4.10.1: a media copy (poster / CORS image / first video frame) arriving is new information - the election that ran without it
+   * was blind, so it is not protected by the dwell (an article hero used to wear white words for ~1.2 s after load while the
+   * copy loaded, the flip to black being vetoed and re-checked). */
+  function reinkFresh() { inkT = -1e9; reink(); }
   function reink() {
     if (nav.getAttribute('data-open') === 'true') return;
     var t0 = now();
@@ -504,7 +513,7 @@
   window.addEventListener('thx-nav-retone', reink);
   document.addEventListener('DOMContentLoaded', reink);
   window.addEventListener('load', function () { reink(); setTimeout(reink, 600); setTimeout(reink, 2000); });
-  document.querySelectorAll('video').forEach(function (v) { v.addEventListener('loadeddata', reink, { once: true }); v.addEventListener('play', reink); });
+  document.querySelectorAll('video').forEach(function (v) { v.addEventListener('loadeddata', reinkFresh, { once: true }); v.addEventListener('play', reink); });
   reink(); sched();
 
   /* ---------- 5. edge lensing (Chromium only; capability + frame-budget gated) ---------- */

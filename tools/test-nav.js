@@ -101,7 +101,7 @@ async function textContrast(page, sel) {
     }
   }
   results.sweep = sweep;
-  const notUnanimous = sweep.filter(s => !s.unanimous), notMaximin = sweep.filter(s => !s.maximinOK);
+  const notUnanimous = sweep.filter(s => !s.unanimous), notMaximin = sweep.filter(s => !s.maximinOK && !s.disagree); /* 4.9.2+: at boundary steps the majority-ink rule legitimately overrides the maximin (the ink that saves more words wins) */
   check('ONE ink for every word + logo at every 50px step (unanimous black or white)', notUnanimous.length === 0, { steps: sweep.length, offenders: notUnanimous.slice(0, 5).map(s => [s.y, s.inks]) });
   check('≥95% of steps wear the maximin ink (the colour whose worst word still reads best, ≥85% of the alternative)', notMaximin.length <= Math.ceil(0.05 * sweep.length), { off: notMaximin.length, of: sweep.length, sample: notMaximin.slice(0, 5).map(s => [s.y, s.inks, s.mean, s.altWorst]) });
   /* 4.9.1 (owner decision): the glass never changes shade - no plates, no scrim, only the ink flips - so AA is enforced wherever the backdrop agrees with itself, and boundary steps (the words disagree about the backdrop) are reported. */
