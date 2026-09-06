@@ -1,4 +1,4 @@
-/* theodyx-cookies 1.7.0 (Phase 11 motion): ACT-06 — the banner and the preferences modal are inserted in a .thxck-from state (opacity 0 + a small translateY/scale) and released in the same task, so they open on a 200/240 ms cubic-bezier(.22,1,.36,1) spring instead of cutting in; only transform and opacity animate, the inert sweep over the background is deferred past the opening frame so the first paint is not held behind it, and prefers-reduced-motion gets the settled state with no transition. RM-05 — the de-blur rule now also answers (forced-colors: active), so the overlay drops backdrop-filter for a solid Canvas-safe backdrop. .thxck-btn/.thxck-link name their transition properties instead of inheriting `all` from the page sheet. Phase 9 a11y is unchanged:  banner is a named role=region inserted first in <body>, revealed on pointer/keydown/focusin, outcomes announced through a visually-hidden role=status; footer control is a real <button>; forced-colors + reduced-transparency + coarse-pointer support. Strings via the locale runtime (window.__thxI18n, keyed by <html lang>, English fallback); logical CSS properties. */
+/* theodyx-cookies 1.8.0 (CONSENT-Z: the banner defers to whatever modal owns the page): the banner is fixed at z-index 9990, above every other overlay on the site, and it arms on a timer — so on /scouting it used to insert itself on top of the age-verification dialog (#sc-gate-age, z-index 9500, page inert behind it) about six seconds after load and swallow the taps meant for Continue. It now waits: while another modal is open the entrance is deferred, a banner that is already up is withdrawn, and the offer is made again the moment that modal closes. "Another modal" is html.sc-gated (theodyx-scouting.js states it on <html> in its first synchronous task, before the dialog node itself exists) or any visible [role=dialog|alertdialog][aria-modal=true] that is not ours; re-arming rides the thx-gate-closed event theodyx-scouting.js 2.2.1 dispatches plus a coalesced MutationObserver, so a dialog this file has never heard of works too. The preferences modal refuses to open over a foreign modal, and its inert sweep no longer inerts one. A CSS failsafe (html.sc-gated .thxck-banner{display:none}) covers the case where the JS deference is ever bypassed. Everything 1.7.0 shipped is unchanged. 1.7.0 (Phase 11 motion): ACT-06 — the banner and the preferences modal are inserted in a .thxck-from state (opacity 0 + a small translateY/scale) and released in the same task, so they open on a 200/240 ms cubic-bezier(.22,1,.36,1) spring instead of cutting in; only transform and opacity animate, the inert sweep over the background is deferred past the opening frame so the first paint is not held behind it, and prefers-reduced-motion gets the settled state with no transition. RM-05 — the de-blur rule now also answers (forced-colors: active), so the overlay drops backdrop-filter for a solid Canvas-safe backdrop. .thxck-btn/.thxck-link name their transition properties instead of inheriting `all` from the page sheet. Phase 9 a11y is unchanged:  banner is a named role=region inserted first in <body>, revealed on pointer/keydown/focusin, outcomes announced through a visually-hidden role=status; footer control is a real <button>; forced-colors + reduced-transparency + coarse-pointer support. Strings via the locale runtime (window.__thxI18n, keyed by <html lang>, English fallback); logical CSS properties. */
 var __CK={"en": {"ck.settings": "Cookie Settings", "ck.intro": "Cookies and similar identifiers keep small pieces of information on your device. We keep this to a minimum: no advertising cookies, no cross-site tracking, and analytics that are cookieless by design. Decide below what we may use — your choice is saved on this device and you can change it anytime. <a href=\"/policies/cookie-policy\">Learn more</a>.", "ck.always": "Always on", "ck.necessary": "Necessary", "ck.necessary.d": "Security, bot protection, and the core features of the Site — the basics that keep pages, forms, and applications working. The Site can’t run without these.", "ck.analytics": "Analytics", "ck.analytics.d": "First-party, cookieless measurement of how the Site performs — page views and scroll depth. Never a raw IP address, never cross-site tracking.", "ck.marketing": "Marketing", "ck.marketing.d": "Would allow personalization and measurement of our marketing on other platforms. We don’t use these today — the switch is here so the choice is always yours.", "ck.save": "Save preferences", "ck.acceptall": "Accept all", "ck.gpc": "We honor Global Privacy Control. When your browser sends a GPC signal, analytics and marketing default to off.", "ck.gpc.active": " — a GPC signal is active in this browser.", "ck.banner.h": "Your privacy, handled properly", "ck.banner.p": "We run a privacy-first, largely cookieless site. Choose what we may measure — you can change this anytime.", "ck.necessaryonly": "Necessary only", "ck.prefs": "Preferences", "ck.footer": "Cookie Preferences", "ck.ann.all": "All cookies accepted. Your choice is saved on this device.", "ck.ann.nec": "Necessary cookies only. Your choice is saved on this device.", "ck.ann.saved": "Cookie preferences saved."}, "es": {"ck.settings": "Configuración de cookies", "ck.intro": "Las cookies e identificadores similares guardan pequeños fragmentos de información en tu dispositivo. Los reducimos al mínimo: sin cookies publicitarias, sin rastreo entre sitios y con analítica sin cookies por diseño. Decide abajo qué podemos usar; tu elección se guarda en este dispositivo y puedes cambiarla cuando quieras. <a href=\"/policies/cookie-policy\">Más información</a>.", "ck.always": "Siempre activas", "ck.necessary": "Necesarias", "ck.necessary.d": "Seguridad, protección contra bots y las funciones básicas del sitio: lo esencial para que las páginas, los formularios y las solicitudes funcionen. El sitio no puede funcionar sin ellas.", "ck.analytics": "Analítica", "ck.analytics.d": "Medición propia y sin cookies del rendimiento del sitio: páginas vistas y profundidad de desplazamiento. Nunca una dirección IP en bruto, nunca rastreo entre sitios.", "ck.marketing": "Marketing", "ck.marketing.d": "Permitiría personalizar y medir nuestro marketing en otras plataformas. Hoy no las usamos; el interruptor está aquí para que la decisión sea siempre tuya.", "ck.save": "Guardar preferencias", "ck.acceptall": "Aceptar todas", "ck.gpc": "Respetamos Global Privacy Control. Cuando tu navegador envía una señal GPC, la analítica y el marketing quedan desactivados por defecto.", "ck.gpc.active": " Hay una señal GPC activa en este navegador.", "ck.banner.h": "Tu privacidad, bien gestionada", "ck.banner.p": "Somos un sitio que prioriza la privacidad y apenas usa cookies. Elige qué podemos medir; puedes cambiarlo cuando quieras.", "ck.necessaryonly": "Solo las necesarias", "ck.prefs": "Preferencias", "ck.footer": "Preferencias de cookies", "ck.ann.all": "Se han aceptado todas las cookies. Tu elección se ha guardado en este dispositivo.", "ck.ann.nec": "Solo cookies necesarias. Tu elección se ha guardado en este dispositivo.", "ck.ann.saved": "Preferencias de cookies guardadas."}, "pt": {"ck.settings": "Configurações de cookies", "ck.intro": "Cookies e identificadores semelhantes guardam pequenos fragmentos de informação no seu dispositivo. Mantemos isso no mínimo: sem cookies de publicidade, sem rastreamento entre sites e com análise sem cookies por padrão. Decida abaixo o que podemos usar; sua escolha fica salva neste dispositivo e pode ser alterada a qualquer momento. <a href=\"/policies/cookie-policy\">Saiba mais</a>.", "ck.always": "Sempre ativos", "ck.necessary": "Necessários", "ck.necessary.d": "Segurança, proteção contra bots e as funções essenciais do site: o básico para que páginas, formulários e candidaturas funcionem. O site não funciona sem eles.", "ck.analytics": "Análise", "ck.analytics.d": "Medição própria e sem cookies do desempenho do site: visualizações de página e profundidade de rolagem. Nunca um endereço IP bruto, nunca rastreamento entre sites.", "ck.marketing": "Marketing", "ck.marketing.d": "Permitiria personalizar e medir nosso marketing em outras plataformas. Não os usamos hoje; o botão está aqui para que a escolha seja sempre sua.", "ck.save": "Salvar preferências", "ck.acceptall": "Aceitar todos", "ck.gpc": "Respeitamos o Global Privacy Control. Quando seu navegador envia um sinal GPC, análise e marketing ficam desativados por padrão.", "ck.gpc.active": " Há um sinal GPC ativo neste navegador.", "ck.banner.h": "Sua privacidade, tratada como deve ser", "ck.banner.p": "Somos um site que prioriza a privacidade e quase não usa cookies. Escolha o que podemos medir; você pode mudar isso a qualquer momento.", "ck.necessaryonly": "Apenas os necessários", "ck.prefs": "Preferências", "ck.footer": "Preferências de cookies", "ck.ann.all": "Todos os cookies foram aceitos. Sua escolha foi salva neste dispositivo.", "ck.ann.nec": "Apenas os cookies necessários. Sua escolha foi salva neste dispositivo.", "ck.ann.saved": "Preferências de cookies salvas."}, "fr": {"ck.settings": "Paramètres des cookies", "ck.intro": "Les cookies et identifiants similaires conservent de petites informations sur votre appareil. Nous les limitons au strict minimum : pas de cookies publicitaires, pas de suivi entre sites et une mesure d’audience sans cookies par conception. Choisissez ci-dessous ce que nous pouvons utiliser ; votre choix est enregistré sur cet appareil et modifiable à tout moment. <a href=\"/policies/cookie-policy\">En savoir plus</a>.", "ck.always": "Toujours actifs", "ck.necessary": "Nécessaires", "ck.necessary.d": "Sécurité, protection contre les robots et fonctions essentielles du site : l’indispensable pour que les pages, formulaires et candidatures fonctionnent. Le site ne peut pas s’en passer.", "ck.analytics": "Mesure d’audience", "ck.analytics.d": "Mesure interne et sans cookies des performances du site : pages vues et profondeur de défilement. Jamais d’adresse IP brute, jamais de suivi entre sites.", "ck.marketing": "Marketing", "ck.marketing.d": "Permettrait de personnaliser et de mesurer notre marketing sur d’autres plateformes. Nous ne les utilisons pas aujourd’hui ; l’interrupteur est là pour que le choix vous appartienne toujours.", "ck.save": "Enregistrer les préférences", "ck.acceptall": "Tout accepter", "ck.gpc": "Nous respectons le Global Privacy Control. Lorsque votre navigateur envoie un signal GPC, la mesure d’audience et le marketing sont désactivés par défaut.", "ck.gpc.active": " Un signal GPC est actif dans ce navigateur.", "ck.banner.h": "Votre vie privée, traitée comme il se doit", "ck.banner.p": "Notre site privilégie la vie privée et n’utilise presque aucun cookie. Choisissez ce que nous pouvons mesurer ; vous pourrez changer d’avis à tout moment.", "ck.necessaryonly": "Nécessaires uniquement", "ck.prefs": "Préférences", "ck.footer": "Préférences de cookies", "ck.ann.all": "Tous les cookies ont été acceptés. Votre choix est enregistré sur cet appareil.", "ck.ann.nec": "Cookies nécessaires uniquement. Votre choix est enregistré sur cet appareil.", "ck.ann.saved": "Préférences de cookies enregistrées."}};var __I=window.__thxI18n;if(__I){for(var __lc in __CK)__I.add(__lc,__CK[__lc]);}function T(k,v){if(__I&&__I.t)return __I.t(k,v);var s=__CK.en[k]||k;if(v)for(var p in v)s=s.split('{'+p+'}').join(v[p]);return s;}
 /* Theodyx Cookie Preferences — banner + settings modal, GPC-aware. v1.3.0 (focus management: focus-in, trap, inert background, restore) */
 (function(){
@@ -8,6 +8,8 @@ var GPC=(navigator.globalPrivacyControl===true);
 function read(){try{var v=JSON.parse(localStorage.getItem(KEY));if(v&&v.v===1)return v;}catch(e){}return null;}
 function write(c){c.v=1;c.ts=Date.now();c.necessary=true;try{localStorage.setItem(KEY,JSON.stringify(c));}catch(e){}
   window.__thxConsent=c;window.__thxAnalyticsOptOut=!c.analytics;
+  /* CONSENT-Z: the question has been answered, so nothing is waiting on a modal any more. */
+  bannerPending=false;unwatchModals();
   try{document.dispatchEvent(new CustomEvent('thx-consent-change',{detail:c}));}catch(e){}}
 var stored=read();
 if(stored){window.__thxConsent=stored;window.__thxAnalyticsOptOut=!stored.analytics;}
@@ -69,6 +71,10 @@ var CSS=''+
 '.thxck-overlay.thxck-from{opacity:0}'+
 '.thxck-overlay.thxck-from .thxck-modal{opacity:0;transform:translateY(10px) scale(.985)}'+
 '.thxck-banner.thxck-from{opacity:0;transform:translateY(12px) scale(.99)}'+
+/* CONSENT-Z failsafe (1.8.0): the deference below keeps the banner out of the DOM while the
+   scouting age dialog is up. This rule is the belt to that pair of braces — if the banner is ever
+   inserted while html.sc-gated stands, it is neither seen nor hit-tested. */
+'html.sc-gated .thxck-banner{display:none!important}'+
 /* RM-01 parity: under reduced motion the same states arrive settled, with no transition at all */
 '@media (prefers-reduced-motion: reduce){'+
 '.thxck-overlay,.thxck-modal,.thxck-banner,.thxck-btn,.thxck-link,.thxck-sw,.thxck-sw::after{transition:none!important}'+
@@ -121,8 +127,66 @@ function afterPaint(fn){
   else setTimeout(fn,0);
 }
 
+/* ------------------------------------------------------------ CONSENT-Z — modal deference (1.8.0)
+   A consent choice is never urgent enough to sit on top of a dialog that has taken the page
+   hostage. isShown() is the cheap "does this node have a box" test; foreignModal() answers "is
+   some other modal holding the page right now" from two signals:
+     1. html.sc-gated — the /scouting page head stamps it before first paint and
+        theodyx-scouting.js re-states it in its first synchronous task, both well before
+        #sc-gate-age exists as a dialog node, so it is the earliest and most reliable signal;
+     2. any visible [role=dialog|alertdialog][aria-modal="true"] that is not our own .thxck-modal —
+        the generic case, so a dialog this file has never heard of is deferred to as well. */
+function isShown(n){try{return !!(n&&(n.offsetWidth||n.offsetHeight||(n.getClientRects&&n.getClientRects().length)));}catch(e){return false;}}
+function foreignModal(){
+  try{
+    if(document.documentElement.classList.contains('sc-gated'))return true;
+    var d=document.querySelectorAll('[role="dialog"][aria-modal="true"],[role="alertdialog"][aria-modal="true"]');
+    for(var i=0;i<d.length;i++){
+      var n=d[i];
+      if(n.classList&&n.classList.contains('thxck-modal'))continue;   /* ours */
+      if(isShown(n))return true;
+    }
+  }catch(e){}
+  return false;
+}
+/* The watcher only lives while we still have a banner to place — armed when the entrance is
+   deferred or when the banner goes up, disconnected once consent is recorded. Mutations are
+   coalesced through a 60 ms tail so a page that churns classes while scrolling costs one pass. */
+var modalMO=null,syncQueued=false;
+function syncModal(){
+  if(syncQueued)return;syncQueued=true;
+  setTimeout(function(){syncQueued=false;applyModalState();},60);
+}
+function watchModals(){
+  if(modalMO)return;
+  try{
+    modalMO=new MutationObserver(syncModal);
+    modalMO.observe(document.documentElement,{attributes:true,attributeFilter:['class']});
+    if(document.body)modalMO.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class','style','aria-modal','role']});
+  }catch(e){modalMO=null;}
+  document.addEventListener('thx-gate-closed',syncModal);
+}
+function unwatchModals(){
+  if(modalMO){try{modalMO.disconnect();}catch(e){}modalMO=null;}
+  document.removeEventListener('thx-gate-closed',syncModal);
+}
+var bannerPending=false;
+function applyModalState(){
+  if(read()){bannerPending=false;unwatchModals();return;}          /* answered — nothing left to place */
+  if(foreignModal()){
+    /* the reverse race: the banner was already up when the dialog booted. Take it down rather than
+       leave it painting over a modal; it is offered again, spring and all, the moment that closes. */
+    if(bannerEl){bannerEl.remove();bannerEl=null;bannerPending=true;}
+    return;
+  }
+  if(bannerPending){bannerPending=false;banner(true);}
+}
+
 function modal(){
   if(document.querySelector('.thxck-overlay'))return;
+  /* CONSENT-Z: never stack our dialog on someone else's. The footer control is inert under a modal
+     anyway, so in practice this only ever answers a programmatic __thxOpenCookiePrefs() call. */
+  if(foreignModal())return;
   ensureLive();
   var ov=el('div','thxck-overlay');
   var m=el('div','thxck-modal');m.setAttribute('role','dialog');m.setAttribute('aria-modal','true');m.setAttribute('aria-label',T('ck.settings'));
@@ -175,7 +239,14 @@ function modal(){
      is inert well before anything can be tabbed into. */
   afterPaint(function(){
     if(!document.contains(ov))return;
-    Array.prototype.forEach.call(document.body.children,function(c){if(c!==ov&&!c.hasAttribute('inert')&&!/^(SCRIPT|STYLE|LINK)$/.test(c.tagName)){c.setAttribute('inert','');inerted.push(c);}});
+    Array.prototype.forEach.call(document.body.children,function(c){
+      if(c===ov||c.hasAttribute('inert')||/^(SCRIPT|STYLE|LINK)$/.test(c.tagName))return;
+      /* CONSENT-Z: never inert a modal that is not ours. Doing so would strand whoever is inside it,
+         and close() would then hand its `inert` back — un-inerting a dialog the other runtime is
+         still holding the page behind. */
+      if(c.getAttribute('aria-modal')==='true'&&isShown(c))return;
+      c.setAttribute('inert','');inerted.push(c);
+    });
   });
   var ff=m.querySelector('button');setTimeout(function(){try{(ff||m).focus();}catch(e){}},30);
 }
@@ -183,8 +254,11 @@ window.__thxOpenCookiePrefs=modal;
 
 var bannerEl=null;
 function banner(show){
-  if(!show){if(bannerEl){bannerEl.remove();bannerEl=null;}return;}
+  if(!show){if(bannerEl){bannerEl.remove();bannerEl=null;}bannerPending=false;return;}
   if(bannerEl||read())return;
+  /* CONSENT-Z: a modal owns the page — hold the entrance and take it up again on the way out. */
+  if(foreignModal()){bannerPending=true;watchModals();return;}
+  watchModals();   /* and stay armed, so a dialog that boots after us takes the banner back down */
   ensureLive();
   bannerEl=el('div','thxck-banner');
   /* COOKIE-BANNER — a named region, and a styled paragraph instead of a free-floating <h4>

@@ -1,4 +1,11 @@
-/* theodyx-scouting 2.2.0 — age verification, restored. The owner's call overrides the Phase 10
+/* theodyx-scouting 2.2.1 — closeAgeGate() dispatches a `thx-gate-closed` CustomEvent on document.
+ * The only listener is theodyx-cookies.js 1.8.0, which holds its consent banner back while this
+ * dialog is up (the banner is fixed at z-index 9990 and arms on a timer; this dialog sits at 9500,
+ * so the banner used to insert itself over the Continue button about six seconds after load) and
+ * offers it again on this event. Nothing here depends on anyone listening — the cookies runtime
+ * also watches html.sc-gated, so the event is the fast path, not the contract. Everything below is
+ * 2.2.0, unchanged.
+ * 2.2.0 — age verification, restored. The owner's call overrides the Phase 10
  * decision that retired the gates: nobody reaches the application form without first confirming a
  * date of birth. One centred dialog goes up in the same synchronous task this script starts in —
  * role="dialog" aria-modal="true", labelled by its own heading, focus trapped, Escape deliberately
@@ -375,6 +382,11 @@
     if (g) { g.classList.remove('is-open'); g.style.display = 'none'; }
     document.documentElement.classList.remove('sc-gated');
     lockScroll(false);
+    /* 2.2.1 — one line for the rest of the site. theodyx-cookies.js 1.8.0 holds its consent banner
+     * back while this dialog is up (the banner is fixed at z-index 9990, this dialog at 9500, so it
+     * used to land on top of Continue about six seconds after load) and offers it again on this
+     * event. It also watches html.sc-gated, so the event is the fast path, not the contract. */
+    try { document.dispatchEvent(new CustomEvent('thx-gate-closed')); } catch (e) {}
   }
 
   function gateSubmit() {
