@@ -1,4 +1,8 @@
-/*! theodyx-nav.js v4.13.0 (2026-09-06) — behaviours for the clear liquid-glass nav (#thx-nav).
+/*! theodyx-nav.js v4.14.0 (2026-09-06) — behaviours for the clear liquid-glass nav (#thx-nav).
+ * 4.14.0 (owner: "for the phone make it simple liquid glass that works on everything - no colour stuff, just a modern frost;
+ * it is too load-bearing on mobile"): under 900 px the bar is a plain frosted pill drawn by CSS alone (blur + saturate, a
+ * light frost, black ink) - no SVG lens, no colour bleed, no dispersion, no halo, no ink sampling, no look-ahead, and the
+ * WebKit WebGL lens never starts (its loader is gated the same way). Desktop is unchanged.
  * 4.13.0 (owner: "make sure it doesn't glitch, catch, slip or stick on desktop or mobile, on any page - prerun it and save it if
  * you have to"): the ink answers the scroll in the same frame - the solver's result is memoised per 8 px of scroll and the bar's
  * boxes are solved AHEAD of the scroll at idle (every 8 px of the current viewport above and below the bar), so a scroll into a
@@ -37,7 +41,7 @@
   if (window.__thxNav) return;
   var nav = document.getElementById('thx-nav');
   if (!nav) return;
-  var API = window.__thxNav = { v: '4.13.0' };
+  var API = window.__thxNav = { v: '4.14.0' };
   var I18N = window.__thxI18n; function T(k) { return (I18N && I18N.t) ? I18N.t(k) : ({ 'nav.open': 'Open menu', 'nav.close': 'Close menu' })[k] || k; } /* Phase 6: locale runtime (nv2pagesf) keyed by <html lang> */
   var doc = document.documentElement, body = document.body;
   var glass = nav.querySelector('.thx-nav-glass');
@@ -555,8 +559,14 @@
     nav.setAttribute('data-ink', ink);
     anyMedia = m.media; anyLive = m.live;
   }
+  /* 4.14.0: under 900 px the frost carries the contrast - black ink, no sampling, no memo, no halo */
+  function phoneInk() {
+    for (var k in GROUPS) { var G = GROUPS[k]; G.ink = 'dark'; G.split = false; G.primed = true; if (groupEls[k]) { groupEls[k].setAttribute('data-ink', 'dark'); groupEls[k].removeAttribute('data-split'); } }
+    ink = 'dark'; nav.setAttribute('data-ink', 'dark'); anyMedia = false; anyLive = false; clearTimeout(inkTimer);
+  }
   function reink() {
     if (nav.getAttribute('data-open') === 'true') return;
+    if (!mqDesk.matches) { phoneInk(); return; }
     var t0 = now(), y = scrollTop(), k = memoKey(y), m = null;
     if (memoDirty || memoW !== window.innerWidth) { memoClear(); memoW = window.innerWidth; }
     if (!anyLive && memo.has(k)) m = memo.get(k);
@@ -576,7 +586,7 @@
    * finds its answers already in the memo. Cancelled the moment the page moves (the next reink schedules it again). */
   function schedPrefill() { clearTimeout(prefillT); prefillT = setTimeout(startPrefill, 140); }
   function startPrefill() {
-    if (prefillIdle || document.hidden || nav.getAttribute('data-open') === 'true' || !window.requestIdleCallback) return;
+    if (prefillIdle || document.hidden || nav.getAttribute('data-open') === 'true' || !window.requestIdleCallback || !mqDesk.matches) return;
     var y0 = scrollTop(), vh = window.innerHeight, tries = [];
     for (var d = MEMO_STEP; d <= vh; d += MEMO_STEP) { tries.push(d); if (y0 - d >= 0) tries.push(-d); }
     prefillY = y0;
@@ -609,7 +619,7 @@
   } catch (e) {}
   /* 3 s self-check: re-measure the current position and, if the memo disagrees with the page, start over */
   setInterval(function () {
-    if (document.hidden || nav.getAttribute('data-open') === 'true') return;
+    if (document.hidden || nav.getAttribute('data-open') === 'true' || !mqDesk.matches) return;
     var k = memoKey(scrollTop()), old = memo.get(k);
     if (!old || memoDirty) { if (memoDirty) memoClear(); reink(); return; }
     var m = measure(0), off = false;
@@ -635,7 +645,7 @@
   var refractOK = false, lite = false;
   try {
     var isBlink = !!(navigator.userAgentData && navigator.userAgentData.brands && navigator.userAgentData.brands.some(function (b) { return /Chromium/i.test(b.brand); })) || (/Chrome\/|Chromium\//.test(navigator.userAgent) && !/\bEdgiOS\b/.test(navigator.userAgent));
-    refractOK = !!mapImg && isBlink && CSS.supports('backdrop-filter', 'url(#x) blur(1px)') && !mqMotion.matches && !mqTrans.matches && (navigator.hardwareConcurrency || 8) >= 4 && (navigator.deviceMemory || 8) >= 4 && sessionStorage.getItem('thx-nav-norefract') !== '1';
+    refractOK = !!mapImg && isBlink && mqDesk.matches && CSS.supports('backdrop-filter', 'url(#x) blur(1px)') && !mqMotion.matches && !mqTrans.matches && (navigator.hardwareConcurrency || 8) >= 4 && (navigator.deviceMemory || 8) >= 4 && sessionStorage.getItem('thx-nav-norefract') !== '1';
     lite = !mqDesk.matches || !mqFine.matches || (navigator.hardwareConcurrency || 8) < 8;
   } catch (e) { refractOK = false; }
   /* Tunables (live: __thxNav.lens({scale:70,...})). Profile T(d) over distance d from the rounded edge: a rim term
@@ -911,7 +921,7 @@
     });
     panel.addEventListener('click', function (e) { if (e.target.closest('a[href]')) close(false); });
     document.addEventListener('pointerdown', function (e) { if (nav.getAttribute('data-open') === 'true' && !nav.contains(e.target)) close(); }, true);
-    mqDesk.addEventListener && mqDesk.addEventListener('change', function (m) { if (m.matches) close(false); });
+    mqDesk.addEventListener && mqDesk.addEventListener('change', function (m) { if (m.matches) close(false); reinkFresh(); });
     window.addEventListener('pagehide', function () { close(false); });
   }
 

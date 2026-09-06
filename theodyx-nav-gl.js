@@ -13,11 +13,12 @@
   var glass = nav && nav.querySelector('.thx-nav-glass');
   if (!nav || !glass) return;
   var doc = document.documentElement, ua = navigator.userAgent;
-  var API = window.__thxNavGL = { v: '1.1.0', on: false, why: '', state: function () { return { on: API.on, why: API.why }; } };
+  var API = window.__thxNavGL = { v: '1.2.0', on: false, why: '', state: function () { return { on: API.on, why: API.why }; } };
   var mq = function (q) { try { return window.matchMedia(q); } catch (e) { return { matches: false, addEventListener: function () {} }; } };
   var isBlink = !!(navigator.userAgentData && navigator.userAgentData.brands && navigator.userAgentData.brands.some(function (b) { return /Chromium/i.test(b.brand); })) || (/Chrome\/|Chromium\//.test(ua) && !/\bCriOS\b|\bEdgiOS\b|\bFxiOS\b/.test(ua));
   var isWebKit = /AppleWebKit\//.test(ua) && !isBlink;
   function bail(why) { API.why = why; nav.setAttribute('data-gl', why); return false; }
+  if (!mq('(min-width: 900px)').matches) return bail('phone'); /* 1.2.0 (owner, 2026-09-06): under 900 px the bar is a plain CSS frost - the WebGL lens never starts on a phone */
   if (!isWebKit && !nav.hasAttribute('data-gl-force')) return bail('not-webkit');
   if (nav.classList.contains('is-refract') || nav.getAttribute('data-lens') === 'svg') return bail('svg-lens');
   if (mq('(prefers-reduced-transparency:reduce)').matches) return bail('reduced-transparency');
