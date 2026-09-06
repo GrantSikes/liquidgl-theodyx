@@ -3,7 +3,7 @@
 //   --only   run a single block: head|cookie|home|scouting|article|footnotes|index|policy|contact|hub|mobile|mobile2
 // Staging nhq.webflow.io by default; fresh context per page.
 const { chromium, devices } = require('playwright');
-const gateFill = async (pg, iso) => { const [y, m, d] = iso.split('-'); if (await pg.$('#sc-gate-y')) { await pg.fill('#sc-gate-m', m); await pg.fill('#sc-gate-d', d); await pg.fill('#sc-gate-y', y); } else await pg.fill('#sc-gate-dob', iso); }; /* scouting 2.3.0: the date is three segments (month / day / year, locale order); #sc-gate-dob is the hidden composite */
+const gateFill = async (pg, iso) => { try { const ok = await pg.$('#sc-gate-safety-ok'); if (ok && await ok.isVisible()) { await ok.click(); await pg.waitForTimeout(450); } } catch (e) {} /* scouting 2.4.0: the safety stage first */ const [y, m, d] = iso.split('-'); if (await pg.$('#sc-gate-y')) { await pg.fill('#sc-gate-m', m); await pg.fill('#sc-gate-d', d); await pg.fill('#sc-gate-y', y); } else await pg.fill('#sc-gate-dob', iso); }; /* scouting 2.3.0: the date is three segments (month / day / year, locale order); #sc-gate-dob is the hidden composite */
 const fs = require('fs'), path = require('path');
 const PROD = process.argv.includes('--prod');
 const BASE_ARG = (process.argv.find(a => a.startsWith('--base=')) || '').slice(7);
@@ -80,11 +80,13 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     // Owner decision 2026-09-05 (scouting 2.2.0): the age-verification gate is BACK as a real modal dialog on arrival; the inline
     // safety section and its required checkbox stay. Everything else Phase 9 established has to survive unchanged.
     const y12 = new Date().getFullYear() - 12, y22 = new Date().getFullYear() - 22;
-    const g0 = await page.evaluate(() => { const gate = document.getElementById('sc-gate-age'); return {
+    const g0 = await page.evaluate(() => { const gate = [document.getElementById('sc-gate-safety'), document.getElementById('sc-gate-age')].filter(function (g) { return g && getComputedStyle(g).display !== 'none'; })[0] || document.getElementById('sc-gate-age'); return {
       gate: gate ? { role: gate.getAttribute('role'), modal: gate.getAttribute('aria-modal'), labelled: !!gate.getAttribute('aria-labelledby'), visible: getComputedStyle(gate).display !== 'none', focusInside: gate.contains(document.activeElement) } : null,
       inert: [...document.body.children].filter(e => e.hasAttribute('inert')).length, gated: document.documentElement.classList.contains('sc-gated'),
       formsHidden: ['sc-form-you', 'sc-form-work', 'sc-form-consent'].every(i => getComputedStyle(document.getElementById(i)).display === 'none') }; });
-    check('GATE: the age-verification dialog is up on arrival (role=dialog, aria-modal, labelled, focus inside, page inert, form hidden)', !!(g0.gate && g0.gate.role === 'dialog' && g0.gate.modal === 'true' && g0.gate.labelled && g0.gate.visible && g0.gate.focusInside && g0.inert > 0 && g0.gated && g0.formsHidden), g0);
+    check('GATE: a gate is up on arrival (role=dialog, aria-modal, labelled, focus inside, page inert, form hidden) - scouting 2.4.0: the safety stage first', !!(g0.gate && g0.gate.role === 'dialog' && g0.gate.modal === 'true' && g0.gate.labelled && g0.gate.visible && g0.gate.focusInside && g0.inert > 0 && g0.gated && g0.formsHidden), g0);
+    /* scouting 2.4.0: acknowledge the safety statement (Escape/Tab trap is exercised on the age stage below, the same modal contract) */
+    if (await page.$('#sc-gate-safety-ok')) { await page.click('#sc-gate-safety-ok'); await sleep(500); }
     await page.keyboard.press('Escape'); await sleep(200); for (let i = 0; i < 8; i++) await page.keyboard.press('Tab');
     const trap = await page.evaluate(() => ({ open: getComputedStyle(document.getElementById('sc-gate-age')).display !== 'none', inside: document.getElementById('sc-gate-age').contains(document.activeElement) }));
     check('GATE: Escape does not dismiss it and Tab cannot leave it', trap.open && trap.inside, trap);

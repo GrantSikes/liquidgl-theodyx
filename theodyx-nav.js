@@ -1,4 +1,10 @@
-/*! theodyx-nav.js v4.12.1 (2026-09-06) — behaviours for the clear liquid-glass nav (#thx-nav).
+/*! theodyx-nav.js v4.13.0 (2026-09-06) — behaviours for the clear liquid-glass nav (#thx-nav).
+ * 4.13.0 (owner: "make sure it doesn't glitch, catch, slip or stick on desktop or mobile, on any page - prerun it and save it if
+ * you have to"): the ink answers the scroll in the same frame - the solver's result is memoised per 8 px of scroll and the bar's
+ * boxes are solved AHEAD of the scroll at idle (every 8 px of the current viewport above and below the bar), so a scroll into a
+ * solved position is a lookup; the 3 s hold is gone (it read as "stuck"), a 160 ms dwell only stops edge strobing; a playing
+ * video under the bar is polled every 150 ms and a new ink must win for 900 ms before it lands (no flicker with every cut);
+ * the halo is stricter (a true split, or a scene the live hold has not answered) and steadier (off after 260 ms clean).
  * 4.12.1: the ink sampler reads the scene where the lens actually pulls it from. With dispersion 1.2 over the whole bevel the
  * content under a word's edge comes from up to ~60 px outside the pill, so a sample taken straight under the word elected the
  * wrong ink at hard boundaries (Home y=650: white words over a bright band the lens had pulled in); each of the nine sample
@@ -31,7 +37,7 @@
   if (window.__thxNav) return;
   var nav = document.getElementById('thx-nav');
   if (!nav) return;
-  var API = window.__thxNav = { v: '4.12.1' };
+  var API = window.__thxNav = { v: '4.13.0' };
   var I18N = window.__thxI18n; function T(k) { return (I18N && I18N.t) ? I18N.t(k) : ({ 'nav.open': 'Open menu', 'nav.close': 'Close menu' })[k] || k; } /* Phase 6: locale runtime (nv2pagesf) keyed by <html lang> */
   var doc = document.documentElement, body = document.body;
   var glass = nav.querySelector('.thx-nav-glass');
@@ -125,6 +131,9 @@
   function idleReink() { if (window.requestIdleCallback) requestIdleCallback(function () { reink(); }, { timeout: 200 }); else raf(function () { reink(); }); }
   function reinkSoon() {
     var t = now(), y = window.scrollY || doc.scrollTop || 0;
+    /* 4.13.0: a solved position is a lookup and a cheap solver (<= 8 ms) runs inside the scroll frame, so the words change exactly
+     * where the backdrop changes; only a slow device falls back to the throttled idle cadence below */
+    if ((!anyLive && memo.has(memoKey(y))) || lastTickMs <= 8) { lastReink = t; lastReinkY = y; reink(); return; }
     if (Math.abs(y - lastReinkY) < 24 && !anyMedia && lastReinkY !== -1e9) return;
     var gap = scrollV > 1.5 ? 160 : REINK_MS;
     if (t - lastReink >= gap) { lastReink = t; lastReinkY = y; idleReink(); }
@@ -227,7 +236,7 @@
         if (el.readyState >= 2 && !el.__thxVideoTainted) {
           var sm = smallCopy(el, el.videoWidth, el.videoHeight, false);
           if (sm === 'tainted') el.__thxVideoTainted = true;
-          else if (sm) { if (!drawRegion(sm.c, sm.w, sm.h, mr, r, fit)) return null; var stv = readPixels(); stv.sd = Math.max(stv.sd, 0.22); return stv; } /* live video: frames change, so always wear the stronger halo */
+          else if (sm) { if (!drawRegion(sm.c, sm.w, sm.h, mr, r, fit)) return null; var stv = readPixels(); stv.sd = Math.max(stv.sd, 0.22); stv.live = !el.paused && !el.ended; return stv; } /* live video: frames change - the election polls it and never memoises it (4.13.0) */
         }
         /* frames unavailable (no CORS on the media, or not loaded yet): use the poster as a stand-in for the scene */
         var ps = el.poster || el.getAttribute('poster'); if (!ps) return null;
@@ -363,7 +372,7 @@
     /* composite the stack of elements under (x,y) top-down: translucent colours, glyphs, gradients, images/video (opaque) */
     x = Math.min(Math.max(x, 0), window.innerWidth - 1); y = Math.min(Math.max(y, 0), window.innerHeight - 1);
     var els = document.elementsFromPoint(x, y);
-    var acc = 0, rem = 1, sdMax = 0, media = false, key = Math.round(r.left) + ':' + Math.round(r.width);
+    var acc = 0, rem = 1, sdMax = 0, media = false, live = false, key = Math.round(r.left) + ':' + Math.round(r.width);
     var G = function (L) { return Math.pow(Math.max(0, Math.min(1, L)), 1 / 2.2); }; /* blending happens on sRGB-encoded values, so accumulate in gamma space */
     for (var i = 0; i < els.length && rem > 0.02; i++) {
       var el = els[i];
@@ -375,7 +384,7 @@
       if (MEDIA.test(el.tagName)) {
         if (!(key in per)) per[key] = mediaStats(el, r);
         var st = per[key]; media = true;
-        if (st) { sdMax = Math.max(sdMax, st.sd); acc += rem * G(st.L); rem = 0; break; }
+        if (st) { sdMax = Math.max(sdMax, st.sd); if (st.live) live = true; acc += rem * G(st.L); rem = 0; break; }
         var cs0 = getComputedStyle(el), pb = parseBg(cs0);
         if (pb !== null) { acc += rem * G(pb); rem = 0; break; }
         sdMax = Math.max(sdMax, 0.25); continue; /* no frames yet and no colour of its own (a video still loading): what is painted beneath it is what the eye sees */
@@ -393,7 +402,7 @@
           var perK = tickCache.get(km); if (!perK) { perK = {}; tickCache.set(km, perK); }
           if (!(key in perK)) perK[key] = mediaStats(km, r);
           var stk = perK[key]; media = true; hit = true;
-          if (stk) { sdMax = Math.max(sdMax, stk.sd); acc += rem * G(stk.L); rem = 0; }
+          if (stk) { sdMax = Math.max(sdMax, stk.sd); if (stk.live) live = true; acc += rem * G(stk.L); rem = 0; }
           else sdMax = Math.max(sdMax, 0.25);
           break;
         }
@@ -421,39 +430,86 @@
       for (var q3 = 0; q3 < own.length && rem > 0.02; q3++) { acc += rem * own[q3].a * G(own[q3].L); rem *= (1 - own[q3].a); }
     }
     if (rem > 0.02) { var lb = parseBg(getComputedStyle(body)); if (lb === null) lb = parseBg(getComputedStyle(doc)); acc += rem * G(lb === null ? 1 : lb); }
-    return { L: Math.pow(acc, 2.2), sd: sdMax, media: media };
+    return { L: Math.pow(acc, 2.2), sd: sdMax, media: media, live: live };
   }
   var inkEls = [];
   if (logo) inkEls.push(logo);
-  nav.querySelectorAll('.thx-nav-menu a').forEach(function (a) { inkEls.push(a); });
+  nav.querySelectorAll('.thx-nav-menu a').forEach(function (a) { inkEls.push(a); a.removeAttribute('data-ink'); });
   if (burger) inkEls.push(burger);
   var inkState = inkEls.map(function (el) { return { el: el, L: null, mixed: false }; });
-  var ink = 'light', inkT = 0, inkPrimed = false, dwellT = 0, tone = 'dark', anyMedia = false, lastTickMs = 0, inkTimer = 0, inkInterval = 320, tickId = 0; /* 4.9.3: inkPrimed - the first real election is never gated by the dwell (inkT starts at 0 on the performance.now() clock, so a fast load used to keep the default white words on a white page for up to 600 ms) */
+  var ink = 'light', inkT = 0, tone = 'dark', anyMedia = false, anyLive = false, lastTickMs = 0, inkTimer = 0, tickId = 0;
   var cal = function (L) { return Math.min(1, L * 1.3 + 0.01); }; /* calibrated against rendered pixels through the glass: sampler underreads ~12% and the glass lifts the backdrop ~15% */
   function contrast(L, which) { return which === 'light' ? 1.05 / (L + 0.05) : (L + 0.05) / 0.05; }
   nav.setAttribute('data-ink', ink);
-  /* 4.10.1: a media copy (poster / CORS image / first video frame) arriving is new information - the election that ran without it
-   * was blind, so it is not protected by the dwell (an article hero used to wear white words for ~1.2 s after load while the
-   * copy loaded, the flip to black being vetoed and re-checked). */
-  function reinkFresh() { inkT = -1e9; for (var k in GROUPS) GROUPS[k].inkT = -1e9; reink(); }
-  function reink() {
-    if (nav.getAttribute('data-open') === 'true') return;
-    var t0 = now();
-    tickCache = new Map(); anyMedia = false;
-    var pe = nav.style.pointerEvents; nav.style.pointerEvents = 'none'; /* hit-testing (caret + elementsFromPoint) must see through the nav */
-    try { reinkInner(t0); } finally { nav.style.pointerEvents = pe; }
-  }
-  /* 4.11.0: three ink GROUPS - the mark, the menu (every word together) and the burger - each elect their own ink, so a black
-   * band under the mark can no longer be outvoted by a white gutter under the menu (and vice versa). Each group counts the
-   * sample points that would FAIL AA for each ink (a black band with one bright shape is nine points for white words and two
-   * against, whatever the mean says); a clear majority of points decides, a near tie falls back to the maximin on the worst
-   * word and then the mean; hysteresis + a 600 ms dwell per group, a dwell-vetoed flip re-checked when the dwell expires,
-   * and the first real election never gated. The glass itself never changes - only the ink (owner decision). */
-  var INK_HOLD = 3000; /* 4.12.0 (owner): a group keeps its ink for 3 s after a flip; a flip the hold vetoed is re-checked the moment it expires */
-  var GROUPS = { logo: { ink: 'light', inkT: 0, primed: false, holdT: 0, split: false, els: logo ? [logo] : [] }, menu: { ink: 'light', inkT: 0, primed: false, holdT: 0, split: false, els: [] }, burger: { ink: 'light', inkT: 0, primed: false, holdT: 0, split: false, els: burger ? [burger] : [] } };
-  nav.querySelectorAll('.thx-nav-menu a').forEach(function (a) { GROUPS.menu.els.push(a); a.removeAttribute('data-ink'); }); /* 4.12.0: no per-word ink - every word in the menu changes together */
+  var PTS = [[0.15, 0.18], [0.5, 0.18], [0.85, 0.18], [0.15, 0.5], [0.5, 0.5], [0.85, 0.5], [0.15, 0.84], [0.5, 0.84], [0.85, 0.84]];
+  /* 4.13.0 (owner: "make sure it doesn't glitch, catch, slip or stick on any page - prerun it and save it if you have to").
+   * Three ink GROUPS (mark / menu / burger) still elect their own ink from the sample points that would fail AA. What changed:
+   *   - the ink answers the scroll in the SAME frame: the solver's result is memoised per 8 px of scroll (per viewport width), and
+   *     at idle the bar's boxes are measured AHEAD of the scroll - every 8 px of the current viewport above and below the bar is
+   *     solved before the reader gets there (the whole viewport is on screen, so elementsFromPoint can read it) - so a scroll
+   *     into a solved position is a lookup, not a solve, and the words change exactly where the backdrop changes;
+   *   - no 3 s hold (it read as "stuck"); a 160 ms dwell only stops a single edge from strobing under sub-pixel jitter;
+   *   - a MOVING picture (a playing video under the bar) is the one backdrop that changes without scrolling: it is polled every
+   *     150 ms, never memoised, and a new ink has to win for 900 ms before it lands so the words do not flicker with every cut;
+   *   - the halo (data-split) is stricter and steadier: on when neither ink clears a quarter of a group's points (a true split) or
+   *     the elected ink fails almost half of them (a scene the live hold has not answered yet); off after 260 ms of a clean backdrop;
+   *   - the memo is dropped on resize, media arrival, DOM changes outside the bar, tab return, and by a 3 s self-check that
+   *     re-measures the current position and compares. The glass never changes - only the ink (owner decision). */
+  var INK_DWELL = 260, LIVE_HOLD = 900, SPLIT_OFF = 260, LIVE_POLL = 150, MEMO_STEP = 8; /* dwell 260: a band crossed in under a quarter second produces no flip at all (a flick is a blur anyway); the election's own dead band (strong majority or 1.15x better) keeps an edge from strobing under jitter */
+  var GROUPS = { logo: { ink: 'light', inkT: 0, primed: false, dwellT: 0, split: false, splitOffT: 0, wantInk: null, wantT: 0, prevInk: null, inkY: -1e9, els: logo ? [logo] : [] }, menu: { ink: 'light', inkT: 0, primed: false, dwellT: 0, split: false, splitOffT: 0, wantInk: null, wantT: 0, prevInk: null, inkY: -1e9, els: [] }, burger: { ink: 'light', inkT: 0, primed: false, dwellT: 0, split: false, splitOffT: 0, wantInk: null, wantT: 0, prevInk: null, inkY: -1e9, els: burger ? [burger] : [] } };
+  nav.querySelectorAll('.thx-nav-menu a').forEach(function (a) { GROUPS.menu.els.push(a); });
   var groupEls = { logo: logo, menu: nav.querySelector('.thx-nav-menu'), burger: burger };
-  function electGroup(G, acc, t0) {
+  var memo = new Map(), memoW = 0, memoDirty = false, dirtyT = 0, prefillT = 0, prefillIdle = 0, prefillY = -1;
+  function memoKey(y) { return Math.round(y / MEMO_STEP); }
+  function memoClear() { memo.clear(); memoDirty = false; }
+  function scrollTop() { return window.scrollY || doc.scrollTop || 0; }
+  function mkAcc() { return { fD: 0, fL: 0, pts: 0, worstD: Infinity, worstL: Infinity, wsum: 0, wL: 0, meanLe: 0.5 }; }
+  /* one measurement of the bar's boxes shifted by dy viewport pixels (dy = 0: where the bar is). Returns everything the
+   * election needs and nothing that depends on the previous ink, so it can be memoised and replayed. */
+  function measure(dy) {
+    tickId++;
+    var m = { forced: null, live: false, media: false, invalid: false, sumL: 0, n: 0, acc: { logo: mkAcc(), menu: mkAcc(), burger: mkAcc() }, words: [] };
+    tickCache = new Map();
+    var pe = nav.style.pointerEvents; nav.style.pointerEvents = 'none'; /* hit-testing (caret + elementsFromPoint) must see through the nav */
+    try {
+      var vh = window.innerHeight;
+      for (var i = 0; i < inkState.length; i++) {
+        var s = inkState[i], el = s.el;
+        if (!el.offsetParent) continue;
+        var r = el.getBoundingClientRect(); if (!r.width) continue;
+        if (dy && (r.top + dy < 0 || r.bottom + dy > vh)) { m.invalid = true; break; } /* a look-ahead is only real while every box lands inside the viewport */
+        var Ls = [], sds = [];
+        for (var p = 0; p < PTS.length; p++) {
+          var sx = r.left + r.width * PTS[p][0], sy = r.top + r.height * PTS[p][1], rr = r;
+          var dsp = lensSource(sx, sy); /* 4.12.1: read the scene where the lens pulls it from (the media region moves with the point) */
+          var ox = dsp ? dsp[0] : 0, oy = (dsp ? dsp[1] : 0) + dy;
+          sx += ox; sy += oy;
+          if (ox || oy) rr = { left: r.left + ox, top: r.top + oy, right: r.right + ox, bottom: r.bottom + oy, width: r.width, height: r.height };
+          var st; try { st = pointStats(sx, sy, rr); } catch (e) { st = null; }
+          if (!st) continue;
+          if (st.forced) { m.forced = st.forced; break; }
+          Ls.push(st.L); sds.push(st.sd || 0); if (st.media) m.media = true; if (st.live) m.live = true;
+        }
+        if (m.forced) break;
+        if (!Ls.length) continue;
+        var L = Ls.reduce(function (a, b) { return a + b; }, 0) / Ls.length;
+        var spread = Math.max.apply(null, Ls) - Math.min.apply(null, Ls);
+        var sd = sds.reduce(function (a, b) { return a + b; }, 0) / sds.length;
+        var g = (el === logo) ? 'logo' : (el === burger) ? 'burger' : 'menu', A = m.acc[g];
+        var tgt = (g === 'menu') ? 4.5 : 3;
+        var Le = cal(L), cd = contrast(Le, 'dark'), cl = contrast(Le, 'light');
+        if (cd < A.worstD) A.worstD = cd; if (cl < A.worstL) A.worstL = cl;
+        for (var q = 0; q < Ls.length; q++) { var Lq = cal(Ls[q]); if (contrast(Lq, 'dark') < tgt) A.fD++; if (contrast(Lq, 'light') < tgt) A.fL++; }
+        A.pts += Ls.length;
+        var w = r.width * r.height; A.wsum += w; A.wL += w * Le;
+        m.sumL += L; m.n++;
+        m.words.push({ i: i, L: L, Lmin: Math.min.apply(null, Ls), Lmax: Math.max.apply(null, Ls), mixed: spread > 0.3 || sd > 0.2 });
+      }
+      for (var k in m.acc) { var A2 = m.acc[k]; A2.meanLe = A2.wsum ? A2.wL / A2.wsum : 0.5; }
+    } finally { nav.style.pointerEvents = pe; tickCache = null; }
+    return m;
+  }
+  function elect(G, acc, t0, live) {
     var want = G.ink;
     if (!acc.pts) return;
     var diff = Math.abs(acc.fD - acc.fL), byPts = acc.fD < acc.fL ? 'dark' : acc.fL < acc.fD ? 'light' : null;
@@ -463,92 +519,116 @@
     else want = acc.worstD > acc.worstL ? 'dark' : 'light';
     if (want !== G.ink && G.primed) {
       var better = want === 'dark' ? acc.worstD / Math.max(0.01, acc.worstL) : acc.worstL / Math.max(0.01, acc.worstD);
-      var justified = strong || better >= 1.15, held = t0 - G.inkT < INK_HOLD;
-      if (!justified || held) {
-        if (justified && held) { clearTimeout(G.holdT); G.holdT = setTimeout(reink, INK_HOLD - (t0 - G.inkT) + 30); }
-        want = G.ink;
-      }
-    }
+      if (!(strong || better >= 1.15)) want = G.ink;
+      else if (live) { if (G.wantInk !== want) { G.wantInk = want; G.wantT = t0; } if (t0 - G.wantT < LIVE_HOLD) want = G.ink; }
+      else if (t0 - G.inkT < INK_DWELL) { clearTimeout(G.dwellT); G.dwellT = setTimeout(reink, INK_DWELL - (t0 - G.inkT) + 20); want = G.ink; }
+    } else G.wantInk = null;
     G.primed = true;
-    if (want !== G.ink) { G.ink = want; G.inkT = t0; }
-    /* 4.12.0: the halo answers the backdrop at once (it is legibility insurance while the ink is held): on while the elected ink
-     * fails AA on three or more of the group's sample points - a split backdrop, or a band the 3 s hold has not yet answered */
-    G.split = (G.ink === 'dark' ? acc.fD : acc.fL) >= 3;
+    if (want !== G.ink) { G.prevInk = G.ink; G.ink = want; G.inkT = t0; G.inkY = scrollTop(); G.wantInk = null; }
+    var fe = (G.ink === 'dark' ? acc.fD : acc.fL) / acc.pts, fo = (G.ink === 'dark' ? acc.fL : acc.fD) / acc.pts;
+    var splitNow = (fe >= 0.25 && fo >= 0.2) || fe >= 0.45;
+    if (splitNow) { G.split = true; G.splitOffT = 0; }
+    else if (G.split) { if (!G.splitOffT) { G.splitOffT = t0; clearTimeout(G.splitT); G.splitT = setTimeout(reink, SPLIT_OFF + 20); } else if (t0 - G.splitOffT >= SPLIT_OFF) { G.split = false; G.splitOffT = 0; } } /* the off-check re-runs on its own when nothing scrolls */
   }
-  function reinkInner(t0) {
-    tickId++;
-    var forced = null, sumL = 0, n = 0;
-    var acc = { logo: { fD: 0, fL: 0, pts: 0, worstD: Infinity, worstL: Infinity, wsum: 0, wL: 0, meanLe: 0.5 }, menu: { fD: 0, fL: 0, pts: 0, worstD: Infinity, worstL: Infinity, wsum: 0, wL: 0, meanLe: 0.5 }, burger: { fD: 0, fL: 0, pts: 0, worstD: Infinity, worstL: Infinity, wsum: 0, wL: 0, meanLe: 0.5 } };
-    for (var i = 0; i < inkState.length; i++) {
-      var s = inkState[i], el = s.el;
-      if (!el.offsetParent) continue;
-      var r = el.getBoundingClientRect(); if (!r.width) continue;
-      var pts = [[0.15, 0.18], [0.5, 0.18], [0.85, 0.18], [0.15, 0.5], [0.5, 0.5], [0.85, 0.5], [0.15, 0.84], [0.5, 0.84], [0.85, 0.84]];
-      var Ls = [], sds = [];
-      for (var p = 0; p < pts.length; p++) {
-        var sx = r.left + r.width * pts[p][0], sy = r.top + r.height * pts[p][1], rr = r;
-        var dsp = lensSource(sx, sy); /* 4.12.1: read the scene where the lens pulls it from (the media region moves with the point) */
-        if (dsp) { sx += dsp[0]; sy += dsp[1]; rr = { left: r.left + dsp[0], top: r.top + dsp[1], right: r.right + dsp[0], bottom: r.bottom + dsp[1], width: r.width, height: r.height }; }
-        var st; try { st = pointStats(sx, sy, rr); } catch (e) { st = null; }
-        if (!st) continue;
-        if (st.forced) { forced = st.forced; break; }
-        Ls.push(st.L); sds.push(st.sd || 0); if (st.media) anyMedia = true;
-      }
-      if (forced) break;
-      if (!Ls.length) continue;
-      var L = Ls.reduce(function (a, b) { return a + b; }, 0) / Ls.length;
-      var spread = Math.max.apply(null, Ls) - Math.min.apply(null, Ls);
-      var sd = sds.reduce(function (a, b) { return a + b; }, 0) / sds.length;
-      s.mixed = spread > 0.3 || sd > 0.2;
-      s.L = L; s.Lmin = Math.min.apply(null, Ls); s.Lmax = Math.max.apply(null, Ls); s.tick = tickId;
-      var g = (el === logo) ? 'logo' : (el === burger) ? 'burger' : 'menu', A = acc[g];
-      var tgt = (g === 'menu') ? 4.5 : 3;
-      var Le = cal(L), cd = contrast(Le, 'dark'), cl = contrast(Le, 'light');
-      if (cd < A.worstD) A.worstD = cd; if (cl < A.worstL) A.worstL = cl;
-      for (var q = 0; q < Ls.length; q++) { var Lq = cal(Ls[q]); if (contrast(Lq, 'dark') < tgt) A.fD++; if (contrast(Lq, 'light') < tgt) A.fL++; }
-      A.pts += Ls.length;
-      var w = r.width * r.height; A.wsum += w; A.wL += w * Le;
-      sumL += L; n++;
-    }
-    if (n) {
-      var avg = sumL / n, t = tone;
+  function apply(m, t0) {
+    for (var wi = 0; wi < m.words.length; wi++) { var wd = m.words[wi], s = inkState[wd.i]; s.L = wd.L; s.Lmin = wd.Lmin; s.Lmax = wd.Lmax; s.mixed = wd.mixed; s.tick = tickId; }
+    if (m.n) {
+      var avg = m.sumL / m.n, t = tone;
       if (tone === 'dark' && avg > 0.56) t = 'light';
       if (tone === 'light' && avg < 0.40) t = 'dark';
       if (t !== tone) { tone = t; nav.setAttribute('data-tone', t); nav.dispatchEvent(new CustomEvent('thx-nav-tone', { detail: t })); }
     }
     for (var k in GROUPS) {
-      var G = GROUPS[k], A2 = acc[k];
-      if (forced) { G.ink = forced === 'light' ? 'dark' : 'light'; G.primed = true; G.split = false; }
-      else { A2.meanLe = A2.wsum ? A2.wL / A2.wsum : 0.5; electGroup(G, A2, t0); }
+      var G = GROUPS[k];
+      if (m.forced) {
+        var fw = m.forced === 'light' ? 'dark' : 'light'; G.split = false;
+        if (G.primed && fw !== G.ink && t0 - G.inkT < INK_DWELL) { clearTimeout(G.dwellT); G.dwellT = setTimeout(reink, INK_DWELL - (t0 - G.inkT) + 20); } /* a forced tone answers to the same dwell */
+        else if (fw !== G.ink) { G.prevInk = G.ink; G.ink = fw; G.inkT = t0; }
+        G.primed = true;
+      }
+      else elect(G, m.acc[k], t0, m.live);
       if (groupEls[k]) { groupEls[k].setAttribute('data-ink', G.ink); if (G.split) groupEls[k].setAttribute('data-split', 'true'); else groupEls[k].removeAttribute('data-split'); }
     }
     /* the bar-level ink (progress hairline, API consumers) follows the menu on desktop and the mark on phones */
     var lead = (groupEls.menu && groupEls.menu.offsetParent) ? GROUPS.menu.ink : GROUPS.logo.ink;
     if (lead !== ink) { ink = lead; inkT = t0; }
     nav.setAttribute('data-ink', ink);
+    anyMedia = m.media; anyLive = m.live;
+  }
+  function reink() {
+    if (nav.getAttribute('data-open') === 'true') return;
+    var t0 = now(), y = scrollTop(), k = memoKey(y), m = null;
+    if (memoDirty || memoW !== window.innerWidth) { memoClear(); memoW = window.innerWidth; }
+    if (!anyLive && memo.has(k)) m = memo.get(k);
+    else { m = measure(0); if (!m.live && !m.forced && !m.invalid) memo.set(k, m); }
+    apply(m, t0);
     lastTickMs = now() - t0;
-    tickCache = null;
-    schedMedia();
+    schedMedia(); schedPrefill();
+  }
+  /* 4.10.1: a media copy (poster / CORS image / first video frame) arriving is new information - the election that ran without it
+   * was blind, so it is not protected by the dwell. 4.13.0: it also drops the memo. settle() (verifiers) is the same call. */
+  function reinkFresh() { memoClear(); inkT = -1e9; for (var k in GROUPS) { GROUPS[k].inkT = -1e9; GROUPS[k].wantInk = null; GROUPS[k].wantT = -1e9; } reink(); }
+  /* a video starting or stopping (Home resumes autoplay on scroll, pauses it out of view) changes what is under the bar but is not
+   * new information about a still scene: the memo goes, the dwell stays - otherwise every play/pause let a second flip land 150 ms
+   * after the first (seen in the scripted-scroll recordings) */
+  function reinkMedia() { memoClear(); reink(); }
+  /* look-ahead: at idle, solve every 8 px of the current viewport above and below the bar, nearest first, so the next scroll
+   * finds its answers already in the memo. Cancelled the moment the page moves (the next reink schedules it again). */
+  function schedPrefill() { clearTimeout(prefillT); prefillT = setTimeout(startPrefill, 140); }
+  function startPrefill() {
+    if (prefillIdle || document.hidden || nav.getAttribute('data-open') === 'true' || !window.requestIdleCallback) return;
+    var y0 = scrollTop(), vh = window.innerHeight, tries = [];
+    for (var d = MEMO_STEP; d <= vh; d += MEMO_STEP) { tries.push(d); if (y0 - d >= 0) tries.push(-d); }
+    prefillY = y0;
+    prefillIdle = requestIdleCallback(function step(dl) {
+      var t0 = now();
+      while (tries.length && (dl.timeRemaining() > 6 || dl.didTimeout)) {
+        if (scrollTop() !== prefillY || memoDirty) { tries = []; break; }
+        var d = tries.shift(), k = memoKey(prefillY + d);
+        if (memo.has(k)) continue;
+        var m = measure(d);
+        if (m.invalid) { if (d > 0) tries = tries.filter(function (x) { return x < 0; }); else tries = tries.filter(function (x) { return x > 0; }); continue; }
+        if (!m.live && !m.forced) memo.set(k, m);
+        if (now() - t0 > 14) break;
+      }
+      prefillIdle = 0;
+      if (tries.length) prefillIdle = requestIdleCallback(step, { timeout: 600 });
+    }, { timeout: 600 });
   }
   function schedMedia() {
     clearTimeout(inkTimer);
-    if (!anyMedia || document.hidden) return;
-    inkInterval = lastTickMs > 6 ? Math.min(900, inkInterval * 1.4) : Math.max(320, inkInterval * 0.8);
-    inkTimer = setTimeout(reink, inkInterval);
+    if (!anyLive || document.hidden) return;
+    inkTimer = setTimeout(reink, lastTickMs > 8 ? LIVE_POLL * 2 : LIVE_POLL);
   }
-  document.addEventListener('visibilitychange', function () { if (!document.hidden) reink(); });
-  setInterval(function () { if (!document.hidden && nav.getAttribute('data-open') !== 'true') reink(); }, INK_HOLD); /* 4.12.0 (owner): the 3 s background re-check, scroll or no scroll */
-  API.reink = reink; API.retone = reink; API.settle = reinkFresh; /* 4.12.0: verifiers measure the settled ink without waiting out the 3 s hold */
+  /* the memo answers to the page: anything added or removed outside the bar, or a source swapped, drops it */
+  try {
+    var lensSvg = document.getElementById('thx-lens-svg') || (mapImg && mapImg.ownerSVGElement);
+    new MutationObserver(function (muts) {
+      for (var i = 0; i < muts.length; i++) { var tg = muts[i].target; if (tg === nav || nav.contains(tg) || (lensSvg && lensSvg.contains(tg))) continue; memoDirty = true; clearTimeout(dirtyT); dirtyT = setTimeout(reink, 160); return; }
+    }).observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ['src', 'srcset', 'hidden', 'poster'] });
+  } catch (e) {}
+  /* 3 s self-check: re-measure the current position and, if the memo disagrees with the page, start over */
+  setInterval(function () {
+    if (document.hidden || nav.getAttribute('data-open') === 'true') return;
+    var k = memoKey(scrollTop()), old = memo.get(k);
+    if (!old || memoDirty) { if (memoDirty) memoClear(); reink(); return; }
+    var m = measure(0), off = false;
+    for (var g in old.acc) { var a = old.acc[g], b = m.acc[g]; if (Math.abs(a.fD - b.fD) > 2 || Math.abs(a.fL - b.fL) > 2 || a.pts !== b.pts) off = true; }
+    if (off || m.live !== old.live || m.forced !== old.forced) { memoClear(); reink(); }
+  }, 3000);
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) reinkFresh(); });
+  API.reink = reink; API.retone = reink; API.settle = reinkFresh; /* verifiers: measure and elect at once, memo dropped */
   API.inks = function () { return inkState.map(function (s) { var g = (s.el === logo) ? 'logo' : (s.el === burger) ? 'burger' : 'menu'; return { text: (s.el.textContent || s.el.getAttribute('aria-label') || '').trim().slice(0, 24), ink: GROUPS[g].ink, group: g, L: s.L, Lmin: s.Lmin, Lmax: s.Lmax, mixed: s.mixed }; }); };
-  API.ink = function () { return { ink: ink, tone: tone, logo: GROUPS.logo.ink, menu: GROUPS.menu.ink, burger: GROUPS.burger.ink, split: { logo: GROUPS.logo.split, menu: GROUPS.menu.split, burger: GROUPS.burger.split }, hold: INK_HOLD }; };
+  API.ink = function () { return { ink: ink, tone: tone, logo: GROUPS.logo.ink, menu: GROUPS.menu.ink, burger: GROUPS.burger.ink, split: { logo: GROUPS.logo.split, menu: GROUPS.menu.split, burger: GROUPS.burger.split }, live: anyLive, memo: memo.size, dwell: INK_DWELL, liveHold: LIVE_HOLD }; };
+  API.memo = function () { return { size: memo.size, keys: Array.from(memo.keys()).map(function (k) { return k * MEMO_STEP; }) }; };
   API.tickMs = function () { return lastTickMs; };
   API.lensSource = lensSource;
   API.debugPoint = function (x, y, w) { tickCache = new Map(); var pe = nav.style.pointerEvents; nav.style.pointerEvents = 'none'; var r = { left: x - (w || 60) / 2, top: y - 8, width: w || 60, height: 16, right: x + (w || 60) / 2, bottom: y + 8 }; var st; try { st = pointStats(x, y, r); } finally { nav.style.pointerEvents = pe; } tickCache = null; return st; };
   API.setTone = function (t) { tone = t === 'light' ? 'light' : 'dark'; nav.setAttribute('data-tone', tone); };
-  window.addEventListener('thx-nav-retone', reink);
-  document.addEventListener('DOMContentLoaded', reink);
-  window.addEventListener('load', function () { reink(); setTimeout(reink, 600); setTimeout(reink, 2000); });
-  document.querySelectorAll('video').forEach(function (v) { v.addEventListener('loadeddata', reinkFresh, { once: true }); v.addEventListener('play', reink); });
+  window.addEventListener('thx-nav-retone', reinkFresh);
+  document.addEventListener('DOMContentLoaded', reinkFresh);
+  window.addEventListener('load', function () { reinkFresh(); setTimeout(reinkFresh, 600); setTimeout(reinkFresh, 2000); });
+  document.querySelectorAll('video').forEach(function (v) { v.addEventListener('loadeddata', reinkFresh, { once: true }); v.addEventListener('play', reinkMedia); v.addEventListener('pause', reinkMedia); });
   reink(); sched();
 
   /* ---------- 5. edge lensing (Chromium only; capability + frame-budget gated) ---------- */

@@ -1,6 +1,6 @@
 // Phase 11 motion verifier. Usage: node p11_verify.js [--prod]  (staging by default; fresh context per page; GPU flags for the nav)
 const { chromium, devices } = require('playwright');
-const gateFill = async (pg, iso) => { const [y, m, d] = iso.split('-'); if (await pg.$('#sc-gate-y')) { await pg.fill('#sc-gate-m', m); await pg.fill('#sc-gate-d', d); await pg.fill('#sc-gate-y', y); } else await pg.fill('#sc-gate-dob', iso); }; /* scouting 2.3.0: the date is three segments (month / day / year, locale order); #sc-gate-dob is the hidden composite */
+const gateFill = async (pg, iso) => { try { const ok = await pg.$('#sc-gate-safety-ok'); if (ok && await ok.isVisible()) { await ok.click(); await pg.waitForTimeout(450); } } catch (e) {} /* scouting 2.4.0: the safety stage first */ const [y, m, d] = iso.split('-'); if (await pg.$('#sc-gate-y')) { await pg.fill('#sc-gate-m', m); await pg.fill('#sc-gate-d', d); await pg.fill('#sc-gate-y', y); } else await pg.fill('#sc-gate-dob', iso); }; /* scouting 2.3.0: the date is three segments (month / day / year, locale order); #sc-gate-dob is the hidden composite */
 const fs = require('fs'), path = require('path');
 const PROD = process.argv.includes('--prod'); const BASE = PROD ? 'https://www.theodyx.com' : 'https://nhq.webflow.io';
 const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36';
