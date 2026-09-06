@@ -92,7 +92,7 @@ async function textContrast(page, sel) {
       const worstEl = per.reduce((a, b) => a.worst10 < b.worst10 ? a : b);
       const altWorst = Math.min(...per.map(p => p.other));            /* maximin: the other ink's worst word at this step */
       const disagree = per.some(p => p.other > p.mean * 1.15) && per.some(p => p.mean > p.other * 1.15); /* the words genuinely prefer different inks */
-      const unanimous = new Set(inks.filter((v, i) => !flips[i])).size === 1; /* 4.7.0: a word may carry its own ink when a plate would not save it */
+      const unanimous = new Set(inks.slice(1)).size === 1; /* 4.11.0: the menu words share one ink; the mark (index 0) and the burger elect their own */
       const wordMin = Math.min(...per.filter(p => p.sel !== '.thx-nav-logo').map(p => p.mean)); const logoMean = Math.min(...per.filter(p => p.sel === '.thx-nav-logo').map(p => p.mean), 99);
       minWord = Math.min(minWord, wordMin); minLogo = Math.min(minLogo, logoMean);
       const maximinOK = mn >= 0.85 * altWorst || mn >= 4.5;          /* chosen ink's worst word is (near) the best achievable worst word */
@@ -102,7 +102,7 @@ async function textContrast(page, sel) {
   }
   results.sweep = sweep;
   const notUnanimous = sweep.filter(s => !s.unanimous), notMaximin = sweep.filter(s => !s.maximinOK && !s.disagree); /* 4.9.2+: at boundary steps the majority-ink rule legitimately overrides the maximin (the ink that saves more words wins) */
-  check('ONE ink for every word + logo at every 50px step (unanimous black or white)', notUnanimous.length === 0, { steps: sweep.length, offenders: notUnanimous.slice(0, 5).map(s => [s.y, s.inks]) });
+  check('ONE ink for every menu word at every 50px step (the mark and the burger may differ, 4.11.0)', notUnanimous.length === 0, { steps: sweep.length, offenders: notUnanimous.slice(0, 5).map(s => [s.y, s.inks]) });
   check('≥95% of steps wear the maximin ink (the colour whose worst word still reads best, ≥85% of the alternative)', notMaximin.length <= Math.ceil(0.05 * sweep.length), { off: notMaximin.length, of: sweep.length, sample: notMaximin.slice(0, 5).map(s => [s.y, s.inks, s.mean, s.altWorst]) });
   /* 4.9.1 (owner decision): the glass never changes shade - no plates, no scrim, only the ink flips - so AA is enforced wherever the backdrop agrees with itself, and boundary steps (the words disagree about the backdrop) are reported. */
   /* a step is 'capped' when neither ink could reach AA for its worst word (a mid-tone photo under one word while another sits on white): the clear glass has no answer, so it is reported, not failed */

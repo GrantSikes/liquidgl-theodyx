@@ -1,4 +1,4 @@
-/*! theodyx-nav.css v4.10.0 (2026-09-05) — clear liquid-glass nav. The bar is one continuous lens: transparent glass
+/*! theodyx-nav.css v4.11.0 (2026-09-05) — clear liquid-glass nav. The bar is one continuous lens: transparent glass
  * whose whole surface bends what is behind it (Chromium: SVG displacement in backdrop-filter, strongest at the
  * bevel, per-channel dispersion), a specular rim lit from the pill's own geometry, a colour bleed that takes on the
  * hues around it, and colour enhancement. The words, the logo and the burger share ONE ink — pure white or pure
@@ -54,6 +54,9 @@ pointer-events:none;z-index:0;overflow:hidden;transition:background-color 360ms 
 .thx-nav-menu a,.thx-nav-logo,.thx-nav-burger{color:var(--thx-ink-light);text-shadow:none} /* 4.8.0 (Phase 11 EASE-02): no transition shorthand here — it reset the logo/menu longhands above (hover scale + fill snapped) */
 .thx-nav[data-ink="dark"] .thx-nav-menu a,.thx-nav[data-ink="dark"] .thx-nav-logo,.thx-nav[data-ink="dark"] .thx-nav-burger{color:var(--thx-ink-dark)}
 .thx-nav[data-ink="light"] .thx-nav-menu a,.thx-nav[data-ink="light"] .thx-nav-logo,.thx-nav[data-ink="light"] .thx-nav-burger{color:var(--thx-ink-light)}
+/* 4.11.0: the mark, the menu and the burger carry their own ink (the script elects each from what is behind it); these outrank the bar-level ink above */
+.thx-nav .thx-nav-logo[data-ink="dark"],.thx-nav .thx-nav-burger[data-ink="dark"],.thx-nav .thx-nav-menu[data-ink="dark"] a{color:var(--thx-ink-dark)}
+.thx-nav .thx-nav-logo[data-ink="light"],.thx-nav .thx-nav-burger[data-ink="light"],.thx-nav .thx-nav-menu[data-ink="light"] a{color:var(--thx-ink-light)}
 .thx-nav a:focus-visible,.thx-nav button:focus-visible{outline:2px solid #000;outline-offset:2px;border-radius:999px;box-shadow:0 0 0 4px #fff,0 0 0 6px #000} /* Phase 9 KB-02/C-03: two-tone ring, cannot vanish against any ink or surface */
 /* --- burger --- */
 .thx-nav-burger{display:none;width:44px;height:44px;border:0;border-radius:999px;background:transparent;cursor:pointer;padding:0;align-items:center;justify-content:center;flex-direction:column;gap:5px;transition:background-color 200ms,color 240ms}
@@ -85,9 +88,9 @@ html.thx-nav-lock{overflow:hidden;padding-inline-end:var(--thx-sbw)}html.thx-nav
 .thx-nav.is-scrolled{transform:none}
 @media (max-width:899px){:root{--thx-nav-h:52px;--thx-nav-rim:8px}.thx-nav{width:min(720px,calc(100% - 1.5rem))}.thx-nav-bar{padding:4px;padding-inline-start:16px}.thx-nav-menu{display:none}.thx-nav-burger{display:inline-flex}}
 /* 4.10.0 phones: the mark and the burger sit over body text for most of a page, so the ink wears a soft legibility halo (a text effect on the ink itself - the glass is untouched): a pale halo under dark ink, a dark one under light ink */
-@media (max-width:899px){.thx-nav[data-ink="dark"] .thx-nav-logo svg,.thx-nav[data-ink="dark"] .thx-nav-burger span{filter:drop-shadow(0 0 1.5px rgba(255,255,255,.95)) drop-shadow(0 0 5px rgba(255,255,255,.7))}.thx-nav[data-ink="light"] .thx-nav-logo svg,.thx-nav[data-ink="light"] .thx-nav-burger span{filter:drop-shadow(0 0 1.5px rgba(0,0,0,.8)) drop-shadow(0 0 5px rgba(0,0,0,.5))}.thx-nav[data-open="true"] .thx-nav-logo svg,.thx-nav[data-open="true"] .thx-nav-burger span{filter:none}}
+@media (max-width:899px){.thx-nav .thx-nav-logo[data-ink="dark"] svg,.thx-nav .thx-nav-burger[data-ink="dark"] span{filter:drop-shadow(0 0 1.5px rgba(255,255,255,.95)) drop-shadow(0 0 5px rgba(255,255,255,.7))}.thx-nav .thx-nav-logo[data-ink="light"] svg,.thx-nav .thx-nav-burger[data-ink="light"] span{filter:drop-shadow(0 0 1.5px rgba(0,0,0,.8)) drop-shadow(0 0 5px rgba(0,0,0,.5))}.thx-nav[data-open="true"] .thx-nav-logo svg,.thx-nav[data-open="true"] .thx-nav-burger span{filter:none}}
 @media (min-width:900px){.thx-nav-panel{display:none}}
-@media (hover:none){.thx-nav-menu a:hover{background:transparent}.thx-nav-logo:hover{transform:none}}
+@media (hover:none){.thx-nav-menu a:hover{background:transparent}.thx-nav-logo:hover{transform:none}.thx-nav-burger:hover{background:transparent}} /* 4.11.0: the burger's hover chip stuck after a tap on touch screens */
 /* --- WebGL lens (theodyx-nav-gl.js, WebKit only): the canvas paints the lensed backdrop above the glass layer and below the rim and the words; once it is solid the CSS glass steps aside. Open sheet: canvas hidden, frosted CSS glass back --- */
 .thx-nav-gl{position:absolute;inset:0;width:100%;height:100%;border-radius:inherit;z-index:0;display:block;pointer-events:none;opacity:0;transition:opacity 480ms var(--thx-nav-ease)} /* a replaced element keeps its intrinsic (backing-store) size under inset:0 unless width/height are set */
 .thx-nav.is-gl .thx-nav-gl{opacity:1}
