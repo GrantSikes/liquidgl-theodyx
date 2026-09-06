@@ -1,4 +1,5 @@
-/*! theodyx-policies v3.2.0 — /policies/* in-page contents rail.
+/*! theodyx-policies v3.3.0 — /policies/* in-page contents rail.
+    3.3.0 (C-08): the active-item marker no longer overlaps the label below 480px (see the block at the end of this file).
     3.2.0 (Phase 9 accessibility): KB-08 activating a contents link moves focus to the section it scrolled to;
     SEM-25 "Contents" is a real heading that names the aside, and the 13 links are a list. */
 (function(){
@@ -59,3 +60,20 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 })();
 
 ;(function(){/* Phase 7 (thx-policies-p7): name the in-page contents landmark and mark the effective date up as <time> */try{var run=function(){document.querySelectorAll('nav.polx-side-list:not([aria-label]),.polx-side nav:not([aria-label])').forEach(function(n){n.setAttribute('aria-label','On this page');});var MO={january:1,february:2,march:3,april:4,may:5,june:6,july:7,august:8,september:9,october:10,november:11,december:12};var w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT,null),n,hits=[];while((n=w.nextNode())){if(/Effective(?: date)?:?\s+[A-Z][a-z]+ \d{1,2},\s*\d{4}/.test(n.nodeValue)&&!n.parentElement.closest('time')&&!n.parentElement.querySelector('time'))hits.push(n);}hits.forEach(function(n){var m=n.nodeValue.match(/([A-Z][a-z]+) (\d{1,2}),\s*(\d{4})/);if(!m||!MO[m[1].toLowerCase()])return;var iso=m[3]+'-'+String(MO[m[1].toLowerCase()]).padStart(2,'0')+'-'+String(m[2]).padStart(2,'0');var i=n.nodeValue.indexOf(m[0]);var t=document.createElement('time');t.setAttribute('datetime',iso);t.textContent=m[0];var after=n.splitText(i);after.nodeValue=after.nodeValue.slice(m[0].length);n.parentNode.insertBefore(t,after);});};if(document.readyState!=='loading')run();else document.addEventListener('DOMContentLoaded',run);setTimeout(run,1500);}catch(e){}})();
+
+/* ---------- C-08: the contents marker must not sit on top of the label on phones ----------
+   The active contents item is drawn with box-shadow:inset 3px 0 0 currentColor, i.e. a bar
+   painted inside the link's own left edge. Every breakpoint reserves a gutter for it -
+   14px at >=992px, 10px from 480px up - except Webflow's <=479px one, which resets the
+   link to padding:6px 0. With no left padding the 3px bar lands on the glyphs, so on an
+   iPhone the white bar sat across the "1" of "1. Personal Data we collect".
+   Restore the 480px breakpoint's own 10px gutter below 480px. The rail is inside an
+   overflow:auto column, so the marker has to stay inside the link box rather than being
+   offset out of it. Nothing at 480px and up changes. */
+(function(){try{
+if(!/^\/policies\//.test(location.pathname))return;
+if(document.getElementById('thx-polx-marker-gutter'))return;
+var st=document.createElement('style');st.id='thx-polx-marker-gutter';
+st.textContent='@media (max-width:479px){html body a.polx-side-link{padding-left:10px!important}}';
+(document.head||document.documentElement).appendChild(st);
+}catch(e){}})();

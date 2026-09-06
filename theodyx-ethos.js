@@ -1,4 +1,5 @@
-/*! theodyx-ethos v1.2.0 - re-hosted from Webflow on 2026-09-05; source of truth is now this repo.
+/*! theodyx-ethos v1.3.0 - C-02: the article/ethos hero title now clears the nav pill on phones (see the block at the end of this file).
+   1.2.0 - re-hosted from Webflow on 2026-09-05; source of truth is now this repo.
    Phase 11 motion: REVEAL-03/REVEAL-08 the .ethx-rvl scroll-reveal system and its 3 s /
    catch() safety nets are gone - article content is visible at once. RM-01 the .ethx-down
    jump and RM-02 the carousel glide() read prefers-reduced-motion live and jump instantly
@@ -51,4 +52,43 @@ q('.ethx-down').forEach(function(d){d.setAttribute('aria-label','Skip to the art
    Scoped to videos with no controls, which never includes the inline
    .ethx-vidwrap player this file builds above. */
 q('video.ethx-media').forEach(function(v){if(!v.hasAttribute('controls'))v.setAttribute('aria-hidden','true')});
+}catch(e){}})();
+
+/* ---------- C-02: the hero title must clear the fixed nav pill on phones ----------
+   The Webflow template embed sizes the hero at 72svh on touch (and <=767px) with
+   overflow:hidden, and lays .ethx-heroinner out as position:absolute; inset:0 with
+   justify-content:flex-end and padding-top:40px. Absolute inner + fixed hero height
+   means the hero can never grow, so as soon as the H1 + dek + jump arrow are taller
+   than the hero box, flex-end overflows the START edge: the H1 climbs to a negative
+   top and interleaves with the nav wordmark (measured -139px at 320x568, -7px at
+   375x667, +10px at 767x700). 40px of top padding is below the pill's 64px bottom
+   edge anyway, so even the non-overflowing widths had no guaranteed clearance.
+
+   Fix, phones only: put the inner back in flow and bottom-align it from the hero
+   itself (flex column + justify-content:flex-end), so the look is unchanged while
+   the hero is free to grow past its min-height instead of clipping; and floor the
+   inner's top padding at nav-bottom + 16px = --thx-nav-top + --thx-nav-h + 16px.
+   min-height mirrors whatever the embed's height rule resolves to at that width
+   (72svh on touch and <=767px, 100svh for a 768-899px window), so nothing moves
+   where the content already fitted. Desktop (>=900px, fine pointer) is untouched. */
+(function(){try{
+if(document.getElementById('thx-ethx-heroclear'))return;
+if(!document.querySelector('.ethx-heroinner'))return;
+var BASE='html body .ethx-hero.ethx-hero{height:auto!important;display:flex!important;flex-direction:column!important;justify-content:flex-end!important}'
+ +'html body .ethx-heroinner{position:relative!important;inset:auto!important;'
+ +'padding-top:calc(var(--thx-nav-top,12px) + var(--thx-nav-h,52px) + 16px)!important}'
+ /* the embed opens the hero block with a 200px top margin on the H1. In the old absolute
+    box that margin was pure overflow - flex-end simply pushed it off the top edge - but in
+    flow it would add 200px of real height and drag the whole hero down. The padding above
+    is the clearance now, so the leading margin goes. Everything else (the embed's -42px
+    bottom margin below 480px included) is left alone, which reproduces the current
+    geometry to the pixel on every width where the content already fitted. */
+ +'html body .ethx-heroinner > :first-child{margin-top:0!important}';
+var st=document.createElement('style');st.id='thx-ethx-heroclear';
+st.textContent=
+  '@media (max-width:899px){'+BASE+'html body .ethx-hero.ethx-hero{min-height:100svh}'
+   +'html.xp-touch body .ethx-hero.ethx-hero{min-height:72svh}}'
+ +'@media (max-width:767px){html body .ethx-hero.ethx-hero{min-height:72svh}}'
+ +'@media (hover:none) and (pointer:coarse){'+BASE+'html body .ethx-hero.ethx-hero{min-height:72svh}}';
+(document.body||document.documentElement).appendChild(st);
 }catch(e){}})();
