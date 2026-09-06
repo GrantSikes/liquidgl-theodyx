@@ -53,6 +53,8 @@ const SPRING = /cubic-bezier\(0\.22, 1, 0\.36, 1\)/;
     check('RM-01: hero down-arrow jumps instantly under prefers-reduced-motion', rm === 'no-arrow' || rm.instant, rm); await ctx.close(); }
   // 4. scouting + cookies
   { const { page, ctx, errors } = await open('/scouting', { settle: 2500 });
+    /* owner 2026-09-05: the age-verification dialog is up on arrival and the consent banner defers to it (cookies 1.8.0) - answer the gate first */
+    await page.fill('#sc-gate-dob', (new Date().getFullYear() - 22) + '-06-15'); await page.click('#sc-gate-age-go'); await sleep(900);
     const sc = await page.evaluate(() => ({ all: [...document.querySelectorAll('.sc-chip, .sc-btn, .sc-input, .sc-select, #sc-submit')].map(e => getComputedStyle(e).transition).filter(t => /all/.test(t)).length, drop: (() => { const d = document.getElementById('sc-mediakit'); return d ? d.tagName : null; })() }));
     check('EASE-03: no transition:all on scouting controls', sc.all === 0, sc.all);
     const photoT = await page.evaluate(() => { const i = document.querySelector('.sc-photo img'); return i ? getComputedStyle(i).transition : 'no-photo'; });

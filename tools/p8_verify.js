@@ -5,7 +5,7 @@ const prod = process.argv.includes('--prod');
 const R = []; const ok = (n, c, d) => R.push({ n, c: !!c, d: d || '' });
 const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128 Safari/537.36 thx-p8';
 async function main() {
-  const br = await chromium.launch(); let ctx = await br.newContext({ userAgent: UA });
+  const br = await chromium.launch({ channel: process.env.PW_CHANNEL || undefined }); let ctx = await br.newContext({ userAgent: UA }); /* PW_CHANNEL=chrome for the H.264 video checks (Playwright's Chromium has no proprietary codecs) */
   async function page(path, fn, opts) {
     opts = opts || {};
     const mobile = opts.viewport && opts.viewport.width < 600;

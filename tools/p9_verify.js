@@ -29,9 +29,9 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     const html = await page.content();
     const lines = fs.readFileSync(HEAD_MIN, 'utf8').split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('<!--'));
     const norm = t => t.replace(/ (crossorigin|defer|data-thx-robots)(?=[ >])/g, ' $1=""'); const H = norm(html); const missing = lines.filter(l => !H.includes(norm(l)) && !html.includes(l));
-    check('head v4.11.2 banner is live', html.includes('Theodyx head code · v4.11.2'));
+    check('head v4.11.3 banner is live', html.includes('Theodyx head code · v4.11.3'));
     check('every line of site-head.min.html appears in the page', missing.length === 0, { missing: missing.length, first: missing[0] && missing[0].slice(0, 120) });
-    for (const [f, sha] of [['theodyx-nav.js', 'f656d91bc67eadc7e304c8905a81ac5be3e2d50c'], ['nv2pagesf.js', '6613fa29f87593a2d12cc9f4fb97f35103a791f5'], ['theodyx-cookies.js', '75c55eb6bf0a969abd0dcfa19bd51b84cb392022'], ['theodyx-article-fx.js', '1ada34cade7b358f3a40225a8913b5b8d7935a2d']]) {
+    for (const [f, sha] of [['theodyx-nav.js', '093656986ea77c63f9d1dec760db4715a1c92d6f'], ['nv2pagesf.js', 'c654fd90ad0d8f1985167b695a18ed9a8be87f7d'], ['theodyx-cookies.js', '8f07b13f736da64cb6b36af45800192ff3b6e3b3'], ['theodyx-article-fx.js', '1ada34cade7b358f3a40225a8913b5b8d7935a2d']]) {
       const re = new RegExp('<script src="https://cdn\\.jsdelivr\\.net/gh/GrantSikes/liquidgl-theodyx@' + sha + '/' + f.replace('.', '\\.') + '" integrity="sha384-[^"]+" crossorigin="anonymous" defer(="")?>');
       check('footer tag pinned: ' + f + ' @' + sha.slice(0, 7), re.test(html));
     }
