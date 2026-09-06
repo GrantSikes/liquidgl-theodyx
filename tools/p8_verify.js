@@ -38,7 +38,7 @@ async function main() {
   });
   await page('/', async (p, raw, reqs) => {
     const v = raw.match(/<video[^>]*class="hero-video"[^>]*>/) || raw.match(/<video[^>]*hero-video[^>]*>/);
-    ok('home: hero video = 12 s loop, preload=none + data-thx-src (Phase 10: attached after the LCP)', v && /data-thx-src="[^"]*theodyx-hero-720-loop\.mp4"/.test(v[0]) && /preload="none"/.test(v[0]) && !/\ssrc="/.test(v[0]), v && v[0].slice(0, 160));
+    ok('home: hero video = the full film with its soundtrack (owner 2026-09-05), preload=none + data-thx-src, attached after the LCP; phones get the 480p full rendition', v && /data-thx-src="[^"]*\/theodyx-hero-720\.mp4"/.test(v[0]) && /data-thx-src-mobile="[^"]*theodyx-hero-480-full\.mp4"/.test(v[0]) && /preload="none"/.test(v[0]) && !/\ssrc="/.test(v[0]), v && v[0].slice(0, 160));
     ok('home: theodyx-cine.js + home-fx present once', scriptTags(raw).filter(s => /theodyx-cine\.js/.test(s.src)).length === 1 && scriptTags(raw).filter(s => /theodyx-home-fx\.js/.test(s.src)).length === 1, '');
     ok('home: stories 1.2.1 from jsDelivr with integrity', /liquidgl-theodyx@8ae1e1a[^"]*theodyx-stories\.js"[^>]*integrity=/.test(raw), '');
     const playing = await p.evaluate(() => { const v = document.querySelector('video.hero-video'); return v ? { paused: v.paused, src: (v.currentSrc || '').slice(-28), muted: v.muted } : null; });
@@ -67,7 +67,7 @@ async function main() {
       ok(`scouting ${vp.width}: CLS < 0.05`, cls < 0.05, String(cls));
       ok(`scouting ${vp.width}: Turnstile not loaded before the gate clears`, !reqs.some(u => /challenges\.cloudflare\.com\/turnstile/.test(u)), '');
       ok(`scouting ${vp.width}: qrcode not loaded before success`, !reqs.some(u => /qrcode/.test(u)), '');
-      const gate = await p.evaluate(() => ({ cls: document.documentElement.className, safety: !!document.getElementById('sc-safety'), overlay: [...document.querySelectorAll('[id^="sc-gate"]')].some(e => getComputedStyle(e).position === 'fixed' && getComputedStyle(e).display !== 'none') })); ok(`scouting ${vp.width}: Phase 10 - no modal gate, inline safety section present`, gate.safety && !gate.overlay && !/sc-(gated|open)/.test(gate.cls), JSON.stringify(gate));
+      const gate = await p.evaluate(() => ({ cls: document.documentElement.className, safety: !!document.getElementById('sc-safety'), overlay: [...document.querySelectorAll('[id^="sc-gate"]')].some(e => getComputedStyle(e).position === 'fixed' && getComputedStyle(e).display !== 'none') })); ok(`scouting ${vp.width}: owner 2026-09-05 - the age-verification dialog is up on arrival (fixed overlay), inline safety section present`, gate.safety && gate.overlay && /sc-gated/.test(gate.cls), JSON.stringify(gate));
     }, { viewport: vp, wait: 3000 });
   }
   await page('/', async (p) => { const link = await p.evaluate(() => { const a = document.querySelector('[data-thx-cookie-prefs]'); if (!a) return null; const r = a.getBoundingClientRect(); const cs = getComputedStyle(a); return { w: r.width, h: r.height, disp: cs.display, vis: cs.visibility }; }); ok('mobile 390: Cookie Preferences link visible', link && link.disp !== 'none' && link.w > 0 && link.h > 0, JSON.stringify(link)); }, { viewport: { width: 390, height: 844 }, wait: 3500 });
