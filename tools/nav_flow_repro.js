@@ -12,7 +12,7 @@ let pass = 0, fail = 0; const check = (n, ok, d) => { console.log((ok ? 'PASS ' 
   await page.goto(O + '/', { waitUntil: 'load' }); await sleep(2500);
   if (!LIVE) await page.addStyleTag({ content: fs.readFileSync(ROOT + 'theodyx-nav.css', 'utf8') });
   const v = await page.evaluate(() => ({ v: window.__thxNav.v, i: window.__thxNav.ink(), tick: window.__thxNav.tickMs() }));
-  check('nav 4.13.x loaded: dwell 260, live hold 900', /^4\.13\./.test(v.v) && v.i.dwell === 260 && v.i.liveHold === 900, v);
+  check('nav 4.13+ loaded: dwell 260, live hold 900', /^4\.1[3-9]/.test(v.v) && v.i.dwell === 260 && v.i.liveHold === 900, v);
   // live video at the top
   const liveTop = await page.evaluate(async () => { const vid = document.querySelector('video'); try { await vid.play(); } catch (e) {} await new Promise(r => setTimeout(r, 900)); window.__thxNav.reink(); return { live: window.__thxNav.ink().live, paused: vid.paused, rs: vid.readyState, memo: window.__thxNav.ink().memo }; });
   check('a playing hero video under the bar is read as live (polled, not memoised)', liveTop.live === true || liveTop.paused || liveTop.rs < 2, liveTop);
