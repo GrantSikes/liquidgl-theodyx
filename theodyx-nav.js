@@ -1,4 +1,4 @@
-/*! theodyx-nav.js v4.9.4 (2026-09-05) — behaviours for the clear liquid-glass nav (#thx-nav).
+/*! theodyx-nav.js v4.10.0 (2026-09-05) — behaviours for the clear liquid-glass nav (#thx-nav).
  * One unanimous ink (every word, the logo and the burger flip together between pure white and pure black, chosen
  * from what is behind all of them: the ink whose worst word still reads best, with hysteresis and a dwell). 4.9.1:
  * the glass itself never changes - the per-word/menu plates and the legibility scrim of 4.7-4.8 are gone; only the
@@ -11,7 +11,7 @@
   if (window.__thxNav) return;
   var nav = document.getElementById('thx-nav');
   if (!nav) return;
-  var API = window.__thxNav = { v: '4.9.4' };
+  var API = window.__thxNav = { v: '4.10.0' };
   var I18N = window.__thxI18n; function T(k) { return (I18N && I18N.t) ? I18N.t(k) : ({ 'nav.open': 'Open menu', 'nav.close': 'Close menu' })[k] || k; } /* Phase 6: locale runtime (nv2pagesf) keyed by <html lang> */
   var doc = document.documentElement, body = document.body;
   var glass = nav.querySelector('.thx-nav-glass');
@@ -517,14 +517,17 @@
   /* Tunables (live: __thxNav.lens({scale:70,...})). Profile T(d) over distance d from the rounded edge: a rim term
    * (smoothstep^rimK over the outer rimW*h, the bevel) plus a body term that runs all the way to the centre line
    * (sign < 0 = the centre magnifies like a thick slab), so the whole surface bends — no flat inset panel. */
-  var LENS = { scale: 112, rim: 0.9, rimW: 0.58, rimK: 1.25, body: -0.6, bodyK: 1.5, disp: 0.34, dispW: 0.4, dispBody: 0.05, sat: 1.9, blur: 0.45, spec: 0.5, specW: 0.24, bleed: 0.9, bleedBlur: 20, light: [-0.55, -0.83], light2: [0.55, 0.83] }; /* 4.4: turned up — deeper centre magnification, wider bevel, more dispersion, saturation and colour bleed. 4.5: dispersion lives at the edge — disp fades in over the outer dispW of the bevel, dispBody is a whisper in the body — one map per channel, so text under the body no longer splits into three colours */
+  var LENS = { scale: 112, rim: 1.0, rimW: 0.58, rimK: 1.25, body: -0.6, bodyK: 1.5, disp: 0.55, dispW: 0.55, dispBody: 0.06, sat: 1.1, blur: 0.45, spec: 0.8, specW: 0.3, bleed: 1.0, bleedBlur: 26, bleedSat: 1.8, light: [-0.55, -0.83], light2: [0.55, 0.83] }; /* 4.10.0 (owner: "turn up the light effects for colour blending, no frosting"): dispersion .34 -> .55 over a wider band, specular .5 -> .8 on a wider rim, bleed .9 -> 1.0 at 26 px; saturation 1.9 -> 1.1 so the glass takes the true colours of what is behind it instead of a neon slab over warm video (measured: the wall under the pill read rgb(214,132,101) raw and rgb(240,130,87) through the 1.9 lens); the bleed's own saturation moves here (bleedSat 1.8, was 2.2 in the CSS); blur stays .45 - the glass is never frosted */
+  var LENS_PHONE = { scale: 24, rim: -0.3, rimW: 0.22, body: 0, disp: 0.15 }; /* 4.10.0: on phones (and the lite tier) the pill sits over body text all the time, and the centre magnification refracted that text into a doubled, shifted mess under the mark - the phone lens bends only at the rim, and inward (rim < 0): an outward rim pulled the section above the bar into the pill as a pale block whenever a hard boundary sat just above it */
+  function lensParams() { return (lite || !mqDesk.matches) ? Object.assign({}, LENS, LENS_PHONE) : LENS; }
   var mapW = 0, mapH = 0, mapURLs = ['', '', ''], mapRetry = 0;
   var svgNS = 'http://www.w3.org/2000/svg';
   function fe(name, attrs) { var e = document.createElementNS(svgNS, name); for (var k in attrs) e.setAttribute(k, attrs[k]); return e; }
-  function buildFilters(w, h) {
+  function buildFilters(w, h, P) {
     /* rebuilds #thx-lens (full: three displacement passes = per-channel dispersion) and #thx-lens-lite (one pass) */
     var svg = mapImg && mapImg.ownerSVGElement; if (!svg) return false;
-    var S = LENS.scale, D = LENS.disp, cm = function (r, g, b, res, inp) { return fe('feColorMatrix', { 'in': inp, type: 'matrix', values: r + ' 0 0 0 0  0 ' + g + ' 0 0 0  0 0 ' + b + ' 0 0  0 0 0 1 0', result: res }); };
+    P = P || LENS;
+    var S = P.scale, D = P.disp, cm = function (r, g, b, res, inp) { return fe('feColorMatrix', { 'in': inp, type: 'matrix', values: r + ' 0 0 0 0  0 ' + g + ' 0 0 0  0 0 ' + b + ' 0 0  0 0 0 1 0', result: res }); };
     var build = function (id, full) {
       var f = svg.querySelector('#' + id); if (!f) { f = fe('filter', { id: id }); svg.appendChild(f); }
       while (f.firstChild) f.removeChild(f.firstChild);
@@ -532,7 +535,7 @@
       var mk = function (mid, url, res) { var img = fe('feImage', { id: mid, result: res, preserveAspectRatio: 'none', x: '0', y: '0', width: w, height: h }); img.setAttribute('href', url); try { img.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', url); } catch (e) {} f.appendChild(img); };
       mk(id + '-map', mapURLs[1], 'map'); /* green = the reference map (also the only map the lite filter uses) */
       if (full && D > 0) { mk(id + '-map-r', mapURLs[0], 'mapr'); mk(id + '-map-b', mapURLs[2], 'mapb'); }
-      f.appendChild(fe('feGaussianBlur', { 'in': 'SourceGraphic', stdDeviation: LENS.blur, result: 'src' }));
+      f.appendChild(fe('feGaussianBlur', { 'in': 'SourceGraphic', stdDeviation: P.blur, result: 'src' }));
       if (full && D > 0) {
         f.appendChild(fe('feDisplacementMap', { 'in': 'src', in2: 'mapr', scale: S, xChannelSelector: 'R', yChannelSelector: 'G', result: 'dr' }));
         f.appendChild(fe('feDisplacementMap', { 'in': 'src', in2: 'map', scale: S, xChannelSelector: 'R', yChannelSelector: 'G', result: 'dg' }));
@@ -543,7 +546,7 @@
       } else {
         f.appendChild(fe('feDisplacementMap', { 'in': 'src', in2: 'map', scale: S, xChannelSelector: 'R', yChannelSelector: 'G', result: 'd' }));
       }
-      f.appendChild(fe('feColorMatrix', { 'in': 'd', type: 'saturate', values: LENS.sat }));
+      f.appendChild(fe('feColorMatrix', { 'in': 'd', type: 'saturate', values: P.sat }));
     };
     build('thx-lens', true); build('thx-lens-lite', false);
     mapImg = document.getElementById('thx-lens-map'); mapImgLite = document.getElementById('thx-lens-map-lite');
@@ -557,20 +560,22 @@
     if (h > 160 || w < 200 || !/url\(|blur\(/.test(getComputedStyle(glass).backdropFilter || '')) { clearTimeout(mapRetry); mapRetry = setTimeout(function () { buildMap(force); }, 150); return; } /* stylesheet not applied yet (unstyled header) — never bake a map for the wrong geometry */
     if (!force && w === mapW && h === mapH) return;
     mapW = w; mapH = h;
+    var P = lensParams();
     /* The lens pulls content in from OUTSIDE the pill, but a backdrop-filter only captures what is under its own box,
      * so the glass is enlarged by `pad` on every side (and clipped back to the pill with clip-path). The map covers
      * the enlarged box; the pill geometry sits centred in it. */
-    var pad = Math.ceil(LENS.scale / 2) + 4;
+    var pad = Math.ceil(P.scale / 2) + 4;
     /* The capture box must never leave the viewport: Chromium clips a backdrop-filter to the visible area and then stretches
      * the map over what is left, which shifts the whole lens. The top pad is therefore capped at the bar's own offset, and
      * upward samples are clamped to the viewport edge (see below). */
     var padT = Math.max(2, Math.min(pad, Math.floor(nr.top) - 1));
     nav.style.setProperty('--thx-lens-pad', pad + 'px'); nav.style.setProperty('--thx-lens-pad-t', padT + 'px');
-    nav.style.setProperty('--thx-nav-bleed', String(LENS.bleed)); nav.style.setProperty('--thx-nav-bleed-blur', LENS.bleedBlur + 'px');
+    nav.style.setProperty('--thx-nav-bleed', String(P.bleed)); nav.style.setProperty('--thx-nav-bleed-blur', P.bleedBlur + 'px');
+    if (tint) { var tbf = 'blur(' + P.bleedBlur + 'px) saturate(' + (P.bleedSat || 1.8) + ') brightness(1.04)'; tint.style.webkitBackdropFilter = tbf; tint.style.backdropFilter = tbf; } /* 4.10.0: the bleed saturation is a tunable, not a stylesheet literal */
     var W = w + 2 * pad, Hh = h + pad + padT;
     var R = Math.min(h / 2, parseFloat(getComputedStyle(nav).borderTopLeftRadius) || h / 2);
-    var H = h / 2, Rb = Math.max(12, h * LENS.rimW);
-    var L1 = LENS.light, L2 = LENS.light2;
+    var H = h / 2, Rb = Math.max(12, h * P.rimW);
+    var L1 = P.light, L2 = P.light2;
     /* signed distance to the rounded-rect edge (positive inside) + outward normal, for a point (px,py) relative to the pill's top-left */
     function geo(px, py) {
       var cx = px - w / 2, cy = py - h / 2;
@@ -588,21 +593,21 @@
     var c = document.createElement('canvas'); c.width = cw; c.height = ch;
     var ctx = c.getContext('2d'); if (!ctx) { refractOK = false; return; }
     var imgs = [ctx.createImageData(cw, ch), ctx.createImageData(cw, ch), ctx.createImageData(cw, ch)];
-    var sx = W / cw, sy = Hh / ch, D = LENS.disp, Db = LENS.dispBody || 0, kk = [-1, 0, 1];
+    var sx = W / cw, sy = Hh / ch, D = P.disp, Db = P.dispBody || 0, kk = [-1, 0, 1];
     for (var y = 0; y < ch; y++) {
       for (var x = 0; x < cw; x++) {
         var g = geo((x + 0.5) * sx - pad, (y + 0.5) * sy - padT), dist = g[0];
         var i = (y * cw + x) * 4, tr = 0, tb = 0, dw = 0;
         if (dist > 0) {
-          tr = Math.max(0, Math.min(1, 1 - dist / Rb)); tr = tr * tr * (3 - 2 * tr); tr = Math.pow(tr, LENS.rimK);
-          tb = Math.max(0, Math.min(1, 1 - dist / H)); tb = Math.pow(tb, LENS.bodyK);
-          dw = Math.max(0, Math.min(1, 1 - dist / (Rb * (LENS.dispW || 0.4)))); dw = dw * dw * (3 - 2 * dw); /* colour splits only at the outer edge of the bevel */
+          tr = Math.max(0, Math.min(1, 1 - dist / Rb)); tr = tr * tr * (3 - 2 * tr); tr = Math.pow(tr, P.rimK);
+          tb = Math.max(0, Math.min(1, 1 - dist / H)); tb = Math.pow(tb, P.bodyK);
+          dw = Math.max(0, Math.min(1, 1 - dist / (Rb * (P.dispW || 0.4)))); dw = dw * dw * (3 - 2 * dw); /* colour splits only at the outer edge of the bevel */
         }
         for (var ci = 0; ci < 3; ci++) {
           var T = 0;
           if (dist > 0) {
-            T = Math.max(-1, Math.min(1, tr * LENS.rim * (1 + kk[ci] * D * dw) + tb * LENS.body * (1 + kk[ci] * Db)));
-            if (T > 0 && g[2] < 0) { var reach = 2 * (padT + dist) / (LENS.scale * -g[2]); if (T > reach) T = reach; } /* an upward sample may not go above the viewport */
+            T = Math.max(-1, Math.min(1, tr * P.rim * (1 + kk[ci] * D * dw) + tb * P.body * (1 + kk[ci] * Db)));
+            if (T > 0 && g[2] < 0) { var reach = 2 * (padT + dist) / (P.scale * -g[2]); if (T > reach) T = reach; } /* an upward sample may not go above the viewport */
           }
           var dd = imgs[ci].data;
           dd[i] = Math.round(128 + g[1] * T * 127); dd[i + 1] = Math.round(128 + g[2] * T * 127); dd[i + 2] = 128; dd[i + 3] = 255;
@@ -618,9 +623,9 @@
       for (var y2 = 0; y2 < ch2; y2++) {
         for (var x2 = 0; x2 < cw2; x2++) {
           var g2 = geo((x2 + 0.5) * sx2, (y2 + 0.5) * sy2), d2 = Math.max(0, g2[0]), nx = g2[1], ny = g2[2];
-          var t2 = Math.max(0, Math.min(1, 1 - d2 / Math.max(8, h * LENS.specW))); t2 = t2 * t2 * (3 - 2 * t2); t2 = Math.pow(t2, LENS.rimK); /* the highlight lives on a narrower band than the lens, so a dark page stays dark through the body */
+          var t2 = Math.max(0, Math.min(1, 1 - d2 / Math.max(8, h * P.specW))); t2 = t2 * t2 * (3 - 2 * t2); t2 = Math.pow(t2, P.rimK); /* the highlight lives on a narrower band than the lens, so a dark page stays dark through the body */
           var s1 = Math.max(0, nx * L1[0] + ny * L1[1]), s2 = Math.max(0, nx * L2[0] + ny * L2[1]);
-          var spec = (Math.pow(s1, 2.4) * 1.0 + Math.pow(s2, 2.4) * 0.42) * Math.pow(t2, 0.85) * LENS.spec;
+          var spec = (Math.pow(s1, 2.4) * 1.0 + Math.pow(s2, 2.4) * 0.42) * Math.pow(t2, 0.85) * P.spec;
           var edge = d2 < 1.2 ? 0.40 : 0;
           var j = (y2 * cw2 + x2) * 4;
           hd[j] = 255; hd[j + 1] = 255; hd[j + 2] = 255; hd[j + 3] = Math.round(255 * Math.min(1, spec * 0.92 + edge));
@@ -629,7 +634,7 @@
       hctx.putImageData(himg, 0, 0);
       rim.style.backgroundImage = 'url(' + hc.toDataURL('image/png') + ')'; nav.classList.add('has-spec');
     }
-    if (!buildFilters(W, Hh)) { refractOK = false; return; }
+    if (!buildFilters(W, Hh, P)) { refractOK = false; return; }
     nav.classList.add('is-refract'); nav.classList.toggle('is-lite', lite);
   }
   /* colour bleed: the glass takes on the colours around it (blurred, saturated, masked to the outer body) */
@@ -657,7 +662,7 @@
   if (refractOK) { raf(function () { idle(function () { buildMap(); }); }); frameBudget(); window.addEventListener('resize', function () { raf(function () { buildMap(); }); }, { passive: true }); window.addEventListener('load', function () { buildMap(); }); if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { buildMap(); }); }
   API.lens = function (opts) {
     if (opts && typeof opts === 'object') { for (var k in opts) if (k in LENS) LENS[k] = opts[k]; if (refractOK) buildMap(true); }
-    return { on: nav.classList.contains('is-refract'), lite: nav.classList.contains('is-lite'), map: [mapW, mapH], params: JSON.parse(JSON.stringify(LENS)) };
+    return { on: nav.classList.contains('is-refract'), lite: nav.classList.contains('is-lite'), map: [mapW, mapH], params: JSON.parse(JSON.stringify(LENS)), phone: JSON.parse(JSON.stringify(LENS_PHONE)), active: JSON.parse(JSON.stringify(lensParams())) };
   };
   API.setLite = function (on) { lite = !!on; nav.classList.toggle('is-lite', lite); };
 
