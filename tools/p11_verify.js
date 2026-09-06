@@ -1,5 +1,6 @@
 // Phase 11 motion verifier. Usage: node p11_verify.js [--prod]  (staging by default; fresh context per page; GPU flags for the nav)
 const { chromium, devices } = require('playwright');
+const gateFill = async (pg, iso) => { const [y, m, d] = iso.split('-'); if (await pg.$('#sc-gate-y')) { await pg.fill('#sc-gate-m', m); await pg.fill('#sc-gate-d', d); await pg.fill('#sc-gate-y', y); } else await pg.fill('#sc-gate-dob', iso); }; /* scouting 2.3.0: the date is three segments (month / day / year, locale order); #sc-gate-dob is the hidden composite */
 const fs = require('fs'), path = require('path');
 const PROD = process.argv.includes('--prod'); const BASE = PROD ? 'https://www.theodyx.com' : 'https://nhq.webflow.io';
 const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36';
@@ -54,7 +55,7 @@ const SPRING = /cubic-bezier\(0\.22, 1, 0\.36, 1\)/;
   // 4. scouting + cookies
   { const { page, ctx, errors } = await open('/scouting', { settle: 2500 });
     /* owner 2026-09-05: the age-verification dialog is up on arrival and the consent banner defers to it (cookies 1.8.0) - answer the gate first */
-    await page.fill('#sc-gate-dob', (new Date().getFullYear() - 22) + '-06-15'); await page.click('#sc-gate-age-go'); await sleep(900);
+    await gateFill(page, (new Date().getFullYear() - 22) + '-06-15'); await page.click('#sc-gate-age-go'); await sleep(900);
     const sc = await page.evaluate(() => ({ all: [...document.querySelectorAll('.sc-chip, .sc-btn, .sc-input, .sc-select, #sc-submit')].map(e => getComputedStyle(e).transition).filter(t => /all/.test(t)).length, drop: (() => { const d = document.getElementById('sc-mediakit'); return d ? d.tagName : null; })() }));
     check('EASE-03: no transition:all on scouting controls', sc.all === 0, sc.all);
     const photoT = await page.evaluate(() => { const i = document.querySelector('.sc-photo img'); return i ? getComputedStyle(i).transition : 'no-photo'; });

@@ -1,4 +1,16 @@
-/* theodyx-scouting 2.2.1 — closeAgeGate() dispatches a `thx-gate-closed` CustomEvent on document.
+/* theodyx-scouting 2.3.0 — the age-verification dialog, redesigned (owner, 2026-09-06: "more modern and
+ * sophisticated"). It is a full-bleed stage in the page's own ink now, not a grey card over a dimmed page:
+ * the mark top-left, a thin uppercase display title in the hero's own face, one line of lead, and the date
+ * of birth as three large numeral fields (month / day / year in the reader's locale order, numeric keypads,
+ * auto-advance, backspace back, a pasted date distributed) with the safety statement set beside the question
+ * on wide screens and between the title and the fields on phones. Same contract as 2.2.x: role="dialog"
+ * aria-modal, named by its heading, focus trapped, Escape unbound, the page inert and scroll-locked,
+ * html.sc-gated stamped before first paint (the page head now also paints the ink stage itself, so the hero
+ * never flashes behind the dialog), #sc-gate-dob still the composite YYYY-MM-DD value gateSubmit() reads,
+ * #sc-gate-age-go still the submit, #sc-gate-msg still the role="status" line, thx-gate-closed still
+ * dispatched on close. New: a 280 ms fade on the way out (reduced motion: none), an impossible date
+ * ("31 February") named as such, and the mark cloned from the site nav so the stage carries the brand.
+ * 2.2.1 — closeAgeGate() dispatches a `thx-gate-closed` CustomEvent on document.
  * The only listener is theodyx-cookies.js 1.8.0, which holds its consent banner back while this
  * dialog is up (the banner is fixed at z-index 9990 and arms on a timer; this dialog sits at 9500,
  * so the banner used to insert itself over the Continue button about six seconds after load) and
@@ -54,10 +66,10 @@
      stays byte-identical. The safety statement itself is sc.safety.body: legal copy, English in
      every locale until a person translates it. */
   var SCD_GATE = {
-    "en": {"sc.gate.eyebrow": "Theodyx \u2014 Safety", "sc.gate.title": "Before you apply", "sc.gate.dob": "Your date of birth", "sc.gate.go": "Continue", "sc.gate.note": "You must be {n} or older to apply directly. We use your date of birth only to check that."},
-    "es": {"sc.gate.eyebrow": "Theodyx \u2014 Seguridad", "sc.gate.title": "Antes de solicitar", "sc.gate.dob": "Tu fecha de nacimiento", "sc.gate.go": "Continuar", "sc.gate.note": "Debes tener {n} a\u00f1os o m\u00e1s para solicitar directamente. Solo usamos tu fecha de nacimiento para comprobarlo."},
-    "pt": {"sc.gate.eyebrow": "Theodyx \u2014 Seguran\u00e7a", "sc.gate.title": "Antes de se candidatar", "sc.gate.dob": "Sua data de nascimento", "sc.gate.go": "Continuar", "sc.gate.note": "Voc\u00ea precisa ter {n} anos ou mais para se candidatar diretamente. Usamos sua data de nascimento apenas para verificar isso."},
-    "fr": {"sc.gate.eyebrow": "Theodyx \u2014 S\u00e9curit\u00e9", "sc.gate.title": "Avant de postuler", "sc.gate.dob": "Votre date de naissance", "sc.gate.go": "Continuer", "sc.gate.note": "Vous devez avoir {n} ans ou plus pour postuler directement. Nous utilisons votre date de naissance uniquement pour le v\u00e9rifier."}
+    "en": {"sc.gate.eyebrow": "Theodyx \u2014 Safety", "sc.gate.title": "Before you apply", "sc.gate.dob": "Your date of birth", "sc.gate.go": "Continue", "sc.gate.note": "You must be {n} or older to apply directly. We use your date of birth only to check that.", "sc.gate.kicker": "Our Scouting", "sc.gate.lead": "One question before we read a word.", "sc.gate.m": "Month", "sc.gate.d": "Day", "sc.gate.y": "Year", "sc.gate.ph.m": "MM", "sc.gate.ph.d": "DD", "sc.gate.ph.y": "YYYY", "sc.gate.dobreal": "That date doesn\u2019t exist \u2014 check the day and month."},
+    "es": {"sc.gate.eyebrow": "Theodyx \u2014 Seguridad", "sc.gate.title": "Antes de solicitar", "sc.gate.dob": "Tu fecha de nacimiento", "sc.gate.go": "Continuar", "sc.gate.note": "Debes tener {n} a\u00f1os o m\u00e1s para solicitar directamente. Solo usamos tu fecha de nacimiento para comprobarlo.", "sc.gate.kicker": "Our Scouting", "sc.gate.lead": "Una pregunta antes de leer una sola palabra.", "sc.gate.m": "Mes", "sc.gate.d": "D\u00eda", "sc.gate.y": "A\u00f1o", "sc.gate.ph.m": "MM", "sc.gate.ph.d": "DD", "sc.gate.ph.y": "AAAA", "sc.gate.dobreal": "Esa fecha no existe: revisa el d\u00eda y el mes."},
+    "pt": {"sc.gate.eyebrow": "Theodyx \u2014 Seguran\u00e7a", "sc.gate.title": "Antes de se candidatar", "sc.gate.dob": "Sua data de nascimento", "sc.gate.go": "Continuar", "sc.gate.note": "Voc\u00ea precisa ter {n} anos ou mais para se candidatar diretamente. Usamos sua data de nascimento apenas para verificar isso.", "sc.gate.kicker": "Our Scouting", "sc.gate.lead": "Uma pergunta antes de lermos uma palavra.", "sc.gate.m": "M\u00eas", "sc.gate.d": "Dia", "sc.gate.y": "Ano", "sc.gate.ph.m": "MM", "sc.gate.ph.d": "DD", "sc.gate.ph.y": "AAAA", "sc.gate.dobreal": "Essa data n\u00e3o existe: confira o dia e o m\u00eas."},
+    "fr": {"sc.gate.eyebrow": "Theodyx \u2014 S\u00e9curit\u00e9", "sc.gate.title": "Avant de postuler", "sc.gate.dob": "Votre date de naissance", "sc.gate.go": "Continuer", "sc.gate.note": "Vous devez avoir {n} ans ou plus pour postuler directement. Nous utilisons votre date de naissance uniquement pour le v\u00e9rifier.", "sc.gate.kicker": "Our Scouting", "sc.gate.lead": "Une question avant de lire le moindre mot.", "sc.gate.m": "Mois", "sc.gate.d": "Jour", "sc.gate.y": "Ann\u00e9e", "sc.gate.ph.m": "MM", "sc.gate.ph.d": "JJ", "sc.gate.ph.y": "AAAA", "sc.gate.dobreal": "Cette date n\u2019existe pas : v\u00e9rifiez le jour et le mois."}
   };
   for (var __gl in SCD_GATE) { if (!SCD[__gl]) SCD[__gl] = {}; for (var __gk in SCD_GATE[__gl]) SCD[__gl][__gk] = SCD_GATE[__gl][__gk]; }
   var __I = window.__thxI18n; if (__I) { for (var __lc in SCD) __I.add(__lc, SCD[__lc]); }
@@ -299,9 +311,66 @@
     var p = document.createElement('p'); p.className = 'sc-gate-body'; p.textContent = T('sc.safety.body'); return p;
   }
 
+  /* 2.3.0: the segment order follows the reader's locale (MM DD YYYY for en-US, DD MM YYYY nearly everywhere else). */
+  function gateOrder() {
+    var lang = (document.documentElement.lang || 'en'), order = ['m', 'd', 'y'];
+    try {
+      var parts = new Intl.DateTimeFormat(lang, { year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(new Date(2000, 10, 20)), o = [];
+      parts.forEach(function (p) { if (p.type === 'month') o.push('m'); else if (p.type === 'day') o.push('d'); else if (p.type === 'year') o.push('y'); });
+      if (o.length === 3) order = o;
+    } catch (e) {}
+    return order;
+  }
+  var GATE_SEG = { m: { id: 'sc-gate-m', len: 2, ac: 'bday-month', lbl: 'sc.gate.m', ph: 'sc.gate.ph.m' }, d: { id: 'sc-gate-d', len: 2, ac: 'bday-day', lbl: 'sc.gate.d', ph: 'sc.gate.ph.d' }, y: { id: 'sc-gate-y', len: 4, ac: 'bday-year', lbl: 'sc.gate.y', ph: 'sc.gate.ph.y' } };
+  var GATE_ARROW = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 12h15M13 6l6 6-6 6"/></svg>';
+  function parsePastedDate(t, order) {
+    var iso = /(\d{4})-(\d{1,2})-(\d{1,2})/.exec(t); if (iso) return [iso[1], iso[2], iso[3]];
+    var m = /(\d{1,4})\D+(\d{1,2})\D+(\d{1,4})/.exec(t); if (!m) return null;
+    var a = [m[1], m[2], m[3]], yi = a[0].length === 4 ? 0 : a[2].length === 4 ? 2 : -1; if (yi < 0) return null;
+    var rest = yi === 0 ? [a[1], a[2]] : [a[0], a[1]], mFirst = order.indexOf('m') < order.indexOf('d');
+    return [a[yi], mFirst ? rest[0] : rest[1], mFirst ? rest[1] : rest[0]];
+  }
+  function gateCompose() {
+    var hid = $('sc-gate-dob'), sm = $('sc-gate-m'), sd = $('sc-gate-d'), sy = $('sc-gate-y'); if (!hid || !sm || !sd || !sy) return;
+    var v = '';
+    if (/^\d{1,2}$/.test(sm.value) && /^\d{1,2}$/.test(sd.value) && /^\d{4}$/.test(sy.value)) v = sy.value + '-' + ('0' + sm.value).slice(-2) + '-' + ('0' + sd.value).slice(-2);
+    hid.value = v;
+  }
+  function wireGateSegments(list, order) {
+    list.forEach(function (inp, i) {
+      var len = +inp.getAttribute('maxlength');
+      on(inp, 'input', function () {
+        var clean = inp.value.replace(/\D+/g, '').slice(0, len);
+        if (clean !== inp.value) inp.value = clean;
+        if (inp.getAttribute('aria-invalid') === 'true') { inp.removeAttribute('aria-invalid'); inp.classList.remove('is-bad'); gateMsg(''); }
+        gateCompose();
+        if (clean.length === len && list[i + 1] && document.activeElement === inp) focusEl(list[i + 1]);
+      });
+      on(inp, 'keydown', function (e) {
+        if (e.key === 'Backspace' && !inp.value && list[i - 1]) { e.preventDefault(); var p = list[i - 1]; focusEl(p); try { p.setSelectionRange(p.value.length, p.value.length); } catch (x) {} }
+        else if (e.key === 'ArrowLeft' && inp.selectionStart === 0 && inp.selectionEnd === 0 && list[i - 1]) { e.preventDefault(); focusEl(list[i - 1]); }
+        else if (e.key === 'ArrowRight' && inp.selectionStart === inp.value.length && list[i + 1]) { e.preventDefault(); focusEl(list[i + 1]); }
+      });
+      on(inp, 'paste', function (e) {
+        var t = ''; try { t = (e.clipboardData || window.clipboardData).getData('text'); } catch (x) {}
+        var full = parsePastedDate(t, order); if (!full) return;
+        e.preventDefault();
+        var sy = $('sc-gate-y'), sm = $('sc-gate-m'), sd = $('sc-gate-d');
+        if (sy) sy.value = full[0].slice(0, 4); if (sm) sm.value = ('0' + full[1]).slice(-2); if (sd) sd.value = ('0' + full[2]).slice(-2);
+        gateCompose(); focusEl(list[list.length - 1]);
+      });
+      on(inp, 'focus', function () { try { inp.select(); } catch (x) {} });
+    });
+  }
+  function resetGateFields() {
+    ['sc-gate-dob', 'sc-gate-m', 'sc-gate-d', 'sc-gate-y'].forEach(function (id) { var i = $(id); if (!i) return; i.value = ''; i.removeAttribute('aria-invalid'); i.classList.remove('is-bad'); });
+    gateMsg('');
+  }
+
   /* The native page still ships an (empty, display:none) #sc-gate-age div left over from 1.x, and the
-   * page's own <style id="sc-native-css"> block still positions it. Reuse that node — same id, same
-   * overlay treatment — and rebuild its contents around a date field instead of the old age select. */
+   * page's own <style id="sc-native-css"> block still positions it. Reuse that node — same id — and
+   * rebuild its contents: a full-bleed stage in the page's ink with the brand mark, the title, the
+   * statement and the three-segment date of birth. */
   function mountAgeGate() {
     if (!document.body) return null;
     var g = $('sc-gate-age');
@@ -316,47 +385,71 @@
     g.setAttribute('aria-labelledby', 'sc-gate-title');
     g.setAttribute('tabindex', '-1');
 
+    var light = document.createElement('div'); light.className = 'sc-gate-light'; light.setAttribute('aria-hidden', 'true'); g.appendChild(light);
+    /* the site nav sits beneath the stage, so the stage carries the mark itself (cloned from the nav; text if the nav is not there) */
+    var brand = document.createElement('div'); brand.className = 'sc-gate-brand'; brand.setAttribute('aria-hidden', 'true');
+    var navSvg = qs('.thx-nav-logo svg'); if (navSvg) brand.appendChild(navSvg.cloneNode(true)); else brand.textContent = 'Theodyx';
+    g.appendChild(brand);
+
     var form = document.createElement('form');
     form.className = 'sc-gate-inner sc-gate-form';   /* not .sc-form: neutralizeForms() must not touch it */
     form.setAttribute('novalidate', '');
 
-    var eb = document.createElement('span'); eb.className = 'sc-gate-eyebrow'; eb.textContent = T('sc.gate.eyebrow');
+    /* 1. the title */
+    var head = document.createElement('div'); head.className = 'sc-gate-head';
+    var kick = document.createElement('span'); kick.className = 'sc-gate-eyebrow sc-gate-kicker'; kick.textContent = T('sc.gate.kicker');
     var h = document.createElement('h2'); h.className = 'sc-gate-h'; h.id = 'sc-gate-title'; h.textContent = T('sc.gate.title');
-    form.appendChild(eb); form.appendChild(h);
-    form.appendChild(gateSafetyBody());
+    var lead = document.createElement('p'); lead.className = 'sc-gate-lead'; lead.textContent = T('sc.gate.lead');
+    head.appendChild(kick); head.appendChild(h); head.appendChild(lead);
+    form.appendChild(head);
 
-    var field = document.createElement('div'); field.className = 'sc-gate-field';
-    var lab = document.createElement('label'); lab.className = 'sc-label'; lab.setAttribute('for', 'sc-gate-dob');
-    lab.textContent = T('sc.gate.dob');
-    var inp = document.createElement('input');
-    inp.type = 'date'; inp.id = 'sc-gate-dob'; inp.className = 'sc-gate-input';
-    inp.setAttribute('autocomplete', 'bday');
-    inp.setAttribute('aria-describedby', 'sc-gate-msg sc-gate-note');
-    var ty = new Date();
-    inp.max = ty.getFullYear() + '-' + String(ty.getMonth() + 1).padStart(2, '0') + '-' + String(ty.getDate()).padStart(2, '0');
-    inp.min = (ty.getFullYear() - 100) + '-01-01';
-    field.appendChild(lab); field.appendChild(inp);
-    form.appendChild(field);
+    /* 2. the statement - before the question in the DOM (phones and screen readers meet it before the fields), beside it on wide screens */
+    var aside = document.createElement('aside'); aside.className = 'sc-gate-col sc-gate-col--safety'; aside.setAttribute('aria-label', T('sc.safety.eyebrow'));
+    var seb = document.createElement('span'); seb.className = 'sc-gate-eyebrow'; seb.textContent = T('sc.gate.eyebrow');
+    var sh = document.createElement('h3'); sh.className = 'sc-gate-h3'; sh.textContent = T('sc.safety.title');
+    aside.appendChild(seb); aside.appendChild(sh); aside.appendChild(gateSafetyBody());
+    form.appendChild(aside);
+
+    /* 3. the question */
+    var entry = document.createElement('div'); entry.className = 'sc-gate-entry';
+    var fset = document.createElement('fieldset'); fset.className = 'sc-gate-dob';
+    var lg = document.createElement('legend'); lg.className = 'sc-gate-legend'; lg.textContent = T('sc.gate.dob'); fset.appendChild(lg);
+    var row = document.createElement('div'); row.className = 'sc-gate-seg';
+    var order = gateOrder(), list = [];
+    order.forEach(function (k, i) {
+      var S = GATE_SEG[k];
+      if (i) { var sep = document.createElement('span'); sep.className = 'sc-gate-sep'; sep.setAttribute('aria-hidden', 'true'); sep.textContent = '/'; row.appendChild(sep); }
+      var cell = document.createElement('div'); cell.className = 'sc-gate-cell sc-gate-cell--' + k;
+      var inp = document.createElement('input');
+      inp.type = 'text'; inp.id = S.id; inp.className = 'sc-gate-input';
+      inp.setAttribute('inputmode', 'numeric'); inp.setAttribute('pattern', '[0-9]*'); inp.setAttribute('autocomplete', S.ac);
+      inp.setAttribute('maxlength', String(S.len)); inp.setAttribute('placeholder', T(S.ph)); inp.setAttribute('aria-describedby', 'sc-gate-msg sc-gate-note');
+      var lab = document.createElement('label'); lab.className = 'sc-gate-cell-l'; lab.setAttribute('for', S.id); lab.textContent = T(S.lbl);
+      cell.appendChild(inp); cell.appendChild(lab); row.appendChild(cell); list.push(inp);
+    });
+    fset.appendChild(row);
+    var hid = document.createElement('input'); hid.type = 'hidden'; hid.id = 'sc-gate-dob'; fset.appendChild(hid);   /* the composite YYYY-MM-DD, what gateSubmit() reads */
+    entry.appendChild(fset);
 
     /* role="status" and empty from the start, so the live region exists before it has anything to say */
     var msg = document.createElement('p'); msg.id = 'sc-gate-msg'; msg.className = 'sc-gate-err';
     msg.setAttribute('role', 'status');
-    form.appendChild(msg);
+    entry.appendChild(msg);
 
     var go = document.createElement('button');
-    go.type = 'submit'; go.id = 'sc-gate-age-go'; go.className = 'sc-gate-btn'; go.textContent = T('sc.gate.go');
-    form.appendChild(go);                             /* never disabled: an empty submit has to be able to explain itself */
+    go.type = 'submit'; go.id = 'sc-gate-age-go'; go.className = 'sc-gate-btn';
+    var goT = document.createElement('span'); goT.textContent = T('sc.gate.go'); go.appendChild(goT);
+    go.insertAdjacentHTML('beforeend', GATE_ARROW);
+    entry.appendChild(go);                            /* never disabled: an empty submit has to be able to explain itself */
 
     var note = document.createElement('p'); note.id = 'sc-gate-note'; note.className = 'sc-gate-note';
     note.textContent = T('sc.gate.note', { n: MIN_AGE });
-    form.appendChild(note);
+    entry.appendChild(note);
+    form.appendChild(entry);
 
     g.appendChild(form);
+    wireGateSegments(list, order);
     on(form, 'submit', function (e) { e.preventDefault(); gateSubmit(); });
-    on(inp, 'input', function () {
-      if (inp.getAttribute('aria-invalid') !== 'true') return;
-      inp.removeAttribute('aria-invalid'); inp.classList.remove('is-bad'); gateMsg('');
-    });
     return g;
   }
 
@@ -366,10 +459,12 @@
     if (text) m.classList.add('is-on'); else m.classList.remove('is-on');
   }
 
+  var gateCloseT = 0;
   function openAgeGate() {
     var g = mountAgeGate(); if (!g) return;
     var d = document.documentElement;
     d.classList.add('sc-gated'); d.classList.remove('sc-inelig');
+    clearTimeout(gateCloseT); g.classList.remove('is-leaving');
     g.classList.add('is-open');
     g.style.removeProperty('display');
     lockScroll(true);
@@ -379,9 +474,14 @@
 
   function closeAgeGate() {
     var g = $('sc-gate-age');
-    if (g) { g.classList.remove('is-open'); g.style.display = 'none'; }
     document.documentElement.classList.remove('sc-gated');
     lockScroll(false);
+    if (g) {
+      /* 2.3.0: the stage fades over 280 ms while the page it was covering settles in; reduced motion goes at once */
+      var done = function () { g.classList.remove('is-open', 'is-leaving'); g.style.display = 'none'; };
+      var rm = false; try { rm = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
+      if (rm) done(); else { g.classList.add('is-leaving'); clearTimeout(gateCloseT); gateCloseT = setTimeout(done, 300); }
+    }
     /* 2.2.1 — one line for the rest of the site. theodyx-cookies.js 1.8.0 holds its consent banner
      * back while this dialog is up (the banner is fixed at z-index 9990, this dialog at 9500, so it
      * used to land on top of Continue about six seconds after load) and offers it again on this
@@ -390,16 +490,28 @@
   }
 
   function gateSubmit() {
-    var inp = $('sc-gate-dob'); if (!inp) return;
-    var v = String(inp.value || '').trim();
+    var hid = $('sc-gate-dob'); if (!hid) return;
+    var sm = $('sc-gate-m'), sd = $('sc-gate-d'), sy = $('sc-gate-y'), segs = [sm, sd, sy].filter(Boolean);
+    var bad = [], v = String(hid.value || '').trim();
+    if (segs.length === 3) {
+      var mm = +sm.value, dd = +sd.value, yy = +sy.value, ty = new Date().getFullYear();
+      if (!/^\d{1,2}$/.test(sm.value) || mm < 1 || mm > 12) bad.push(sm);
+      if (!/^\d{1,2}$/.test(sd.value) || dd < 1 || dd > 31) bad.push(sd);
+      if (!/^\d{4}$/.test(sy.value) || yy < ty - 120 || yy > ty) bad.push(sy);
+      if (!bad.length) { var dt = new Date(yy, mm - 1, dd); if (dt.getMonth() !== mm - 1 || dt.getDate() !== dd) bad.push(sd); } /* 31 February */
+      v = bad.length ? '' : sy.value + '-' + ('0' + mm).slice(-2) + '-' + ('0' + dd).slice(-2);
+      hid.value = v;
+    }
     var a = /^\d{4}-\d{2}-\d{2}$/.test(v) ? ageFromDob(v) : null;
-    if (a == null || a < 0 || a > 120) {              /* empty, unparsed, in the future, or not a lifetime */
-      inp.setAttribute('aria-invalid', 'true'); inp.classList.add('is-bad');
-      gateMsg(T('sc.err.dob'));
-      focusEl(inp);
+    if (a == null || a < 0 || a > 120) {              /* empty, unparsed, impossible, in the future, or not a lifetime */
+      var empty = segs.filter(function (i) { return !i.value; });
+      var marks = bad.length ? bad : (empty.length ? empty : (segs.length ? segs : [hid]));
+      marks.forEach(function (i) { i.setAttribute('aria-invalid', 'true'); i.classList.add('is-bad'); });
+      gateMsg(T(bad.length && !empty.length ? 'sc.gate.dobreal' : 'sc.err.dob'));
+      focusEl(marks[0]);
       return;
     }
-    inp.removeAttribute('aria-invalid'); inp.classList.remove('is-bad'); gateMsg('');
+    segs.concat([hid]).forEach(function (i) { i.removeAttribute('aria-invalid'); i.classList.remove('is-bad'); }); gateMsg('');
     gates.age = a; gates.eligible = a >= MIN_AGE; gates.ageResolved = true; gates.gatePassed = true; gates.dob = v;
     persistGates();
     if (gates.eligible) { trk('age_eligible', null, true); trk('age_acknowledged', null, true); passGate(v); }
@@ -572,8 +684,7 @@
     bootU14 = false;
     var d = $('sc-dob'); if (d) { d.value = ''; persistForm(); }
     restoreU14Home();
-    var gi = $('sc-gate-dob');
-    if (gi) { gi.value = ''; gi.removeAttribute('aria-invalid'); gi.classList.remove('is-bad'); }
+    resetGateFields();
     openAgeGate();
   }
 
@@ -1525,39 +1636,76 @@
          embed, which sits in the body and declares #sc-gate-age{display:none}. */
       'html.sc-gated #sc-form-you,html.sc-gated #sc-form-work,html.sc-gated #sc-form-consent{display:none!important;}',
       '#sc-gate-age{display:none;}',
-      '#sc-gate-age.is-open{display:flex;position:fixed;inset:0;z-index:9500;overflow-y:auto;align-items:flex-start;justify-content:center;padding:24px 20px;background:rgba(10,10,12,0.82);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);color:var(--sc-paper);font-family:"Objectivity","Archivo",sans-serif;}',
+      /* 2.3.0: a full-bleed stage in the page's ink. The page's own <style id="sc-native-css"> declares
+         #sc-gate-age{background:rgba(14,14,15,.92);backdrop-filter:blur(6px)} - both restated here. */
+      '#sc-gate-age.is-open{display:block;position:fixed;inset:0;z-index:9500;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0;background:var(--sc-ink);-webkit-backdrop-filter:none;backdrop-filter:none;color:var(--sc-paper);font-family:"Objectivity","Archivo",sans-serif;}',
       '#sc-gate-age:focus{outline:none;}',
-      /* margin:auto centres the card when there is room and refuses to clip its top when there is
-         not — which align-items:center would do on a 390 px viewport. */
-      '#sc-gate-age .sc-gate-inner{margin:auto;width:100%;max-width:560px;padding:clamp(30px,5vw,44px);background:var(--sc-ink);border:1px solid rgba(242,241,236,0.22);text-align:start;}',
-      '#sc-gate-age.is-open .sc-gate-inner{animation:sc-gate-in 240ms var(--sc-ease,cubic-bezier(.22,1,.36,1)) both;}',
-      '@keyframes sc-gate-in{from{opacity:0;transform:translate3d(0,12px,0) scale(.985);}to{opacity:1;transform:none;}}',
-      '#sc-gate-age .sc-gate-eyebrow{margin-bottom:16px;}',
-      '#sc-gate-age .sc-gate-h{font-size:clamp(26px,3.4vw,38px);margin:0;}',
-      '#sc-gate-age .sc-gate-body{font-size:15px;line-height:1.65;margin-top:20px;}',
-      '.sc-gate-field{max-width:320px;margin:30px 0 0;}',
-      '.sc-gate-field .sc-label{display:block;font-family:"Space Mono","Mono",ui-monospace,monospace;font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:var(--sc-paper)!important;margin-bottom:8px;}',
-      '.sc-gate-input{width:100%;background:transparent;border:0;border-bottom:1px solid rgba(242,241,236,0.55);border-radius:0;padding:8px 0 10px;font-family:inherit;font-size:17px;color:var(--sc-paper);color-scheme:dark;-webkit-appearance:none;appearance:none;transition:border-color 160ms var(--sc-ease,cubic-bezier(.22,1,.36,1));}',
-      '.sc-gate-input:focus{outline:none;border-bottom-color:var(--sc-paper);border-bottom-width:1.5px;}',
-      '.sc-gate-input:focus-visible{outline:2px solid var(--sc-paper);outline-offset:4px;}',
-      '.sc-gate-input.is-bad{border-bottom-color:#FFB4AE;}',
-      '#sc-gate-msg{display:none;margin:14px 0 0;font-size:14px;line-height:1.5;color:#FFB4AE;}',
+      '#sc-gate-age.is-open.is-leaving{opacity:0;pointer-events:none;transition:opacity 280ms var(--sc-ease);}',
+      '.sc-gate-light{position:absolute;inset:0;pointer-events:none;background:radial-gradient(70% 55% at 18% 0%,rgba(242,241,236,.085) 0%,rgba(242,241,236,0) 65%),radial-gradient(50% 40% at 100% 100%,rgba(242,241,236,.045) 0%,rgba(242,241,236,0) 70%);}',
+      '.sc-gate-brand{position:absolute;top:max(22px,env(safe-area-inset-top,0px));inset-inline-start:clamp(22px,6vw,72px);height:22px;color:var(--sc-paper);font-family:"Objectivity","Archivo",sans-serif;font-weight:500;font-size:18px;letter-spacing:-.01em;line-height:22px;}',
+      '.sc-gate-brand svg{height:22px;width:auto;display:block;}',
+      '#sc-gate-age .sc-gate-inner{position:relative;box-sizing:border-box;min-height:100%;width:100%;max-width:1240px;margin:0 auto;padding:calc(max(22px,env(safe-area-inset-top,0px)) + 72px) clamp(22px,6vw,72px) clamp(40px,6vh,72px);display:grid;grid-template-columns:minmax(0,1fr);gap:clamp(32px,5vh,52px);align-content:center;background:none;border:0;text-align:start;}',
+      '#sc-gate-age .sc-gate-eyebrow{display:block;font-family:"Space Mono","Mono",ui-monospace,monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--sc-mute-ink);margin:0 0 22px;}',
+      '#sc-gate-age .sc-gate-kicker{display:flex;align-items:center;gap:14px;}',
+      '#sc-gate-age .sc-gate-kicker::before{content:"";width:28px;height:1px;background:var(--sc-mute-ink);}',
+      '#sc-gate-age .sc-gate-h{font-family:"Archivo","Theodyx Display Fallback","Theodyx Sans Fallback",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-weight:300;font-size:clamp(40px,6.2vw,88px);line-height:.96;letter-spacing:.012em;text-transform:uppercase;margin:0;text-wrap:balance;}',
+      '#sc-gate-age .sc-gate-lead{font-family:"Objectivity","Archivo",sans-serif;font-weight:300;font-size:clamp(18px,1.9vw,25px);line-height:1.4;color:rgba(242,241,236,.8);margin:20px 0 0;max-width:34ch;}',
+      '#sc-gate-age .sc-gate-col--safety{border-inline-start:1px solid rgba(242,241,236,.18);padding-inline-start:clamp(18px,2.4vw,32px);}',
+      '#sc-gate-age .sc-gate-h3{font-family:"Objectivity","Archivo",sans-serif;font-weight:500;font-size:clamp(17px,1.5vw,21px);line-height:1.25;letter-spacing:-.01em;margin:0 0 12px;}',
+      '#sc-gate-age .sc-gate-body{font-size:14px;line-height:1.7;margin:0;color:rgba(242,241,236,.74);max-width:46ch;}',
+      '#sc-gate-age .sc-gate-body a{color:var(--sc-paper);text-decoration:underline;text-underline-offset:3px;}',
+      '#sc-gate-age .sc-gate-body a:focus-visible{outline:2px solid var(--sc-paper);outline-offset:3px;}',
+      '.sc-gate-dob{border:0;padding:0;margin:0;min-width:0;}',
+      '.sc-gate-legend{display:block;padding:0;margin:0 0 16px;font-family:"Space Mono","Mono",ui-monospace,monospace;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--sc-mute-ink);}',
+      '.sc-gate-seg{display:flex;align-items:flex-end;gap:clamp(10px,1.6vw,22px);}',
+      '.sc-gate-cell{display:flex;flex-direction:column;gap:10px;}',
+      '.sc-gate-cell--m,.sc-gate-cell--d{width:clamp(66px,7vw,98px);}',
+      '.sc-gate-cell--y{width:clamp(116px,12vw,172px);}',
+      '#sc-gate-age .sc-gate-input{box-sizing:border-box;width:100%;margin:0;padding:0 0 10px;background:transparent;border:0;border-bottom:1px solid rgba(242,241,236,.32);border-radius:0;font-family:"Archivo","Theodyx Display Fallback",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-weight:300;font-size:clamp(34px,4.4vw,58px);line-height:1;letter-spacing:.02em;text-align:center;font-variant-numeric:tabular-nums;color:var(--sc-paper);caret-color:var(--sc-paper);-webkit-appearance:none;appearance:none;transition:border-color 160ms var(--sc-ease),box-shadow 160ms var(--sc-ease);}',
+      '#sc-gate-age .sc-gate-input::placeholder{color:rgba(242,241,236,.26);opacity:1;}',
+      '#sc-gate-age .sc-gate-input:focus{outline:none;border-bottom-color:var(--sc-paper);box-shadow:0 1px 0 0 var(--sc-paper);}',
+      '#sc-gate-age .sc-gate-input.is-bad{border-bottom-color:#FFB4AE;box-shadow:0 1px 0 0 #FFB4AE;}',
+      '.sc-gate-cell-l{font-family:"Space Mono","Mono",ui-monospace,monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--sc-mute-ink);text-align:center;}',
+      '.sc-gate-sep{align-self:flex-end;padding-bottom:34px;font-family:"Archivo","Theodyx Display Fallback",system-ui,sans-serif;font-weight:200;font-size:clamp(28px,3.6vw,48px);line-height:1;color:rgba(242,241,236,.28);}',
+      '#sc-gate-msg{display:none;margin:16px 0 0;font-size:14px;line-height:1.5;color:#FFB4AE;}',
       '#sc-gate-msg.is-on{display:block;}',
-      '#sc-gate-age .sc-gate-btn{margin-top:28px;}',
-      '#sc-gate-age .sc-gate-btn:focus-visible{outline:2px solid var(--sc-paper);outline-offset:3px;}',
-      '#sc-gate-age .sc-gate-note{margin-top:20px;}',
-      /* the statement is long and it is not going to be shortened — it is the point of the dialog.
-         On a phone it is set a step tighter so the date field is one short scroll away, not two. */
+      '#sc-gate-age .sc-gate-btn{display:inline-flex;align-items:center;gap:14px;margin:clamp(28px,4vh,40px) 0 0;padding:17px 26px 17px 30px;border-radius:999px;background:var(--sc-paper);color:var(--sc-ink);border:1px solid var(--sc-paper);font-family:"Space Mono","Mono",ui-monospace,monospace;font-size:12px;letter-spacing:.18em;text-transform:uppercase;cursor:pointer;}',
+      '#sc-gate-age .sc-gate-btn svg{display:block;transition:transform 160ms var(--sc-ease);}',
+      '#sc-gate-age .sc-gate-btn:hover:not(:disabled){background:transparent;color:var(--sc-paper);}',
+      '#sc-gate-age .sc-gate-btn:hover:not(:disabled) svg{transform:translateX(4px);}',
+      '#sc-gate-age .sc-gate-btn:focus-visible{outline:2px solid var(--sc-paper);outline-offset:4px;}',
+      '#sc-gate-age .sc-gate-note{font-family:"Space Mono","Mono",ui-monospace,monospace;font-size:11px;line-height:1.7;letter-spacing:.02em;color:var(--sc-mute-ink);margin:22px 0 0;max-width:48ch;}',
+      /* wide: the title above the question in the left column, the statement in the right column, bottom-aligned with the note */
+      '@media(min-width:900px){',
+      '#sc-gate-age .sc-gate-inner{grid-template-columns:minmax(0,7fr) minmax(300px,4fr);grid-template-rows:auto auto;column-gap:clamp(48px,7vw,120px);row-gap:clamp(36px,5vh,56px);align-items:end;}',
+      '#sc-gate-age .sc-gate-head{grid-column:1;grid-row:1;align-self:end;}',
+      '#sc-gate-age .sc-gate-entry{grid-column:1;grid-row:2;}',
+      '#sc-gate-age .sc-gate-col--safety{grid-column:2;grid-row:1/3;align-self:end;padding-bottom:4px;}',
+      '}',
+      /* one entrance: the stage is already painted by the page head; the mark, the title, the statement and the question rise in turn */
+      '@keyframes sc-gate-in{from{opacity:0;transform:translate3d(0,18px,0);}to{opacity:1;transform:none;}}',
+      '#sc-gate-age.is-open .sc-gate-brand,#sc-gate-age.is-open .sc-gate-head,#sc-gate-age.is-open .sc-gate-col--safety,#sc-gate-age.is-open .sc-gate-entry{animation:sc-gate-in 640ms var(--sc-ease,cubic-bezier(.22,1,.36,1)) both;}',
+      '#sc-gate-age.is-open .sc-gate-head{animation-delay:60ms;}',
+      '#sc-gate-age.is-open .sc-gate-entry{animation-delay:160ms;}',
+      '#sc-gate-age.is-open .sc-gate-col--safety{animation-delay:260ms;}',
       '@media(max-width:480px){',
-      '#sc-gate-age.is-open{padding:16px 12px;}',
-      '#sc-gate-age .sc-gate-inner{padding:26px 22px;}',
-      '#sc-gate-age .sc-gate-body{font-size:14px;line-height:1.6;margin-top:16px;}',
-      '.sc-gate-field{margin-top:24px;}',
+      '#sc-gate-age .sc-gate-inner{padding-top:calc(max(22px,env(safe-area-inset-top,0px)) + 60px);row-gap:26px;}',
+      '#sc-gate-age .sc-gate-h{font-size:clamp(36px,10.5vw,46px);}',
+      '#sc-gate-age .sc-gate-lead{font-size:17px;margin-top:14px;}',
+      '#sc-gate-age .sc-gate-eyebrow{margin-bottom:14px;}',
+      '#sc-gate-age .sc-gate-h3{font-size:16px;margin-bottom:10px;}',
+      '#sc-gate-age .sc-gate-body{font-size:13px;line-height:1.6;}',
+      '.sc-gate-legend{margin-bottom:12px;}',
+      '.sc-gate-cell--m,.sc-gate-cell--d{width:62px;}',
+      '.sc-gate-cell--y{width:112px;}',
+      '#sc-gate-age .sc-gate-btn{width:100%;justify-content:space-between;}',
       '}',
       '@media (prefers-reduced-motion: reduce){',
-      '#sc-gate-age.is-open .sc-gate-inner{animation:none;}',
+      '#sc-gate-age.is-open .sc-gate-brand,#sc-gate-age.is-open .sc-gate-head,#sc-gate-age.is-open .sc-gate-col--safety,#sc-gate-age.is-open .sc-gate-entry{animation:none;}',
+      '#sc-gate-age.is-open.is-leaving{transition:none;}',
       '.sc-gate-input{transition-duration:1ms!important;}',
       '}',
+      '@media (forced-colors:active){#sc-gate-age.is-open{background:Canvas;color:CanvasText;}#sc-gate-age .sc-gate-input{border-bottom-color:CanvasText;}#sc-gate-age .sc-gate-btn{border:1px solid ButtonText;}}',
       '@media (forced-colors: active){',
       '#sc-gate-age.is-open{background:Canvas;-webkit-backdrop-filter:none;backdrop-filter:none;}',
       '#sc-gate-age .sc-gate-inner{background:Canvas;border:1px solid CanvasText;}',

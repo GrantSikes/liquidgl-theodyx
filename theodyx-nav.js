@@ -1,4 +1,11 @@
-/*! theodyx-nav.js v4.11.1 (2026-09-05) — behaviours for the clear liquid-glass nav (#thx-nav).
+/*! theodyx-nav.js v4.12.0 (2026-09-06) — behaviours for the clear liquid-glass nav (#thx-nav).
+ * 4.12.0 (owner, 2026-09-06): the words change TOGETHER - the per-word ink of 4.11.1 is gone (it flipped three of five words by
+ * their mean luminance over the Home cards and left "Clients" black across a dark photograph while "Partners" stayed white);
+ * each group (mark / menu / burger) holds its ink for 3 s after a flip (INK_HOLD, "a 3 second timer for background adjust") and
+ * re-checks on a 3 s tick as well as on scroll; while the elected ink fails AA on part of a group (a split backdrop, or the
+ * 3 s hold) the group wears a thin text halo of the other ink (text only - the glass never changes). Lens: colour refracts
+ * through the edges - dispersion 1.2 over the whole bevel, a .15 body split, saturate 1.2, specular 1.0, the colour bleed at
+ * full strength (saturate 2.6 at 30 px) hugging the rim; phones: dispersion .35 on the inward bevel.
  * One unanimous ink (every word, the logo and the burger flip together between pure white and pure black, chosen
  * from what is behind all of them: the ink whose worst word still reads best, with hysteresis and a dwell). Owner
  * decisions (2026-09-05): the glass itself never changes - no plates, no scrim, no frost, no blur; only the words
@@ -20,7 +27,7 @@
   if (window.__thxNav) return;
   var nav = document.getElementById('thx-nav');
   if (!nav) return;
-  var API = window.__thxNav = { v: '4.11.1' };
+  var API = window.__thxNav = { v: '4.12.0' };
   var I18N = window.__thxI18n; function T(k) { return (I18N && I18N.t) ? I18N.t(k) : ({ 'nav.open': 'Open menu', 'nav.close': 'Close menu' })[k] || k; } /* Phase 6: locale runtime (nv2pagesf) keyed by <html lang> */
   var doc = document.documentElement, body = document.body;
   var glass = nav.querySelector('.thx-nav-glass');
@@ -438,10 +445,10 @@
    * against, whatever the mean says); a clear majority of points decides, a near tie falls back to the maximin on the worst
    * word and then the mean; hysteresis + a 600 ms dwell per group, a dwell-vetoed flip re-checked when the dwell expires,
    * and the first real election never gated. The glass itself never changes - only the ink (owner decision). */
-  var GROUPS = { logo: { ink: 'light', inkT: 0, primed: false, els: logo ? [logo] : [] }, menu: { ink: 'light', inkT: 0, primed: false, els: [] }, burger: { ink: 'light', inkT: 0, primed: false, els: burger ? [burger] : [] } };
-  nav.querySelectorAll('.thx-nav-menu a').forEach(function (a) { GROUPS.menu.els.push(a); });
+  var INK_HOLD = 3000; /* 4.12.0 (owner): a group keeps its ink for 3 s after a flip; a flip the hold vetoed is re-checked the moment it expires */
+  var GROUPS = { logo: { ink: 'light', inkT: 0, primed: false, holdT: 0, split: false, els: logo ? [logo] : [] }, menu: { ink: 'light', inkT: 0, primed: false, holdT: 0, split: false, els: [] }, burger: { ink: 'light', inkT: 0, primed: false, holdT: 0, split: false, els: burger ? [burger] : [] } };
+  nav.querySelectorAll('.thx-nav-menu a').forEach(function (a) { GROUPS.menu.els.push(a); a.removeAttribute('data-ink'); }); /* 4.12.0: no per-word ink - every word in the menu changes together */
   var groupEls = { logo: logo, menu: nav.querySelector('.thx-nav-menu'), burger: burger };
-  (function () { var st = document.createElement('style'); st.id = 'thx-nav-word-ink'; st.textContent = '.thx-nav .thx-nav-menu a[data-ink="dark"][data-ink]{color:var(--thx-ink-dark)}.thx-nav .thx-nav-menu a[data-ink="light"][data-ink]{color:var(--thx-ink-light)}'; document.head.appendChild(st); })(); /* 4.11.1: per-word override rules outrank the group rule by specificity, whatever the stylesheet order */
   function electGroup(G, acc, t0) {
     var want = G.ink;
     if (!acc.pts) return;
@@ -452,14 +459,17 @@
     else want = acc.worstD > acc.worstL ? 'dark' : 'light';
     if (want !== G.ink && G.primed) {
       var better = want === 'dark' ? acc.worstD / Math.max(0.01, acc.worstL) : acc.worstL / Math.max(0.01, acc.worstD);
-      var justified = strong || better >= 1.15;
-      if (!justified || t0 - G.inkT < 600) {
-        if (justified && t0 - G.inkT < 600) { clearTimeout(dwellT); dwellT = setTimeout(reink, 600 - (t0 - G.inkT) + 30); }
+      var justified = strong || better >= 1.15, held = t0 - G.inkT < INK_HOLD;
+      if (!justified || held) {
+        if (justified && held) { clearTimeout(G.holdT); G.holdT = setTimeout(reink, INK_HOLD - (t0 - G.inkT) + 30); }
         want = G.ink;
       }
     }
     G.primed = true;
     if (want !== G.ink) { G.ink = want; G.inkT = t0; }
+    /* 4.12.0: the halo answers the backdrop at once (it is legibility insurance while the ink is held): on while the elected ink
+     * fails AA on three or more of the group's sample points - a split backdrop, or a band the 3 s hold has not yet answered */
+    G.split = (G.ink === 'dark' ? acc.fD : acc.fL) >= 3;
   }
   function reinkInner(t0) {
     tickId++;
@@ -501,24 +511,9 @@
     }
     for (var k in GROUPS) {
       var G = GROUPS[k], A2 = acc[k];
-      if (forced) { G.ink = forced === 'light' ? 'dark' : 'light'; G.primed = true; }
+      if (forced) { G.ink = forced === 'light' ? 'dark' : 'light'; G.primed = true; G.split = false; }
       else { A2.meanLe = A2.wsum ? A2.wL / A2.wsum : 0.5; electGroup(G, A2, t0); }
-      if (groupEls[k]) groupEls[k].setAttribute('data-ink', G.ink);
-    }
-    /* 4.11.1: a single menu word may carry its own ink, but only when the menu's ink leaves it unreadable (< 2.5:1 on its mean) while the
-     * other ink reads at least 3:1 and 1.8x better there - the boundary case where four words sit on the dark video and one on the white page.
-     * Word overrides answer to their own 600 ms dwell so a boundary crossing cannot strobe them. */
-    var menuInk = GROUPS.menu.ink;
-    for (var wi = 0; wi < inkState.length; wi++) {
-      var ws = inkState[wi], wel = ws.el;
-      if (wel === logo || wel === burger || ws.tick !== tickId || ws.L === null || ws.L === undefined) { if (wel !== logo && wel !== burger && wel.hasAttribute('data-ink')) wel.removeAttribute('data-ink'); continue; }
-      var wLe = cal(ws.L), wcd = contrast(wLe, 'dark'), wcl = contrast(wLe, 'light');
-      var own = menuInk === 'light' ? (wcl < 2.5 && wcd >= Math.max(3, wcl * 1.8) ? 'dark' : '') : (wcd < 2.5 && wcl >= Math.max(3, wcd * 1.8) ? 'light' : '');
-      var cur = wel.getAttribute('data-ink') || '';
-      if (own !== cur) {
-        if (t0 - (ws.ovT || 0) < 600 && !forced) { clearTimeout(dwellT); dwellT = setTimeout(reink, 600 - (t0 - (ws.ovT || 0)) + 30); continue; }
-        ws.ovT = t0; if (own) wel.setAttribute('data-ink', own); else wel.removeAttribute('data-ink');
-      }
+      if (groupEls[k]) { groupEls[k].setAttribute('data-ink', G.ink); if (G.split) groupEls[k].setAttribute('data-split', 'true'); else groupEls[k].removeAttribute('data-split'); }
     }
     /* the bar-level ink (progress hairline, API consumers) follows the menu on desktop and the mark on phones */
     var lead = (groupEls.menu && groupEls.menu.offsetParent) ? GROUPS.menu.ink : GROUPS.logo.ink;
@@ -535,9 +530,10 @@
     inkTimer = setTimeout(reink, inkInterval);
   }
   document.addEventListener('visibilitychange', function () { if (!document.hidden) reink(); });
-  API.reink = reink; API.retone = reink;
+  setInterval(function () { if (!document.hidden && nav.getAttribute('data-open') !== 'true') reink(); }, INK_HOLD); /* 4.12.0 (owner): the 3 s background re-check, scroll or no scroll */
+  API.reink = reink; API.retone = reink; API.settle = reinkFresh; /* 4.12.0: verifiers measure the settled ink without waiting out the 3 s hold */
   API.inks = function () { return inkState.map(function (s) { var g = (s.el === logo) ? 'logo' : (s.el === burger) ? 'burger' : 'menu'; return { text: (s.el.textContent || s.el.getAttribute('aria-label') || '').trim().slice(0, 24), ink: GROUPS[g].ink, group: g, L: s.L, Lmin: s.Lmin, Lmax: s.Lmax, mixed: s.mixed }; }); };
-  API.ink = function () { return { ink: ink, tone: tone, logo: GROUPS.logo.ink, menu: GROUPS.menu.ink, burger: GROUPS.burger.ink }; };
+  API.ink = function () { return { ink: ink, tone: tone, logo: GROUPS.logo.ink, menu: GROUPS.menu.ink, burger: GROUPS.burger.ink, split: { logo: GROUPS.logo.split, menu: GROUPS.menu.split, burger: GROUPS.burger.split }, hold: INK_HOLD }; };
   API.tickMs = function () { return lastTickMs; };
   API.debugPoint = function (x, y, w) { tickCache = new Map(); var pe = nav.style.pointerEvents; nav.style.pointerEvents = 'none'; var r = { left: x - (w || 60) / 2, top: y - 8, width: w || 60, height: 16, right: x + (w || 60) / 2, bottom: y + 8 }; var st; try { st = pointStats(x, y, r); } finally { nav.style.pointerEvents = pe; } tickCache = null; return st; };
   API.setTone = function (t) { tone = t === 'light' ? 'light' : 'dark'; nav.setAttribute('data-tone', tone); };
@@ -557,8 +553,8 @@
   /* Tunables (live: __thxNav.lens({scale:70,...})). Profile T(d) over distance d from the rounded edge: a rim term
    * (smoothstep^rimK over the outer rimW*h, the bevel) plus a body term that runs all the way to the centre line
    * (sign < 0 = the centre magnifies like a thick slab), so the whole surface bends — no flat inset panel. */
-  var LENS = { scale: 112, rim: 0.9, rimW: 0.58, rimK: 1.25, body: -0.6, bodyK: 1.5, disp: 0.45, dispW: 0.5, dispBody: 0.05, sat: 1.1, blur: 0.45, spec: 0.8, specW: 0.3, bleed: 0.9, bleedBlur: 26, bleedSat: 1.6, light: [-0.55, -0.83], light2: [0.55, 0.83] }; /* 4.10.0 (owner: "turn up the light effects for colour blending, no frosting"): dispersion .34 -> .55 over a wider band, specular .5 -> .8 on a wider rim, bleed .9 -> 1.0 at 26 px; saturation 1.9 -> 1.1 so the glass takes the true colours of what is behind it instead of a neon slab over warm video (measured: the wall under the pill read rgb(214,132,101) raw and rgb(240,130,87) through the 1.9 lens); the bleed's own saturation moves here (bleedSat 1.8, was 2.2 in the CSS); blur stays .45 - the glass is never frosted */
-  var LENS_PHONE = { scale: 24, rim: -0.3, rimW: 0.22, body: 0, disp: 0.15 }; /* 4.10.0: on phones (and the lite tier) the pill sits over body text all the time, and the centre magnification refracted that text into a doubled, shifted mess under the mark - the phone lens bends only at the rim, and inward (rim < 0): an outward rim pulled the section above the bar into the pill as a pale block whenever a hard boundary sat just above it */
+  var LENS = { scale: 112, rim: 1.0, rimW: 0.58, rimK: 1.25, body: -0.6, bodyK: 1.5, disp: 1.2, dispW: 1.0, dispBody: 0.15, sat: 1.2, blur: 0.45, spec: 1.0, specW: 0.34, bleed: 1, bleedBlur: 30, bleedSat: 2.6, light: [-0.55, -0.83], light2: [0.55, 0.83] }; /* 4.12.0 (owner: "the colour refracts through the edges - EPIC, bright and vivid, hues blending into the glass"): dispersion 1.2 over the whole bevel (dispW 1), a .15 channel split in the body, saturate 1.2, specular 1.0 on a .34 rim, bleed 1.0 at 30 px saturate 2.6 - the mask in the CSS now hugs the rim so the centre stays true */ /* 4.10.0 (owner: "turn up the light effects for colour blending, no frosting"): dispersion .34 -> .55 over a wider band, specular .5 -> .8 on a wider rim, bleed .9 -> 1.0 at 26 px; saturation 1.9 -> 1.1 so the glass takes the true colours of what is behind it instead of a neon slab over warm video (measured: the wall under the pill read rgb(214,132,101) raw and rgb(240,130,87) through the 1.9 lens); the bleed's own saturation moves here (bleedSat 1.8, was 2.2 in the CSS); blur stays .45 - the glass is never frosted */
+  var LENS_PHONE = { scale: 24, rim: -0.3, rimW: 0.22, body: 0, disp: 0.35, dispBody: 0 }; /* 4.10.0: on phones (and the lite tier) the pill sits over body text all the time, and the centre magnification refracted that text into a doubled, shifted mess under the mark - the phone lens bends only at the rim, and inward (rim < 0): an outward rim pulled the section above the bar into the pill as a pale block whenever a hard boundary sat just above it */
   function lensParams() { return (lite || !mqDesk.matches) ? Object.assign({}, LENS, LENS_PHONE) : LENS; }
   var mapW = 0, mapH = 0, mapURLs = ['', '', ''], mapRetry = 0;
   var svgNS = 'http://www.w3.org/2000/svg';

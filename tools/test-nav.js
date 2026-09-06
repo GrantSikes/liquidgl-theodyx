@@ -76,7 +76,7 @@ async function textContrast(page, sel) {
   for (let y = 0; y <= maxY; y += 50) {
     await page.evaluate(v => window.scrollTo(0, v), y); await sleep(120);
     await page.evaluate(() => { document.querySelectorAll('video').forEach(v => { try { v.pause(); } catch (e) {} }); }); /* page scripts resume autoplay on scroll; hold the frame while this step is measured */
-    await page.evaluate(() => window.__thxNav && (window.__thxNav.reink || window.__thxNav.retone)()); await sleep(380);
+    await page.evaluate(() => window.__thxNav && (window.__thxNav.settle || window.__thxNav.reink || window.__thxNav.retone)()); await sleep(380); /* 4.12.0: settle() elects without the 3 s hold - the sweep measures the settled ink at every step; the hold itself is checked by nav_hold_repro.js */
     const tone = await page.evaluate(() => document.getElementById('thx-nav').dataset.tone);
     const inks = await page.evaluate(() => { const n = document.getElementById('thx-nav'); const root = n.dataset.ink; return [...document.querySelectorAll('#thx-nav .thx-nav-logo, #thx-nav .thx-nav-menu a')].map(e => e.dataset.ink || root || 'n/a'); });
     const scrim = await page.evaluate(() => document.getElementById('thx-nav').dataset.scrim || '');

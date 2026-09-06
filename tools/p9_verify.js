@@ -3,6 +3,7 @@
 //   --only   run a single block: head|cookie|home|scouting|article|footnotes|index|policy|contact|hub|mobile|mobile2
 // Staging nhq.webflow.io by default; fresh context per page.
 const { chromium, devices } = require('playwright');
+const gateFill = async (pg, iso) => { const [y, m, d] = iso.split('-'); if (await pg.$('#sc-gate-y')) { await pg.fill('#sc-gate-m', m); await pg.fill('#sc-gate-d', d); await pg.fill('#sc-gate-y', y); } else await pg.fill('#sc-gate-dob', iso); }; /* scouting 2.3.0: the date is three segments (month / day / year, locale order); #sc-gate-dob is the hidden composite */
 const fs = require('fs'), path = require('path');
 const PROD = process.argv.includes('--prod');
 const BASE_ARG = (process.argv.find(a => a.startsWith('--base=')) || '').slice(7);
@@ -90,7 +91,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     await page.click('#sc-gate-age-go'); await sleep(400);
     const empty = await page.evaluate(() => ({ open: getComputedStyle(document.getElementById('sc-gate-age')).display !== 'none', msg: (document.getElementById('sc-gate-msg') || {}).textContent || '' }));
     check('GATE: an empty submit explains itself and stays open', empty.open && empty.msg.length > 3, empty);
-    await page.fill('#sc-gate-dob', y22 + '-06-15'); await page.click('#sc-gate-age-go'); await sleep(700);
+    await gateFill(page, y22 + '-06-15'); await page.click('#sc-gate-age-go'); await sleep(700);
     const passed = await page.evaluate(() => ({ gone: getComputedStyle(document.getElementById('sc-gate-age')).display === 'none', gated: document.documentElement.classList.contains('sc-gated'), dob: document.getElementById('sc-dob').value, formsOpen: ['sc-form-you', 'sc-form-work', 'sc-form-consent'].every(i => getComputedStyle(document.getElementById(i)).display === 'block'), inert: [...document.body.children].filter(e => e.hasAttribute('inert')).length, ack: document.getElementById('sc-safety-ack') && document.getElementById('sc-safety-ack').checked }));
     check('GATE: an adult date closes it, carries the date into #sc-dob, opens the form, releases the page and does not pre-tick the acknowledgement', passed.gone && !passed.gated && passed.dob === y22 + '-06-15' && passed.formsOpen && passed.inert === 0 && passed.ack === false, passed);
     const g = await page.evaluate(() => {

@@ -1,4 +1,5 @@
-/*! theodyx-nav.css v4.11.0 (2026-09-05) — clear liquid-glass nav. The bar is one continuous lens: transparent glass
+/*! theodyx-nav.css v4.12.0 (2026-09-06) — clear liquid-glass nav. 4.12.0 (owner): words change together (no per-word ink), a
+ * thin text halo of the other ink while a group's ink fails on part of its backdrop, the colour bleed hugging the rim. The bar is one continuous lens: transparent glass
  * whose whole surface bends what is behind it (Chromium: SVG displacement in backdrop-filter, strongest at the
  * bevel, per-channel dispersion), a specular rim lit from the pill's own geometry, a colour bleed that takes on the
  * hues around it, and colour enhancement. The words, the logo and the burger share ONE ink — pure white or pure
@@ -20,7 +21,7 @@ box-shadow:inset 0 1px 0 0 rgba(255,255,255,.62),inset 0 -1px 0 0 rgba(255,255,2
 -webkit-backdrop-filter:blur(var(--thx-nav-blur)) saturate(var(--thx-nav-sat)) contrast(1.03) brightness(1.02);backdrop-filter:blur(var(--thx-nav-blur)) saturate(var(--thx-nav-sat)) contrast(1.03) brightness(1.02);
 pointer-events:none;z-index:0;overflow:hidden;transition:background-color 360ms var(--thx-nav-ease)} /* 4.8.0 (Phase 11 EASE-07): the shadow snaps - a shadow transition over a backdrop-filter repaints the blur */
 /* colour bleed: the glass picks up the colours around it — blurred, saturated, masked to the outer body so the centre stays clear */
-.thx-nav-tint{position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:0;opacity:var(--thx-nav-bleed);-webkit-backdrop-filter:blur(var(--thx-nav-bleed-blur)) saturate(2.2) brightness(1.04);backdrop-filter:blur(var(--thx-nav-bleed-blur)) saturate(2.2) brightness(1.04);-webkit-mask:radial-gradient(70% 140% at 50% 50%,transparent 26%,#000 88%);mask:radial-gradient(70% 140% at 50% 50%,transparent 26%,#000 88%);transition:opacity 320ms var(--thx-nav-ease)}
+.thx-nav-tint{position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:0;opacity:var(--thx-nav-bleed);-webkit-backdrop-filter:blur(var(--thx-nav-bleed-blur)) saturate(2.2) brightness(1.04);backdrop-filter:blur(var(--thx-nav-bleed-blur)) saturate(2.2) brightness(1.04);-webkit-mask:radial-gradient(62% 130% at 50% 50%,transparent 38%,#000 92%);mask:radial-gradient(62% 130% at 50% 50%,transparent 38%,#000 92%);transition:opacity 320ms var(--thx-nav-ease)} /* 4.12.0: the bleed hugs the rim - the centre stays the scene's true colour */
 .thx-nav.is-lite .thx-nav-tint,.thx-nav[data-open="true"] .thx-nav-tint,.thx-nav:not(.is-refract):not(.is-gl) .thx-nav-tint{display:none} /* 4.8.0 (Phase 11 SIG-07): the tint is a second 30px blur; without the lens it made the fallback the slow path */
 .thx-nav.is-refract .thx-nav-glass{backdrop-filter:url(#thx-lens) contrast(1.03) brightness(1.02);inset:calc(-1 * var(--thx-lens-pad-t,11px)) calc(-1 * var(--thx-lens-pad,46px)) calc(-1 * var(--thx-lens-pad,46px)) calc(-1 * var(--thx-lens-pad,46px));border-radius:0;clip-path:inset(var(--thx-lens-pad-t,11px) var(--thx-lens-pad,46px) var(--thx-lens-pad,46px) var(--thx-lens-pad,46px) round var(--thx-nav-r));box-shadow:none} /* enlarged capture (the lens samples outside the pill), clipped back to the pill; the top pad stays inside the viewport */
 .thx-nav.is-refract.is-lite .thx-nav-glass{backdrop-filter:url(#thx-lens-lite) contrast(1.03) brightness(1.02)}
@@ -42,12 +43,12 @@ pointer-events:none;z-index:0;overflow:hidden;transition:background-color 360ms 
 @media (max-width:899px){.thx-nav-prog{inset-inline:16px;bottom:4px}}
 [dir="rtl"] .thx-nav-prog{transform-origin:100% 50%} /* the reading hairline grows from the inline start */
 .thx-nav-bar{position:relative;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:1rem;min-height:var(--thx-nav-h);padding:6px;padding-inline-start:22px}
-.thx-nav-logo{display:inline-flex;align-items:center;height:44px;padding:0 4px;text-decoration:none;border-radius:999px;transition:transform 300ms var(--thx-nav-ease),color 240ms var(--thx-nav-ease),background-color 200ms}
+.thx-nav-logo{display:inline-flex;align-items:center;height:44px;padding:0 4px;text-decoration:none;border-radius:999px;transition:transform 300ms var(--thx-nav-ease),color 320ms var(--thx-nav-ease),background-color 200ms,filter 320ms var(--thx-nav-ease)}
 .thx-nav-logo svg{height:22px;width:auto;display:block}
 .thx-nav-logo:hover{transform:scale(1.03)}.thx-nav-logo:active{transform:scale(.985)}
 .thx-nav-menu{display:flex;align-items:center;gap:2px;list-style:none;margin:0;padding:0}
 .thx-nav-menu li,.thx-nav-list li{display:flex;align-items:center;margin:0;padding:0;line-height:1;list-style:none} /* Webflow's global li{line-height:60px} pushed the words 9px low and grew the bar to 73px */
-.thx-nav-menu a{display:inline-flex;align-items:center;min-height:44px;padding:0 16px;text-decoration:none;font-size:var(--step--1,15px);font-weight:500;letter-spacing:-.005em;line-height:1;-webkit-font-smoothing:antialiased;border-radius:999px;white-space:nowrap;transition:background-color 200ms,color 240ms var(--thx-nav-ease)}
+.thx-nav-menu a{display:inline-flex;align-items:center;min-height:44px;padding:0 16px;text-decoration:none;font-size:var(--step--1,15px);font-weight:500;letter-spacing:-.005em;line-height:1;-webkit-font-smoothing:antialiased;border-radius:999px;white-space:nowrap;transition:background-color 200ms,color 320ms var(--thx-nav-ease),text-shadow 320ms var(--thx-nav-ease)}
 .thx-nav-menu a:hover{background:color-mix(in srgb,currentColor 8%,transparent)} /* no persistent selected-page fill: it sat on top of the lens and read as a stuck button */
 .thx-nav-menu a:active{transform:scale(.985)}
 /* --- ink: the words, the logo and the burger flip TOGETHER; default light --- */
@@ -57,6 +58,8 @@ pointer-events:none;z-index:0;overflow:hidden;transition:background-color 360ms 
 /* 4.11.0: the mark, the menu and the burger carry their own ink (the script elects each from what is behind it); these outrank the bar-level ink above */
 .thx-nav .thx-nav-logo[data-ink="dark"],.thx-nav .thx-nav-burger[data-ink="dark"],.thx-nav .thx-nav-menu[data-ink="dark"] a{color:var(--thx-ink-dark)}
 .thx-nav .thx-nav-logo[data-ink="light"],.thx-nav .thx-nav-burger[data-ink="light"],.thx-nav .thx-nav-menu[data-ink="light"] a{color:var(--thx-ink-light)}
+/* 4.12.0: a group whose ink fails AA on part of its backdrop (a split, or a band the 3 s hold has not answered yet) wears a thin halo of the other ink - text only, the glass never changes; phones already carry an always-on halo on the mark and burger (below) */
+@media (min-width:900px){.thx-nav .thx-nav-menu[data-ink="light"][data-split="true"] a{text-shadow:0 0 1px rgba(0,0,0,.6),0 1px 6px rgba(0,0,0,.38)}.thx-nav .thx-nav-menu[data-ink="dark"][data-split="true"] a{text-shadow:0 0 1px rgba(255,255,255,.75),0 1px 6px rgba(255,255,255,.5)}.thx-nav .thx-nav-logo[data-ink="light"][data-split="true"] svg{filter:drop-shadow(0 0 1px rgba(0,0,0,.6)) drop-shadow(0 0 4px rgba(0,0,0,.4))}.thx-nav .thx-nav-logo[data-ink="dark"][data-split="true"] svg{filter:drop-shadow(0 0 1px rgba(255,255,255,.8)) drop-shadow(0 0 4px rgba(255,255,255,.5))}}
 .thx-nav a:focus-visible,.thx-nav button:focus-visible{outline:2px solid #000;outline-offset:2px;border-radius:999px;box-shadow:0 0 0 4px #fff,0 0 0 6px #000} /* Phase 9 KB-02/C-03: two-tone ring, cannot vanish against any ink or surface */
 /* --- burger --- */
 .thx-nav-burger{display:none;width:44px;height:44px;border:0;border-radius:999px;background:transparent;cursor:pointer;padding:0;align-items:center;justify-content:center;flex-direction:column;gap:5px;transition:background-color 200ms,color 240ms}
