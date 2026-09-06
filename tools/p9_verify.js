@@ -29,9 +29,9 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     const html = await page.content();
     const lines = fs.readFileSync(HEAD_MIN, 'utf8').split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('<!--'));
     const norm = t => t.replace(/ (crossorigin|defer|data-thx-robots)(?=[ >])/g, ' $1=""'); const H = norm(html); const missing = lines.filter(l => !H.includes(norm(l)) && !html.includes(l));
-    check('head v4.11.1 banner is live', html.includes('Theodyx head code · v4.11.1'));
+    check('head v4.11.2 banner is live', html.includes('Theodyx head code · v4.11.2'));
     check('every line of site-head.min.html appears in the page', missing.length === 0, { missing: missing.length, first: missing[0] && missing[0].slice(0, 120) });
-    for (const [f, sha] of [['theodyx-nav.js', '0a92ee1956a5a4b2d8e5a30b291cf4900acb5cee'], ['nv2pagesf.js', '6613fa29f87593a2d12cc9f4fb97f35103a791f5'], ['theodyx-cookies.js', '75c55eb6bf0a969abd0dcfa19bd51b84cb392022'], ['theodyx-article-fx.js', '1ada34cade7b358f3a40225a8913b5b8d7935a2d']]) {
+    for (const [f, sha] of [['theodyx-nav.js', 'f656d91bc67eadc7e304c8905a81ac5be3e2d50c'], ['nv2pagesf.js', '6613fa29f87593a2d12cc9f4fb97f35103a791f5'], ['theodyx-cookies.js', '75c55eb6bf0a969abd0dcfa19bd51b84cb392022'], ['theodyx-article-fx.js', '1ada34cade7b358f3a40225a8913b5b8d7935a2d']]) {
       const re = new RegExp('<script src="https://cdn\\.jsdelivr\\.net/gh/GrantSikes/liquidgl-theodyx@' + sha + '/' + f.replace('.', '\\.') + '" integrity="sha384-[^"]+" crossorigin="anonymous" defer(="")?>');
       check('footer tag pinned: ' + f + ' @' + sha.slice(0, 7), re.test(html));
     }
@@ -65,7 +65,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     await ctx.close(); }
   // 3. home hero
   if (run('home')) { const { page, ctx, errors } = await open('/');
-    check('footer tag pinned: theodyx-cine.js @4e1d3a5 (Home)', /liquidgl-theodyx@4e1d3a53e57869e8fc19bdc5cc2de0cb17cebf82\/theodyx-cine\.js" integrity="sha384-/.test(await page.content()));
+    check('footer tag pinned: theodyx-cine.js @055e9e1 (Home, 5.2.0)', /liquidgl-theodyx@055e9e1f210a99fc15267d101d39e4f99dccb10f\/theodyx-cine\.js" integrity="sha384-/.test(await page.content()));
     await page.keyboard.press('Tab'); await sleep(800);
     const h = await page.evaluate(() => { const v = document.querySelector('video.hero-video'); const pause = document.querySelector('.hero-ctrl-btn[data-hero-pause]'); const wm = document.querySelector('.hero-vlabel'); return { muted: v && v.muted, label: v && v.getAttribute('aria-label'), pause: pause ? { pressed: pause.getAttribute('aria-pressed'), name: pause.getAttribute('aria-label') } : null, wm: wm ? { role: wm.getAttribute('role'), name: wm.getAttribute('aria-label'), hiddenLetters: wm.querySelectorAll('p[aria-hidden="true"]').length } : null, alts: [...document.querySelectorAll('img[alt*="Theodyx Capital"]')].length }; });
     check('F-01: hero video stays muted after a keystroke', h.muted === true, h.muted);
@@ -76,22 +76,31 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     await ctx.close(); }
   // 4. scouting gates
   if (run('scouting')) { const { page, ctx, errors } = await open('/scouting', { settle: 2500 });
-    // Phase 10 replaced the two modal gates. The safety statement is an inline section above the
-    // form and its acknowledgement is a required checkbox; age comes from #sc-dob alone. So the
-    // modal contract (focus trap, inert, aria-modal) is gone by design and is asserted absent —
-    // everything else Phase 9 established has to survive unchanged.
+    // Owner decision 2026-09-05 (scouting 2.2.0): the age-verification gate is BACK as a real modal dialog on arrival; the inline
+    // safety section and its required checkbox stay. Everything else Phase 9 established has to survive unchanged.
+    const y12 = new Date().getFullYear() - 12, y22 = new Date().getFullYear() - 22;
+    const g0 = await page.evaluate(() => { const gate = document.getElementById('sc-gate-age'); return {
+      gate: gate ? { role: gate.getAttribute('role'), modal: gate.getAttribute('aria-modal'), labelled: !!gate.getAttribute('aria-labelledby'), visible: getComputedStyle(gate).display !== 'none', focusInside: gate.contains(document.activeElement) } : null,
+      inert: [...document.body.children].filter(e => e.hasAttribute('inert')).length, gated: document.documentElement.classList.contains('sc-gated'),
+      formsHidden: ['sc-form-you', 'sc-form-work', 'sc-form-consent'].every(i => getComputedStyle(document.getElementById(i)).display === 'none') }; });
+    check('GATE: the age-verification dialog is up on arrival (role=dialog, aria-modal, labelled, focus inside, page inert, form hidden)', !!(g0.gate && g0.gate.role === 'dialog' && g0.gate.modal === 'true' && g0.gate.labelled && g0.gate.visible && g0.gate.focusInside && g0.inert > 0 && g0.gated && g0.formsHidden), g0);
+    await page.keyboard.press('Escape'); await sleep(200); for (let i = 0; i < 8; i++) await page.keyboard.press('Tab');
+    const trap = await page.evaluate(() => ({ open: getComputedStyle(document.getElementById('sc-gate-age')).display !== 'none', inside: document.getElementById('sc-gate-age').contains(document.activeElement) }));
+    check('GATE: Escape does not dismiss it and Tab cannot leave it', trap.open && trap.inside, trap);
+    await page.click('#sc-gate-age-go'); await sleep(400);
+    const empty = await page.evaluate(() => ({ open: getComputedStyle(document.getElementById('sc-gate-age')).display !== 'none', msg: (document.getElementById('sc-gate-msg') || {}).textContent || '' }));
+    check('GATE: an empty submit explains itself and stays open', empty.open && empty.msg.length > 3, empty);
+    await page.fill('#sc-gate-dob', y22 + '-06-15'); await page.click('#sc-gate-age-go'); await sleep(700);
+    const passed = await page.evaluate(() => ({ gone: getComputedStyle(document.getElementById('sc-gate-age')).display === 'none', gated: document.documentElement.classList.contains('sc-gated'), dob: document.getElementById('sc-dob').value, formsOpen: ['sc-form-you', 'sc-form-work', 'sc-form-consent'].every(i => getComputedStyle(document.getElementById(i)).display === 'block'), inert: [...document.body.children].filter(e => e.hasAttribute('inert')).length, ack: document.getElementById('sc-safety-ack') && document.getElementById('sc-safety-ack').checked }));
+    check('GATE: an adult date closes it, carries the date into #sc-dob, opens the form, releases the page and does not pre-tick the acknowledgement', passed.gone && !passed.gated && passed.dob === y22 + '-06-15' && passed.formsOpen && passed.inert === 0 && passed.ack === false, passed);
     const g = await page.evaluate(() => {
       const safety = document.getElementById('sc-safety'), you = document.getElementById('sc-form-you');
       return {
-        gatesGone: !document.getElementById('sc-gate-safety') && !document.getElementById('sc-gate-age'),
-        inert: [...document.body.children].filter(e => e.hasAttribute('inert')).length,
         safetyInline: !!(safety && you && (safety.compareDocumentPosition(you) & 4) && getComputedStyle(safety).position === 'static' && getComputedStyle(safety).display !== 'none'),
         safetyNamed: safety && safety.getAttribute('aria-labelledby'),
-        ack: (() => { const a = document.getElementById('sc-safety-ack'); return a ? { required: a.required, label: !!document.querySelector('label[for="sc-safety-ack"]') } : null; })(),
-        formsOpen: ['sc-form-you', 'sc-form-work', 'sc-form-consent'].every(i => getComputedStyle(document.getElementById(i)).display === 'block')
+        ack: (() => { const a = document.getElementById('sc-safety-ack'); return a ? { required: a.required, label: !!document.querySelector('label[for="sc-safety-ack"]') } : null; })()
       };
     });
-    check('LAND-01: the modal gates are gone and the form is open on arrival', g.gatesGone && g.inert === 0 && g.formsOpen, g);
     check('LAND-01: the safety statement is a named inline section above the form', g.safetyInline && g.safetyNamed === 'sc-safety-h', g);
     check('F-08b: the safety acknowledgement is a required, labelled checkbox', !!(g.ack && g.ack.required && g.ack.label), g.ack);
     // the acknowledgement blocks submit exactly like the consent box
@@ -104,7 +113,6 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     }));
     check('F-05/F-09: submit still opens the error summary, takes focus, and the acknowledgement is in it', blocked.summary === 'block' && !!blocked.ackMsg && blocked.ackInvalid === 'true' && blocked.focus === 'sc-err-title', blocked);
     // FORMS-04: the date is the only age answer, and it is always correctable
-    const y12 = new Date().getFullYear() - 12, y22 = new Date().getFullYear() - 22;
     await page.fill('#sc-dob', y12 + '-06-15'); await page.click('#sc-firstName'); await sleep(400);
     const u = await page.evaluate(() => ({ msg: (document.getElementById('sc-dob-err') || {}).textContent || null, note: getComputedStyle(document.getElementById('sc-gate-u14')).display, submit: getComputedStyle(document.getElementById('sc-submit')).display, editable: !!document.getElementById('sc-dob').offsetParent }));
     check('FORMS-04: an under-14 date is answered inline, replaces the submit row, and stays editable', /\d/.test(u.msg || '') && u.note === 'block' && u.submit === 'none' && u.editable, u);
