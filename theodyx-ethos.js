@@ -1,4 +1,4 @@
-/*! theodyx-ethos v1.3.0 - C-02: the article/ethos hero title now clears the nav pill on phones (see the block at the end of this file).
+/*! theodyx-ethos v1.3.1 (2026-09-10: carousel slides load once the carousel nears the viewport) - was v1.3.0 - C-02: the article/ethos hero title now clears the nav pill on phones (see the block at the end of this file).
    1.2.0 - re-hosted from Webflow on 2026-09-05; source of truth is now this repo.
    Phase 11 motion: REVEAL-03/REVEAL-08 the .ethx-rvl scroll-reveal system and its 3 s /
    catch() safety nets are gone - article content is visible at once. RM-01 the .ethx-down
@@ -22,6 +22,11 @@ if(!document.getElementById('thx-ethx-a11y-css')){
 }
 
 /* AXE-03: horizontally scrollable carousels are keyboard reachable and named. */
+/* 1.3.1 (2026-09-10): slides outside the carousel's scroll viewport are lazy, so the browser never fetches them until they are
+   scrolled into the strip - advancing the carousel showed blank frames. Once a carousel is near the viewport, every slide loads. */
+try{var eag=function(car){q('img[loading="lazy"]',car).forEach(function(i){i.loading='eager';i.setAttribute('loading','eager');i.decoding='async'})};
+  if('IntersectionObserver' in window){var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){eag(e.target);io.unobserve(e.target)}})},{rootMargin:'600px 0px'});q('.ethx-car').forEach(function(c){io.observe(c)})}
+  else q('.ethx-car').forEach(eag)}catch(e){}
 q('.ethx-car').forEach(function(car){
   var n=q('.ethx-slide',car).filter(function(s){return getComputedStyle(s).display!=='none'}).length;
   if(!car.hasAttribute('tabindex'))car.setAttribute('tabindex','0');

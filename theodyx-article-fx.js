@@ -1,4 +1,4 @@
-/*! theodyx-article-fx v1.8.0 — Theodyx publication template reading chrome.
+/*! theodyx-article-fx v1.8.1 (2026-09-10: the rendered day is datePublished; empty alts/separators repaired) — was v1.8.0 — Theodyx publication template reading chrome.
    CONTRACT: enhancement-only. All content is native Webflow DOM; this script only
    (1) links existing <sup>N</sup> footnote markers to the Notes & sources list (dedicated .art-notes section, or legacy in-body h6+ol),
    (2) injects an "In this report" TOC from the article headings (h2, falling back to h3 then h4; 3+ entries) across EVERY
@@ -82,6 +82,14 @@
   /* ---------- cards (articles + index pages) ---------- */
   function cards() {
     try {
+      /* 1.8.1: a Keep-reading card whose bound image alt is empty describes itself by its title; a kicker separator with nothing
+       * before it (the item has no Series) goes; the same for the article's own hero and metaline */
+      document.querySelectorAll('a.thx-rel-card').forEach(function (c) {
+        var im = c.querySelector('img'), tt = c.querySelector('.thx-rel-t');
+        if (im && !(im.getAttribute('alt') || '').trim() && tt) im.setAttribute('alt', txt(tt));
+        c.querySelectorAll('.thx-ml-t').forEach(function (p) { if (txt(p) === '\u00b7') { var pv = p.previousElementSibling, nx = p.nextElementSibling; if (!pv || !txt(pv) || !nx || !txt(nx)) p.style.display = 'none'; } });
+      });
+      try { var hh = document.querySelector('h1'); document.querySelectorAll('img.thx-art-hero-img, .ethx-hero img.ethx-media').forEach(function (im) { if (!(im.getAttribute('alt') || '').trim() && hh) im.setAttribute('alt', txt(hh)); }); document.querySelectorAll('.thx-art-metaline .thx-ml-t').forEach(function (p) { if (!txt(p)) p.style.display = 'none'; }); } catch (e) {}
       document.querySelectorAll('a.thx-rel-card').forEach(function (a3) {
         var sl = a3.querySelector('.thx-rel-slug');
         if (sl && sl.textContent.trim()) a3.setAttribute('href', PUB + '/' + sl.textContent.trim());
@@ -364,8 +372,13 @@
           art.isPartOf = { '@id': WEB };
           var crumbs = [{ '@type': 'ListItem', 'position': 1, 'name': 'Home', 'item': origin + '/' }, { '@type': 'ListItem', 'position': 2, 'name': 'Our Thinking', 'item': origin + PUB }, { '@type': 'ListItem', 'position': 3, 'name': art.headline || title, 'item': url }];
           d = { '@context': 'https://schema.org', '@graph': [art, { '@type': 'WebSite', '@id': WEB, 'url': origin + '/', 'name': 'Theodyx', 'publisher': { '@id': ORG } }, { '@type': 'BreadcrumbList', '@id': url + '#breadcrumb', 'itemListElement': crumbs }] };
+          /* 1.8.1: the RENDERED day is the date of record. Webflow stores the CMS date as a UTC midnight stamp and renders it in the
+           * site's timezone, so the stamp reads one day later than the page (April 11 vs "April 10") - Google flags the mismatch.
+           * datePublished and article:published_time follow the metaline; dateModified is a real timestamp and stays. */
+          var ml2 = null, mm = null;
+          try { ml2 = document.querySelector('.thx-art-metaline'); if (ml2) { mm = txt(ml2).match(/([A-Z][a-z]+ \d{1,2},\s*\d{4})/); var ri = mm && isoDate(mm[1]); if (ri) { art.datePublished = ri; if (art.dateModified && art.dateModified < ri) art.dateModified = ri; var pm = document.querySelector('meta[property="article:published_time"]'); if (pm) pm.setAttribute('content', ri); } } } catch (e) {}
           ssr.textContent = JSON.stringify(d);
-          try { var ml2 = document.querySelector('.thx-art-metaline'); if (ml2 && art.datePublished) { var mm = txt(ml2).match(/([A-Z][a-z]+ \d{1,2},\s*\d{4})/); if (mm) timeWrap(ml2, mm[1], isoDate(mm[1]) || String(art.datePublished).slice(0, 10)); } } catch (e) {} /* the visible date gets <time datetime> + Intl text on the server-rendered path too; the ISO comes from the rendered day (site timezone), not the UTC stamp */
+          try { if (ml2 && art.datePublished && mm) timeWrap(ml2, mm[1], isoDate(mm[1]) || String(art.datePublished).slice(0, 10)); } catch (e) {} /* the visible date gets <time datetime> + Intl text on the server-rendered path too; the ISO comes from the rendered day (site timezone), not the UTC stamp */
           return;
         }
       } catch (e) { /* malformed server block (e.g. a quote in a bound field): fall through and build a clean one */ }
