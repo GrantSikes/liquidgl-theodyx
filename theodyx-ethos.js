@@ -1,4 +1,4 @@
-/*! theodyx-ethos v1.3.1 (2026-09-10: carousel slides load once the carousel nears the viewport) - was v1.3.0 - C-02: the article/ethos hero title now clears the nav pill on phones (see the block at the end of this file).
+/*! theodyx-ethos v1.4.0 (2026-09-11: Article JSON-LD on Ethos pages) - was 1.3.1 (2026-09-10: carousel slides load once the carousel nears the viewport) - was v1.3.0 - C-02: the article/ethos hero title now clears the nav pill on phones (see the block at the end of this file).
    1.2.0 - re-hosted from Webflow on 2026-09-05; source of truth is now this repo.
    Phase 11 motion: REVEAL-03/REVEAL-08 the .ethx-rvl scroll-reveal system and its 3 s /
    catch() safety nets are gone - article content is visible at once. RM-01 the .ethx-down
@@ -22,6 +22,13 @@ if(!document.getElementById('thx-ethx-a11y-css')){
 }
 
 /* AXE-03: horizontally scrollable carousels are keyboard reachable and named. */
+/* 1.4.0 (2026-09-11, owner): an Ethos piece is typed as an Article - headline, description, image, publisher, author, dates
+   (datePublished from a data-thx-published stamp on body if present, else the article:published_time meta, else omitted). */
+try{if(!document.getElementById('thx-ethos-ld')&&!document.getElementById('thx-article-ssr')&&document.querySelector('.ethx-dek,.ethx-deck')&&!/\/our-thinking\//.test(location.pathname)){var h1=document.querySelector('h1'),dk=document.querySelector('.ethx-dek,.ethx-deck'),og=document.querySelector('meta[property="og:image"]'),md=document.querySelector('meta[name="description"]'),pt=document.querySelector('meta[property="article:published_time"]'),mt=document.querySelector('meta[property="article:modified_time"]');
+  var O=location.origin,ORG=O+'/#organization',art={'@type':'Article','@id':location.href.split('#')[0]+'#article','mainEntityOfPage':location.href.split('#')[0],'headline':h1?h1.textContent.trim():document.title,'description':(dk&&dk.textContent.trim())||(md&&md.content)||'','image':og?[og.content]:undefined,'author':{'@type':'Organization','@id':ORG,'name':'Theodyx'},'publisher':{'@type':'Organization','@id':ORG,'name':'Theodyx','url':O+'/','logo':{'@type':'ImageObject','url':'https://cdn.prod.website-files.com/69fe0aaad9f3034241913693/6a1a1717e93ecc012e58ba8b_theodyx-webclip.png'}},'inLanguage':document.documentElement.lang||'en-US','isPartOf':{'@id':O+'/#website'}};
+  var dp=(document.body.getAttribute('data-thx-published')||(pt&&pt.content)||'').slice(0,10);if(dp)art.datePublished=dp;var dm=(mt&&mt.content||'').slice(0,10);if(dm)art.dateModified=dm;else if(dp)art.dateModified=dp;
+  var wc=0;q('.ethx-over p,.ethx-chapter p,.thx-read p').forEach(function(p){wc+=(p.textContent||'').trim().split(/\s+/).filter(Boolean).length});if(wc>50){art.wordCount=wc;art.timeRequired='PT'+Math.max(1,Math.round(wc/230))+'M'}
+  if(!art.image)delete art.image;var sc=document.createElement('script');sc.type='application/ld+json';sc.id='thx-ethos-ld';sc.textContent=JSON.stringify({'@context':'https://schema.org','@graph':[art]});document.head.appendChild(sc)}}catch(e){}
 /* 1.3.1 (2026-09-10): slides outside the carousel's scroll viewport are lazy, so the browser never fetches them until they are
    scrolled into the strip - advancing the carousel showed blank frames. Once a carousel is near the viewport, every slide loads. */
 try{var eag=function(car){q('img[loading="lazy"]',car).forEach(function(i){i.loading='eager';i.setAttribute('loading','eager');i.decoding='async'})};

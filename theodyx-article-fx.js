@@ -1,4 +1,4 @@
-/*! theodyx-article-fx v1.8.1 (2026-09-10: the rendered day is datePublished; empty alts/separators repaired) — was v1.8.0 — Theodyx publication template reading chrome.
+/*! theodyx-article-fx v1.8.2 (2026-09-11: byline rendered, trailing crumb chevron gone) — was 1.8.1 (2026-09-10: the rendered day is datePublished; empty alts/separators repaired) — was v1.8.0 — Theodyx publication template reading chrome.
    CONTRACT: enhancement-only. All content is native Webflow DOM; this script only
    (1) links existing <sup>N</sup> footnote markers to the Notes & sources list (dedicated .art-notes section, or legacy in-body h6+ol),
    (2) injects an "In this report" TOC from the article headings (h2, falling back to h3 then h4; 3+ entries) across EVERY
@@ -89,6 +89,10 @@
         if (im && !(im.getAttribute('alt') || '').trim() && tt) im.setAttribute('alt', txt(tt));
         c.querySelectorAll('.thx-ml-t').forEach(function (p) { if (txt(p) === '\u00b7') { var pv = p.previousElementSibling, nx = p.nextElementSibling; if (!pv || !txt(pv) || !nx || !txt(nx)) p.style.display = 'none'; } });
       });
+      /* 1.8.2 (owner): the byline is rendered - "By <author>" under the metaline (the bound .thx-read-by was styled but hidden), and a
+       * breadcrumb whose last visible crumb is the chevron (the title crumb is hidden by design) drops that chevron */
+      try { var by = document.querySelector('.thx-read-by'); if (by) { var an = txt(by).replace(/^By\s+/i, ''); if (an) { by.textContent = 'By ' + an; if (!document.getElementById('thx-byline-css')) { var bcs = document.createElement('style'); bcs.id = 'thx-byline-css'; bcs.textContent = 'html body .thx-read-by.thx-read-by{display:block!important;text-align:center;font-size:13px;color:rgba(13,13,13,.6);margin:6px auto 0;letter-spacing:.01em}'; document.head.appendChild(bcs); } } } } catch (e) {}
+      try { document.querySelectorAll('.thx-crumb').forEach(function (cr) { var kids = [].filter.call(cr.children, function (k) { return getComputedStyle(k).display !== 'none' && txt(k); }); var last = kids[kids.length - 1]; if (last && last.classList.contains('thx-dot')) last.style.display = 'none'; }); } catch (e) {}
       /* the hub's card thumbnails (.thxo-img, bound to the CMS thumbnail whose asset alt is empty) take the card's title */
       try { document.querySelectorAll('a img.thxo-img, a img.thx-rel-img-el').forEach(function (im) { if ((im.getAttribute('alt') || '').trim()) return; var a = im.closest('a'), t = a && (a.querySelector('h2,h3,h4,.thxo-card-t,.thx-rel-t,[class*="title"]') || a); var n = t ? txt(t).slice(0, 160) : ''; if (n) im.setAttribute('alt', n); }); } catch (e) {}
       try { var hh = document.querySelector('h1'); document.querySelectorAll('img.thx-art-hero-img, .ethx-hero img.ethx-media').forEach(function (im) { if (!(im.getAttribute('alt') || '').trim() && hh) im.setAttribute('alt', txt(hh)); }); document.querySelectorAll('.thx-art-metaline .thx-ml-t').forEach(function (p) { if (!txt(p)) p.style.display = 'none'; }); } catch (e) {}

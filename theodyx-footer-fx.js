@@ -1,4 +1,4 @@
-/* theodyx-footer-fx.js — Theodyx footer ANIMATION ONLY.
+/* theodyx-footer-fx.js 1.2.0 (2026-09-11: on phones the mark floats above the word) — Theodyx footer ANIMATION ONLY.
  * Contract: may only append/read inside [data-thx-anim="footer"].
  * MUST NOT: set hrefs, hide/move/restyle footer links or columns,
  * inject text content, or query anything outside the slot. */
@@ -165,9 +165,10 @@
         var tt = (now - t0) / 1000;
         var tx, ty;
         if (hasInput) { tx = target[0]; ty = target[1]; }
+        else if (stage.clientWidth < 520) { tx = 0.55 * Math.sin(tt * 0.16); ty = 0.72 + 0.14 * Math.sin(tt * 0.23 + 1.0); } /* 1.2.0 (owner): on a phone the mark drifts ABOVE the letters - across them it sat on the D/Y and read as a collision */
         else { tx = 0.95 * Math.sin(tt * 0.16); ty = 0.42 * Math.sin(tt * 0.23 + 1.0); }
         oc[0] += (tx - oc[0]) * 0.10; oc[1] += (ty - oc[1]) * 0.10;
-        var orr = 0.22 + 0.02 * Math.sin(tt * 0.8);
+        var orr = (stage.clientWidth < 520 ? 0.15 : 0.22) + 0.02 * Math.sin(tt * 0.8);
         var asp = stage.width / Math.max(1, stage.height);
         gl.useProgram(pr);
         gl.uniform1f(U.uT, tt); gl.uniform1f(U.uPx, pxScale); gl.uniform1f(U.uAsp, asp);
