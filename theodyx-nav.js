@@ -1,4 +1,7 @@
-/*! theodyx-nav.js v4.14.0 (2026-09-06) — behaviours for the clear liquid-glass nav (#thx-nav).
+/*! theodyx-nav.js v4.15.0 (2026-09-10) — behaviours for the clear liquid-glass nav (#thx-nav).
+ * 4.15.0 (owner: "exactly like /clients, but not glitching as much"): ONE ink for the whole bar (the mark, the words and the burger
+ * change colour together, once, in one fade), dwell 420 ms, a flip needs a 1.3x clearer win, a playing video is read through a
+ * ~700 ms moving average of its polls and held 1.6 s. The glass is untouched - the clear lens exactly as on /clients.
  * 4.14.0 (owner: "for the phone make it simple liquid glass that works on everything - no colour stuff, just a modern frost;
  * it is too load-bearing on mobile"): under 900 px the bar is a plain frosted pill drawn by CSS alone (blur + saturate, a
  * light frost, black ink) - no SVG lens, no colour bleed, no dispersion, no halo, no ink sampling, no look-ahead, and the
@@ -41,7 +44,7 @@
   if (window.__thxNav) return;
   var nav = document.getElementById('thx-nav');
   if (!nav) return;
-  var API = window.__thxNav = { v: '4.14.0' };
+  var API = window.__thxNav = { v: '4.15.0' };
   var I18N = window.__thxI18n; function T(k) { return (I18N && I18N.t) ? I18N.t(k) : ({ 'nav.open': 'Open menu', 'nav.close': 'Close menu' })[k] || k; } /* Phase 6: locale runtime (nv2pagesf) keyed by <html lang> */
   var doc = document.documentElement, body = document.body;
   var glass = nav.querySelector('.thx-nav-glass');
@@ -459,10 +462,32 @@
    *     the elected ink fails almost half of them (a scene the live hold has not answered yet); off after 260 ms of a clean backdrop;
    *   - the memo is dropped on resize, media arrival, DOM changes outside the bar, tab return, and by a 3 s self-check that
    *     re-measures the current position and compares. The glass never changes - only the ink (owner decision). */
-  var INK_DWELL = 260, LIVE_HOLD = 900, SPLIT_OFF = 260, LIVE_POLL = 150, MEMO_STEP = 8; /* dwell 260: a band crossed in under a quarter second produces no flip at all (a flick is a blur anyway); the election's own dead band (strong majority or 1.15x better) keeps an edge from strobing under jitter */
+  /* 4.15.0 (owner: "exactly like /clients, but not glitching"): ONE ink for the whole bar. The mark, the words and the burger no
+   * longer elect separately (two groups flipping 100-300 ms apart over the same edge read as a glitch); the bar's sample points are
+   * pooled and elected once, so everything changes colour together, in one 320 ms fade. The dwell is 420 ms, a flip needs a 1.3x
+   * clearer win, and a PLAYING video is read through a ~700 ms moving average of its polls (a single bright frame or a film cut
+   * no longer moves the ink) with a 1.6 s hold before a new ink lands. The halo stays per group (text only, glass untouched). */
+  var INK_DWELL = 420, LIVE_HOLD = 1600, SPLIT_OFF = 600, SPLIT_ON = 220, LIVE_POLL = 150, MEMO_STEP = 8, LIVE_TAU = 700, HYST = 1.3; /* dwell 260: a band crossed in under a quarter second produces no flip at all (a flick is a blur anyway); the election's own dead band (strong majority or 1.15x better) keeps an edge from strobing under jitter */
   var GROUPS = { logo: { ink: 'light', inkT: 0, primed: false, dwellT: 0, split: false, splitOffT: 0, wantInk: null, wantT: 0, prevInk: null, inkY: -1e9, els: logo ? [logo] : [] }, menu: { ink: 'light', inkT: 0, primed: false, dwellT: 0, split: false, splitOffT: 0, wantInk: null, wantT: 0, prevInk: null, inkY: -1e9, els: [] }, burger: { ink: 'light', inkT: 0, primed: false, dwellT: 0, split: false, splitOffT: 0, wantInk: null, wantT: 0, prevInk: null, inkY: -1e9, els: burger ? [burger] : [] } };
   nav.querySelectorAll('.thx-nav-menu a').forEach(function (a) { GROUPS.menu.els.push(a); });
   var groupEls = { logo: logo, menu: nav.querySelector('.thx-nav-menu'), burger: burger };
+  var BAR = { ink: 'light', inkT: 0, primed: false, dwellT: 0, wantInk: null, wantT: 0, prevInk: null, inkY: -1e9 };
+  var liveAvg = { t: 0, fD: 0, fL: 0, worstD: 21, worstL: 21, meanLe: 0.5, pts: 0 };
+  function combine(accs) {
+    var c = mkAcc();
+    for (var k in accs) { var A = accs[k]; if (!A.pts) continue; c.fD += A.fD; c.fL += A.fL; c.pts += A.pts; if (A.worstD < c.worstD) c.worstD = A.worstD; if (A.worstL < c.worstL) c.worstL = A.worstL; c.wsum += A.wsum; c.wL += A.wL; }
+    c.meanLe = c.wsum ? c.wL / c.wsum : 0.5;
+    return c;
+  }
+  /* a playing video is polled every 150 ms; the election reads the running average of those polls, not the last frame */
+  function smoothLive(c, t0) {
+    var a = liveAvg.t ? Math.min(1, (t0 - liveAvg.t) / LIVE_TAU) : 1;
+    if (!liveAvg.t || liveAvg.pts !== c.pts) a = 1;
+    liveAvg.fD += (c.fD - liveAvg.fD) * a; liveAvg.fL += (c.fL - liveAvg.fL) * a;
+    liveAvg.worstD += (c.worstD - liveAvg.worstD) * a; liveAvg.worstL += (c.worstL - liveAvg.worstL) * a;
+    liveAvg.meanLe += (c.meanLe - liveAvg.meanLe) * a; liveAvg.pts = c.pts; liveAvg.t = t0;
+    return { fD: liveAvg.fD, fL: liveAvg.fL, pts: c.pts, worstD: liveAvg.worstD, worstL: liveAvg.worstL, meanLe: liveAvg.meanLe };
+  }
   var memo = new Map(), memoW = 0, memoDirty = false, dirtyT = 0, prefillT = 0, prefillIdle = 0, prefillY = -1;
   function memoKey(y) { return Math.round(y / MEMO_STEP); }
   function memoClear() { memo.clear(); memoDirty = false; }
@@ -523,15 +548,24 @@
     else want = acc.worstD > acc.worstL ? 'dark' : 'light';
     if (want !== G.ink && G.primed) {
       var better = want === 'dark' ? acc.worstD / Math.max(0.01, acc.worstL) : acc.worstL / Math.max(0.01, acc.worstD);
-      if (!(strong || better >= 1.15)) want = G.ink;
+      if (!(strong || better >= HYST)) want = G.ink;
       else if (live) { if (G.wantInk !== want) { G.wantInk = want; G.wantT = t0; } if (t0 - G.wantT < LIVE_HOLD) want = G.ink; }
       else if (t0 - G.inkT < INK_DWELL) { clearTimeout(G.dwellT); G.dwellT = setTimeout(reink, INK_DWELL - (t0 - G.inkT) + 20); want = G.ink; }
     } else G.wantInk = null;
     G.primed = true;
     if (want !== G.ink) { G.prevInk = G.ink; G.ink = want; G.inkT = t0; G.inkY = scrollTop(); G.wantInk = null; }
+  }
+  function splitFor(G, acc, t0) {
+    if (!acc.pts) { G.split = false; return; }
     var fe = (G.ink === 'dark' ? acc.fD : acc.fL) / acc.pts, fo = (G.ink === 'dark' ? acc.fL : acc.fD) / acc.pts;
-    var splitNow = (fe >= 0.25 && fo >= 0.2) || fe >= 0.45;
-    if (splitNow) { G.split = true; G.splitOffT = 0; }
+    /* 4.15.0: the halo needs a true split (both inks failing a share of the points) or a backdrop the elected ink half fails, and it has
+     * to persist for SPLIT_ON before it shows; it leaves after SPLIT_OFF clean. It no longer pops on a single ambiguous step. */
+    var splitNow = (fe >= 0.25 && fo >= 0.2) || fe >= 0.5;
+    if (splitNow) {
+      G.splitOffT = 0;
+      if (!G.split) { if (!G.splitOnT) { G.splitOnT = t0; clearTimeout(G.splitT); G.splitT = setTimeout(reink, SPLIT_ON + 20); } else if (t0 - G.splitOnT >= SPLIT_ON) { G.split = true; G.splitOnT = 0; } }
+    }
+    else if (!G.split) G.splitOnT = 0;
     else if (G.split) { if (!G.splitOffT) { G.splitOffT = t0; clearTimeout(G.splitT); G.splitT = setTimeout(reink, SPLIT_OFF + 20); } else if (t0 - G.splitOffT >= SPLIT_OFF) { G.split = false; G.splitOffT = 0; } } /* the off-check re-runs on its own when nothing scrolls */
   }
   function apply(m, t0) {
@@ -542,15 +576,16 @@
       if (tone === 'light' && avg < 0.40) t = 'dark';
       if (t !== tone) { tone = t; nav.setAttribute('data-tone', t); nav.dispatchEvent(new CustomEvent('thx-nav-tone', { detail: t })); }
     }
+    if (!m.forced) { var C = combine(m.acc); if (m.live) C = smoothLive(C, t0); else liveAvg.t = 0; elect(BAR, C, t0, m.live); }
     for (var k in GROUPS) {
       var G = GROUPS[k];
       if (m.forced) {
         var fw = m.forced === 'light' ? 'dark' : 'light'; G.split = false;
         if (G.primed && fw !== G.ink && t0 - G.inkT < INK_DWELL) { clearTimeout(G.dwellT); G.dwellT = setTimeout(reink, INK_DWELL - (t0 - G.inkT) + 20); } /* a forced tone answers to the same dwell */
         else if (fw !== G.ink) { G.prevInk = G.ink; G.ink = fw; G.inkT = t0; }
-        G.primed = true;
+        G.primed = true; BAR.ink = G.ink; BAR.inkT = G.inkT; BAR.primed = true;
       }
-      else elect(G, m.acc[k], t0, m.live);
+      else { G.ink = BAR.ink; G.inkT = BAR.inkT; G.primed = true; splitFor(G, m.acc[k], t0); }
       if (groupEls[k]) { groupEls[k].setAttribute('data-ink', G.ink); if (G.split) groupEls[k].setAttribute('data-split', 'true'); else groupEls[k].removeAttribute('data-split'); }
     }
     /* the bar-level ink (progress hairline, API consumers) follows the menu on desktop and the mark on phones */
@@ -562,7 +597,7 @@
   /* 4.14.0: under 900 px the frost carries the contrast - black ink, no sampling, no memo, no halo */
   function phoneInk() {
     for (var k in GROUPS) { var G = GROUPS[k]; G.ink = 'dark'; G.split = false; G.primed = true; if (groupEls[k]) { groupEls[k].setAttribute('data-ink', 'dark'); groupEls[k].removeAttribute('data-split'); } }
-    ink = 'dark'; nav.setAttribute('data-ink', 'dark'); anyMedia = false; anyLive = false; clearTimeout(inkTimer);
+    BAR.ink = 'dark'; BAR.primed = true; ink = 'dark'; nav.setAttribute('data-ink', 'dark'); anyMedia = false; anyLive = false; clearTimeout(inkTimer);
   }
   function reink() {
     if (nav.getAttribute('data-open') === 'true') return;
@@ -577,7 +612,7 @@
   }
   /* 4.10.1: a media copy (poster / CORS image / first video frame) arriving is new information - the election that ran without it
    * was blind, so it is not protected by the dwell. 4.13.0: it also drops the memo. settle() (verifiers) is the same call. */
-  function reinkFresh() { memoClear(); inkT = -1e9; for (var k in GROUPS) { GROUPS[k].inkT = -1e9; GROUPS[k].wantInk = null; GROUPS[k].wantT = -1e9; } reink(); }
+  function reinkFresh() { memoClear(); inkT = -1e9; BAR.inkT = -1e9; BAR.wantInk = null; BAR.wantT = -1e9; liveAvg.t = 0; for (var k in GROUPS) { GROUPS[k].inkT = -1e9; GROUPS[k].wantInk = null; GROUPS[k].wantT = -1e9; } reink(); }
   /* a video starting or stopping (Home resumes autoplay on scroll, pauses it out of view) changes what is under the bar but is not
    * new information about a still scene: the memo goes, the dwell stays - otherwise every play/pause let a second flip land 150 ms
    * after the first (seen in the scripted-scroll recordings) */

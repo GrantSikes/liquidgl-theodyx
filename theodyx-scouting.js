@@ -1,4 +1,4 @@
-/* theodyx-scouting 2.4.0 — the safety statement gates the page again (owner, 2026-09-06: "the one I liked
+/* theodyx-scouting 2.4.1 (2026-09-10: the page never scrolls behind a gate stage — html + body locked, preboot CSS) — was 2.4.0: the safety statement gates the page again (owner, 2026-09-06: "the one I liked
  * that would gate anyone before EVEN seeing the scouting page"). Two full-bleed stages in the page's ink, in
  * order: 1. #sc-gate-safety - "Theodyx | Safety / Your safety comes first." with the statement word for word and
  * an Acknowledged button (the page's own 1.x node, rebuilt on the 2.3.0 stage); 2. #sc-gate-age - the date of
@@ -250,7 +250,10 @@
   var HAS_INERT = ('inert' in document.documentElement);
 
   function isVisible(el) { return !!(el && (el.offsetWidth || el.offsetHeight || (el.getClientRects && el.getClientRects().length))); }
-  function lockScroll(lock) { try { document.body.style.overflow = lock ? 'hidden' : ''; } catch (e) {} }
+  /* 2.4.1 (owner: no scrolling while a gate stage is up): the site head sets html{overflow-x:clip}, so a body overflow alone never
+   * reaches the viewport scroller - the page kept scrolling (and showed its scrollbar) behind the opaque stage. Both roots are locked,
+   * and html.sc-gated carries the same rule in CSS (script sheet + page-head preboot) so the lock holds before this bundle runs. */
+  function lockScroll(lock) { try { document.body.style.overflow = lock ? 'hidden' : ''; document.documentElement.style.overflow = lock ? 'hidden' : ''; if (lock) window.scrollTo(0, 0); } catch (e) {} }
   function gateFocusables(gate) {
     return qsa(FOCUSABLE, gate).filter(function (el) { return isVisible(el) && !el.hasAttribute('inert'); });
   }
@@ -1665,6 +1668,8 @@
          and #sc-gate-age.is-open has to out-rank the page's own <style id="sc-native-css">
          embed, which sits in the body and declares #sc-gate-age{display:none}. */
       'html.sc-gated #sc-form-you,html.sc-gated #sc-form-work,html.sc-gated #sc-form-consent{display:none!important;}',
+      'html.sc-gated,html.sc-gated body{overflow:hidden!important;height:100%!important;overscroll-behavior:none;}', /* 2.4.1: the page never scrolls behind a stage */
+      'html.sc-gated body{position:fixed;inset:0;width:100%;}',
       '#sc-gate-age,#sc-gate-safety{display:none;}',
       /* 2.3.0: a full-bleed stage in the page's ink. The page's own <style id="sc-native-css"> declares
          #sc-gate-age{background:rgba(14,14,15,.92);backdrop-filter:blur(6px)} - both restated here. */

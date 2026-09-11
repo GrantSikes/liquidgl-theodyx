@@ -4,7 +4,7 @@ const fs = require('fs'); const sleep = ms => new Promise(r => setTimeout(r, ms)
 const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36';
 const O = process.env.ORIGIN || 'https://nhq.webflow.io'; const PATH = process.env.PATHNAME || '/'; const OUT = process.env.OUT || 'r4/rec';
 (async () => {
-  const browser = await chromium.launch({ headless: true, args: ['--enable-gpu', '--use-angle=metal', '--ignore-gpu-blocklist'] });
+  const browser = await chromium.launch({ headless: true, channel: process.env.PW_CHANNEL || undefined, args: ['--enable-gpu', '--use-angle=metal', '--ignore-gpu-blocklist'] });
   for (const mobile of [false, true]) {
     const tag = (mobile ? 'phone' : 'desktop') + PATH.replace(/\W+/g, '_');
     const ctx = await browser.newContext(mobile ? { ...devices['iPhone 13'], recordVideo: { dir: OUT, size: { width: 390, height: 844 } } } : { viewport: { width: 1440, height: 900 }, userAgent: UA, recordVideo: { dir: OUT, size: { width: 1440, height: 900 } } });
