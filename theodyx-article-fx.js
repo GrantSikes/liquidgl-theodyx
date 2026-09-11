@@ -89,6 +89,8 @@
         if (im && !(im.getAttribute('alt') || '').trim() && tt) im.setAttribute('alt', txt(tt));
         c.querySelectorAll('.thx-ml-t').forEach(function (p) { if (txt(p) === '\u00b7') { var pv = p.previousElementSibling, nx = p.nextElementSibling; if (!pv || !txt(pv) || !nx || !txt(nx)) p.style.display = 'none'; } });
       });
+      /* the hub's card thumbnails (.thxo-img, bound to the CMS thumbnail whose asset alt is empty) take the card's title */
+      try { document.querySelectorAll('a img.thxo-img, a img.thx-rel-img-el').forEach(function (im) { if ((im.getAttribute('alt') || '').trim()) return; var a = im.closest('a'), t = a && (a.querySelector('h2,h3,h4,.thxo-card-t,.thx-rel-t,[class*="title"]') || a); var n = t ? txt(t).slice(0, 160) : ''; if (n) im.setAttribute('alt', n); }); } catch (e) {}
       try { var hh = document.querySelector('h1'); document.querySelectorAll('img.thx-art-hero-img, .ethx-hero img.ethx-media').forEach(function (im) { if (!(im.getAttribute('alt') || '').trim() && hh) im.setAttribute('alt', txt(hh)); }); document.querySelectorAll('.thx-art-metaline .thx-ml-t').forEach(function (p) { if (!txt(p)) p.style.display = 'none'; }); } catch (e) {}
       document.querySelectorAll('a.thx-rel-card').forEach(function (a3) {
         var sl = a3.querySelector('.thx-rel-slug');
