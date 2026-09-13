@@ -1,4 +1,4 @@
-/* theodyx-scouting 2.4.1 (2026-09-10: the page never scrolls behind a gate stage — html + body locked, preboot CSS) — was 2.4.0: the safety statement gates the page again (owner, 2026-09-06: "the one I liked
+/* theodyx-scouting 2.5.0 (2026-09-13: the hero lead is a native, Webflow-editable paragraph; the dictionary sentence is only the fallback) — was 2.4.1 (2026-09-10: the page never scrolls behind a gate stage — html + body locked, preboot CSS) — was 2.4.0: the safety statement gates the page again (owner, 2026-09-06: "the one I liked
  * that would gate anyone before EVEN seeing the scouting page"). Two full-bleed stages in the page's ink, in
  * order: 1. #sc-gate-safety - "Theodyx | Safety / Your safety comes first." with the statement word for word and
  * an Acknowledged button (the page's own 1.x node, rebuilt on the 2.3.0 stage); 2. #sc-gate-age - the date of
@@ -635,8 +635,10 @@
     var h1 = qs('.sc-hero-title', hero) || qs('h1', hero);
     var eb = document.createElement('span'); eb.className = 'sc-hero-eyebrow'; eb.textContent = T('sc.hero.eyebrow');
     if (h1) hero.insertBefore(eb, h1); else hero.appendChild(eb);
-    var sub = document.createElement('p'); sub.className = 'sc-hero-sub'; sub.textContent = T('sc.hero.sub');
-    if (h1 && h1.nextSibling) hero.insertBefore(sub, h1.nextSibling); else hero.appendChild(sub);
+    /* 2.5.0 (owner): the lead is editable in Webflow - a native p.sc-hero-sub on the page wins; the dictionary line is only the fallback */
+    var sub = qs('.sc-hero-sub', hero);
+    if (!sub) { sub = document.createElement('p'); sub.className = 'sc-hero-sub'; sub.textContent = T('sc.hero.sub');
+      if (h1 && h1.nextSibling) hero.insertBefore(sub, h1.nextSibling); else hero.appendChild(sub); }
     if (!$('sc-hero-cta')) {
       var cta = document.createElement('a');
       cta.id = 'sc-hero-cta'; cta.className = 'thxo-btn sc-hero-cta';
