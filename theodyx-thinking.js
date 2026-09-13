@@ -1,4 +1,4 @@
-/*! theodyx-thinking.js v1.1.0 (2026-09-13) — the Our Thinking system: editorial carousels (.thk-track), the hub's search +
+/*! theodyx-thinking.js v1.2.0 (2026-09-13) — the Our Thinking system: editorial carousels (.thk-track), the hub's search +
  * facet filter (.thk-hub), and the card polish shared by the homepage band, /our-thinking and the alumni page.
  * Carousel: prev/next arrows glide one card at a time (snap-safe: scroll-snap is lifted during the rAF tween, exactly as the
  * Ethos carousel fix of 2026-07-28 - Chrome swallows smooth scrollTo on a mandatory-snap container), a 6.5 s autoplay that
@@ -9,7 +9,7 @@
 (function () {
   'use strict';
   if (window.__thxThinking) return;
-  var API = window.__thxThinking = { v: '1.1.0' };
+  var API = window.__thxThinking = { v: '1.2.0' };
   function q(s, r) { return [].slice.call((r || document).querySelectorAll(s)); }
   var RED = function () { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } };
   var raf = window.requestAnimationFrame || function (f) { return setTimeout(f, 16); };
@@ -123,4 +123,44 @@
     if (pre) chips.forEach(function (ch) { if (ch.getAttribute('data-kind') === pre) ch.click(); }); else apply();
   }
   q('[data-cap="index"]').forEach(capIndex);
+  /* ---------- people profile: the vCard is generated from what the page shows (name, role, email, phone, office, address, photo);
+     an uploaded .vcf (data-ppl-file on the button) wins. Capability tags become chips that link to /capabilities/<slug>. ---------- */
+  function slugify(t) { return (t || '').toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''); }
+  function vtext(sel) { var el = document.querySelector(sel); return el ? (el.textContent || '').replace(/\s+/g, ' ').trim() : ''; }
+  function vEsc(v) { return String(v).replace(/\\/g, '\\\\').replace(/\n/g, '\\n').replace(/,/g, '\\,').replace(/;/g, '\;'); }
+  function buildVcard() {
+    var name = vtext('[data-ppl="name"]'), role = vtext('[data-ppl="role"]'), email = vtext('[data-ppl="email"]'), phone = vtext('[data-ppl="phone"]');
+    var office = vtext('[data-ppl="office"]'), address = vtext('[data-ppl="address"]'), img = document.querySelector('[data-ppl="photo"] img');
+    var parts = name.split(' '), last = parts.length > 1 ? parts.pop() : '', first = parts.join(' ');
+    var adr = address ? address.split(/\s*,\s*/) : [];
+    var L = ['BEGIN:VCARD', 'VERSION:3.0', 'N:' + vEsc(last) + ';' + vEsc(first) + ';;;', 'FN:' + vEsc(name), 'ORG:Theodyx Inc.'];
+    if (role) L.push('TITLE:' + vEsc(role));
+    if (email) L.push('EMAIL;TYPE=INTERNET,WORK:' + email);
+    if (phone) L.push('TEL;TYPE=WORK,VOICE:' + phone.replace(/[^+\d]/g, ''));
+    if (adr.length) L.push('ADR;TYPE=WORK:;;' + vEsc(adr[0] || '') + ';' + vEsc(adr[1] || '') + ';' + vEsc((adr[2] || '').replace(/\s*\d{5}(-\d{4})?$/, '')) + ';' + vEsc(((adr[2] || '').match(/\d{5}(-\d{4})?$/) || [''])[0]) + ';' + vEsc(adr[3] || ''));
+    if (office) L.push('NOTE:' + vEsc(office + ' office'));
+    L.push('URL:' + location.href.split('#')[0]);
+    if (img && img.currentSrc) L.push('PHOTO;VALUE=URI:' + img.currentSrc);
+    L.push('REV:' + new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d+/, ''), 'END:VCARD');
+    return L.join('\r\n') + '\r\n';
+  }
+  q('[data-ppl="vcard"], [data-ppl="vcard2"]').forEach(function (a) {
+    var file = a.getAttribute('data-ppl-file');
+    if (file) { a.setAttribute('href', file); a.setAttribute('download', ''); return; }
+    a.addEventListener('click', function (e) {
+      e.preventDefault();
+      var name = vtext('[data-ppl="name"]') || 'contact', blob = new Blob([buildVcard()], { type: 'text/vcard;charset=utf-8' });
+      var url = URL.createObjectURL(blob), l = document.createElement('a'); l.href = url; l.download = slugify(name) + '.vcf'; document.body.appendChild(l); l.click();
+      setTimeout(function () { document.body.removeChild(l); URL.revokeObjectURL(url); }, 800);
+      try { if (typeof window.__thxTrack === 'function') window.__thxTrack('vcard_download', slugify(name)); } catch (err) {}
+    });
+  });
+  q('[data-ppl="tags"]').forEach(function (p) {
+    var names = (p.textContent || '').split(',').map(function (t) { return t.trim(); }).filter(Boolean);
+    if (!names.length) { var sec = p.closest('section'); if (sec) sec.style.display = 'none'; return; }
+    var wrap = document.createElement('div'); wrap.className = 'thk-chips';
+    names.forEach(function (n) { var a = document.createElement('a'); a.className = 'thk-chip'; a.href = '/capabilities/' + slugify(n); a.textContent = n; wrap.appendChild(a); });
+    p.parentNode.replaceChild(wrap, p);
+  });
+  /* the people index reuses the hub filter: department is the card kicker, so the chips match on it */
 })();
