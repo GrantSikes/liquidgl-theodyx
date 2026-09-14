@@ -1,4 +1,4 @@
-/* theodyx-scouting 2.5.0 (2026-09-13: the hero lead is a native, Webflow-editable paragraph; the dictionary sentence is only the fallback) — was 2.4.1 (2026-09-10: the page never scrolls behind a gate stage — html + body locked, preboot CSS) — was 2.4.0: the safety statement gates the page again (owner, 2026-09-06: "the one I liked
+/* theodyx-scouting 2.6.0 (2026-09-14: the page joins the house system - Google Sans Flex everywhere, a cream hero with black ink, 12 px labels, pill chips and submit; the safety/age stages stay ink-dark) — was 2.5.0 (2026-09-13: the hero lead is a native, Webflow-editable paragraph; the dictionary sentence is only the fallback) — was 2.4.1 (2026-09-10: the page never scrolls behind a gate stage — html + body locked, preboot CSS) — was 2.4.0: the safety statement gates the page again (owner, 2026-09-06: "the one I liked
  * that would gate anyone before EVEN seeing the scouting page"). Two full-bleed stages in the page's ink, in
  * order: 1. #sc-gate-safety - "Theodyx | Safety / Your safety comes first." with the statement word for word and
  * an Acknowledged button (the page's own 1.x node, rebuilt on the 2.3.0 stage); 2. #sc-gate-age - the date of
@@ -1754,6 +1754,18 @@
     var style = document.createElement('style');
     style.id = 'sc-css';
     style.textContent = css;
+    /* 2.6.0 (owner, 2026-09-14: "the entire website - Google Sans Flex, black text, normal spacing"): the page joins the house
+     * system - every face is Google Sans Flex (the site head's Archivo rule on the hero title is outranked by specificity), the hero
+     * is cream with black ink like every other hero, labels read at 12 px, chips and the submit are pills. The safety and age stages
+     * stay ink-dark on purpose (a full-bleed dialog that must be read before the page). */
+    style.textContent += '.sc-hero,.sc-hero *,.sc-intro,.sc-intro *,#sc-form-you,#sc-form-work,#sc-form-consent,#sc-form-you *,#sc-form-work *,#sc-form-consent *,.sc-chip,.sc-submit,.sc-legend,.sc-label,.sc-eyebrow,.sc-note,.sc-drop *,#sc-success,#sc-success *,#sc-gate-age *,#sc-gate-safety *,.sc-app-sans,.sc-gate-h,.sc-h2{font-family:"Google Sans Flex","Google Sans","Theodyx Sans Fallback",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif!important}'
+      + 'html body .sc-hero-title.sc-hero-title.sc-hero-title{font-family:"Google Sans Flex","Google Sans","Theodyx Sans Fallback",system-ui,sans-serif!important;text-transform:none!important;font-weight:500!important;letter-spacing:-.03em!important;line-height:1!important;font-size:clamp(40px,6.4vw,84px)!important;color:#0d0d0d!important}'
+      + '.sc-hero{background:#f4f2ec!important}.sc-hero-eyebrow{color:rgba(13,13,13,.6)!important;font-size:12px!important;letter-spacing:.08em!important}.sc-hero-sub{color:rgba(13,13,13,.8)!important;font-size:clamp(16px,1.4vw,19px)!important}'
+      + 'a.sc-hero-cta{background:#0d0d0d!important;color:#f4f2ec!important;border-color:#0d0d0d!important;border-radius:999px!important;font-weight:500!important}a.sc-hero-cta:hover{background:#000!important}'
+      + '.sc-hero-title,.sc-hero-eyebrow,.sc-hero-sub{text-shadow:none!important}.sc-hero svg,.sc-hero-mark{color:#0d0d0d!important;fill:#0d0d0d!important}'
+      + '.sc-h2,.sc-gate-h{font-weight:500!important;letter-spacing:-.02em!important}.sc-label,.sc-legend,.sc-eyebrow,.sc-req,.sc-note,.sc-drop-sub,.sc-drop-main,.sc-req-note{font-size:12px!important;letter-spacing:.08em!important}'
+      + '.sc-chip{border-radius:999px!important;font-size:14px!important}.sc-submit,.sc-gate-btn{border-radius:999px!important;font-size:15px!important;letter-spacing:0!important;text-transform:none!important;font-weight:500!important}'
+      + '.sc-input,.sc-select,.sc-textarea{font-family:inherit!important}';
     document.head.appendChild(style);
   }
 
