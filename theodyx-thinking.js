@@ -11,7 +11,7 @@
   if (window.__thxThinking) return;
   var API = window.__thxThinking = { v: '1.3.0' };
   /* 1.3.0 (owner: "when you click search our thinking it makes that large black border - remove it"): the site-wide two-tone focus ring (head, Phase 9) is lifted off the hub search input; the pill itself carries a soft focus-within state (native style) */
-  (function () { var st = document.createElement('style'); st.id = 'thx-thk-css'; st.textContent = 'html body input.thk-search-in.w-input:focus-visible,html body input.thk-search-in.w-input:focus{box-shadow:none!important;outline:none!important;border:0!important}'; document.head.appendChild(st); })();
+  (function () { var st = document.createElement('style'); st.id = 'thx-thk-css'; st.textContent = 'html body input.thk-search-in:focus-visible,html body input.thk-search-in:focus{box-shadow:none!important;outline:none!important;border:0!important}'; document.head.appendChild(st); })();
   function q(s, r) { return [].slice.call((r || document).querySelectorAll(s)); }
   var RED = function () { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } };
   var raf = window.requestAnimationFrame || function (f) { return setTimeout(f, 16); };
