@@ -1,4 +1,8 @@
-/*! theodyx-nav.js v4.16.0 (2026-09-13) — behaviours for the clear liquid-glass nav (#thx-nav).
+/*! theodyx-nav.js v4.17.0 (2026-09-13) — behaviours for the clear liquid-glass nav (#thx-nav).
+ * 4.17.0 (owner: "turn down the distortion with the colour a good bit, just a hint of colour like refraction" + "a small icon in the
+ * upper-left corner of each page that opens up the links"): the lens is a whisper (scale 60, dispersion .18, body split .015,
+ * saturate 1.04, specular .42, bleed .3 at saturate 1.25); a round two-line button before the mark opens a cream menu panel
+ * (three groups, current page marked, staggered links, Escape / outside click / scroll closes) and the right-hand burger retires.
  * 4.16.0 (owner: "turn the effects down so it does not glitch as much, smoother, change nothing else"): the lens bends less
  * (scale 112 -> 84, dispersion 1.2 -> .6 with a .06 body split, specular .7, colour bleed .7 at saturate 1.8) so the backdrop
  * re-snapshots read as a soft refraction instead of a shimmer, and the ink is steadier (dwell 650 ms, a flip needs a 1.5x
@@ -48,7 +52,7 @@
   if (window.__thxNav) return;
   var nav = document.getElementById('thx-nav');
   if (!nav) return;
-  var API = window.__thxNav = { v: '4.15.0' };
+  var API = window.__thxNav = { v: '4.17.0' };
   var I18N = window.__thxI18n; function T(k) { return (I18N && I18N.t) ? I18N.t(k) : ({ 'nav.open': 'Open menu', 'nav.close': 'Close menu' })[k] || k; } /* Phase 6: locale runtime (nv2pagesf) keyed by <html lang> */
   var doc = document.documentElement, body = document.body;
   var glass = nav.querySelector('.thx-nav-glass');
@@ -690,7 +694,7 @@
   /* Tunables (live: __thxNav.lens({scale:70,...})). Profile T(d) over distance d from the rounded edge: a rim term
    * (smoothstep^rimK over the outer rimW*h, the bevel) plus a body term that runs all the way to the centre line
    * (sign < 0 = the centre magnifies like a thick slab), so the whole surface bends — no flat inset panel. */
-  var LENS = { scale: 84, rim: 1.0, rimW: 0.58, rimK: 1.25, body: -0.6, bodyK: 1.5, disp: 0.6, dispW: 1.0, dispBody: 0.06, sat: 1.2, blur: 0.45, spec: 0.7, specW: 0.34, bleed: 0.7, bleedBlur: 30, bleedSat: 1.8, light: [-0.55, -0.83], light2: [0.55, 0.83] }; /* 4.12.0 (owner: "the colour refracts through the edges - EPIC, bright and vivid, hues blending into the glass"): dispersion 1.2 over the whole bevel (dispW 1), a .15 channel split in the body, saturate 1.2, specular 1.0 on a .34 rim, bleed 1.0 at 30 px saturate 2.6 - the mask in the CSS now hugs the rim so the centre stays true */ /* 4.10.0 (owner: "turn up the light effects for colour blending, no frosting"): dispersion .34 -> .55 over a wider band, specular .5 -> .8 on a wider rim, bleed .9 -> 1.0 at 26 px; saturation 1.9 -> 1.1 so the glass takes the true colours of what is behind it instead of a neon slab over warm video (measured: the wall under the pill read rgb(214,132,101) raw and rgb(240,130,87) through the 1.9 lens); the bleed's own saturation moves here (bleedSat 1.8, was 2.2 in the CSS); blur stays .45 - the glass is never frosted */
+  var LENS = { scale: 60, rim: 0.85, rimW: 0.58, rimK: 1.25, body: -0.45, bodyK: 1.5, disp: 0.18, dispW: 1.0, dispBody: 0.015, sat: 1.04, blur: 0.45, spec: 0.42, specW: 0.34, bleed: 0.3, bleedBlur: 30, bleedSat: 1.25, /* 4.17.0 (owner: "turn down the distortion with the colour a good bit - just a hue or a hint of colour, like refraction"): scale 60, dispersion .18 (was .6), body split .015, saturate 1.04, specular .42, colour bleed .3 at saturate 1.25 */ light: [-0.55, -0.83], light2: [0.55, 0.83] }; /* 4.12.0 (owner: "the colour refracts through the edges - EPIC, bright and vivid, hues blending into the glass"): dispersion 1.2 over the whole bevel (dispW 1), a .15 channel split in the body, saturate 1.2, specular 1.0 on a .34 rim, bleed 1.0 at 30 px saturate 2.6 - the mask in the CSS now hugs the rim so the centre stays true */ /* 4.10.0 (owner: "turn up the light effects for colour blending, no frosting"): dispersion .34 -> .55 over a wider band, specular .5 -> .8 on a wider rim, bleed .9 -> 1.0 at 26 px; saturation 1.9 -> 1.1 so the glass takes the true colours of what is behind it instead of a neon slab over warm video (measured: the wall under the pill read rgb(214,132,101) raw and rgb(240,130,87) through the 1.9 lens); the bleed's own saturation moves here (bleedSat 1.8, was 2.2 in the CSS); blur stays .45 - the glass is never frosted */
   var LENS_PHONE = { scale: 24, rim: -0.3, rimW: 0.22, body: 0, disp: 0.35, dispBody: 0 }; /* 4.10.0: on phones (and the lite tier) the pill sits over body text all the time, and the centre magnification refracted that text into a doubled, shifted mess under the mark - the phone lens bends only at the rim, and inward (rim < 0): an outward rim pulled the section above the bar into the pill as a pale block whenever a hard boundary sat just above it */
   function lensParams() { return (lite || !mqDesk.matches) ? Object.assign({}, LENS, LENS_PHONE) : LENS; }
   var mapW = 0, mapH = 0, mapURLs = ['', '', ''], mapRetry = 0;
@@ -963,6 +967,78 @@
     mqDesk.addEventListener && mqDesk.addEventListener('change', function (m) { if (m.matches) close(false); reinkFresh(); });
     window.addEventListener('pagehide', function () { close(false); });
   }
+
+  /* ---------- 7b. the menu (4.17.0, owner: "a small icon in the upper-left corner of each page that opens up the links") ----------
+   * A round button injected before the mark opens a cream panel that drops from the pill: every section of the site in three
+   * groups, the current page marked, links staggered in. Escape, an outside click, a scroll of more than 120 px or a resize
+   * closes it. The old right-hand burger is retired (one menu control on every viewport). The button wears the mark's ink. */
+  (function menu() {
+    var bar = nav.querySelector('.thx-nav-bar'); if (!bar || !logo) return;
+    var LINKS = [
+      { h: 'Firm', l: [['/about', 'About Theodyx'], ['/our-capabilities', 'Our capabilities'], ['/our-people', 'Our people'], ['/clients', 'Clients'], ['/partners', 'Partners']] },
+      { h: 'Thinking', l: [['/our-thinking', 'Our thinking'], ['/charter', 'Charter'], ['/applications', 'Applications']] },
+      { h: 'Join', l: [['/scouting', 'Scouting'], ['/network', 'Theodyx Network'], ['/contact', 'Connect']] }
+    ];
+    var FOOT = [['/policies/legal', 'Legal'], ['/policies/privacy-policy', 'Privacy'], ['/policies/terms-of-service', 'Terms']];
+    var css = '.thx-nav-mbtn{display:inline-flex;flex:0 0 auto;width:40px;height:40px;margin-right:2px;border:0;border-radius:999px;background:transparent;cursor:pointer;padding:0;align-items:center;justify-content:center;color:var(--thx-ink-light);transition:background-color 200ms,color 320ms var(--thx-nav-ease)}'
+      + '.thx-nav-mbtn:hover{background:color-mix(in srgb,currentColor 10%,transparent)}.thx-nav-mbtn svg{width:18px;height:18px;display:block;overflow:visible}.thx-nav-mbtn line{stroke:currentColor;stroke-width:1.9;stroke-linecap:round;transition:transform 360ms var(--thx-nav-ease),opacity 200ms;transform-origin:50% 50%}'
+      + '.thx-nav[data-ink="dark"] .thx-nav-mbtn,.thx-nav .thx-nav-mbtn[data-ink="dark"]{color:var(--thx-ink-dark)}.thx-nav .thx-nav-mbtn[data-ink="light"]{color:var(--thx-ink-light)}'
+      + '.thx-nav[data-menu="open"] .thx-nav-mbtn line:first-child{transform:translateY(3px) rotate(45deg)}.thx-nav[data-menu="open"] .thx-nav-mbtn line:last-child{transform:translateY(-3px) rotate(-45deg)}'
+      + '.thx-nav.has-mbtn .thx-nav-bar{padding-inline-start:8px}.thx-nav.has-mbtn .thx-nav-burger{display:none!important}'
+      + '@media (max-width:899px){.thx-nav .thx-nav-mbtn,.thx-nav .thx-nav-mbtn[data-ink]{color:#000}.thx-nav.has-mbtn .thx-nav-bar{padding-inline-start:4px}}'
+      + '.thx-menu{position:fixed;z-index:2147483000;inset:0;display:none;font-family:"Google Sans Flex","Google Sans","Theodyx Sans Fallback",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;letter-spacing:normal}.thx-menu[data-on]{display:block}'
+      + '.thx-menu-scrim{position:absolute;inset:0;background:rgba(20,18,14,.18);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);opacity:0;transition:opacity 320ms var(--thx-nav-ease)}.thx-menu[data-in] .thx-menu-scrim{opacity:1}'
+      + '.thx-menu-panel{position:absolute;top:var(--thx-menu-top,80px);left:var(--thx-menu-left,16px);width:min(440px,calc(100vw - 24px));max-height:calc(100vh - var(--thx-menu-top,80px) - 16px);overflow:auto;box-sizing:border-box;padding:26px 30px 22px;border-radius:26px;background:#f4f2ec;color:#0d0d0d;box-shadow:0 1px 0 rgba(255,255,255,.7) inset,0 0 0 1px rgba(13,13,13,.07),0 34px 90px -24px rgba(0,0,0,.42);opacity:0;transform:translateY(-10px) scale(.985);transform-origin:8% 0;transition:opacity 300ms var(--thx-nav-ease),transform 420ms var(--thx-nav-ease)}'
+      + '.thx-menu[data-in] .thx-menu-panel{opacity:1;transform:none}'
+      + '.thx-menu-g{margin:0 0 20px}.thx-menu-g:last-of-type{margin-bottom:0}.thx-menu-h{margin:0 0 6px;font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:rgba(13,13,13,.5)}'
+      + '.thx-menu ul{list-style:none;margin:0;padding:0}.thx-menu li{margin:0;padding:0;line-height:1;list-style:none;opacity:0;transform:translateY(8px);transition:opacity 360ms var(--thx-nav-ease),transform 460ms var(--thx-nav-ease);transition-delay:var(--d,0ms)}.thx-menu[data-in] li{opacity:1;transform:none}'
+      + '.thx-menu-a{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:9px 0;color:#0d0d0d;text-decoration:none;font-size:21px;font-weight:500;letter-spacing:-.012em;line-height:1.2;border-radius:8px;transition:color 200ms,padding-left 260ms var(--thx-nav-ease)}'
+      + '.thx-menu-a:hover,.thx-menu-a:focus-visible{padding-left:6px;color:#000}.thx-menu-a:focus-visible{outline:2px solid #0d0d0d;outline-offset:2px}.thx-menu-a[aria-current="page"]{color:rgba(13,13,13,.55)}.thx-menu-a[aria-current="page"]::before{content:"";width:6px;height:6px;border-radius:999px;background:#0d0d0d;margin-right:-6px;flex:0 0 auto}'
+      + '.thx-menu-a svg{width:16px;height:16px;flex:0 0 auto;opacity:0;transform:translateX(-6px);transition:opacity 200ms,transform 260ms var(--thx-nav-ease)}.thx-menu-a:hover svg,.thx-menu-a:focus-visible svg{opacity:1;transform:none}'
+      + '.thx-menu-f{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:22px;padding-top:16px;border-top:1px solid rgba(13,13,13,.1)}.thx-menu-f a{color:rgba(13,13,13,.6);text-decoration:none;font-size:13px;letter-spacing:.01em}.thx-menu-f a:hover{color:#0d0d0d}'
+      + '@media (max-width:899px){.thx-menu-panel{left:12px;width:calc(100vw - 24px);padding:22px 24px 18px;border-radius:22px}.thx-menu-a{font-size:20px}}'
+      + '@media (prefers-reduced-motion:reduce){.thx-menu *,.thx-menu-panel,.thx-menu-scrim{transition:none!important}}';
+    var st = document.createElement('style'); st.id = 'thx-menu-css'; st.textContent = css; document.head.appendChild(st);
+    var btn = document.createElement('button'); btn.type = 'button'; btn.className = 'thx-nav-mbtn'; btn.setAttribute('aria-label', T('nav.open')); btn.setAttribute('aria-expanded', 'false'); btn.setAttribute('aria-controls', 'thx-menu'); btn.setAttribute('aria-haspopup', 'true');
+    btn.innerHTML = '<svg viewBox="0 0 18 18" aria-hidden="true"><line x1="2" y1="6" x2="16" y2="6"/><line x1="2" y1="12" x2="16" y2="12"/></svg>';
+    bar.insertBefore(btn, logo); nav.classList.add('has-mbtn');
+    var mirror = function () { var v = logo.getAttribute('data-ink'); if (v) btn.setAttribute('data-ink', v); else btn.removeAttribute('data-ink'); };
+    mirror(); if (window.MutationObserver) new MutationObserver(mirror).observe(logo, { attributes: true, attributeFilter: ['data-ink'] });
+    var root = document.createElement('div'); root.className = 'thx-menu'; root.id = 'thx-menu'; root.setAttribute('aria-hidden', 'true');
+    var arrow = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h9M8.5 4.5 12 8l-3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    var html = '<div class="thx-menu-scrim"></div><nav class="thx-menu-panel" aria-label="Site menu">', d = 0;
+    LINKS.forEach(function (g) { html += '<div class="thx-menu-g"><p class="thx-menu-h">' + g.h + '</p><ul>'; g.l.forEach(function (l) { var cur = l[0] !== '/' && path.indexOf(l[0]) === 0 ? ' aria-current="page"' : ''; html += '<li style="--d:' + (d++ * 28) + 'ms"><a class="thx-menu-a" href="' + l[0] + '"' + cur + '><span>' + l[1] + '</span>' + arrow + '</a></li>'; }); html += '</ul></div>'; });
+    html += '<div class="thx-menu-f">'; FOOT.forEach(function (l) { html += '<a href="' + l[0] + '">' + l[1] + '</a>'; }); html += '</div></nav>';
+    root.innerHTML = html; body.appendChild(root);
+    var panel2 = root.querySelector('.thx-menu-panel'), openY = 0, on = false, hideT = 0;
+    function place() { var r = nav.getBoundingClientRect(); root.style.setProperty('--thx-menu-top', Math.round(r.bottom + 10) + 'px'); root.style.setProperty('--thx-menu-left', Math.max(12, Math.round(r.left)) + 'px'); }
+    function mopen() {
+      if (on) return; on = true; clearTimeout(hideT); place(); openY = window.scrollY || 0;
+      root.setAttribute('data-on', ''); root.setAttribute('aria-hidden', 'false'); nav.setAttribute('data-menu', 'open'); btn.setAttribute('aria-expanded', 'true'); btn.setAttribute('aria-label', T('nav.close'));
+      lens.tx = 0; lens.ty = 0; lens.on = false; nav.classList.remove('is-lens'); kick();
+      raf(function () { raf(function () { root.setAttribute('data-in', ''); }); });
+      var f = panel2.querySelector('a'); setTimeout(function () { if (on && f) f.focus({ preventScroll: true }); }, 120);
+      track('nav_menu_open');
+    }
+    function mclose(restore) {
+      if (!on) return; on = false;
+      root.removeAttribute('data-in'); nav.removeAttribute('data-menu'); btn.setAttribute('aria-expanded', 'false'); btn.setAttribute('aria-label', T('nav.open'));
+      hideT = setTimeout(function () { root.removeAttribute('data-on'); root.setAttribute('aria-hidden', 'true'); }, 340);
+      if (restore !== false) { try { btn.focus({ preventScroll: true }); } catch (e) {} }
+    }
+    btn.addEventListener('click', function () { on ? mclose() : mopen(); });
+    root.querySelector('.thx-menu-scrim').addEventListener('click', function () { mclose(); });
+    root.addEventListener('click', function (e) { if (e.target.closest('a[href]')) mclose(false); });
+    document.addEventListener('keydown', function (e) {
+      if (!on) return;
+      if (e.key === 'Escape') { e.preventDefault(); mclose(); return; }
+      if (e.key === 'Tab') { var f = [btn].concat([].slice.call(panel2.querySelectorAll('a[href]'))); var first = f[0], last = f[f.length - 1]; if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); } else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); } else if (!root.contains(document.activeElement) && document.activeElement !== btn) { e.preventDefault(); first.focus(); } }
+    });
+    window.addEventListener('scroll', function () { if (on && Math.abs((window.scrollY || 0) - openY) > 120) mclose(false); }, { passive: true });
+    window.addEventListener('resize', function () { if (on) place(); });
+    window.addEventListener('pagehide', function () { mclose(false); });
+    API.menu = { open: mopen, close: mclose };
+  })();
 
   /* ---------- 8. reduced-motion: pause autoplaying background video (WCAG 2.2.2) ---------- */
   function motionPref() {
