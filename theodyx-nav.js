@@ -1,3 +1,4 @@
+/*! theodyx-nav.js v4.19.0 (2026-09-14) — 4.19.0 (owner: "the nav glitches SO bad; the menu icon at the top-left, frosted glass, just the icon"): the bar is a frosted pill with a sheen (FROST on - no displacement lens, so nothing can re-snapshot out of place); the menu button is a matching frosted circle at the top-left, the panel drops beneath it; one flat list of links.
 /*! theodyx-nav.js v4.18.0 (2026-09-14) — 4.18.0 (owner: "I want the liquid glass still - the warping, just not as intense, no glitch"): the clear lens stays, gentler still (scale 44, rim .7, body .15, dispersion .12, no body split, bleed .35); FROST=true would swap in a plain frosted pill; the menu is a floating black button at the left edge that opens on hover (links editable via window.__thxMenu in the site footer code).
 /*! theodyx-nav.js v4.17.0 (2026-09-13) — behaviours for the clear liquid-glass nav (#thx-nav).
  * 4.17.0 (owner: "turn down the distortion with the colour a good bit, just a hint of colour like refraction" + "a small icon in the
@@ -53,7 +54,7 @@
   if (window.__thxNav) return;
   var nav = document.getElementById('thx-nav');
   if (!nav) return;
-  var API = window.__thxNav = { v: '4.18.1' };
+  var API = window.__thxNav = { v: '4.19.0' };
   var I18N = window.__thxI18n; function T(k) { return (I18N && I18N.t) ? I18N.t(k) : ({ 'nav.open': 'Open menu', 'nav.close': 'Close menu' })[k] || k; } /* Phase 6: locale runtime (nv2pagesf) keyed by <html lang> */
   var doc = document.documentElement, body = document.body;
   var glass = nav.querySelector('.thx-nav-glass');
@@ -686,13 +687,13 @@
   reink(); sched();
 
   /* ---------- 5. edge lensing (Chromium only; capability + frame-budget gated) ---------- */
-  var FROST = false; /* 4.18.0 (owner: "the nav looks so bad now, it glitches - make it amazing"): the desktop bar is the same calm frosted pill as the phone - CSS blur + saturate over a light frost, black ink, no SVG lens, no colour bleed, no ink election, nothing re-snapshots. Set false to bring the clear lens back. */
+  var FROST = true; /* 4.18.0 (owner: "the nav looks so bad now, it glitches - make it amazing"): the desktop bar is the same calm frosted pill as the phone - CSS blur + saturate over a light frost, black ink, no SVG lens, no colour bleed, no ink election, nothing re-snapshots. Set false to bring the clear lens back. */
   (function frost() {
     if (!FROST) return;
     nav.classList.add('is-frost');
     var st = document.createElement('style'); st.id = 'thx-frost-css';
     st.textContent = '.thx-nav.is-frost .thx-nav-glass,.thx-nav.is-frost.is-refract .thx-nav-glass,.thx-nav.is-frost.is-gl .thx-nav-glass{inset:0;border-radius:inherit;clip-path:none;visibility:visible;background:rgba(255,255,255,.66);-webkit-backdrop-filter:blur(18px) saturate(1.5);backdrop-filter:blur(18px) saturate(1.5);box-shadow:inset 0 1px 0 0 rgba(255,255,255,.75),inset 0 0 0 1px rgba(255,255,255,.4),0 1px 2px rgba(0,0,0,.06),0 10px 30px rgba(0,0,0,.12)}'
-      + '.thx-nav.is-frost .thx-nav-glass::before,.thx-nav.is-frost .thx-nav-glass::after,.thx-nav.is-frost .thx-nav-tint,.thx-nav.is-frost .thx-nav-gl,.thx-nav.is-frost canvas.thx-nav-gl{display:none}'
+      + '.thx-nav.is-frost .thx-nav-glass::after,.thx-nav.is-frost .thx-nav-tint,.thx-nav.is-frost .thx-nav-gl,.thx-nav.is-frost canvas.thx-nav-gl{display:none}'
       + '.thx-nav.is-frost .thx-nav-rim{background:none;box-shadow:none}'
       + '.thx-nav.is-frost .thx-nav-menu a,.thx-nav.is-frost .thx-nav-logo,.thx-nav.is-frost .thx-nav-burger,.thx-nav.is-frost[data-ink] .thx-nav-menu a,.thx-nav.is-frost[data-ink] .thx-nav-logo,.thx-nav.is-frost .thx-nav-menu[data-ink] a,.thx-nav.is-frost .thx-nav-logo[data-ink]{color:#000;text-shadow:none}'
       + '.thx-nav.is-frost .thx-nav-prog{background:#000}.thx-nav.is-frost .thx-nav-menu a:hover{background:rgba(0,0,0,.06)}';
@@ -990,28 +991,26 @@
   (function menu() {
     var cfg = (window.__thxMenu && typeof window.__thxMenu === 'object') ? window.__thxMenu : null;
     var LINKS = (cfg && cfg.groups) || [
-      { h: 'Firm', l: [['/about', 'About Theodyx'], ['/our-capabilities', 'Our capabilities'], ['/our-people', 'Our people'], ['/clients', 'Clients'], ['/partners', 'Partners']] },
-      { h: 'Thinking', l: [['/our-thinking', 'Our thinking'], ['/charter', 'Charter'], ['/applications', 'Applications']] },
-      { h: 'Join', l: [['/scouting', 'Scouting'], ['/network', 'Theodyx Network'], ['/contact', 'Connect']] }
+      { h: '', l: [['/', 'Home'], ['/our-capabilities', 'Our capabilities'], ['/clients', 'Clients'], ['/partners', 'Partners'], ['/our-thinking', 'Our thinking'], ['/scouting', 'Scouting'], ['/network', 'Network'], ['/contact', 'Connect']] }
     ];
-    var FOOT = (cfg && cfg.foot) || [['/policies/legal', 'Legal'], ['/policies/privacy-policy', 'Privacy'], ['/policies/terms-of-service', 'Terms']];
+    var FOOT = (cfg && cfg.foot) || [];
     var FONT = '"Google Sans Flex","Google Sans","Theodyx Sans Fallback",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif';
-    var css = '.thx-nav .thx-nav-burger{display:none!important}' /* 4.18.1: one menu control everywhere - the old in-bar burger (phones) retires */ + '.thx-fab{position:fixed;z-index:2147482990;left:18px;top:50%;transform:translateY(-50%);width:52px;height:52px;border:0;border-radius:999px;background:#0d0d0d;color:#fff;cursor:pointer;padding:0;display:inline-flex;align-items:center;justify-content:center;box-shadow:0 1px 0 rgba(255,255,255,.12) inset,0 10px 30px -8px rgba(0,0,0,.45),0 0 0 1px rgba(0,0,0,.08);transition:transform 320ms var(--thx-nav-ease),box-shadow 320ms var(--thx-nav-ease),background-color 200ms;font-family:' + FONT + '}'
-      + '.thx-fab:hover,.thx-fab[aria-expanded="true"]{transform:translateY(-50%) scale(1.06);box-shadow:0 1px 0 rgba(255,255,255,.14) inset,0 16px 40px -10px rgba(0,0,0,.5),0 0 0 1px rgba(0,0,0,.1)}.thx-fab:active{transform:translateY(-50%) scale(.98)}'
+    var css = '.thx-nav .thx-nav-burger{display:none!important}' /* 4.18.1: one menu control everywhere - the old in-bar burger (phones) retires */ + '.thx-fab{position:fixed;z-index:2147482990;left:calc(env(safe-area-inset-left,0px) + 16px);top:var(--thx-nav-top,12px);width:var(--thx-nav-h,56px);height:var(--thx-nav-h,56px);border:0;border-radius:999px;background:rgba(255,255,255,.66);-webkit-backdrop-filter:blur(18px) saturate(1.5);backdrop-filter:blur(18px) saturate(1.5);color:#000;cursor:pointer;padding:0;display:inline-flex;align-items:center;justify-content:center;box-shadow:inset 0 1px 0 0 rgba(255,255,255,.75),inset 0 0 0 1px rgba(255,255,255,.4),0 1px 2px rgba(0,0,0,.06),0 10px 30px rgba(0,0,0,.12);transition:transform 320ms var(--thx-nav-ease),background-color 240ms;font-family:' + FONT + '}'
+      + '@media (min-width:900px){.thx-nav{width:min(var(--thx-nav-w),calc(100% - 176px))}}@media (max-width:899px){.thx-nav{inset-inline:calc(env(safe-area-inset-left,0px) + 76px) .75rem;width:auto;margin-inline:0}}'
+      + '.thx-fab:hover,.thx-fab[aria-expanded="true"]{background:rgba(255,255,255,.86);transform:scale(1.04)}.thx-fab:active{transform:scale(.98)}'
       + '.thx-fab:focus-visible{outline:2px solid #0d0d0d;outline-offset:3px}.thx-fab svg{width:20px;height:20px;display:block;overflow:visible}.thx-fab line{stroke:currentColor;stroke-width:1.9;stroke-linecap:round;transition:transform 360ms var(--thx-nav-ease),opacity 200ms;transform-origin:50% 50%}'
       + '.thx-fab[aria-expanded="true"] line:first-child{transform:translateY(3px) rotate(45deg)}.thx-fab[aria-expanded="true"] line:last-child{transform:translateY(-3px) rotate(-45deg)}'
       + '.thx-menu{position:fixed;z-index:2147482980;inset:0;display:none;font-family:' + FONT + ';letter-spacing:normal}.thx-menu[data-on]{display:block}'
       + '.thx-menu-scrim{position:absolute;inset:0;background:rgba(20,18,14,.10);opacity:0;transition:opacity 320ms var(--thx-nav-ease)}.thx-menu[data-in] .thx-menu-scrim{opacity:1}'
-      + '.thx-menu-panel{position:absolute;left:86px;top:50%;transform:translateY(-50%) translateX(-10px);width:min(420px,calc(100vw - 110px));max-height:calc(100vh - 32px);overflow:auto;box-sizing:border-box;padding:26px 30px 22px;border-radius:26px;background:#f4f2ec;color:#0d0d0d;box-shadow:0 1px 0 rgba(255,255,255,.7) inset,0 0 0 1px rgba(13,13,13,.07),0 34px 90px -24px rgba(0,0,0,.42);opacity:0;transition:opacity 260ms var(--thx-nav-ease),transform 420ms var(--thx-nav-ease)}'
-      + '.thx-menu[data-in] .thx-menu-panel{opacity:1;transform:translateY(-50%)}'
+      + '.thx-menu-panel{position:absolute;left:calc(env(safe-area-inset-left,0px) + 16px);top:calc(var(--thx-nav-top,12px) + var(--thx-nav-h,56px) + 10px);transform:translateY(-10px);width:min(420px,calc(100vw - 110px));max-height:calc(100vh - 32px);overflow:auto;box-sizing:border-box;padding:26px 30px 22px;border-radius:26px;background:#f4f2ec;color:#0d0d0d;box-shadow:0 1px 0 rgba(255,255,255,.7) inset,0 0 0 1px rgba(13,13,13,.07),0 34px 90px -24px rgba(0,0,0,.42);opacity:0;transition:opacity 260ms var(--thx-nav-ease),transform 420ms var(--thx-nav-ease)}'
+      + '.thx-menu[data-in] .thx-menu-panel{opacity:1;transform:none}'
       + '.thx-menu-g{margin:0 0 20px}.thx-menu-g:last-of-type{margin-bottom:0}.thx-menu-h{margin:0 0 6px;font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:rgba(13,13,13,.5)}'
       + '.thx-menu ul{list-style:none;margin:0;padding:0}.thx-menu li{margin:0;padding:0;line-height:1;list-style:none;opacity:0;transform:translateX(-8px);transition:opacity 360ms var(--thx-nav-ease),transform 460ms var(--thx-nav-ease);transition-delay:var(--d,0ms)}.thx-menu[data-in] li{opacity:1;transform:none}'
       + '.thx-menu-a{display:flex;align-items:center;gap:12px;padding:9px 0;color:#0d0d0d;text-decoration:none;font-size:21px;font-weight:500;letter-spacing:-.012em;line-height:1.2;border-radius:8px;transition:color 200ms,padding-left 260ms var(--thx-nav-ease)}.thx-menu-a>span{flex:1 1 auto}'
       + '.thx-menu-a:hover,.thx-menu-a:focus-visible{padding-left:6px;color:#000}.thx-menu-a:focus-visible{outline:2px solid #0d0d0d;outline-offset:2px}.thx-menu-a[aria-current="page"]{color:rgba(13,13,13,.55)}.thx-menu-a[aria-current="page"]::before{content:"";width:6px;height:6px;border-radius:999px;background:#0d0d0d;flex:0 0 auto}'
       + '.thx-menu-a svg{width:16px;height:16px;flex:0 0 auto;opacity:0;transform:translateX(-6px);transition:opacity 200ms,transform 260ms var(--thx-nav-ease)}.thx-menu-a:hover svg,.thx-menu-a:focus-visible svg{opacity:1;transform:none}'
       + '.thx-menu-f{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:22px;padding-top:16px;border-top:1px solid rgba(13,13,13,.1)}.thx-menu-f a{color:rgba(13,13,13,.6);text-decoration:none;font-size:13px;letter-spacing:.01em}.thx-menu-f a:hover{color:#0d0d0d}'
-      + '@media (max-width:899px){.thx-fab{left:14px;top:auto;bottom:max(18px,env(safe-area-inset-bottom,0px));transform:none;width:50px;height:50px}.thx-fab:hover,.thx-fab[aria-expanded="true"]{transform:scale(1.04)}.thx-fab:active{transform:scale(.98)}'
-      + '.thx-menu-panel{left:12px;top:auto;bottom:84px;transform:translateY(10px);width:calc(100vw - 24px);max-height:calc(100vh - 110px);padding:22px 24px 18px;border-radius:22px}.thx-menu[data-in] .thx-menu-panel{transform:none}.thx-menu-a{font-size:20px}}'
+      + '@media (max-width:899px){.thx-menu-panel{left:12px;width:calc(100vw - 24px);max-height:calc(100vh - 110px);padding:22px 24px 18px;border-radius:22px}.thx-menu-a{font-size:20px}}'
       + '@media (prefers-reduced-motion:reduce){.thx-fab,.thx-menu *,.thx-menu-panel,.thx-menu-scrim{transition:none!important}}'
       + '@media print{.thx-fab,.thx-menu{display:none!important}}';
     var st = document.createElement('style'); st.id = 'thx-menu-css'; st.textContent = css; document.head.appendChild(st);
@@ -1021,7 +1020,7 @@
     var arrow = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h9M8.5 4.5 12 8l-3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
     var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
     var html = '<div class="thx-menu-scrim"></div><nav class="thx-menu-panel" aria-label="Site menu">', d = 0;
-    LINKS.forEach(function (g) { html += '<div class="thx-menu-g">' + (g.h ? '<p class="thx-menu-h">' + esc(g.h) + '</p>' : '') + '<ul>'; (g.l || []).forEach(function (l) { var cur = l[0] !== '/' && path.indexOf(l[0]) === 0 ? ' aria-current="page"' : ''; html += '<li style="--d:' + (d++ * 26) + 'ms"><a class="thx-menu-a" href="' + esc(l[0]) + '"' + cur + '><span>' + esc(l[1]) + '</span>' + arrow + '</a></li>'; }); html += '</ul></div>'; });
+    LINKS.forEach(function (g) { html += '<div class="thx-menu-g">' + (g.h ? '<p class="thx-menu-h">' + esc(g.h) + '</p>' : '') + '<ul>'; (g.l || []).forEach(function (l) { var cur = (l[0] === '/' ? path === '/' : path.indexOf(l[0]) === 0) ? ' aria-current="page"' : ''; html += '<li style="--d:' + (d++ * 26) + 'ms"><a class="thx-menu-a" href="' + esc(l[0]) + '"' + cur + '><span>' + esc(l[1]) + '</span>' + arrow + '</a></li>'; }); html += '</ul></div>'; });
     if (FOOT.length) { html += '<div class="thx-menu-f">'; FOOT.forEach(function (l) { html += '<a href="' + esc(l[0]) + '">' + esc(l[1]) + '</a>'; }); html += '</div>'; }
     html += '</nav>';
     root.innerHTML = html; body.appendChild(root); body.appendChild(btn);
