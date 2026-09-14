@@ -1,4 +1,4 @@
-/*! theodyx-thinking.js v1.3.0 (2026-09-13) — the Our Thinking system: editorial carousels (.thk-track), the hub's search +
+/*! theodyx-thinking.js v1.3.1 (2026-09-13) — the Our Thinking system: editorial carousels (.thk-track), the hub's search +
  * facet filter (.thk-hub), and the card polish shared by the homepage band, /our-thinking and the alumni page.
  * Carousel: prev/next arrows glide one card at a time (snap-safe: scroll-snap is lifted during the rAF tween, exactly as the
  * Ethos carousel fix of 2026-07-28 - Chrome swallows smooth scrollTo on a mandatory-snap container), a 6.5 s autoplay that
@@ -9,7 +9,7 @@
 (function () {
   'use strict';
   if (window.__thxThinking) return;
-  var API = window.__thxThinking = { v: '1.3.0' };
+  var API = window.__thxThinking = { v: '1.3.1' };
   /* 1.3.0 (owner: "when you click search our thinking it makes that large black border - remove it"): the site-wide two-tone focus ring (head, Phase 9) is lifted off the hub search input; the pill itself carries a soft focus-within state (native style) */
   (function () { var st = document.createElement('style'); st.id = 'thx-thk-css'; st.textContent = 'html body input.thk-search-in:focus-visible,html body input.thk-search-in:focus{box-shadow:none!important;outline:none!important;border:0!important}'; document.head.appendChild(st); })();
   function q(s, r) { return [].slice.call((r || document).querySelectorAll(s)); }
@@ -29,7 +29,7 @@
 
   /* ---------- carousels ---------- */
   function carousel(track) {
-    var list = track.querySelector('.thk-list') || track.querySelector('.w-dyn-items'); if (!list) return;
+    var list = track.querySelector('.thk-list') || track.querySelector('.w-dyn-items') || track.querySelector('[data-thk-list]'); if (!list) return; /* 1.3.1: a static strip (the homepage What we do cards) marks its list with data-thk-list */
     var band = track.closest('.thk-band, section, .thxo-sec') || track;
     var prev = band.querySelector('.thk-arrow[data-dir="prev"]'), next = band.querySelector('.thk-arrow[data-dir="next"]');
     var stopped = false, hover = false, tweening = false, timer = 0, STEP_MS = 6500;
