@@ -1,4 +1,4 @@
-/*! theodyx-thinking.js v1.3.2 (2026-09-13) — the Our Thinking system: editorial carousels (.thk-track), the hub's search +
+/*! theodyx-thinking.js v1.4.0 (2026-09-14) — the Our Thinking system: editorial carousels (.thk-track), the hub's search +
  * facet filter (.thk-hub), and the card polish shared by the homepage band, /our-thinking and the alumni page.
  * Carousel: prev/next arrows glide one card at a time (snap-safe: scroll-snap is lifted during the rAF tween, exactly as the
  * Ethos carousel fix of 2026-07-28 - Chrome swallows smooth scrollTo on a mandatory-snap container), a 6.5 s autoplay that
@@ -9,7 +9,7 @@
 (function () {
   'use strict';
   if (window.__thxThinking) return;
-  var API = window.__thxThinking = { v: '1.3.2' };
+  var API = window.__thxThinking = { v: '1.4.0' };
   /* 1.3.0 (owner: "when you click search our thinking it makes that large black border - remove it"): the site-wide two-tone focus ring (head, Phase 9) is lifted off the hub search input; the pill itself carries a soft focus-within state (native style) */
   (function () { var st = document.createElement('style'); st.id = 'thx-thk-css'; st.textContent = 'html body input.thk-search-in:focus-visible,html body input.thk-search-in:focus{box-shadow:none!important;outline:none!important;border:0!important}'; document.head.appendChild(st); })();
   function q(s, r) { return [].slice.call((r || document).querySelectorAll(s)); }
@@ -54,6 +54,9 @@
       if (i < 0) i = s.length - 1;
       glide(s[i]);
     }
+    /* 1.4.0 (a11y): the arrows are keyboard buttons too (Enter / Space), and the strip announces itself as a carousel */
+    [prev, next].forEach(function (b) { if (!b) return; if (!b.hasAttribute('role')) b.setAttribute('role', 'button'); if (!b.hasAttribute('tabindex')) b.setAttribute('tabindex', '0'); b.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); b.click(); } }); });
+    if (!list.hasAttribute('role')) list.setAttribute('role', 'region'); if (!list.hasAttribute('aria-roledescription')) list.setAttribute('aria-roledescription', 'carousel'); if (!list.hasAttribute('aria-label')) { var hd = band.querySelector('h2,h3'); list.setAttribute('aria-label', hd ? (hd.textContent || '').trim().slice(0, 80) : 'Carousel'); }
     if (prev) prev.addEventListener('click', function (e) { e.preventDefault(); go(-1, true); });
     if (next) next.addEventListener('click', function (e) { e.preventDefault(); go(1, true); });
     list.addEventListener('keydown', function (e) { if (e.key === 'ArrowRight') { e.preventDefault(); go(1, true); } if (e.key === 'ArrowLeft') { e.preventDefault(); go(-1, true); } });
