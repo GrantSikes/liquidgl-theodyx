@@ -1,4 +1,4 @@
-/*! theodyx-ff.js v1.2.1 (2026-09-15) — the Freshfields-pattern runtime for theodyx.com.
+/*! theodyx-ff.js v1.2.2 (2026-09-15) — the Freshfields-pattern runtime for theodyx.com.
  * Owner directive (2026-09-15): "make theodyx.com exactly like freshfields.com — the UI/UX, the colours, the sections — so I can edit it and
  * make it mine." Everything visual lives in native Designer classes (ff-*). This file only adds what CSS classes cannot:
  *  1. the How-we-help ACCORDION: a CMS rich-text field ([data-ff="acc"]) is split at every H3 — the H3 becomes the row title, everything
@@ -14,7 +14,7 @@
 (function () {
   'use strict';
   if (window.__thxFF) return;
-  var API = window.__thxFF = { v: '1.2.1' };
+  var API = window.__thxFF = { v: '1.2.2' };
   var SANS = '"Google Sans Flex","Google Sans",system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif';
   function q(s, r) { return [].slice.call((r || document).querySelectorAll(s)); }
   var RED = function () { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } };
@@ -110,7 +110,7 @@
       /* the Our thinking hero form fields (selects sit on a lavender panel) */
       '.ff-thk-hero-r .ff-select{background-color:#fff}',
       /* a data-ff="color" carrier is never shown */
-      '[data-ff="color"]{display:none!important}',
+      '[data-ff="color"]{display:none!important}[data-ppl-cat]{display:none!important}',
       /* hide-when-empty (a CMS field left blank hides the whole section) */
       '[data-ff-hide-empty]:has(.w-dyn-bind-empty){display:none}',
       '.ff-hero-media:has(.w-dyn-bind-empty),.ff-hero-media:empty{display:none}.ff-hero:has(.ff-hero-media:empty),.ff-hero:has(.ff-hero-media .w-dyn-bind-empty){grid-template-columns:minmax(0,1fr)}',
@@ -195,6 +195,15 @@
     }
     btn.addEventListener('click', function (e) { e.preventDefault(); run(); });
     ['practice', 'industry', 'section'].forEach(function (n) { var s = sel(n); if (s) s.addEventListener('change', run); });
+  })();
+
+  /* ---------- 8b. Our Humans catalogue: a card whose Department is empty takes its Network category as the kicker, so the category chips filter it ---------- */
+  (function catalogue() {
+    q('.thk-card').forEach(function (c) {
+      var k = c.querySelector('.thk-kicker'), cat = c.querySelector('[data-ppl-cat]'); if (!k || !cat) return;
+      var t = (cat.textContent || '').trim(); if (!t || cat.classList.contains('w-dyn-bind-empty')) return;
+      if (!(k.textContent || '').trim() || k.classList.contains('w-dyn-bind-empty')) { k.textContent = t; k.classList.remove('w-dyn-bind-empty'); }
+    });
   })();
 
   /* ---------- 8. people panel: an intro line under the title, and the count reads "N people" not "N pieces" ---------- */
