@@ -1,4 +1,4 @@
-/*! theodyx-ff.js v1.2.3 (2026-09-15) — the Freshfields-pattern runtime for theodyx.com.
+/*! theodyx-ff.js v1.2.4 (2026-09-15) — the Freshfields-pattern runtime for theodyx.com.
  * Owner directive (2026-09-15): "make theodyx.com exactly like freshfields.com — the UI/UX, the colours, the sections — so I can edit it and
  * make it mine." Everything visual lives in native Designer classes (ff-*). This file only adds what CSS classes cannot:
  *  1. the How-we-help ACCORDION: a CMS rich-text field ([data-ff="acc"]) is split at every H3 — the H3 becomes the row title, everything
@@ -14,7 +14,7 @@
 (function () {
   'use strict';
   if (window.__thxFF) return;
-  var API = window.__thxFF = { v: '1.2.3' };
+  var API = window.__thxFF = { v: '1.2.4' };
   var SANS = '"Google Sans Flex","Google Sans",system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif';
   function q(s, r) { return [].slice.call((r || document).querySelectorAll(s)); }
   var RED = function () { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } };
@@ -122,6 +122,18 @@
     /* before Webflow's stylesheet: equal-specificity Designer rules win, tag rules (a, button) still lose */
     var wf = document.querySelector('link[rel="stylesheet"][href*="website-files"], link[rel="stylesheet"]');
     if (wf && wf.parentNode) wf.parentNode.insertBefore(st, wf); else document.head.appendChild(st);
+    /* 1.2.4: the INK sheet goes AFTER Webflow's CSS. Its rules are :where(.ff-page) tag rules - specificity (0,0,1) - so they beat the site's
+       legacy tag rules (h1/p -> the white --font--colors--title-dark variable) by source order, yet lose to ANY class the owner sets in the Designer. */
+    var ink = document.createElement('style'); ink.id = 'thx-ff-ink';
+    ink.textContent = [
+      ':where(.ff-page) :where(h1,h2,h3,h4,h5,h6,p,li,label,a,div,span,blockquote){color:#0d0d0d}',
+      ':where(.ff-page) :where(.ff-black,.ff-panel,.ff-ppl-panel,.ff-ppl-panel-lime .ff-ppl-kicker) :where(h1,h2,h3,h4,p,li,label,a,div,span){color:#f4f2ec}',
+      ':where(.ff-page) :where(.ff-ppl-panel-lime) :where(h1,h2,h3,p,div,span,a){color:#0d0d0d}',
+      ':where(.ff-page) :where(.ff-panel,.ff-ppl-panel) :where(.ff-btn,.ff-btn-sky,.ff-btn-white,.thk-chip-on,.thk-search-in){color:#0d0d0d}',
+      ':where(.ff-page) :where(.ff-btn-black,.ff-kicker-solid,.ff-ppl-kicker,.thk-chip-on){color:#f4f2ec}',
+      ':where(.ff-page) :where(.ff-btn-black,.ff-kicker-solid,.ff-ppl-kicker) :where(span,div){color:#f4f2ec}',
+    ].join('');
+    document.head.appendChild(ink);
   })();
 
   /* ---------- 3. panel colour → class + page tint ---------- */
