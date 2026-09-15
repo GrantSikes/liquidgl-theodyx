@@ -1,4 +1,4 @@
-/*! theodyx-ff.js v1.0.2 (2026-09-15) — the Freshfields-pattern runtime for theodyx.com.
+/*! theodyx-ff.js v1.0.3 (2026-09-15) — the Freshfields-pattern runtime for theodyx.com.
  * Owner directive (2026-09-15): "make theodyx.com exactly like freshfields.com — the UI/UX, the colours, the sections — so I can edit it and
  * make it mine." Everything visual lives in native Designer classes (ff-*). This file only adds what CSS classes cannot:
  *  1. the How-we-help ACCORDION: a CMS rich-text field ([data-ff="acc"]) is split at every H3 — the H3 becomes the row title, everything
@@ -14,7 +14,7 @@
 (function () {
   'use strict';
   if (window.__thxFF) return;
-  var API = window.__thxFF = { v: '1.0.2' };
+  var API = window.__thxFF = { v: '1.0.3' };
   function q(s, r) { return [].slice.call((r || document).querySelectorAll(s)); }
   var RED = function () { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } };
 
@@ -40,17 +40,21 @@
          the rail, the active tab) arrive unstyled. These :where() fallbacks have zero specificity - the moment the owner applies and edits the
          same class in the Designer, the Webflow rule wins. Also: the site's legacy heading/strong colour variable resolves to white, so every
          serif element here states its ink explicitly. */
-      ':where(.ff-acc){border-top:1px solid rgba(13,13,13,.18)}:where(.ff-acc-item){border-bottom:1px solid rgba(13,13,13,.18);transition:background-color 220ms}',
-      ':where(.ff-acc-btn){display:flex;width:100%;align-items:center;justify-content:space-between;gap:24px;padding:28px 24px;background:transparent;border:0;border-radius:0;text-align:left;font:400 21px/1.3 inherit;font-family:inherit;color:#0d0d0d;cursor:pointer;-webkit-appearance:none;appearance:none}',
-      ':where(.ff-acc-icon){flex:0 0 auto;width:22px;height:22px;font-size:26px;line-height:22px;text-align:center}',
-      ':where(.ff-acc-panel){padding:0 24px 28px;font-size:16px;line-height:1.55;color:#0d0d0d}',
-      ':where(.ff-acc-open){background:var(--ff-tint);border:1px solid var(--ff-tint-line);border-radius:4px;margin-top:-1px}',
-      ':where(.ff-rail){position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:90;display:flex;align-items:center;gap:4px;max-width:calc(100% - 48px);padding:6px;border-radius:999px;background:var(--ff-tint);color:#0d0d0d;overflow-x:auto;white-space:nowrap;box-shadow:0 8px 30px rgba(13,13,13,.12)}',
-      ':where(.ff-rail-a){display:inline-flex;align-items:center;padding:10px 22px;border-radius:999px;font-size:15px;line-height:1;color:#0d0d0d;text-decoration:none;white-space:nowrap}',
-      ':where(.ff-rail-on){background:#fff}',
-      ':where(.ff-rail-btn){display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:999px;border:1px solid #0d0d0d;background:transparent;color:#0d0d0d;font-size:16px;cursor:pointer;flex:0 0 auto;margin-left:6px;padding:0}',
-      ':where(.ff-tab-on){background:#f9cdb5}',
-      '@media (max-width:767px){:where(.ff-acc-btn){padding:20px 16px;font-size:18px}:where(.ff-acc-panel){padding:0 16px 20px}:where(.ff-rail){bottom:12px;max-width:calc(100% - 24px)}}',
+      /* 1.0.3: plain class selectors (they must beat the site's global a / button tag rules), and this <style> is inserted BEFORE Webflow's own
+         stylesheet, so a Designer rule for the same class still wins the tie. */
+      '.ff-acc{border-top:1px solid rgba(13,13,13,.18)}.ff-acc-item{border-bottom:1px solid rgba(13,13,13,.18);transition:background-color 220ms}',
+      '.ff-acc-btn{display:flex;width:100%;align-items:center;justify-content:space-between;gap:24px;padding:28px 24px;background:transparent;border:0;border-radius:0;text-align:left;font-size:21px;line-height:1.3;font-weight:400;font-family:inherit;color:#0d0d0d;cursor:pointer;-webkit-appearance:none;appearance:none;margin:0}',
+      '.ff-acc-icon{flex:0 0 auto;width:22px;height:22px;font-size:26px;line-height:22px;text-align:center}',
+      '.ff-acc-panel{padding:0 24px 28px;font-size:16px;line-height:1.55;color:#0d0d0d}',
+      '.ff-acc-open{background:var(--ff-tint);border:1px solid var(--ff-tint-line);border-radius:4px;margin-top:-1px}',
+      '.ff-rail{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:90;display:flex;align-items:center;gap:4px;max-width:calc(100% - 48px);padding:6px;border-radius:999px;background:var(--ff-tint);color:#0d0d0d;overflow-x:auto;white-space:nowrap;box-shadow:0 8px 30px rgba(13,13,13,.12)}',
+      '.ff-rail-a{display:inline-flex;align-items:center;padding:10px 22px;border-radius:999px;font-size:15px;line-height:1;color:#0d0d0d;text-decoration:none;white-space:nowrap}.ff-rail-a:hover{text-decoration:underline}',
+      '.ff-rail-on,.ff-rail-a.ff-rail-on{background:#fff;color:#0d0d0d}',
+      '.ff-rail-btn{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:999px;border:1px solid #0d0d0d;background:transparent;color:#0d0d0d;font-size:16px;cursor:pointer;flex:0 0 auto;margin-left:6px;padding:0}',
+      '.ff-tab-on{background:#f9cdb5}',
+      '@media (max-width:767px){.ff-acc-btn{padding:20px 16px;font-size:18px}.ff-acc-panel{padding:0 16px 20px}.ff-rail{bottom:12px;max-width:calc(100% - 24px)}}',
+      /* the contact form card used to fade in through an old scroll reveal; inside the new layout that trigger never fires - keep it visible */
+      '.contact-form---card,.contact-form-wrapper{opacity:1!important;transform:none!important}',
       '.ff-statement,.ff-hero-h1,.ff-h2,.ff-h2-sm,.ff-h3,.ff-card-t,.ff-list-h,.ff-prose h2,.ff-prose h3,.ff-prose h4,.ff-prose strong,.ff-acc-panel strong,.ff-acc-panel h4,.ff-stat,.ff-tile{color:#0d0d0d}',
       '.ff-panel-h,.ff-panel-p,.ff-panel strong,.ff-black,.ff-black h2,.ff-black h3,.ff-black p,.ff-ppl-panel h1{color:#f4f2ec}',
       /* rich text inside the prose column: Freshfields' serif subheads, comfortable paragraphs, underlined links, tidy lists */
@@ -91,7 +95,9 @@
       /* the Freshfields black footer panel */
       'html.ff-footer .footer{background:#f4f2ec!important}',
     ].join('');
-    document.head.appendChild(st);
+    /* before Webflow's stylesheet: equal-specificity Designer rules win, tag rules (a, button) still lose */
+    var wf = document.querySelector('link[rel="stylesheet"][href*="website-files"], link[rel="stylesheet"]');
+    if (wf && wf.parentNode) wf.parentNode.insertBefore(st, wf); else document.head.appendChild(st);
   })();
 
   /* ---------- 3. panel colour → class + page tint ---------- */
