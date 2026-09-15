@@ -1,4 +1,4 @@
-/*! theodyx-thinking.js v1.6.0 (2026-09-14) — the Our Thinking system: editorial carousels (.thk-track), the hub's search +
+/*! theodyx-thinking.js v1.6.1 (2026-09-14) — the Our Thinking system: editorial carousels (.thk-track), the hub's search +
  * facet filter (.thk-hub), and the card polish shared by the homepage band, /our-thinking and the alumni page.
  * Carousel: prev/next arrows glide one card at a time (snap-safe: scroll-snap is lifted during the rAF tween, exactly as the
  * Ethos carousel fix of 2026-07-28 - Chrome swallows smooth scrollTo on a mandatory-snap container), a 6.5 s autoplay that
@@ -9,7 +9,7 @@
 (function () {
   'use strict';
   if (window.__thxThinking) return;
-  var API = window.__thxThinking = { v: '1.6.0' };
+  var API = window.__thxThinking = { v: '1.6.1' };
   /* 1.3.0 (owner: "when you click search our thinking it makes that large black border - remove it"): the site-wide two-tone focus ring (head, Phase 9) is lifted off the hub search input; the pill itself carries a soft focus-within state (native style) */
   (function () { var st = document.createElement('style'); st.id = 'thx-thk-css'; st.textContent = 'html body input.thk-search-in:focus-visible,html body input.thk-search-in:focus{box-shadow:none!important;outline:none!important;border:0!important}'; document.head.appendChild(st); })();
   function q(s, r) { return [].slice.call((r || document).querySelectorAll(s)); }
@@ -114,14 +114,14 @@
         '.thk-band.thk-tinted .thk-glow-c{top:30%;left:38%;width:min(40vw,520px);height:min(40vw,520px);background:radial-gradient(closest-side,hsl(calc(var(--thx-h) - 30) 80% 84%/.5),hsl(calc(var(--thx-h) - 30) 80% 84%/0) 70%);animation:thk-drift-c 37s ease-in-out infinite alternate}',
         '.thk-band.thk-tinted .thk-glow{color:var(--thx-acc)}',
         /* the synced accent: ghost pills, carousel arrows and card links wherever the page carries them */
-        '.thx-hue .thk-band .thxo-btn-ghost,.thx-hue .wwd-sec .thxo-btn-ghost,.thx-hue .thxo-cta .thxo-btn-ghost{background:var(--thx-acc);color:#fff;transition:background-color 240ms cubic-bezier(.22,1,.36,1)}',
-        '.thx-hue .thk-band .thxo-btn-ghost:hover,.thx-hue .wwd-sec .thxo-btn-ghost:hover,.thx-hue .thxo-cta .thxo-btn-ghost:hover{background:var(--thx-acc-deep);color:#fff}',
+        '.thx-hue .thk-band .thxo-btn-ghost,.thx-hue .wwd-sec .thxo-btn-ghost,.thx-hue .thxo-cta-band .bottom-link-2{background:var(--thx-acc);color:#fff;transition:background-color 240ms cubic-bezier(.22,1,.36,1)}',
+        '.thx-hue .thk-band .thxo-btn-ghost:hover,.thx-hue .wwd-sec .thxo-btn-ghost:hover,.thx-hue .thxo-cta-band .bottom-link-2:hover{background:var(--thx-acc-deep);color:#fff}',
         '.thx-hue .thk-arrow{border-color:hsl(var(--thx-h) 50% var(--thx-l)/.55);color:var(--thx-acc)}',
         '.thx-hue .thk-arrow:hover,.thx-hue .thk-arrow:focus-visible{background:var(--thx-acc);border-color:var(--thx-acc);color:#fff}',
         '.thx-hue .wwd-link{text-decoration-color:var(--thx-acc);text-decoration-thickness:2px;transition:color 200ms}',
         '.thx-hue .wwd-card:hover .wwd-link,.thx-hue .wwd-card:focus-visible .wwd-link{color:var(--thx-acc)}',
-        '.thx-hue .wwd-sec .wwd-kicker,.thx-hue .thxo-cta .thxo-eyebrow{color:var(--thx-acc)}',
-        '.thx-hue .thxo-cta .thxo-btn:hover{background:var(--thx-acc-deep)}',
+        '.thx-hue .wwd-sec .wwd-kicker{color:var(--thx-acc)}',
+        '.thx-hue .thxo-cta-band .bottom-link:hover{background:var(--thx-acc-deep);color:#fff}',
         '@keyframes thk-drift-a{from{transform:translate3d(0,0,0) scale(1)}to{transform:translate3d(-12%,14%,0) scale(1.15)}}',
         '@keyframes thk-drift-b{from{transform:translate3d(0,0,0) scale(1)}to{transform:translate3d(16%,-12%,0) scale(1.1)}}',
         '@keyframes thk-drift-c{from{transform:translate3d(0,0,0) scale(1)}to{transform:translate3d(-10%,-16%,0) scale(1.2)}}',
@@ -135,8 +135,7 @@
       var txt = (t.textContent || '').replace(/\s+/g, ' ').trim(), m = /^(.*?)(never stops moving\.?)$/i.exec(txt);
       if (m) { t.textContent = ''; t.appendChild(document.createTextNode(m[1])); var g = document.createElement('span'); g.className = 'thk-glow'; g.textContent = m[2]; t.appendChild(g); }
     }
-    /* the closing CTA on Home ("Make something only you can.") is a plain thxo-sec: mark it so the accent reaches its pills */
-    q('.thxo-sec').forEach(function (sec) { var hd = sec.querySelector('h2,h3'); if (hd && /^make something only you can/i.test((hd.textContent || '').trim())) sec.classList.add('thxo-cta'); });
+    /* the closing CTA on Home (.thxo-cta-band: 'Get in touch' = .bottom-link, 'Our Scouting' = .bottom-link-2) is reached by class above */
     band.classList.add('thk-tinted');
   })();
 
