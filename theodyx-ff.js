@@ -1,4 +1,4 @@
-/*! theodyx-ff.js v1.1.2 (2026-09-15) — the Freshfields-pattern runtime for theodyx.com.
+/*! theodyx-ff.js v1.2.0 (2026-09-15) — the Freshfields-pattern runtime for theodyx.com.
  * Owner directive (2026-09-15): "make theodyx.com exactly like freshfields.com — the UI/UX, the colours, the sections — so I can edit it and
  * make it mine." Everything visual lives in native Designer classes (ff-*). This file only adds what CSS classes cannot:
  *  1. the How-we-help ACCORDION: a CMS rich-text field ([data-ff="acc"]) is split at every H3 — the H3 becomes the row title, everything
@@ -14,7 +14,7 @@
 (function () {
   'use strict';
   if (window.__thxFF) return;
-  var API = window.__thxFF = { v: '1.1.2' };
+  var API = window.__thxFF = { v: '1.2.0' };
   var SANS = '"Google Sans Flex","Google Sans",system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif';
   function q(s, r) { return [].slice.call((r || document).querySelectorAll(s)); }
   var RED = function () { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } };
@@ -34,10 +34,13 @@
       '[class^="ff-"],[class*=" ff-"]{font-family:' + SANS + ';letter-spacing:normal}',
       '.ff-hero-h1,.ff-h2,.ff-h2-sm,.ff-h3,.ff-statement,.ff-card-t,.ff-list-h,.ff-panel-h,.ff-lead,.ff-p,.ff-hero-deck,.ff-crumb,.ff-crumb-cur,.ff-crumb-link,.ff-label,.ff-input,.ff-select,.ff-textarea,.ff-tab,.ff-chip,.ff-list-a,.ff-aside-link,.ff-aside-t,.ff-card-d,.ff-card-date,.ff-link,.ff-btn,.ff-btn-black,.ff-btn-sky,.ff-btn-ghost,.ff-btn-white,.ff-acc-btn,.ff-acc-panel,.ff-rail,.ff-rail-a,.ff-rail-btn,.ff-tile,.ff-stat,.ff-kicker,.ff-kicker-solid,.ff-form-note,.ff-ppl-label,.ff-ppl-or,.ff-thk-search{font-family:' + SANS + ';letter-spacing:normal}',
       '.ff-hero-h1,.ff-h2,.ff-h2-sm,.ff-h3,.ff-statement,.ff-card-t,.ff-list-h{font-weight:400}',
-      '.ff-page,.ff-page p,.ff-page li,.ff-page label,.ff-page h1,.ff-page h2,.ff-page h3,.ff-page h4,.ff-page a{color:#0d0d0d}',
-      '.ff-page .ff-black,.ff-page .ff-black *,.ff-page .ff-panel,.ff-page .ff-panel *,.ff-page .ff-ppl-panel,.ff-page .ff-ppl-panel *{color:#f4f2ec}',
-      '.ff-page .ff-ppl-panel .ff-btn,.ff-page .ff-ppl-panel .thk-chip-on,.ff-page .ff-ppl-panel .thk-search-in,.ff-page .ff-panel .ff-btn,.ff-page .ff-panel .ff-btn-sky{color:#0d0d0d}',
-      '.ff-page .ff-btn,.ff-page .ff-btn-sky,.ff-page .ff-btn-white,.ff-page .ff-btn-ghost{color:#0d0d0d}.ff-page .ff-btn-black{color:#f4f2ec}',
+      /* 1.2.0: every ink rule sits in :where() (zero specificity) so a page's OWN class (p-<page>-*) always wins in the Designer */
+      ':where(.ff-page,.ff-page p,.ff-page li,.ff-page label,.ff-page h1,.ff-page h2,.ff-page h3,.ff-page h4,.ff-page a){color:#0d0d0d}',
+      ':where(.ff-page .ff-black,.ff-page .ff-black *,.ff-page .ff-panel,.ff-page .ff-panel *,.ff-page .ff-ppl-panel,.ff-page .ff-ppl-panel *){color:#f4f2ec}',
+      ':where(.ff-page .ff-ppl-panel .ff-btn,.ff-page .ff-ppl-panel .thk-chip-on,.ff-page .ff-ppl-panel .thk-search-in,.ff-page .ff-panel .ff-btn,.ff-page .ff-panel .ff-btn-sky){color:#0d0d0d}',
+      ':where(.ff-page .ff-btn,.ff-page .ff-btn-sky,.ff-page .ff-btn-white,.ff-page .ff-btn-ghost){color:#0d0d0d}:where(.ff-page .ff-btn-black){color:#f4f2ec}',
+      /* 1.2.0: checkbox + radio rows, and the form field group shown for some roles (data-ff-showfor) */
+      '.ff-consent{display:flex;gap:12px;align-items:flex-start;margin:8px 0 18px}.ff-consent-t{font-size:15px;line-height:1.5;color:#0d0d0d}[data-ff-showfor][hidden]{display:none!important}',
       /* 1.0.2: Webflow publishes only the classes some element USES in the Designer, so the classes this script adds at runtime (accordion rows,
          the rail, the active tab) arrive unstyled. These :where() fallbacks have zero specificity - the moment the owner applies and edits the
          same class in the Designer, the Webflow rule wins. Also: the site's legacy heading/strong colour variable resolves to white, so every
@@ -57,8 +60,8 @@
       '@media (max-width:767px){.ff-acc-btn{padding:20px 16px;font-size:18px}.ff-acc-panel{padding:0 16px 20px}.ff-rail{bottom:12px;max-width:calc(100% - 24px)}}',
       /* the contact form card used to fade in through an old scroll reveal; inside the new layout that trigger never fires - keep it visible */
       '.contact-form---card,.contact-form-wrapper{opacity:1!important;transform:none!important}',
-      '.ff-statement,.ff-hero-h1,.ff-h2,.ff-h2-sm,.ff-h3,.ff-card-t,.ff-list-h,.ff-prose h2,.ff-prose h3,.ff-prose h4,.ff-prose strong,.ff-acc-panel strong,.ff-acc-panel h4,.ff-stat,.ff-tile{color:#0d0d0d}',
-      '.ff-panel-h,.ff-panel-p,.ff-panel strong,.ff-black,.ff-black h2,.ff-black h3,.ff-black p,.ff-ppl-panel h1{color:#f4f2ec}',
+      ':where(.ff-statement,.ff-hero-h1,.ff-h2,.ff-h2-sm,.ff-h3,.ff-card-t,.ff-list-h,.ff-prose h2,.ff-prose h3,.ff-prose h4,.ff-prose strong,.ff-acc-panel strong,.ff-acc-panel h4,.ff-stat,.ff-tile){color:#0d0d0d}',
+      ':where(.ff-panel-h,.ff-panel-p,.ff-panel strong,.ff-black,.ff-black h2,.ff-black h3,.ff-black p,.ff-ppl-panel h1){color:#f4f2ec}',
       /* rich text inside the prose column: Freshfields' serif subheads, comfortable paragraphs, underlined links, tidy lists */
       '.ff-prose p{margin:0 0 18px;font-size:17px;line-height:1.55}.ff-prose p:last-child{margin-bottom:0}',
       '.ff-prose h2,.ff-prose h3{font-family:inherit;letter-spacing:normal;font-weight:400;font-size:clamp(24px,2.2vw,30px);line-height:1.15;margin:30px 0 12px;letter-spacing:0}',
@@ -207,6 +210,16 @@
   (function emptyLinks() {
     q('a[data-ff-hide-empty]').forEach(function (a) { var h = (a.getAttribute('href') || '').trim(); if (!h || h === '#' || /^mailto:$|^tel:$/.test(h)) a.hidden = true; });
     q('[data-ff-hide-empty]:not(a)').forEach(function (w) { var kids = [].slice.call(w.children); if (kids.length && kids.every(function (k) { return k.hidden || k.classList.contains('w-dyn-bind-empty') || (k.tagName === 'A' && k.hidden); })) w.hidden = true; });
+  })();
+
+  /* ---------- 10. conditional form groups: [data-ff-showfor="A|B"] shows only while the form's Role select holds one of those values ---------- */
+  (function showFor() {
+    q('[data-ff-showfor]').forEach(function (g) {
+      var form = g.closest('form') || document, sel = form.querySelector('select[name="Role"], select[data-ff-role]'); if (!sel) return;
+      var want = g.getAttribute('data-ff-showfor').split('|').map(function (t) { return t.trim().toLowerCase(); });
+      function apply() { var on = want.indexOf((sel.value || '').trim().toLowerCase()) > -1; g.hidden = !on; q('input,select,textarea', g).forEach(function (f) { f.disabled = !on; }); }
+      sel.addEventListener('change', apply); apply();
+    });
   })();
 
   /* ---------- 4. capabilities index tabs ---------- */
