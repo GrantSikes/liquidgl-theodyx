@@ -1,4 +1,4 @@
-/*! theodyx-thinking.js v1.7.2 (2026-09-14) — the Our Thinking system: editorial carousels (.thk-track), the hub's search +
+/*! theodyx-thinking.js v1.8.0 (2026-09-14) — the Our Thinking system: editorial carousels (.thk-track), the hub's search +
  * facet filter (.thk-hub), and the card polish shared by the homepage band, /our-thinking and the alumni page.
  * Carousel: prev/next arrows glide one card at a time (snap-safe: scroll-snap is lifted during the rAF tween, exactly as the
  * Ethos carousel fix of 2026-07-28 - Chrome swallows smooth scrollTo on a mandatory-snap container), a 6.5 s autoplay that
@@ -9,7 +9,7 @@
 (function () {
   'use strict';
   if (window.__thxThinking) return;
-  var API = window.__thxThinking = { v: '1.7.2' };
+  var API = window.__thxThinking = { v: '1.8.0' };
   /* 1.3.0 (owner: "when you click search our thinking it makes that large black border - remove it"): the site-wide two-tone focus ring (head, Phase 9) is lifted off the hub search input; the pill itself carries a soft focus-within state (native style) */
   (function () { var st = document.createElement('style'); st.id = 'thx-thk-css'; st.textContent = 'html body input.thk-search-in:focus-visible,html body input.thk-search-in:focus{box-shadow:none!important;outline:none!important;border:0!important}'; document.head.appendChild(st); })();
   function q(s, r) { return [].slice.call((r || document).querySelectorAll(s)); }
@@ -107,13 +107,8 @@
         ':root.thx-hue{--thx-acc:hsl(var(--thx-h) var(--thx-s) var(--thx-l));--thx-acc-deep:hsl(var(--thx-h) var(--thx-s) calc(var(--thx-l) - 8%));',
         '--thx-tint:hsl(var(--thx-h) 70% 93%);--thx-tint-2:hsl(calc(var(--thx-h) + 28) 70% 94%)}',
         /* the band: a tint that rises out of the cream and settles back into it - no edge at either end */
-                '.thk-band.thk-tinted{background:radial-gradient(115% 95% at 50% 46%,var(--thx-tint) 0%,var(--thx-tint-2) 42%,rgba(244,242,236,0) 100%) #f4f2ec!important;isolation:isolate;border-bottom-color:transparent!important}',
+                '.thk-band.thk-tinted{background:transparent!important;border-bottom-color:transparent!important}', /* 1.8.0 (owner: "remove the page color, keep the colour-changing text and stuff") */
         '.thk-band.thk-tinted>*{position:relative;z-index:1}',
-        '.thk-band.thk-tinted .thk-glows{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none;-webkit-mask-image:linear-gradient(180deg,transparent 0,#000 22%,#000 78%,transparent 100%);mask-image:linear-gradient(180deg,transparent 0,#000 22%,#000 78%,transparent 100%)}',
-        '.thk-band.thk-tinted .thk-glow-a,.thk-band.thk-tinted .thk-glow-b,.thk-band.thk-tinted .thk-glow-c{position:absolute;border-radius:50%;pointer-events:none;filter:blur(80px);will-change:transform}',
-        '.thk-band.thk-tinted .thk-glow-a{top:-18%;right:-6%;width:min(70vw,960px);height:min(70vw,960px);background:radial-gradient(closest-side,hsl(var(--thx-h) 85% 78%/.7),hsl(var(--thx-h) 85% 78%/0) 70%);animation:thk-drift-a 26s ease-in-out infinite alternate}',
-        '.thk-band.thk-tinted .thk-glow-b{bottom:-28%;left:-10%;width:min(56vw,760px);height:min(56vw,760px);background:radial-gradient(closest-side,hsl(calc(var(--thx-h) + 42) 80% 80%/.6),hsl(calc(var(--thx-h) + 42) 80% 80%/0) 70%);animation:thk-drift-b 31s ease-in-out infinite alternate}',
-        '.thk-band.thk-tinted .thk-glow-c{top:30%;left:38%;width:min(40vw,520px);height:min(40vw,520px);background:radial-gradient(closest-side,hsl(calc(var(--thx-h) - 30) 80% 84%/.5),hsl(calc(var(--thx-h) - 30) 80% 84%/0) 70%);animation:thk-drift-c 37s ease-in-out infinite alternate}',
         '.thk-band.thk-tinted .thk-glow{color:var(--thx-acc)}',
         /* the synced accent: ghost pills, carousel arrows and card links wherever the page carries them */
         '.thx-hue .thk-band .thxo-btn-ghost,.thx-hue .wwd-sec .thxo-btn-ghost,.thx-hue .thxo-cta-band .bottom-link-2{background:var(--thx-acc);color:#fff;transition:background-color 240ms cubic-bezier(.22,1,.36,1)}',
@@ -139,17 +134,11 @@
         '.thx-hue .thxo-cta-band .bottom-link,.thx-hue .thxo-cta-band .bottom-link-2{display:inline-flex;align-items:center;padding:13px 24px;margin:0 10px 10px 0;border-radius:999px;font-size:15px;font-weight:500;text-decoration:none;transition:background-color 240ms cubic-bezier(.22,1,.36,1)}',
         '.thx-hue .thxo-cta-band .bottom-link{background:#0d0d0d;color:#f4f2ec}',
         '.thx-hue .thxo-cta-band .bottom-link:hover{background:var(--thx-acc-deep);color:#fff}',
-        '@keyframes thk-drift-a{from{transform:translate3d(0,0,0) scale(1)}to{transform:translate3d(-12%,14%,0) scale(1.15)}}',
-        '@keyframes thk-drift-b{from{transform:translate3d(0,0,0) scale(1)}to{transform:translate3d(16%,-12%,0) scale(1.1)}}',
-        '@keyframes thk-drift-c{from{transform:translate3d(0,0,0) scale(1)}to{transform:translate3d(-10%,-16%,0) scale(1.2)}}',
-        '@media (prefers-reduced-motion:reduce){.thk-band.thk-tinted .thk-glow-a,.thk-band.thk-tinted .thk-glow-b,.thk-band.thk-tinted .thk-glow-c{animation:none}}'
       ].join('');
       document.head.appendChild(st);
     }
     if (!band) return;
-    var wrap = document.createElement('div'); wrap.className = 'thk-glows'; wrap.setAttribute('aria-hidden', 'true');
-    ['a', 'b', 'c'].forEach(function (k) { var g = document.createElement('div'); g.className = 'thk-glow-' + k; wrap.appendChild(g); });
-    band.insertBefore(wrap, band.firstChild);
+    /* 1.8.0: no tint, no glows - the band stays cream; only the words, pill and arrows carry the colour */
     var t = band.querySelector('.thk-title');
     if (t && !t.querySelector('.thk-glow')) {
       var txt = (t.textContent || '').replace(/\s+/g, ' ').trim(), m = /^(.*?)(never stops moving\.?)$/i.exec(txt);
