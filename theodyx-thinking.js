@@ -1,4 +1,4 @@
-/*! theodyx-thinking.js v1.6.3 (2026-09-14) — the Our Thinking system: editorial carousels (.thk-track), the hub's search +
+/*! theodyx-thinking.js v1.7.0 (2026-09-14) — the Our Thinking system: editorial carousels (.thk-track), the hub's search +
  * facet filter (.thk-hub), and the card polish shared by the homepage band, /our-thinking and the alumni page.
  * Carousel: prev/next arrows glide one card at a time (snap-safe: scroll-snap is lifted during the rAF tween, exactly as the
  * Ethos carousel fix of 2026-07-28 - Chrome swallows smooth scrollTo on a mandatory-snap container), a 6.5 s autoplay that
@@ -9,7 +9,7 @@
 (function () {
   'use strict';
   if (window.__thxThinking) return;
-  var API = window.__thxThinking = { v: '1.6.3' };
+  var API = window.__thxThinking = { v: '1.7.0' };
   /* 1.3.0 (owner: "when you click search our thinking it makes that large black border - remove it"): the site-wide two-tone focus ring (head, Phase 9) is lifted off the hub search input; the pill itself carries a soft focus-within state (native style) */
   (function () { var st = document.createElement('style'); st.id = 'thx-thk-css'; st.textContent = 'html body input.thk-search-in:focus-visible,html body input.thk-search-in:focus{box-shadow:none!important;outline:none!important;border:0!important}'; document.head.appendChild(st); })();
   function q(s, r) { return [].slice.call((r || document).querySelectorAll(s)); }
@@ -86,7 +86,8 @@
      glows in the hue and its neighbours, the closing words of the heading), and on Home the ghost pills, carousel arrows and card links of
      "Where to start", "Your ambition, our expertise" and the closing "Make something" CTA. Body copy stays black. Reduced motion = no drift. */
   (function accent() {
-    var band = document.getElementById('thk-home'); if (!band || band.classList.contains('thk-tinted')) return;
+    /* 1.7.0: the accent is site-wide - every page draws one, so pills, arrows and links agree everywhere; only the band itself needs #thk-home */
+    var band = document.getElementById('thk-home'); if (document.documentElement.classList.contains('thx-hue')) return;
     function rgb(h, s, l) { /* hsl -> [r,g,b] 0..1 */
       var c = (1 - Math.abs(2 * l - 1)) * s, x = c * (1 - Math.abs((h / 60) % 2 - 1)), m = l - c / 2, r = 0, g = 0, b = 0;
       if (h < 60) { r = c; g = x; } else if (h < 120) { r = x; g = c; } else if (h < 180) { g = c; b = x; } else if (h < 240) { g = x; b = c; } else if (h < 300) { r = x; b = c; } else { r = c; b = x; }
@@ -122,6 +123,9 @@
         '.thx-hue .wwd-link{text-decoration-color:var(--thx-acc);text-decoration-thickness:2px;transition:color 200ms}',
         '.thx-hue .wwd-card:hover .wwd-link,.thx-hue .wwd-card:focus-visible .wwd-link{color:var(--thx-acc)}',
         '.thx-hue .wwd-sec .wwd-kicker{color:var(--thx-acc)}',
+        '.thx-hue .primary-button:hover,.thx-hue .cap-cta-primary:hover,.thx-hue .thk-more-btn:hover{background:var(--thx-acc-deep)!important;border-color:var(--thx-acc-deep)!important;color:#fff!important}',
+        '.thx-hue .thk-chip-on{background:var(--thx-acc);border-color:var(--thx-acc);color:#fff}',
+        '.thx-hue .thk-search-in:focus{border-color:var(--thx-acc)}',
         '.thx-hue .thxo-cta-band .bottom-link,.thx-hue .thxo-cta-band .bottom-link-2{display:inline-flex;align-items:center;padding:13px 24px;margin:0 10px 10px 0;border-radius:999px;font-size:15px;font-weight:500;text-decoration:none;transition:background-color 240ms cubic-bezier(.22,1,.36,1)}',
         '.thx-hue .thxo-cta-band .bottom-link{background:#0d0d0d;color:#f4f2ec}',
         '.thx-hue .thxo-cta-band .bottom-link:hover{background:var(--thx-acc-deep);color:#fff}',
@@ -132,6 +136,7 @@
       ].join('');
       document.head.appendChild(st);
     }
+    if (!band) return;
     var wrap = document.createElement('div'); wrap.className = 'thk-glows'; wrap.setAttribute('aria-hidden', 'true');
     ['a', 'b', 'c'].forEach(function (k) { var g = document.createElement('div'); g.className = 'thk-glow-' + k; wrap.appendChild(g); });
     band.insertBefore(wrap, band.firstChild);
