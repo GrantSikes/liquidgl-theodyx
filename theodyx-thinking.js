@@ -1,4 +1,4 @@
-/*! theodyx-thinking.js v1.5.0 (2026-09-14) — the Our Thinking system: editorial carousels (.thk-track), the hub's search +
+/*! theodyx-thinking.js v1.6.0 (2026-09-14) — the Our Thinking system: editorial carousels (.thk-track), the hub's search +
  * facet filter (.thk-hub), and the card polish shared by the homepage band, /our-thinking and the alumni page.
  * Carousel: prev/next arrows glide one card at a time (snap-safe: scroll-snap is lifted during the rAF tween, exactly as the
  * Ethos carousel fix of 2026-07-28 - Chrome swallows smooth scrollTo on a mandatory-snap container), a 6.5 s autoplay that
@@ -9,7 +9,7 @@
 (function () {
   'use strict';
   if (window.__thxThinking) return;
-  var API = window.__thxThinking = { v: '1.5.0' };
+  var API = window.__thxThinking = { v: '1.6.0' };
   /* 1.3.0 (owner: "when you click search our thinking it makes that large black border - remove it"): the site-wide two-tone focus ring (head, Phase 9) is lifted off the hub search input; the pill itself carries a soft focus-within state (native style) */
   (function () { var st = document.createElement('style'); st.id = 'thx-thk-css'; st.textContent = 'html body input.thk-search-in:focus-visible,html body input.thk-search-in:focus{box-shadow:none!important;outline:none!important;border:0!important}'; document.head.appendChild(st); })();
   function q(s, r) { return [].slice.call((r || document).querySelectorAll(s)); }
@@ -79,43 +79,64 @@
   }
   q('.thk-track').forEach(carousel);
 
-  /* ---------- 1.5.0 (2026-09-14, owner: "more cool looking with a cool color that changes every time you refresh") ----------
-     The homepage band (#thk-home) wears a different colour on every page load: a soft tint of one hue over the cream, two
-     slow-drifting glows in that hue and its neighbour, the closing words of the heading in the accent, and the band's pill
-     + arrows in the same accent. Ten hues; each carries the lightness at which white-on-accent AND accent-on-cream both clear
-     WCAG AA (computed offline). Body text stays black. Reduced motion stops the drift; the colour still changes. */
-  (function tint() {
+  /* ---------- 1.6.0 (2026-09-14, owner: "the blend way better, a ton more hues, smooth, and the synced colour on a few more sections") ----------
+     One accent per page load, drawn from the whole hue circle (not a list). Its lightness is solved in the browser so that white-on-accent
+     AND accent-on-cream both clear WCAG AA 4.5:1, whatever hue lands. The variables live on <html> (--thx-h / --thx-s / --thx-l / --thx-acc)
+     so every tinted piece on the page agrees: the Our Thinking band (a tint that fades in from the cream and back out, three soft drifting
+     glows in the hue and its neighbours, the closing words of the heading), and on Home the ghost pills, carousel arrows and card links of
+     "Where to start", "Your ambition, our expertise" and the closing "Make something" CTA. Body copy stays black. Reduced motion = no drift. */
+  (function accent() {
     var band = document.getElementById('thk-home'); if (!band || band.classList.contains('thk-tinted')) return;
-    var P = [[16, 43], [34, 35], [52, 29], [96, 29], [152, 30], [186, 31], [210, 43], [250, 50], [282, 50], [330, 47]];
-    var k = P[Math.floor(Math.random() * P.length)];
-    band.style.setProperty('--thk-h', String(k[0])); band.style.setProperty('--thk-l', k[1] + '%');
+    function rgb(h, s, l) { /* hsl -> [r,g,b] 0..1 */
+      var c = (1 - Math.abs(2 * l - 1)) * s, x = c * (1 - Math.abs((h / 60) % 2 - 1)), m = l - c / 2, r = 0, g = 0, b = 0;
+      if (h < 60) { r = c; g = x; } else if (h < 120) { r = x; g = c; } else if (h < 180) { g = c; b = x; } else if (h < 240) { g = x; b = c; } else if (h < 300) { r = x; b = c; } else { r = c; b = x; }
+      return [r + m, g + m, b + m];
+    }
+    function lum(p) { return p.map(function (v) { return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }).reduce(function (a, v, i) { return a + v * [0.2126, 0.7152, 0.0722][i]; }, 0); }
+    function ratio(a, b) { var hi = Math.max(a, b), lo = Math.min(a, b); return (hi + 0.05) / (lo + 0.05); }
+    var CREAM = lum([0xf4 / 255, 0xf2 / 255, 0xec / 255]), WHITE = 1;
+    var h = Math.floor(Math.random() * 360), s = 0.58 + Math.random() * 0.14, l = 0.5;
+    for (var L = 0.52; L >= 0.2; L -= 0.01) { var y = lum(rgb(h, s, L)); if (ratio(WHITE, y) >= 4.6 && ratio(y, CREAM) >= 4.6) { l = L; break; } }
+    var root = document.documentElement;
+    root.style.setProperty('--thx-h', String(h)); root.style.setProperty('--thx-s', Math.round(s * 100) + '%'); root.style.setProperty('--thx-l', Math.round(l * 100) + '%');
+    root.classList.add('thx-hue');
     if (!document.getElementById('thx-thk-tint')) {
       var st = document.createElement('style'); st.id = 'thx-thk-tint';
       st.textContent = [
-        '.thk-band.thk-tinted{--thk-acc:hsl(var(--thk-h) 62% var(--thk-l));--thk-acc-deep:hsl(var(--thk-h) 62% calc(var(--thk-l) - 8%));',
-        'background:linear-gradient(180deg,hsl(var(--thk-h) 72% 93%) 0%,hsl(var(--thk-h) 60% 96%) 58%,#f4f2ec 100%)!important;isolation:isolate}',
-        '.thk-band.thk-tinted::before{content:"";position:absolute;top:-22%;right:-8%;width:min(62vw,880px);height:min(62vw,880px);border-radius:50%;',
-        'background:radial-gradient(closest-side,hsl(var(--thk-h) 90% 80%/.85),hsl(var(--thk-h) 90% 80%/0) 72%);filter:blur(24px);pointer-events:none;z-index:-1;',
-        'animation:thk-drift 22s ease-in-out infinite alternate}',
-        '.thk-band.thk-tinted::after{content:"";position:absolute;bottom:-30%;left:-12%;width:min(48vw,640px);height:min(48vw,640px);border-radius:50%;',
-        'background:radial-gradient(closest-side,hsl(calc(var(--thk-h) + 40) 80% 84%/.6),hsl(calc(var(--thk-h) + 40) 80% 84%/0) 72%);filter:blur(30px);pointer-events:none;z-index:-1;',
-        'animation:thk-drift2 26s ease-in-out infinite alternate}',
-        '.thk-band.thk-tinted .thk-glow{color:var(--thk-acc)}',
-        '.thk-band.thk-tinted .thxo-btn-ghost{background:var(--thk-acc);color:#fff}',
-        '.thk-band.thk-tinted .thxo-btn-ghost:hover{background:var(--thk-acc-deep);color:#fff}',
-        '.thk-band.thk-tinted .thk-arrow{border-color:hsl(var(--thk-h) 50% var(--thk-l)/.55);color:var(--thk-acc)}',
-        '.thk-band.thk-tinted .thk-arrow:hover,.thk-band.thk-tinted .thk-arrow:focus-visible{background:var(--thk-acc);border-color:var(--thk-acc);color:#fff}',
-        '@keyframes thk-drift{from{transform:translate3d(0,0,0) scale(1)}to{transform:translate3d(-10%,12%,0) scale(1.12)}}',
-        '@keyframes thk-drift2{from{transform:translate3d(0,0,0) scale(1)}to{transform:translate3d(14%,-10%,0) scale(1.08)}}',
-        '@media (prefers-reduced-motion:reduce){.thk-band.thk-tinted::before,.thk-band.thk-tinted::after{animation:none}}'
+        ':root.thx-hue{--thx-acc:hsl(var(--thx-h) var(--thx-s) var(--thx-l));--thx-acc-deep:hsl(var(--thx-h) var(--thx-s) calc(var(--thx-l) - 8%));',
+        '--thx-tint:hsl(var(--thx-h) 70% 93%);--thx-tint-2:hsl(calc(var(--thx-h) + 28) 70% 94%)}',
+        /* the band: a tint that rises out of the cream and settles back into it - no edge at either end */
+        '.thk-band.thk-tinted{background:linear-gradient(180deg,#f4f2ec 0%,var(--thx-tint) 22%,var(--thx-tint-2) 62%,#f4f2ec 100%)!important;isolation:isolate;border-bottom-color:hsl(var(--thx-h) 40% 82%)!important}',
+        '.thk-band.thk-tinted>*{position:relative;z-index:1}',
+        '.thk-band.thk-tinted .thk-glow-a,.thk-band.thk-tinted .thk-glow-b,.thk-band.thk-tinted .thk-glow-c{position:absolute;border-radius:50%;pointer-events:none;z-index:0;filter:blur(70px);will-change:transform}',
+        '.thk-band.thk-tinted .thk-glow-a{top:-18%;right:-6%;width:min(70vw,960px);height:min(70vw,960px);background:radial-gradient(closest-side,hsl(var(--thx-h) 85% 78%/.7),hsl(var(--thx-h) 85% 78%/0) 70%);animation:thk-drift-a 26s ease-in-out infinite alternate}',
+        '.thk-band.thk-tinted .thk-glow-b{bottom:-28%;left:-10%;width:min(56vw,760px);height:min(56vw,760px);background:radial-gradient(closest-side,hsl(calc(var(--thx-h) + 42) 80% 80%/.6),hsl(calc(var(--thx-h) + 42) 80% 80%/0) 70%);animation:thk-drift-b 31s ease-in-out infinite alternate}',
+        '.thk-band.thk-tinted .thk-glow-c{top:30%;left:38%;width:min(40vw,520px);height:min(40vw,520px);background:radial-gradient(closest-side,hsl(calc(var(--thx-h) - 30) 80% 84%/.5),hsl(calc(var(--thx-h) - 30) 80% 84%/0) 70%);animation:thk-drift-c 37s ease-in-out infinite alternate}',
+        '.thk-band.thk-tinted .thk-glow{color:var(--thx-acc)}',
+        /* the synced accent: ghost pills, carousel arrows and card links wherever the page carries them */
+        '.thx-hue .thk-band .thxo-btn-ghost,.thx-hue .wwd-sec .thxo-btn-ghost,.thx-hue .thxo-cta .thxo-btn-ghost{background:var(--thx-acc);color:#fff;transition:background-color 240ms cubic-bezier(.22,1,.36,1)}',
+        '.thx-hue .thk-band .thxo-btn-ghost:hover,.thx-hue .wwd-sec .thxo-btn-ghost:hover,.thx-hue .thxo-cta .thxo-btn-ghost:hover{background:var(--thx-acc-deep);color:#fff}',
+        '.thx-hue .thk-arrow{border-color:hsl(var(--thx-h) 50% var(--thx-l)/.55);color:var(--thx-acc)}',
+        '.thx-hue .thk-arrow:hover,.thx-hue .thk-arrow:focus-visible{background:var(--thx-acc);border-color:var(--thx-acc);color:#fff}',
+        '.thx-hue .wwd-link{text-decoration-color:var(--thx-acc);text-decoration-thickness:2px;transition:color 200ms}',
+        '.thx-hue .wwd-card:hover .wwd-link,.thx-hue .wwd-card:focus-visible .wwd-link{color:var(--thx-acc)}',
+        '.thx-hue .wwd-sec .wwd-kicker,.thx-hue .thxo-cta .thxo-eyebrow{color:var(--thx-acc)}',
+        '.thx-hue .thxo-cta .thxo-btn:hover{background:var(--thx-acc-deep)}',
+        '@keyframes thk-drift-a{from{transform:translate3d(0,0,0) scale(1)}to{transform:translate3d(-12%,14%,0) scale(1.15)}}',
+        '@keyframes thk-drift-b{from{transform:translate3d(0,0,0) scale(1)}to{transform:translate3d(16%,-12%,0) scale(1.1)}}',
+        '@keyframes thk-drift-c{from{transform:translate3d(0,0,0) scale(1)}to{transform:translate3d(-10%,-16%,0) scale(1.2)}}',
+        '@media (prefers-reduced-motion:reduce){.thk-band.thk-tinted .thk-glow-a,.thk-band.thk-tinted .thk-glow-b,.thk-band.thk-tinted .thk-glow-c{animation:none}}'
       ].join('');
       document.head.appendChild(st);
     }
+    ['a', 'b', 'c'].forEach(function (k) { var g = document.createElement('div'); g.className = 'thk-glow-' + k; g.setAttribute('aria-hidden', 'true'); band.insertBefore(g, band.firstChild); });
     var t = band.querySelector('.thk-title');
     if (t && !t.querySelector('.thk-glow')) {
       var txt = (t.textContent || '').replace(/\s+/g, ' ').trim(), m = /^(.*?)(never stops moving\.?)$/i.exec(txt);
       if (m) { t.textContent = ''; t.appendChild(document.createTextNode(m[1])); var g = document.createElement('span'); g.className = 'thk-glow'; g.textContent = m[2]; t.appendChild(g); }
     }
+    /* the closing CTA on Home ("Make something only you can.") is a plain thxo-sec: mark it so the accent reaches its pills */
+    q('.thxo-sec').forEach(function (sec) { var hd = sec.querySelector('h2,h3'); if (hd && /^make something only you can/i.test((hd.textContent || '').trim())) sec.classList.add('thxo-cta'); });
     band.classList.add('thk-tinted');
   })();
 
