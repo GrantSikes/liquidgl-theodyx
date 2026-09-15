@@ -1,4 +1,4 @@
-/*! theodyx-thinking.js v1.7.0 (2026-09-14) — the Our Thinking system: editorial carousels (.thk-track), the hub's search +
+/*! theodyx-thinking.js v1.7.1 (2026-09-14) — the Our Thinking system: editorial carousels (.thk-track), the hub's search +
  * facet filter (.thk-hub), and the card polish shared by the homepage band, /our-thinking and the alumni page.
  * Carousel: prev/next arrows glide one card at a time (snap-safe: scroll-snap is lifted during the rAF tween, exactly as the
  * Ethos carousel fix of 2026-07-28 - Chrome swallows smooth scrollTo on a mandatory-snap container), a 6.5 s autoplay that
@@ -9,7 +9,7 @@
 (function () {
   'use strict';
   if (window.__thxThinking) return;
-  var API = window.__thxThinking = { v: '1.7.0' };
+  var API = window.__thxThinking = { v: '1.7.1' };
   /* 1.3.0 (owner: "when you click search our thinking it makes that large black border - remove it"): the site-wide two-tone focus ring (head, Phase 9) is lifted off the hub search input; the pill itself carries a soft focus-within state (native style) */
   (function () { var st = document.createElement('style'); st.id = 'thx-thk-css'; st.textContent = 'html body input.thk-search-in:focus-visible,html body input.thk-search-in:focus{box-shadow:none!important;outline:none!important;border:0!important}'; document.head.appendChild(st); })();
   function q(s, r) { return [].slice.call((r || document).querySelectorAll(s)); }
@@ -125,6 +125,14 @@
         '.thx-hue .wwd-sec .wwd-kicker{color:var(--thx-acc)}',
         '.thx-hue .primary-button:hover,.thx-hue .cap-cta-primary:hover,.thx-hue .thk-more-btn:hover{background:var(--thx-acc-deep)!important;border-color:var(--thx-acc-deep)!important;color:#fff!important}',
         '.thx-hue .thk-chip-on{background:var(--thx-acc);border-color:var(--thx-acc);color:#fff}',
+        /* 1.7.1 (owner: "fix the contact thing, make it blend in"): the form loses its white card and sits on the cream like the column beside it; labels no longer wrap; the submit is the house black pill */
+        '.contact-form---card,.contact-form---card.card{background:transparent!important;border-radius:0!important;box-shadow:none!important;padding:0!important;border:0!important}',
+        '.contact-form-wrapper .field-label,.contact-form-wrapper label{font-family:"Google Sans Flex","Google Sans",system-ui,sans-serif!important;font-size:12px!important;letter-spacing:.06em!important;text-transform:uppercase!important;color:rgba(13,13,13,.7)!important;white-space:nowrap!important;margin-bottom:6px!important;font-weight:500!important}',
+        '.contact-form-wrapper .w-input{font-family:"Google Sans Flex","Google Sans",system-ui,sans-serif!important;font-size:16px!important;background:transparent!important;border:0!important;border-bottom:1px solid rgba(13,13,13,.22)!important;border-radius:0!important;box-shadow:none!important;padding:8px 0 10px!important;color:#0d0d0d!important}',
+        '.contact-form-wrapper .w-input:focus{border-bottom-color:var(--thx-acc,#0d0d0d)!important;outline:none!important}',
+        '.contact-form-wrapper .primary-button{display:inline-flex!important;justify-content:center!important;align-items:center!important;min-height:52px!important;padding:14px 28px!important;background:#0d0d0d!important;color:#f4f2ec!important;font-family:"Google Sans Flex","Google Sans",system-ui,sans-serif!important;font-size:15px!important;font-weight:500!important;letter-spacing:0!important;text-transform:none!important;text-decoration:none!important;border-radius:999px!important;border:1px solid #0d0d0d!important;cursor:pointer;transition:background-color 220ms cubic-bezier(.22,1,.36,1),transform 220ms cubic-bezier(.22,1,.36,1)!important;box-shadow:none!important}',
+        '.contact-form-wrapper .primary-button:hover{background:var(--thx-acc-deep,#262626)!important;border-color:var(--thx-acc-deep,#262626)!important;color:#fff!important;transform:translateY(-1px)}',
+        '.contact-form-wrapper .primary-button:focus-visible{outline:2px solid #0d0d0d!important;outline-offset:3px!important}',
         '.thx-hue .thk-search-in:focus{border-color:var(--thx-acc)}',
         '.thx-hue .thxo-cta-band .bottom-link,.thx-hue .thxo-cta-band .bottom-link-2{display:inline-flex;align-items:center;padding:13px 24px;margin:0 10px 10px 0;border-radius:999px;font-size:15px;font-weight:500;text-decoration:none;transition:background-color 240ms cubic-bezier(.22,1,.36,1)}',
         '.thx-hue .thxo-cta-band .bottom-link{background:#0d0d0d;color:#f4f2ec}',
