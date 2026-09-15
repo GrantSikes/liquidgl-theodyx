@@ -1,4 +1,4 @@
-/*! theodyx-ff.js v1.0.3 (2026-09-15) — the Freshfields-pattern runtime for theodyx.com.
+/*! theodyx-ff.js v1.1.0 (2026-09-15) — the Freshfields-pattern runtime for theodyx.com.
  * Owner directive (2026-09-15): "make theodyx.com exactly like freshfields.com — the UI/UX, the colours, the sections — so I can edit it and
  * make it mine." Everything visual lives in native Designer classes (ff-*). This file only adds what CSS classes cannot:
  *  1. the How-we-help ACCORDION: a CMS rich-text field ([data-ff="acc"]) is split at every H3 — the H3 becomes the row title, everything
@@ -14,18 +14,12 @@
 (function () {
   'use strict';
   if (window.__thxFF) return;
-  var API = window.__thxFF = { v: '1.0.3' };
+  var API = window.__thxFF = { v: '1.1.0' };
+  var SANS = '"Google Sans Flex","Google Sans",system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif';
   function q(s, r) { return [].slice.call((r || document).querySelectorAll(s)); }
   var RED = function () { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } };
 
-  /* ---------- 0. the serif: the native custom font is Newsreader; Google Fonts is fetched as a fallback so the face never misses ---------- */
-  (function font() {
-    var ok = false; try { ok = document.fonts && document.fonts.check('16px Newsreader'); } catch (e) {}
-    if (ok || document.getElementById('thx-ff-font')) return;
-    var l = document.createElement('link'); l.id = 'thx-ff-font'; l.rel = 'stylesheet';
-    l.href = 'https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap';
-    document.head.appendChild(l);
-  })();
+  /* ---------- 0. type: one face only. Owner directive 2026-09-15 (round 2): "all the font is Google Sans Flex, normal spacing, nothing else" - the serif is gone. ---------- */
 
   /* ---------- 5. stylesheet for what classes cannot carry ---------- */
   var TINT = { Blue: ['#7c8aff', '#b3d6f8', '#7fb0ea'], Pink: ['#d28fc8', '#e6daf6', '#c9b3e6'], Lime: ['#c8e67a', '#e7f0cf', '#b9d47a'],
@@ -36,6 +30,14 @@
     var st = document.createElement('style'); st.id = 'thx-ff-css';
     st.textContent = [
       ':root{--ff-tint:#b3d6f8;--ff-tint-line:#7fb0ea}',
+      /* 1.1.0: ONE typeface (Google Sans Flex), normal tracking, black ink on every ff-* element; the black panels keep cream text */
+      '[class^="ff-"],[class*=" ff-"]{font-family:' + SANS + ';letter-spacing:normal}',
+      '.ff-hero-h1,.ff-h2,.ff-h2-sm,.ff-h3,.ff-statement,.ff-card-t,.ff-list-h,.ff-panel-h,.ff-lead,.ff-p,.ff-hero-deck,.ff-crumb,.ff-crumb-cur,.ff-crumb-link,.ff-label,.ff-input,.ff-select,.ff-textarea,.ff-tab,.ff-chip,.ff-list-a,.ff-aside-link,.ff-aside-t,.ff-card-d,.ff-card-date,.ff-link,.ff-btn,.ff-btn-black,.ff-btn-sky,.ff-btn-ghost,.ff-btn-white,.ff-acc-btn,.ff-acc-panel,.ff-rail,.ff-rail-a,.ff-rail-btn,.ff-tile,.ff-stat,.ff-kicker,.ff-kicker-solid,.ff-form-note,.ff-ppl-label,.ff-ppl-or,.ff-thk-search{font-family:' + SANS + ';letter-spacing:normal}',
+      '.ff-hero-h1,.ff-h2,.ff-h2-sm,.ff-h3,.ff-statement,.ff-card-t,.ff-list-h{font-weight:400}',
+      '.ff-page,.ff-page p,.ff-page li,.ff-page label,.ff-page h1,.ff-page h2,.ff-page h3,.ff-page h4,.ff-page a{color:#0d0d0d}',
+      '.ff-page .ff-black,.ff-page .ff-black *,.ff-page .ff-panel,.ff-page .ff-panel *,.ff-page .ff-ppl-panel,.ff-page .ff-ppl-panel *{color:#f4f2ec}',
+      '.ff-page .ff-ppl-panel .ff-btn,.ff-page .ff-ppl-panel .thk-chip-on,.ff-page .ff-ppl-panel .thk-search-in,.ff-page .ff-panel .ff-btn,.ff-page .ff-panel .ff-btn-sky{color:#0d0d0d}',
+      '.ff-page .ff-btn,.ff-page .ff-btn-sky,.ff-page .ff-btn-white,.ff-page .ff-btn-ghost{color:#0d0d0d}.ff-page .ff-btn-black{color:#f4f2ec}',
       /* 1.0.2: Webflow publishes only the classes some element USES in the Designer, so the classes this script adds at runtime (accordion rows,
          the rail, the active tab) arrive unstyled. These :where() fallbacks have zero specificity - the moment the owner applies and edits the
          same class in the Designer, the Webflow rule wins. Also: the site's legacy heading/strong colour variable resolves to white, so every
@@ -47,7 +49,7 @@
       '.ff-acc-icon{flex:0 0 auto;width:22px;height:22px;font-size:26px;line-height:22px;text-align:center}',
       '.ff-acc-panel{padding:0 24px 28px;font-size:16px;line-height:1.55;color:#0d0d0d}',
       '.ff-acc-open{background:var(--ff-tint);border:1px solid var(--ff-tint-line);border-radius:4px;margin-top:-1px}',
-      '.ff-rail{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:90;display:flex;align-items:center;gap:4px;max-width:calc(100% - 48px);padding:6px;border-radius:999px;background:var(--ff-tint);color:#0d0d0d;overflow-x:auto;white-space:nowrap;box-shadow:0 8px 30px rgba(13,13,13,.12)}',
+      '.ff-rail{font-family:' + SANS + ';letter-spacing:normal;position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:90;display:flex;align-items:center;gap:4px;max-width:calc(100% - 48px);padding:6px;border-radius:999px;background:var(--ff-tint);color:#0d0d0d;overflow-x:auto;white-space:nowrap;box-shadow:0 8px 30px rgba(13,13,13,.12)}',
       '.ff-rail-a{display:inline-flex;align-items:center;padding:10px 22px;border-radius:999px;font-size:15px;line-height:1;color:#0d0d0d;text-decoration:none;white-space:nowrap}.ff-rail-a:hover{text-decoration:underline}',
       '.ff-rail-on,.ff-rail-a.ff-rail-on{background:#fff;color:#0d0d0d}',
       '.ff-rail-btn{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:999px;border:1px solid #0d0d0d;background:transparent;color:#0d0d0d;font-size:16px;cursor:pointer;flex:0 0 auto;margin-left:6px;padding:0}',
@@ -59,14 +61,14 @@
       '.ff-panel-h,.ff-panel-p,.ff-panel strong,.ff-black,.ff-black h2,.ff-black h3,.ff-black p,.ff-ppl-panel h1{color:#f4f2ec}',
       /* rich text inside the prose column: Freshfields' serif subheads, comfortable paragraphs, underlined links, tidy lists */
       '.ff-prose p{margin:0 0 18px;font-size:17px;line-height:1.55}.ff-prose p:last-child{margin-bottom:0}',
-      '.ff-prose h2,.ff-prose h3{font-family:Newsreader,Georgia,serif;font-weight:400;font-size:clamp(24px,2.2vw,30px);line-height:1.15;margin:30px 0 12px;letter-spacing:0}',
+      '.ff-prose h2,.ff-prose h3{font-family:inherit;letter-spacing:normal;font-weight:400;font-size:clamp(24px,2.2vw,30px);line-height:1.15;margin:30px 0 12px;letter-spacing:0}',
       '.ff-prose h4{font-size:18px;font-weight:600;margin:24px 0 8px}.ff-prose ul,.ff-prose ol{margin:0 0 18px;padding-left:22px}.ff-prose li{margin:0 0 8px;line-height:1.5}',
       '.ff-prose a{color:#0d0d0d;text-decoration:underline;text-underline-offset:3px}.ff-prose strong{font-weight:600;color:inherit}.ff-prose img{max-width:100%;height:auto;display:block;margin:24px 0}',
-      '.ff-prose blockquote{border-left:2px solid #0d0d0d;margin:24px 0;padding:4px 0 4px 20px;font-family:Newsreader,Georgia,serif;font-size:22px;line-height:1.3}',
+      '.ff-prose blockquote{border-left:2px solid #0d0d0d;margin:24px 0;padding:4px 0 4px 20px;font-family:inherit;letter-spacing:normal;font-size:22px;line-height:1.3}',
       '.ff-main>[data-ff]+.ff-h3{margin-top:40px}',
       /* accordion */
       '.ff-acc-panel p{margin:0 0 14px;font-size:16px;line-height:1.55}.ff-acc-panel p:last-child{margin-bottom:0}',
-      '.ff-acc-panel h4,.ff-acc-panel strong{font-family:Newsreader,Georgia,serif;font-weight:400;font-size:19px;display:block;margin:18px 0 8px}',
+      '.ff-acc-panel h4,.ff-acc-panel strong{font-family:inherit;letter-spacing:normal;font-weight:400;font-size:19px;display:block;margin:18px 0 8px}',
       '.ff-acc-panel ul{margin:0 0 6px;padding-left:22px}.ff-acc-panel li{margin:0 0 4px;font-size:16px}.ff-acc-panel a{color:#0d0d0d;text-decoration:underline;text-underline-offset:3px}',
       '.ff-acc-item.ff-acc-open{background:var(--ff-tint);border-color:var(--ff-tint-line)}.ff-acc-btn[aria-expanded="true"] .ff-acc-icon::before{content:"\\2212"}.ff-acc-btn[aria-expanded="false"] .ff-acc-icon::before{content:"+"}',
       '.ff-acc-btn:focus-visible{outline:2px solid #0d0d0d;outline-offset:-4px}',
@@ -85,6 +87,21 @@
       '.ff-ppl-panel .thk-search{background:#fff;border-radius:999px;border:0}.ff-ppl-panel .thk-search-in{color:#0d0d0d;background:transparent}',
       '.ff-ppl-panel .thk-chips{margin-top:14px}.ff-ppl-panel .thk-chip{border-color:rgba(244,242,236,.5);color:#f4f2ec;background:transparent}',
       '.ff-ppl-panel .thk-chip-on,.thx-hue .ff-ppl-panel .thk-chip-on{background:#c8e67a;border-color:#c8e67a;color:#0d0d0d}.ff-ppl-panel .thk-count{color:rgba(244,242,236,.7);display:block;margin-top:10px}',
+      /* 1.1.0 people panel: a real search bar (icon, 56px, focus ring), chips that wrap, the count on its own line, stacked on phones */
+      '.ff-ppl-panel{grid-template-columns:minmax(0,1fr) 52%;padding:44px 40px 40px;min-height:0;border-radius:8px}',
+      '.ff-ppl-panel .ff-panel-h{font-size:clamp(34px,4vw,62px);line-height:1.02;margin-bottom:16px}',
+      '.ff-ppl-intro{max-width:34ch;font-size:17px;line-height:1.5;color:rgba(244,242,236,.82)!important;margin:0 0 28px}',
+      '.ff-ppl-panel .thk-search{max-width:none;height:56px;padding:0 20px 0 52px;background:#fff url("data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#0d0d0d" stroke-width="1.8"><circle cx="8.5" cy="8.5" r="6"/><path d="M13 13l5 5"/></svg>') + '") no-repeat 20px center;border:1px solid transparent;transition:box-shadow 160ms}',
+      '.ff-ppl-panel .thk-search:focus-within{box-shadow:0 0 0 3px #c8e67a}.ff-ppl-panel .thk-search-in{height:54px;font-size:17px}',
+      '.ff-ppl-panel .thk-tools{display:flex;flex-direction:column;align-items:stretch;gap:0}.ff-ppl-panel .thk-chips{margin-top:16px;gap:8px}',
+      '.ff-ppl-panel .thk-chip{height:40px;padding:0 18px;font-size:14px;transition:background-color 160ms,color 160ms,border-color 160ms}.ff-ppl-panel .thk-chip:hover{background:rgba(244,242,236,.14)}',
+      '.ff-ppl-panel .thk-count{margin:14px 0 0;font-size:14px}',
+      '.ff-ppl-panel .ff-ppl-or{margin-top:30px;font-size:13px;letter-spacing:normal;text-transform:none;font-weight:500;color:rgba(244,242,236,.7)!important}',
+      '.ff-ppl-panel .ff-btn{display:inline-flex;align-self:flex-start;width:auto;padding:14px 26px;font-size:16px}',
+      '@media (max-width:991px){.ff-ppl-panel{grid-template-columns:minmax(0,1fr);padding:32px 24px}}',
+      '@media (max-width:767px){.ff-ppl-panel{padding:28px 18px}.ff-ppl-panel .thk-search{height:52px;padding-left:46px;background-position:16px center}.ff-ppl-panel .thk-chip{height:36px;padding:0 14px;font-size:13px}}',
+      /* the Our thinking hero form fields (selects sit on a lavender panel) */
+      '.ff-thk-hero-r .ff-select{background-color:#fff}',
       /* a data-ff="color" carrier is never shown */
       '[data-ff="color"]{display:none!important}',
       /* hide-when-empty (a CMS field left blank hides the whole section) */
@@ -142,6 +159,45 @@
     rt.parentNode.insertBefore(list, rt); rt.hidden = true; host.dataset.ffReady = '1';
   }
   q('[data-ff="acc"]').forEach(accordion);
+
+  /* ---------- 6. dropdowns: the builder publishes <select> elements with no <option> children, so the options live on the element as
+     data-ff-options="One|Two|Three" (edit them in the Designer's attribute panel); the first entry is the prompt. Duplicate #field ids are made unique. */
+  (function selects() {
+    q('select').forEach(function (s, i) {
+      var raw = s.getAttribute('data-ff-options'); var name = s.getAttribute('name') || ('select-' + i);
+      if (s.id === 'field' || !s.id) s.id = 'ff-' + name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      var lab = s.closest('.ff-field'); var l = lab && lab.querySelector('label'); if (l && !l.getAttribute('for')) l.setAttribute('for', s.id);
+      if (!raw || s.options.length) return;
+      raw.split('|').forEach(function (t, j) { t = t.trim(); if (!t) return; var o = document.createElement('option'); o.textContent = t; o.value = j === 0 ? '' : t; s.appendChild(o); });
+    });
+  })();
+
+  /* ---------- 7. Our thinking: the hero's Practices / Industries / Section + "Search our thinking" drive the page's own filter (chips + search box) ---------- */
+  (function thinking() {
+    var btn = document.querySelector('.ff-thk-search'); if (!btn) return;
+    var form = btn.closest('form'); if (form) form.addEventListener('submit', function (e) { e.preventDefault(); run(); });
+    var sel = function (n) { return document.querySelector('select[name="' + n + '"]'); };
+    function fire(el, type) { el.dispatchEvent(new Event(type, { bubbles: true })); }
+    function run() {
+      var section = (sel('section') || {}).value || '', terms = [(sel('practice') || {}).value, (sel('industry') || {}).value].filter(Boolean).join(' ');
+      var chips = q('.thk-chips .thk-chip'), hit = null;
+      chips.forEach(function (c) { var cat = (c.getAttribute('data-cat') || '').toLowerCase(), txt = c.textContent.trim().toLowerCase(); if (section && (cat === section.toLowerCase() || txt === section.toLowerCase())) hit = c; });
+      (hit || chips[0]) && (hit || chips[0]).click();
+      var box = document.querySelector('#latest .thk-search-in, .thk-hub .thk-search-in'); if (box) { box.value = terms; fire(box, 'input'); fire(box, 'keyup'); fire(box, 'change'); }
+      var tgt = document.getElementById('latest'); if (tgt) { var y = tgt.getBoundingClientRect().top + window.pageYOffset - 90; window.scrollTo({ top: y, behavior: RED() ? 'auto' : 'smooth' }); }
+    }
+    btn.addEventListener('click', function (e) { e.preventDefault(); run(); });
+    ['practice', 'industry', 'section'].forEach(function (n) { var s = sel(n); if (s) s.addEventListener('change', run); });
+  })();
+
+  /* ---------- 8. people panel: an intro line under the title, and the count reads "N people" not "N pieces" ---------- */
+  (function people() {
+    var panel = document.querySelector('.ff-ppl-panel'); if (!panel) return;
+    var h = panel.querySelector('.ff-panel-h'); if (h && !panel.querySelector('.ff-ppl-intro')) { var p = document.createElement('p'); p.className = 'ff-ppl-intro'; p.textContent = 'Find the person behind a practice, a partnership or a payout, and reach them directly.'; h.insertAdjacentElement('afterend', p); }
+    var count = panel.querySelector('.thk-count'); if (!count) return;
+    function fix() { var m = /(\d+)\s*(piece|pieces|item|items|result|results)/i.exec(count.textContent || ''); if (m) { var n = +m[1]; count.textContent = n + (n === 1 ? ' person' : ' people'); } }
+    fix(); new MutationObserver(fix).observe(count, { childList: true, characterData: true, subtree: true });
+  })();
 
   /* ---------- 4. capabilities index tabs ---------- */
   (function tabs() {
