@@ -1,4 +1,4 @@
-/*! theodyx-ff.js v1.2.2 (2026-09-15) — the Freshfields-pattern runtime for theodyx.com.
+/*! theodyx-ff.js v1.2.3 (2026-09-15) — the Freshfields-pattern runtime for theodyx.com.
  * Owner directive (2026-09-15): "make theodyx.com exactly like freshfields.com — the UI/UX, the colours, the sections — so I can edit it and
  * make it mine." Everything visual lives in native Designer classes (ff-*). This file only adds what CSS classes cannot:
  *  1. the How-we-help ACCORDION: a CMS rich-text field ([data-ff="acc"]) is split at every H3 — the H3 becomes the row title, everything
@@ -14,7 +14,7 @@
 (function () {
   'use strict';
   if (window.__thxFF) return;
-  var API = window.__thxFF = { v: '1.2.2' };
+  var API = window.__thxFF = { v: '1.2.3' };
   var SANS = '"Google Sans Flex","Google Sans",system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif';
   function q(s, r) { return [].slice.call((r || document).querySelectorAll(s)); }
   var RED = function () { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } };
@@ -181,7 +181,7 @@
 
   /* ---------- 7. Our thinking: the hero's Practices / Industries / Section + "Search our thinking" drive the page's own filter (chips + search box) ---------- */
   (function thinking() {
-    var btn = document.querySelector('.ff-thk-search'); if (!btn) return;
+    var btn = document.querySelector('.ff-thk-search, .p-thinking-thk-search, [data-ff="thk-search"]'); if (!btn) return;
     var form = btn.closest('form'); if (form) form.addEventListener('submit', function (e) { e.preventDefault(); run(); });
     var sel = function (n) { return document.querySelector('select[name="' + n + '"]'); };
     function fire(el, type) { el.dispatchEvent(new Event(type, { bubbles: true })); }
