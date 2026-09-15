@@ -1,4 +1,4 @@
-/*! theodyx-ff.js v1.1.0 (2026-09-15) — the Freshfields-pattern runtime for theodyx.com.
+/*! theodyx-ff.js v1.1.1 (2026-09-15) — the Freshfields-pattern runtime for theodyx.com.
  * Owner directive (2026-09-15): "make theodyx.com exactly like freshfields.com — the UI/UX, the colours, the sections — so I can edit it and
  * make it mine." Everything visual lives in native Designer classes (ff-*). This file only adds what CSS classes cannot:
  *  1. the How-we-help ACCORDION: a CMS rich-text field ([data-ff="acc"]) is split at every H3 — the H3 becomes the row title, everything
@@ -14,7 +14,7 @@
 (function () {
   'use strict';
   if (window.__thxFF) return;
-  var API = window.__thxFF = { v: '1.1.0' };
+  var API = window.__thxFF = { v: '1.1.1' };
   var SANS = '"Google Sans Flex","Google Sans",system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif';
   function q(s, r) { return [].slice.call((r || document).querySelectorAll(s)); }
   var RED = function () { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } };
@@ -93,7 +93,11 @@
       '.ff-ppl-intro{max-width:34ch;font-size:17px;line-height:1.5;color:rgba(244,242,236,.82)!important;margin:0 0 28px}',
       '.ff-ppl-panel .thk-search{max-width:none;height:56px;padding:0 20px 0 52px;background:#fff url("data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#0d0d0d" stroke-width="1.8"><circle cx="8.5" cy="8.5" r="6"/><path d="M13 13l5 5"/></svg>') + '") no-repeat 20px center;border:1px solid transparent;transition:box-shadow 160ms}',
       '.ff-ppl-panel .thk-search:focus-within{box-shadow:0 0 0 3px #c8e67a}.ff-ppl-panel .thk-search-in{height:54px;font-size:17px}',
-      '.ff-ppl-panel .thk-tools{display:flex;flex-direction:column;align-items:stretch;gap:0}.ff-ppl-panel .thk-chips{margin-top:16px;gap:8px}',
+      '.ff-ppl-panel .thk-tools{display:flex;flex-direction:column;align-items:stretch;gap:0}.ff-ppl-panel .thk-search{flex:0 0 auto;width:100%}.ff-ppl-panel .thk-chips{margin-top:16px;gap:8px}',
+      /* checkbox / radio labels inside the forms read black on the cream page */
+      '.ff-page .w-checkbox,.ff-page .w-radio,.ff-page .w-form-label,.ff-page .w-checkbox-input+span{color:#0d0d0d}',
+      /* three factual tiles on the network page: no image column, so the copy has room */
+      '.ff-cards-3 .ff-tile{display:flex;flex-direction:column;justify-content:space-between;gap:18px;min-height:0}',
       '.ff-ppl-panel .thk-chip{height:40px;padding:0 18px;font-size:14px;transition:background-color 160ms,color 160ms,border-color 160ms}.ff-ppl-panel .thk-chip:hover{background:rgba(244,242,236,.14)}',
       '.ff-ppl-panel .thk-count{margin:14px 0 0;font-size:14px}',
       '.ff-ppl-panel .ff-ppl-or{margin-top:30px;font-size:13px;letter-spacing:normal;text-transform:none;font-weight:500;color:rgba(244,242,236,.7)!important}',
@@ -184,7 +188,7 @@
       chips.forEach(function (c) { var cat = (c.getAttribute('data-cat') || '').toLowerCase(), txt = c.textContent.trim().toLowerCase(); if (section && (cat === section.toLowerCase() || txt === section.toLowerCase())) hit = c; });
       (hit || chips[0]) && (hit || chips[0]).click();
       var box = document.querySelector('#latest .thk-search-in, .thk-hub .thk-search-in'); if (box) { box.value = terms; fire(box, 'input'); fire(box, 'keyup'); fire(box, 'change'); }
-      var tgt = document.getElementById('latest'); if (tgt) { var y = tgt.getBoundingClientRect().top + window.pageYOffset - 90; window.scrollTo({ top: y, behavior: RED() ? 'auto' : 'smooth' }); }
+      var tgt = document.getElementById('latest'); if (tgt) setTimeout(function () { var y = tgt.getBoundingClientRect().top + window.pageYOffset - 90; window.scrollTo({ top: y, behavior: RED() ? 'auto' : 'smooth' }); }, 60);
     }
     btn.addEventListener('click', function (e) { e.preventDefault(); run(); });
     ['practice', 'industry', 'section'].forEach(function (n) { var s = sel(n); if (s) s.addEventListener('change', run); });
