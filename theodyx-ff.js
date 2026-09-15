@@ -1,4 +1,4 @@
-/*! theodyx-ff.js v1.0.0 (2026-09-15) — the Freshfields-pattern runtime for theodyx.com.
+/*! theodyx-ff.js v1.0.1 (2026-09-15) — the Freshfields-pattern runtime for theodyx.com.
  * Owner directive (2026-09-15): "make theodyx.com exactly like freshfields.com — the UI/UX, the colours, the sections — so I can edit it and
  * make it mine." Everything visual lives in native Designer classes (ff-*). This file only adds what CSS classes cannot:
  *  1. the How-we-help ACCORDION: a CMS rich-text field ([data-ff="acc"]) is split at every H3 — the H3 becomes the row title, everything
@@ -14,7 +14,7 @@
 (function () {
   'use strict';
   if (window.__thxFF) return;
-  var API = window.__thxFF = { v: '1.0.0' };
+  var API = window.__thxFF = { v: '1.0.1' };
   function q(s, r) { return [].slice.call((r || document).querySelectorAll(s)); }
   var RED = function () { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } };
 
@@ -56,8 +56,16 @@
       /* selects: a chevron, no native arrow */
       '.ff-select{-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16"><path d="M3 6l5 5 5-5" fill="none" stroke="#0d0d0d" stroke-width="1.6"/></svg>') + '");background-repeat:no-repeat;background-position:right 8px center;padding-right:34px;cursor:pointer}',
       '.ff-input::placeholder,.ff-textarea::placeholder{color:rgba(13,13,13,.45)}',
-      /* the rounded-grid pattern art */
-      '.ff-pattern{background-image:' + PATTERN + ';background-size:80px 80px;background-repeat:repeat}',
+      /* the rounded-grid pattern art (fills whatever wrapper it sits in) */
+      '.ff-pattern{background-image:' + PATTERN + ';background-size:80px 80px;background-repeat:repeat;width:100%;height:100%;min-height:320px;display:block}',
+      '.ff-art{overflow:hidden}.ff-art .ff-pattern{min-height:0;aspect-ratio:1/1}',
+      /* the people search panel (black): the existing filter controls turn white / outlined inside it */
+      '.ff-ppl-panel .thk-tools{position:static;padding:0;margin:0;background:transparent}',
+      '.ff-ppl-panel .thk-search{background:#fff;border-radius:999px;border:0}.ff-ppl-panel .thk-search-in{color:#0d0d0d;background:transparent}',
+      '.ff-ppl-panel .thk-chips{margin-top:14px}.ff-ppl-panel .thk-chip{border-color:rgba(244,242,236,.5);color:#f4f2ec;background:transparent}',
+      '.ff-ppl-panel .thk-chip-on,.thx-hue .ff-ppl-panel .thk-chip-on{background:#c8e67a;border-color:#c8e67a;color:#0d0d0d}.ff-ppl-panel .thk-count{color:rgba(244,242,236,.7);display:block;margin-top:10px}',
+      /* a data-ff="color" carrier is never shown */
+      '[data-ff="color"]{display:none!important}',
       /* hide-when-empty (a CMS field left blank hides the whole section) */
       '[data-ff-hide-empty]:has(.w-dyn-bind-empty){display:none}',
       '.ff-hero-media:has(.w-dyn-bind-empty),.ff-hero-media:empty{display:none}.ff-hero:has(.ff-hero-media:empty),.ff-hero:has(.ff-hero-media .w-dyn-bind-empty){grid-template-columns:minmax(0,1fr)}',
