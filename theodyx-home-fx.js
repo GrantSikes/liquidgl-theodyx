@@ -1,4 +1,4 @@
-/* theodyx-home-fx.js 1.4.0 — Theodyx HOME page ANIMATION ONLY.
+/* theodyx-home-fx.js 1.5.0 — Theodyx HOME page ANIMATION ONLY.
  * Contract: may only append/read inside [data-thx-anim] / [data-thx-reveal] elements,
  * plus the hero control buttons it already owns.
  * MUST NOT: set hrefs, hide/move/restyle content, inject text content,
@@ -487,8 +487,10 @@
       var t = e.target;
       /* the hero's own mute / pause controls speak for themselves — never double-handle them */
       if (t && t.closest && t.closest('[data-hero-mute],[data-hero-pause]')) return;
-      wantSound = true;
-      applySound();
+      /* 1.5.0 (2026-09-14, owner: "I want the auto play music to stop"): a gesture anywhere on the page
+         no longer switches the soundtrack on. The loop stays muted until the mute button itself is pressed;
+         that button is still the one explicit, sticky way to hear it. */
+      return;
     }
     ['pointerdown', 'touchstart', 'click'].forEach(function (t) {
       document.addEventListener(t, pointerGesture, { capture: true, passive: true });
