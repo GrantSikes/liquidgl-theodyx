@@ -1,4 +1,4 @@
-/*! theodyx-ff.js v1.1.1 (2026-09-15) — the Freshfields-pattern runtime for theodyx.com.
+/*! theodyx-ff.js v1.1.2 (2026-09-15) — the Freshfields-pattern runtime for theodyx.com.
  * Owner directive (2026-09-15): "make theodyx.com exactly like freshfields.com — the UI/UX, the colours, the sections — so I can edit it and
  * make it mine." Everything visual lives in native Designer classes (ff-*). This file only adds what CSS classes cannot:
  *  1. the How-we-help ACCORDION: a CMS rich-text field ([data-ff="acc"]) is split at every H3 — the H3 becomes the row title, everything
@@ -14,7 +14,7 @@
 (function () {
   'use strict';
   if (window.__thxFF) return;
-  var API = window.__thxFF = { v: '1.1.1' };
+  var API = window.__thxFF = { v: '1.1.2' };
   var SANS = '"Google Sans Flex","Google Sans",system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif';
   function q(s, r) { return [].slice.call((r || document).querySelectorAll(s)); }
   var RED = function () { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } };
@@ -201,6 +201,12 @@
     var count = panel.querySelector('.thk-count'); if (!count) return;
     function fix() { var m = /(\d+)\s*(piece|pieces|item|items|result|results)/i.exec(count.textContent || ''); if (m) { var n = +m[1]; count.textContent = n + (n === 1 ? ' person' : ' people'); } }
     fix(); new MutationObserver(fix).observe(count, { childList: true, characterData: true, subtree: true });
+  })();
+
+  /* ---------- 9. hide-when-empty for LINKS: a link bound to an empty CMS link field publishes href="#" (no w-dyn-bind-empty), so hide those too ---------- */
+  (function emptyLinks() {
+    q('a[data-ff-hide-empty]').forEach(function (a) { var h = (a.getAttribute('href') || '').trim(); if (!h || h === '#' || /^mailto:$|^tel:$/.test(h)) a.hidden = true; });
+    q('[data-ff-hide-empty]:not(a)').forEach(function (w) { var kids = [].slice.call(w.children); if (kids.length && kids.every(function (k) { return k.hidden || k.classList.contains('w-dyn-bind-empty') || (k.tagName === 'A' && k.hidden); })) w.hidden = true; });
   })();
 
   /* ---------- 4. capabilities index tabs ---------- */
