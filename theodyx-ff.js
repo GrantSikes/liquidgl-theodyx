@@ -1,4 +1,4 @@
-/*! theodyx-ff.js v1.2.5 (2026-09-15) — the Freshfields-pattern runtime for theodyx.com.
+/*! theodyx-ff.js v1.2.6 (2026-09-15) — the Freshfields-pattern runtime for theodyx.com.
  * Owner directive (2026-09-15): "make theodyx.com exactly like freshfields.com — the UI/UX, the colours, the sections — so I can edit it and
  * make it mine." Everything visual lives in native Designer classes (ff-*). This file only adds what CSS classes cannot:
  *  1. the How-we-help ACCORDION: a CMS rich-text field ([data-ff="acc"]) is split at every H3 — the H3 becomes the row title, everything
@@ -14,7 +14,7 @@
 (function () {
   'use strict';
   if (window.__thxFF) return;
-  var API = window.__thxFF = { v: '1.2.5' };
+  var API = window.__thxFF = { v: '1.2.6' };
   var SANS = '"Google Sans Flex","Google Sans",system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif';
   function q(s, r) { return [].slice.call((r || document).querySelectorAll(s)); }
   var RED = function () { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } };
@@ -211,7 +211,7 @@
     ['practice', 'industry', 'section'].forEach(function (n) { var s = sel(n); if (s) s.addEventListener('change', run); });
   })();
 
-  /* ---------- 8b. Our Humans catalogue: a card whose Department is empty takes its Network category as the kicker, so the category chips filter it ---------- */
+  /* ---------- 8b. Our People catalogue: a card whose Department is empty takes its Network category as the kicker, so the category chips filter it ---------- */
   (function catalogue() {
     q('.thk-card').forEach(function (c) {
       var k = c.querySelector('.thk-kicker'), cat = c.querySelector('[data-ppl-cat]'); if (!k || !cat) return;
@@ -223,9 +223,9 @@
   /* ---------- 8. people panel: an intro line under the title, and the count reads "N people" not "N pieces" ---------- */
   (function people() {
     var panel = document.querySelector('.ff-ppl-panel'); if (!panel) return;
-    var h = panel.querySelector('.ff-panel-h'); if (h && !panel.querySelector('.ff-ppl-intro')) { var p = document.createElement('p'); p.className = 'ff-ppl-intro'; p.textContent = 'The humans behind Theodyx and the people in Our Network. Find someone by name, role or team, and reach them directly.'; h.insertAdjacentElement('afterend', p); }
+    var h = panel.querySelector('.ff-panel-h'); if (h && !panel.querySelector('.ff-ppl-intro')) { var p = document.createElement('p'); p.className = 'ff-ppl-intro'; p.textContent = 'The people behind Theodyx and the people in Our Network. Find someone by name, role or team, and reach them directly.'; h.insertAdjacentElement('afterend', p); }
     var count = panel.querySelector('.thk-count'); if (!count) return;
-    function fix() { var m = /(\d+)\s*(piece|pieces|item|items|result|results)/i.exec(count.textContent || ''); if (m) { var n = +m[1]; count.textContent = n + (n === 1 ? ' human' : ' humans'); } }
+    function fix() { var m = /(\d+)\s*(piece|pieces|item|items|result|results)/i.exec(count.textContent || ''); if (m) { var n = +m[1]; count.textContent = n + (n === 1 ? ' person' : ' people'); } }
     fix(); new MutationObserver(fix).observe(count, { childList: true, characterData: true, subtree: true });
   })();
 
