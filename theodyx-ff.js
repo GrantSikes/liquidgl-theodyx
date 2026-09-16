@@ -1,4 +1,4 @@
-/*! theodyx-ff.js v1.3.2 (2026-09-16) — the Freshfields-pattern runtime for theodyx.com.
+/*! theodyx-ff.js v1.3.3 (2026-09-16) — the Freshfields-pattern runtime for theodyx.com.
  * Owner directive (2026-09-15): "make theodyx.com exactly like freshfields.com — the UI/UX, the colours, the sections — so I can edit it and
  * make it mine." Everything visual lives in native Designer classes (ff-*). This file only adds what CSS classes cannot:
  *  1. the How-we-help ACCORDION: a CMS rich-text field ([data-ff="acc"]) is split at every H3 — the H3 becomes the row title, everything
@@ -14,7 +14,7 @@
 (function () {
   'use strict';
   if (window.__thxFF) return;
-  var API = window.__thxFF = { v: '1.3.2' };
+  var API = window.__thxFF = { v: '1.3.3' };
   var SANS = '"Google Sans Flex","Google Sans",system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif';
   function q(s, r) { return [].slice.call((r || document).querySelectorAll(s)); }
   var RED = function () { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } };
@@ -129,6 +129,11 @@
       ':where(.ff-page) :where(h1,h2,h3,h4,h5,h6,p,li,label,a,div,span,blockquote,strong,em,b){color:#0d0d0d}',
       /* 1.3.0: form controls are always readable - the owner's white-ink experiments on select copies made the prompts vanish */
       '.ff-page select,.ff-page input,.ff-page textarea,.ff-page select option{color:#0d0d0d}select option{background:#fff;color:#0d0d0d}.ff-page .ff-select{border-bottom-color:rgba(13,13,13,.7)}',
+      /* 1.3.3: the legacy contact/thinking scripts paint .field-label/.input with !important - inside a modern form these win back */
+      'form.ff-form-modern label,form.ff-form-modern .field-label{font-size:14px!important;font-weight:500!important;letter-spacing:normal!important;text-transform:none!important;color:#0d0d0d!important;white-space:normal!important;margin:0 0 8px!important;opacity:1!important}',
+      'form.ff-form-modern input:not([type=checkbox]):not([type=radio]):not([type=submit]),form.ff-form-modern select,form.ff-form-modern textarea{background:#fff!important;border:1px solid rgba(13,13,13,.22)!important;border-radius:12px!important;box-shadow:none!important;padding:0 16px!important;height:52px!important;font-family:' + SANS + '!important;font-size:16px!important;color:#0d0d0d!important}',
+      'form.ff-form-modern textarea{height:auto!important;min-height:140px!important;padding:14px 16px!important}form.ff-form-modern :is(input,select,textarea):focus{border-color:#0d0d0d!important;box-shadow:0 0 0 3px rgba(13,13,13,.08)!important}',
+      'form.ff-form-modern input[type=submit],form.ff-form-modern .primary-button{position:static!important;margin:0!important;height:52px!important;padding:0 28px!important;border-radius:999px!important;background:#0d0d0d!important;color:#f4f2ec!important;border:0!important;font-size:16px!important;line-height:52px!important}',
       /* 1.3.2 (owner: "more towards the center and not on the wall of the page"): the page column gets Freshfields gutters. */
       '.ff-page{max-width:1440px;margin-left:auto;margin-right:auto;padding-left:clamp(20px,4vw,56px);padding-right:clamp(20px,4vw,56px);box-sizing:border-box}',
       '.ff-form-modern > .ff-field > .ff-field{margin-top:22px}',
