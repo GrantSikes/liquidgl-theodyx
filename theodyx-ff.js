@@ -1,4 +1,4 @@
-/*! theodyx-ff.js v1.3.1 (2026-09-16) — the Freshfields-pattern runtime for theodyx.com.
+/*! theodyx-ff.js v1.3.2 (2026-09-16) — the Freshfields-pattern runtime for theodyx.com.
  * Owner directive (2026-09-15): "make theodyx.com exactly like freshfields.com — the UI/UX, the colours, the sections — so I can edit it and
  * make it mine." Everything visual lives in native Designer classes (ff-*). This file only adds what CSS classes cannot:
  *  1. the How-we-help ACCORDION: a CMS rich-text field ([data-ff="acc"]) is split at every H3 — the H3 becomes the row title, everything
@@ -14,7 +14,7 @@
 (function () {
   'use strict';
   if (window.__thxFF) return;
-  var API = window.__thxFF = { v: '1.3.1' };
+  var API = window.__thxFF = { v: '1.3.2' };
   var SANS = '"Google Sans Flex","Google Sans",system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif';
   function q(s, r) { return [].slice.call((r || document).querySelectorAll(s)); }
   var RED = function () { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } };
@@ -129,6 +129,9 @@
       ':where(.ff-page) :where(h1,h2,h3,h4,h5,h6,p,li,label,a,div,span,blockquote,strong,em,b){color:#0d0d0d}',
       /* 1.3.0: form controls are always readable - the owner's white-ink experiments on select copies made the prompts vanish */
       '.ff-page select,.ff-page input,.ff-page textarea,.ff-page select option{color:#0d0d0d}select option{background:#fff;color:#0d0d0d}.ff-page .ff-select{border-bottom-color:rgba(13,13,13,.7)}',
+      /* 1.3.2 (owner: "more towards the center and not on the wall of the page"): the page column gets Freshfields gutters. */
+      '.ff-page{max-width:1440px;margin-left:auto;margin-right:auto;padding-left:clamp(20px,4vw,56px);padding-right:clamp(20px,4vw,56px);box-sizing:border-box}',
+      '.ff-form-modern > .ff-field > .ff-field{margin-top:22px}',
       /* 1.3.0: the modern form (owner: "make it look WAY more UI/UX and modern") - add class ff-form-modern to a <form>; fields are .ff-field wrappers */
       '.ff-form-modern{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px 24px;max-width:920px}.ff-form-modern .ff-field{margin:0;min-width:0}.ff-form-modern .ff-span,.ff-form-modern .ff-consent,.ff-form-modern .ff-form-note{grid-column:1/-1}',
       '.ff-form-modern [data-ff-showfor]:not([hidden]),.ff-form-modern [data-ff-otherfor]:not([hidden]){display:contents}',
