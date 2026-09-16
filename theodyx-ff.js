@@ -1,4 +1,4 @@
-/*! theodyx-ff.js v1.2.6 (2026-09-15) — the Freshfields-pattern runtime for theodyx.com.
+/*! theodyx-ff.js v1.3.0 (2026-09-16) — the Freshfields-pattern runtime for theodyx.com.
  * Owner directive (2026-09-15): "make theodyx.com exactly like freshfields.com — the UI/UX, the colours, the sections — so I can edit it and
  * make it mine." Everything visual lives in native Designer classes (ff-*). This file only adds what CSS classes cannot:
  *  1. the How-we-help ACCORDION: a CMS rich-text field ([data-ff="acc"]) is split at every H3 — the H3 becomes the row title, everything
@@ -14,7 +14,7 @@
 (function () {
   'use strict';
   if (window.__thxFF) return;
-  var API = window.__thxFF = { v: '1.2.6' };
+  var API = window.__thxFF = { v: '1.3.0' };
   var SANS = '"Google Sans Flex","Google Sans",system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif';
   function q(s, r) { return [].slice.call((r || document).querySelectorAll(s)); }
   var RED = function () { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } };
@@ -127,6 +127,22 @@
     var ink = document.createElement('style'); ink.id = 'thx-ff-ink';
     ink.textContent = [
       ':where(.ff-page) :where(h1,h2,h3,h4,h5,h6,p,li,label,a,div,span,blockquote,strong,em,b){color:#0d0d0d}',
+      /* 1.3.0: form controls are always readable - the owner's white-ink experiments on select copies made the prompts vanish */
+      '.ff-page select,.ff-page input,.ff-page textarea,.ff-page select option{color:#0d0d0d}select option{background:#fff;color:#0d0d0d}',
+      /* 1.3.0: the modern form (owner: "make it look WAY more UI/UX and modern") - add class ff-form-modern to a <form>; fields are .ff-field wrappers */
+      '.ff-form-modern{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px 24px;max-width:920px}.ff-form-modern .ff-field{margin:0;min-width:0}.ff-form-modern .ff-span,.ff-form-modern .ff-consent,.ff-form-modern .ff-form-note{grid-column:1/-1}',
+      '.ff-form-modern [data-ff-showfor]:not([hidden]),.ff-form-modern [data-ff-otherfor]:not([hidden]){display:contents}',
+      '.ff-form-modern label,.ff-form-modern .ff-label{display:block;font-size:14px;font-weight:500;letter-spacing:normal;text-transform:none;color:#0d0d0d;margin:0 0 8px;opacity:1}',
+      '.ff-form-modern input:not([type=checkbox]):not([type=radio]):not([type=submit]),.ff-form-modern select,.ff-form-modern textarea{width:100%;box-sizing:border-box;height:52px;margin:0;padding:0 16px;border:1px solid rgba(13,13,13,.22);border-radius:12px;background:#fff;color:#0d0d0d;font-family:' + SANS + ';font-size:16px;line-height:1.3;letter-spacing:normal;transition:border-color .15s,box-shadow .15s}',
+      '.ff-form-modern textarea{height:auto;min-height:140px;padding:14px 16px;resize:vertical}',
+      '.ff-form-modern select{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2714%27 height=%2714%27 viewBox=%270 0 16 16%27%3E%3Cpath d=%27M3.5 6 8 10.5 12.5 6%27 fill=%27none%27 stroke=%27%230d0d0d%27 stroke-width=%271.6%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 16px center;padding-right:44px;cursor:pointer}',
+      '.ff-form-modern :is(input,select,textarea):focus{outline:none;border-color:#0d0d0d;box-shadow:0 0 0 3px rgba(13,13,13,.08)}.ff-form-modern ::placeholder{color:rgba(13,13,13,.42);opacity:1}',
+      '.ff-form-modern .ff-consent{display:flex;gap:12px;align-items:flex-start;margin:6px 0 0}.ff-form-modern .ff-consent input[type=checkbox]{width:20px;height:20px;margin:2px 0 0;accent-color:#0d0d0d;flex:0 0 auto}.ff-form-modern .ff-consent-t{font-size:15px;line-height:1.5;text-transform:none;letter-spacing:normal}',
+      '.ff-form-modern input[type=submit],.ff-form-modern button[type=submit],.ff-form-modern .w-button{grid-column:1/-1;justify-self:start;width:auto;height:52px;padding:0 28px;border-radius:999px;background:#0d0d0d;color:#f4f2ec;border:0;font-family:' + SANS + ';font-size:16px;font-weight:500;cursor:pointer;transition:transform .15s,opacity .15s}.ff-form-modern input[type=submit]:hover{opacity:.9;transform:translateY(-1px)}',
+      '@media (max-width:767px){.ff-form-modern{grid-template-columns:minmax(0,1fr);gap:18px}}',
+      /* 1.3.0: the university combobox */
+      '.ff-combo{position:relative}.ff-combo-list{position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:60;max-height:280px;overflow:auto;background:#fff;border:1px solid rgba(13,13,13,.16);border-radius:12px;box-shadow:0 12px 40px rgba(13,13,13,.12);padding:6px;margin:0;list-style:none}',
+      '.ff-combo-list li{padding:10px 12px;border-radius:8px;cursor:pointer;font-size:15px;line-height:1.3;color:#0d0d0d}.ff-combo-list li[aria-selected=true],.ff-combo-list li:hover{background:rgba(13,13,13,.06)}.ff-combo-list small{display:block;color:rgba(13,13,13,.5);font-size:12px;margin-top:2px}.ff-combo-list .ff-combo-other{border-top:1px solid rgba(13,13,13,.1);margin-top:4px;padding-top:12px;color:rgba(13,13,13,.7)}',
       /* runtime-made capability chips on pages that never used .thk-chip in the Designer (the class is tree-shaken there) */
       ':where(.ff-page) .thk-chip{display:inline-flex;align-items:center;height:38px;padding:0 16px;border:1px solid rgba(13,13,13,.18);border-radius:999px;color:#0d0d0d;font-size:14px;font-weight:500;text-decoration:none}',
       ':where(.ff-page) :where(.ff-black,.ff-panel,.ff-ppl-panel,.ff-ppl-panel-lime .ff-ppl-kicker) :where(h1,h2,h3,h4,p,li,label,a,div,span){color:#f4f2ec}',
@@ -256,6 +272,56 @@
     tabs.forEach(function (t) { t.setAttribute('role', 'tab'); t.addEventListener('click', function (e) { e.preventDefault(); apply(t.getAttribute('data-kind') || ''); }); });
     var h = (location.hash || '').replace('#', '').toLowerCase(), pre = { 'cap-practices': 'Practice', 'cap-industries': 'Industry', 'cap-innovation': 'Innovation' }[h];
     apply(pre || '');
+  })();
+
+  /* ---------- 11. placeholders (1.3.0, owner: "not 'Example text' - say whatever it is asking the user to input") ----------
+     Any input/textarea whose placeholder is empty or the Designer default takes the text of its own label. The Designer placeholder still wins when set. */
+  (function placeholders() {
+    q('input,textarea').forEach(function (f) {
+      var ph = (f.getAttribute('placeholder') || '').trim(); if (ph && !/^example text$/i.test(ph)) return;
+      if (/^(checkbox|radio|submit|hidden|button|file)$/i.test(f.type || '')) return;
+      var lab = (f.id && document.querySelector('label[for="' + f.id + '"]')) || (f.closest('.ff-field') || f.parentElement || {}).querySelector && (f.closest('.ff-field') || f.parentElement).querySelector('label');
+      var t = lab ? lab.textContent : (f.getAttribute('data-name') || f.name || '');
+      t = t.replace(/\(required\)/ig, '').replace(/\*/g, '').replace(/\s+/g, ' ').trim();
+      if (t) f.setAttribute('placeholder', t);
+    });
+  })();
+
+  /* ---------- 12. "Not listed" free text (1.3.0): a select whose chosen option is "Not listed" / "Other" reveals the field marked data-ff-otherfor="<select name>" ---------- */
+  (function otherField() {
+    q('[data-ff-otherfor]').forEach(function (g) {
+      var form = g.closest('form') || document, sel = form.querySelector('select[name="' + g.getAttribute('data-ff-otherfor') + '"]'); if (!sel) return;
+      function apply() { var on = /^(not listed|other|not listed .*)$/i.test((sel.value || '').trim()); g.hidden = !on; q('input,textarea', g).forEach(function (f) { f.disabled = !on; f.required = on; if (on) setTimeout(function () { try { f.focus({ preventScroll: true }); } catch (e) {} }, 30); }); }
+      sel.addEventListener('change', apply); apply();
+    });
+  })();
+
+  /* ---------- 13. university lookup (1.3.0): an input marked data-ff-uni becomes a combobox over a bundled list of ~10k institutions (name, country),
+     fetched only when the field is first used. "Not listed" hands over to the data-ff-otherfor="University" field. ---------- */
+  (function uni() {
+    var inputs = q('input[data-ff-uni]'); if (!inputs.length) return;
+    var URL = 'https://cdn.jsdelivr.net/gh/GrantSikes/liquidgl-theodyx@4e8305ac49b183cc4d1604b15ce98547018691b0/data/universities.json', data = null, loading = null;
+    function load() { if (data) return Promise.resolve(data); if (loading) return loading; loading = fetch(URL).then(function (r) { return r.json(); }).then(function (j) { data = j; return j; }).catch(function () { data = []; return data; }); return loading; }
+    inputs.forEach(function (inp) {
+      var wrap = document.createElement('div'); wrap.className = 'ff-combo'; inp.parentNode.insertBefore(wrap, inp); wrap.appendChild(inp);
+      var list = document.createElement('ul'); list.className = 'ff-combo-list'; list.hidden = true; list.setAttribute('role', 'listbox'); wrap.appendChild(list);
+      inp.setAttribute('autocomplete', 'off'); inp.setAttribute('role', 'combobox'); inp.setAttribute('aria-autocomplete', 'list'); inp.setAttribute('aria-expanded', 'false');
+      var form = inp.closest('form') || document, other = form.querySelector('[data-ff-otherfor="' + (inp.name || 'University') + '"]'), items = [], cur = -1;
+      function close() { list.hidden = true; inp.setAttribute('aria-expanded', 'false'); cur = -1; }
+      function pick(i) { var it = items[i]; if (!it) return; if (it.other) { inp.value = 'Not listed'; if (other) { other.hidden = false; q('input', other).forEach(function (f) { f.disabled = false; f.required = true; setTimeout(function () { try { f.focus(); } catch (e) {} }, 30); }); } } else { inp.value = it.n; if (other) { other.hidden = true; q('input', other).forEach(function (f) { f.disabled = true; f.required = false; }); } } close(); }
+      function render() {
+        list.innerHTML = ''; items.forEach(function (it, i) { var li = document.createElement('li'); li.setAttribute('role', 'option'); li.setAttribute('aria-selected', i === cur ? 'true' : 'false'); if (it.other) { li.className = 'ff-combo-other'; li.textContent = 'Not listed — I’ll type it in'; } else { li.textContent = it.n; var sm = document.createElement('small'); sm.textContent = it.c; li.appendChild(sm); } li.addEventListener('mousedown', function (e) { e.preventDefault(); pick(i); }); list.appendChild(li); });
+        list.hidden = !items.length; inp.setAttribute('aria-expanded', items.length ? 'true' : 'false');
+      }
+      function search() {
+        var v = inp.value.trim().toLowerCase(); if (v.length < 2) { close(); return; }
+        load().then(function (d) { var out = [], i; for (i = 0; i < d.length && out.length < 8; i++) { if (d[i][0].toLowerCase().indexOf(v) > -1) out.push({ n: d[i][0], c: d[i][1] }); } out.push({ other: true }); items = out; cur = -1; render(); });
+      }
+      inp.addEventListener('input', search); inp.addEventListener('focus', search);
+      inp.addEventListener('keydown', function (e) { if (list.hidden) return; if (e.key === 'ArrowDown') { e.preventDefault(); cur = Math.min(items.length - 1, cur + 1); render(); } else if (e.key === 'ArrowUp') { e.preventDefault(); cur = Math.max(0, cur - 1); render(); } else if (e.key === 'Enter') { if (cur > -1) { e.preventDefault(); pick(cur); } } else if (e.key === 'Escape') { close(); } });
+      inp.addEventListener('blur', function () { setTimeout(close, 120); });
+      if (other) { other.hidden = true; q('input', other).forEach(function (f) { f.disabled = true; f.required = false; }); }
+    });
   })();
 
   /* ---------- 2. the section rail ---------- */
