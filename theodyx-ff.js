@@ -1,4 +1,4 @@
-/*! theodyx-ff.js v1.3.0 (2026-09-16) — the Freshfields-pattern runtime for theodyx.com.
+/*! theodyx-ff.js v1.3.1 (2026-09-16) — the Freshfields-pattern runtime for theodyx.com.
  * Owner directive (2026-09-15): "make theodyx.com exactly like freshfields.com — the UI/UX, the colours, the sections — so I can edit it and
  * make it mine." Everything visual lives in native Designer classes (ff-*). This file only adds what CSS classes cannot:
  *  1. the How-we-help ACCORDION: a CMS rich-text field ([data-ff="acc"]) is split at every H3 — the H3 becomes the row title, everything
@@ -14,7 +14,7 @@
 (function () {
   'use strict';
   if (window.__thxFF) return;
-  var API = window.__thxFF = { v: '1.3.0' };
+  var API = window.__thxFF = { v: '1.3.1' };
   var SANS = '"Google Sans Flex","Google Sans",system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif';
   function q(s, r) { return [].slice.call((r || document).querySelectorAll(s)); }
   var RED = function () { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } };
@@ -128,7 +128,7 @@
     ink.textContent = [
       ':where(.ff-page) :where(h1,h2,h3,h4,h5,h6,p,li,label,a,div,span,blockquote,strong,em,b){color:#0d0d0d}',
       /* 1.3.0: form controls are always readable - the owner's white-ink experiments on select copies made the prompts vanish */
-      '.ff-page select,.ff-page input,.ff-page textarea,.ff-page select option{color:#0d0d0d}select option{background:#fff;color:#0d0d0d}',
+      '.ff-page select,.ff-page input,.ff-page textarea,.ff-page select option{color:#0d0d0d}select option{background:#fff;color:#0d0d0d}.ff-page .ff-select{border-bottom-color:rgba(13,13,13,.7)}',
       /* 1.3.0: the modern form (owner: "make it look WAY more UI/UX and modern") - add class ff-form-modern to a <form>; fields are .ff-field wrappers */
       '.ff-form-modern{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px 24px;max-width:920px}.ff-form-modern .ff-field{margin:0;min-width:0}.ff-form-modern .ff-span,.ff-form-modern .ff-consent,.ff-form-modern .ff-form-note{grid-column:1/-1}',
       '.ff-form-modern [data-ff-showfor]:not([hidden]),.ff-form-modern [data-ff-otherfor]:not([hidden]){display:contents}',
@@ -281,7 +281,9 @@
       var ph = (f.getAttribute('placeholder') || '').trim(); if (ph && !/^example text$/i.test(ph)) return;
       if (/^(checkbox|radio|submit|hidden|button|file)$/i.test(f.type || '')) return;
       var lab = (f.id && document.querySelector('label[for="' + f.id + '"]')) || (f.closest('.ff-field') || f.parentElement || {}).querySelector && (f.closest('.ff-field') || f.parentElement).querySelector('label');
-      var t = lab ? lab.textContent : (f.getAttribute('data-name') || f.name || '');
+      var MAP = { email: 'you@email.com', name: 'Full name', 'first-name': 'First name', 'last-name': 'Last name', company: 'Company, project or institution', 'based-in': 'City, country', website: 'https://', linkedin: 'https://linkedin.com/in/\u2026', instagram: '@handle', tiktok: '@handle', youtube: 'Channel or URL', x: '@handle', 'x-twitter': '@handle', threads: '@handle', 'managed-by': 'Agency or manager', about: 'A few lines about you and your work', 'role-other': 'e.g. Producer, Journalist, Coach', university: 'Start typing your university', 'university-other': 'Your university', message: 'How can we help?', phone: '+1 (555) 000-0000' };
+      var key = (f.getAttribute('data-name') || f.name || '').toLowerCase().trim();
+      var t = MAP[key] || (f.type === 'email' ? 'you@email.com' : f.type === 'url' ? 'https://' : (lab ? lab.textContent : key));
       t = t.replace(/\(required\)/ig, '').replace(/\*/g, '').replace(/\s+/g, ' ').trim();
       if (t) f.setAttribute('placeholder', t);
     });
