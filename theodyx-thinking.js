@@ -1,4 +1,4 @@
-/*! theodyx-thinking.js v1.8.0 (2026-09-14) — the Our Thinking system: editorial carousels (.thk-track), the hub's search +
+/*! theodyx-thinking.js v1.9.0 (2026-09-18) — the Our Thinking system: editorial carousels (.thk-track), the hub's search +
  * facet filter (.thk-hub), and the card polish shared by the homepage band, /our-thinking and the alumni page.
  * Carousel: prev/next arrows glide one card at a time (snap-safe: scroll-snap is lifted during the rAF tween, exactly as the
  * Ethos carousel fix of 2026-07-28 - Chrome swallows smooth scrollTo on a mandatory-snap container), a 6.5 s autoplay that
@@ -9,7 +9,7 @@
 (function () {
   'use strict';
   if (window.__thxThinking) return;
-  var API = window.__thxThinking = { v: '1.8.0' };
+  var API = window.__thxThinking = { v: '1.9.0' };
   /* 1.3.0 (owner: "when you click search our thinking it makes that large black border - remove it"): the site-wide two-tone focus ring (head, Phase 9) is lifted off the hub search input; the pill itself carries a soft focus-within state (native style) */
   (function () { var st = document.createElement('style'); st.id = 'thx-thk-css'; st.textContent = 'html body input.thk-search-in:focus-visible,html body input.thk-search-in:focus{box-shadow:none!important;outline:none!important;border:0!important}'; document.head.appendChild(st); })();
   function q(s, r) { return [].slice.call((r || document).querySelectorAll(s)); }
@@ -118,6 +118,16 @@
         '.thx-hue .wwd-link{text-decoration-color:var(--thx-acc);text-decoration-thickness:2px;transition:color 200ms}',
         '.thx-hue .wwd-card:hover .wwd-link,.thx-hue .wwd-card:focus-visible .wwd-link{color:var(--thx-acc)}',
         '.thx-hue .wwd-sec .wwd-kicker{color:var(--thx-acc)}',
+        /* 1.9.0 (2026-09-18, owner: hero line "Express what only you can." writes itself in, in the visit's accent) */
+        '.thx-hero-ink{color:var(--thx-acc);position:relative}',
+        '.thx-hero-ink .thx-w{display:inline-block;white-space:nowrap}',
+        '.thx-hero-ink .thx-c{display:inline-block;opacity:0;transform:translateY(.32em) rotate(3deg);filter:blur(7px);transition:opacity .5s cubic-bezier(.22,1,.36,1),transform .75s cubic-bezier(.22,1,.36,1),filter .5s ease;transition-delay:calc(var(--i) * 42ms + 140ms);will-change:transform,opacity}',
+        '.thx-hero-on .thx-c{opacity:1;transform:none;filter:blur(0)}',
+        '.thx-hero-ink .thx-caret{display:inline-block;width:.055em;height:.82em;margin-left:.06em;vertical-align:-.06em;background:var(--thx-acc);border-radius:2px;animation:thx-caret 0.9s steps(1) infinite}',
+        '.thx-hero-ink .thx-rule{position:absolute;left:0;bottom:-.14em;height:.045em;width:100%;background:linear-gradient(90deg,var(--thx-acc),var(--thx-acc-deep));border-radius:2px;transform:scaleX(0);transform-origin:0 50%;transition:transform 1.1s cubic-bezier(.22,1,.36,1)}',
+        '.thx-hero-done .thx-rule{transform:scaleX(1)}',
+        '@keyframes thx-caret{0%,100%{opacity:1}50%{opacity:0}}',
+        '@media (prefers-reduced-motion:reduce){.thx-hero-ink .thx-c{opacity:1;transform:none;filter:none;transition:none}.thx-hero-ink .thx-caret{display:none}.thx-hero-ink .thx-rule{transition:none}}',
         '.thx-hue .primary-button:hover,.thx-hue .cap-cta-primary:hover,.thx-hue .thk-more-btn:hover{background:var(--thx-acc-deep)!important;border-color:var(--thx-acc-deep)!important;color:#fff!important}',
         '.thx-hue .thk-chip-on{background:var(--thx-acc);border-color:var(--thx-acc);color:#fff}',
         /* 1.7.1 (owner: "fix the contact thing, make it blend in"): the form loses its white card and sits on the cream like the column beside it; labels no longer wrap; the submit is the house black pill */
@@ -146,6 +156,28 @@
     }
     /* the closing CTA on Home (.thxo-cta-band: 'Get in touch' = .bottom-link, 'Our Scouting' = .bottom-link-2) is reached by class above */
     band.classList.add('thk-tinted');
+  })();
+
+  /* ---------- 1.9.0: the hero line writes itself in, in the visit's accent (Home only: .hero-h1) ---------- */
+  (function heroInk() {
+    var h = document.querySelector('.hero-h1'); if (!h || h.classList.contains('thx-hero-ink')) return;
+    var txt = (h.textContent || '').replace(/\s+/g, ' ').trim(); if (!txt) return;
+    var still = false; try { still = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
+    h.setAttribute('aria-label', txt);
+    var frag = document.createDocumentFragment(), i = 0, words = txt.split(' ');
+    words.forEach(function (w, wi) {
+      var ws = document.createElement('span'); ws.className = 'thx-w'; ws.setAttribute('aria-hidden', 'true');
+      Array.prototype.forEach.call(w, function (ch) { var c = document.createElement('span'); c.className = 'thx-c'; c.textContent = ch; c.style.setProperty('--i', String(i++)); ws.appendChild(c); });
+      frag.appendChild(ws);
+      if (wi < words.length - 1) { frag.appendChild(document.createTextNode(' ')); i++; }
+    });
+    var caret = document.createElement('span'); caret.className = 'thx-caret'; caret.setAttribute('aria-hidden', 'true');
+    var rule = document.createElement('span'); rule.className = 'thx-rule'; rule.setAttribute('aria-hidden', 'true');
+    h.textContent = ''; h.appendChild(frag); if (!still) h.appendChild(caret); h.appendChild(rule);
+    h.classList.add('thx-hero-ink');
+    var total = still ? 0 : (i * 42 + 140 + 750);
+    requestAnimationFrame(function () { requestAnimationFrame(function () { h.classList.add('thx-hero-on'); }); });
+    setTimeout(function () { h.classList.add('thx-hero-done'); if (caret.parentNode) setTimeout(function () { caret.parentNode && caret.parentNode.removeChild(caret); }, 900); }, total);
   })();
 
   /* ---------- hub: search + chips + load more ---------- */
