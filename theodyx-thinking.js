@@ -1,4 +1,4 @@
-/*! theodyx-thinking.js v1.9.0 (2026-09-18) — the Our Thinking system: editorial carousels (.thk-track), the hub's search +
+/*! theodyx-thinking.js v1.9.1 (2026-09-18) — the Our Thinking system: editorial carousels (.thk-track), the hub's search +
  * facet filter (.thk-hub), and the card polish shared by the homepage band, /our-thinking and the alumni page.
  * Carousel: prev/next arrows glide one card at a time (snap-safe: scroll-snap is lifted during the rAF tween, exactly as the
  * Ethos carousel fix of 2026-07-28 - Chrome swallows smooth scrollTo on a mandatory-snap container), a 6.5 s autoplay that
@@ -9,7 +9,7 @@
 (function () {
   'use strict';
   if (window.__thxThinking) return;
-  var API = window.__thxThinking = { v: '1.9.0' };
+  var API = window.__thxThinking = { v: '1.9.1' };
   /* 1.3.0 (owner: "when you click search our thinking it makes that large black border - remove it"): the site-wide two-tone focus ring (head, Phase 9) is lifted off the hub search input; the pill itself carries a soft focus-within state (native style) */
   (function () { var st = document.createElement('style'); st.id = 'thx-thk-css'; st.textContent = 'html body input.thk-search-in:focus-visible,html body input.thk-search-in:focus{box-shadow:none!important;outline:none!important;border:0!important}'; document.head.appendChild(st); })();
   function q(s, r) { return [].slice.call((r || document).querySelectorAll(s)); }
@@ -127,7 +127,9 @@
         '.thx-hero-ink .thx-rule{position:absolute;left:0;bottom:-.14em;height:.045em;width:100%;background:linear-gradient(90deg,var(--thx-acc),var(--thx-acc-deep));border-radius:2px;transform:scaleX(0);transform-origin:0 50%;transition:transform 1.1s cubic-bezier(.22,1,.36,1)}',
         '.thx-hero-done .thx-rule{transform:scaleX(1)}',
         '@keyframes thx-caret{0%,100%{opacity:1}50%{opacity:0}}',
-        '@media (prefers-reduced-motion:reduce){.thx-hero-ink .thx-c{opacity:1;transform:none;filter:none;transition:none}.thx-hero-ink .thx-caret{display:none}.thx-hero-ink .thx-rule{transition:none}}',
+        '.thx-hero-shine .thx-c{animation:thx-shine 1.1s cubic-bezier(.22,1,.36,1) 1;animation-delay:calc(var(--i) * 30ms)}',
+        '@keyframes thx-shine{0%,100%{color:var(--thx-acc);transform:none}35%{color:hsl(var(--thx-h) var(--thx-s) calc(var(--thx-l) + 26%));transform:translateY(-.06em)}}',
+        '@media (prefers-reduced-motion:reduce){.thx-hero-ink .thx-c{opacity:1;transform:none;filter:none;transition:none;animation:none}.thx-hero-ink .thx-caret{display:none}.thx-hero-ink .thx-rule{transition:none}}',
         '.thx-hue .primary-button:hover,.thx-hue .cap-cta-primary:hover,.thx-hue .thk-more-btn:hover{background:var(--thx-acc-deep)!important;border-color:var(--thx-acc-deep)!important;color:#fff!important}',
         '.thx-hue .thk-chip-on{background:var(--thx-acc);border-color:var(--thx-acc);color:#fff}',
         /* 1.7.1 (owner: "fix the contact thing, make it blend in"): the form loses its white card and sits on the cream like the column beside it; labels no longer wrap; the submit is the house black pill */
@@ -158,7 +160,10 @@
     band.classList.add('thk-tinted');
   })();
 
-  /* ---------- 1.9.0: the hero line writes itself in, in the visit's accent (Home only: .hero-h1) ---------- */
+  /* ---------- 1.9.x: the hero line writes itself in, in the visit's accent (Home only: .hero-h1) ----------
+     1.9.1 (2026-09-18, owner: "make sure it does it on scroll as well"): on a tall screen the video pushes the line below the fold, so the
+     write-on now starts when the line actually enters the viewport (IntersectionObserver, 35% visible), replays if you scroll away and
+     come back (after a 6 s cooldown), and finishes with a one-time shimmer that runs through the letters after the underline draws. */
   (function heroInk() {
     var h = document.querySelector('.hero-h1'); if (!h || h.classList.contains('thx-hero-ink')) return;
     var txt = (h.textContent || '').replace(/\s+/g, ' ').trim(); if (!txt) return;
@@ -171,13 +176,33 @@
       frag.appendChild(ws);
       if (wi < words.length - 1) { frag.appendChild(document.createTextNode(' ')); i++; }
     });
-    var caret = document.createElement('span'); caret.className = 'thx-caret'; caret.setAttribute('aria-hidden', 'true');
     var rule = document.createElement('span'); rule.className = 'thx-rule'; rule.setAttribute('aria-hidden', 'true');
-    h.textContent = ''; h.appendChild(frag); if (!still) h.appendChild(caret); h.appendChild(rule);
+    h.textContent = ''; h.appendChild(frag); h.appendChild(rule);
     h.classList.add('thx-hero-ink');
-    var total = still ? 0 : (i * 42 + 140 + 750);
-    requestAnimationFrame(function () { requestAnimationFrame(function () { h.classList.add('thx-hero-on'); }); });
-    setTimeout(function () { h.classList.add('thx-hero-done'); if (caret.parentNode) setTimeout(function () { caret.parentNode && caret.parentNode.removeChild(caret); }, 900); }, total);
+    var total = still ? 0 : (i * 42 + 140 + 750), timers = [], playing = false, lastPlay = 0, caret = null;
+    function clear() { timers.forEach(clearTimeout); timers = []; }
+    function play() {
+      if (playing) return; playing = true; lastPlay = Date.now(); clear();
+      h.classList.remove('thx-hero-on', 'thx-hero-done', 'thx-hero-shine');
+      if (caret && caret.parentNode) caret.parentNode.removeChild(caret);
+      if (!still) { caret = document.createElement('span'); caret.className = 'thx-caret'; caret.setAttribute('aria-hidden', 'true'); h.insertBefore(caret, rule); }
+      void h.offsetWidth; /* commit the reset before the transitions arm */
+      requestAnimationFrame(function () { requestAnimationFrame(function () { h.classList.add('thx-hero-on'); }); });
+      timers.push(setTimeout(function () { h.classList.add('thx-hero-done'); }, total));
+      timers.push(setTimeout(function () { if (caret && caret.parentNode) caret.parentNode.removeChild(caret); h.classList.add('thx-hero-shine'); }, total + 900));
+      timers.push(setTimeout(function () { playing = false; }, total + 900 + i * 30 + 600));
+    }
+    if (still || !('IntersectionObserver' in window)) { play(); return; }
+    var seen = false;
+    var io = new IntersectionObserver(function (es) {
+      es.forEach(function (e) {
+        if (e.isIntersecting && e.intersectionRatio >= 0.35) { if (!seen || Date.now() - lastPlay > 6000) play(); seen = true; }
+        else if (!e.isIntersecting && seen && !playing) { /* fully out of view: arm a replay by hiding the letters again */
+          if (Date.now() - lastPlay > 6000) { h.classList.remove('thx-hero-on', 'thx-hero-done', 'thx-hero-shine'); }
+        }
+      });
+    }, { threshold: [0, 0.35] });
+    io.observe(h);
   })();
 
   /* ---------- hub: search + chips + load more ---------- */
