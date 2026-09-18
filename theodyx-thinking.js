@@ -1,4 +1,4 @@
-/*! theodyx-thinking.js v1.9.1 (2026-09-18) — the Our Thinking system: editorial carousels (.thk-track), the hub's search +
+/*! theodyx-thinking.js v1.9.2 (2026-09-18) — the Our Thinking system: editorial carousels (.thk-track), the hub's search +
  * facet filter (.thk-hub), and the card polish shared by the homepage band, /our-thinking and the alumni page.
  * Carousel: prev/next arrows glide one card at a time (snap-safe: scroll-snap is lifted during the rAF tween, exactly as the
  * Ethos carousel fix of 2026-07-28 - Chrome swallows smooth scrollTo on a mandatory-snap container), a 6.5 s autoplay that
@@ -9,7 +9,7 @@
 (function () {
   'use strict';
   if (window.__thxThinking) return;
-  var API = window.__thxThinking = { v: '1.9.1' };
+  var API = window.__thxThinking = { v: '1.9.2' };
   /* 1.3.0 (owner: "when you click search our thinking it makes that large black border - remove it"): the site-wide two-tone focus ring (head, Phase 9) is lifted off the hub search input; the pill itself carries a soft focus-within state (native style) */
   (function () { var st = document.createElement('style'); st.id = 'thx-thk-css'; st.textContent = 'html body input.thk-search-in:focus-visible,html body input.thk-search-in:focus{box-shadow:none!important;outline:none!important;border:0!important}'; document.head.appendChild(st); })();
   function q(s, r) { return [].slice.call((r || document).querySelectorAll(s)); }
@@ -193,13 +193,13 @@
       timers.push(setTimeout(function () { playing = false; }, total + 900 + i * 30 + 600));
     }
     if (still || !('IntersectionObserver' in window)) { play(); return; }
-    var seen = false;
+    /* enter → write (if the letters are hidden); leave → after the cooldown, hide the letters again so the next entry replays */
+    var armTimer = null;
+    function arm() { clearTimeout(armTimer); armTimer = setTimeout(function () { if (!playing) { clear(); h.classList.remove('thx-hero-on', 'thx-hero-done', 'thx-hero-shine'); if (caret && caret.parentNode) caret.parentNode.removeChild(caret); } }, Math.max(0, 6000 - (Date.now() - lastPlay))); }
     var io = new IntersectionObserver(function (es) {
       es.forEach(function (e) {
-        if (e.isIntersecting && e.intersectionRatio >= 0.35) { if (!seen || Date.now() - lastPlay > 6000) play(); seen = true; }
-        else if (!e.isIntersecting && seen && !playing) { /* fully out of view: arm a replay by hiding the letters again */
-          if (Date.now() - lastPlay > 6000) { h.classList.remove('thx-hero-on', 'thx-hero-done', 'thx-hero-shine'); }
-        }
+        if (e.isIntersecting && e.intersectionRatio >= 0.35) { clearTimeout(armTimer); if (!h.classList.contains('thx-hero-on')) play(); }
+        else if (!e.isIntersecting) arm();
       });
     }, { threshold: [0, 0.35] });
     io.observe(h);
