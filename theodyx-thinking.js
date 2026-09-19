@@ -1,4 +1,4 @@
-/*! theodyx-thinking.js v2.1.3 (2026-09-18) — the Our Thinking system: editorial carousels (.thk-track), the hub's search +
+/*! theodyx-thinking.js v2.1.4 (2026-09-18) — the Our Thinking system: editorial carousels (.thk-track), the hub's search +
  * facet filter (.thk-hub), and the card polish shared by the homepage band, /our-thinking and the alumni page.
  * Carousel: prev/next arrows glide one card at a time (snap-safe: scroll-snap is lifted during the rAF tween, exactly as the
  * Ethos carousel fix of 2026-07-28 - Chrome swallows smooth scrollTo on a mandatory-snap container), a 6.5 s autoplay that
@@ -9,7 +9,7 @@
 (function () {
   'use strict';
   if (window.__thxThinking) return;
-  var API = window.__thxThinking = { v: '2.1.3' };
+  var API = window.__thxThinking = { v: '2.1.4' };
   /* 1.3.0 (owner: "when you click search our thinking it makes that large black border - remove it"): the site-wide two-tone focus ring (head, Phase 9) is lifted off the hub search input; the pill itself carries a soft focus-within state (native style) */
   (function () { var st = document.createElement('style'); st.id = 'thx-thk-css'; st.textContent = 'html body input.thk-search-in:focus-visible,html body input.thk-search-in:focus{box-shadow:none!important;outline:none!important;border:0!important}'; document.head.appendChild(st); })();
   function q(s, r) { return [].slice.call((r || document).querySelectorAll(s)); }
@@ -219,8 +219,10 @@
        so it plays on scroll; on a phone it sits in view under the video on load, so it plays right away instead of waiting. */
     var played = false;
     var io = new IntersectionObserver(function (es) {
-      es.forEach(function (e) { if (!played && e.isIntersecting && e.intersectionRatio >= 0.5) { played = true; io.disconnect(); setTimeout(play, 220); } });
-    }, { threshold: [0, 0.5] });
+      /* 2.1.4: on a phone the header is taller than half the screen, so "half of it in view" never happens - its top being in the
+         upper part of the screen counts too */
+      es.forEach(function (e) { if (!played && e.isIntersecting && (e.intersectionRatio >= 0.5 || e.boundingClientRect.top < innerHeight * 0.55)) { played = true; io.disconnect(); setTimeout(play, 220); } });
+    }, { threshold: [0, 0.2, 0.5] });
     io.observe(group || h);
   })();
 
