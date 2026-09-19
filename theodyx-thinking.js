@@ -1,4 +1,4 @@
-/*! theodyx-thinking.js v2.1.2 (2026-09-18) — the Our Thinking system: editorial carousels (.thk-track), the hub's search +
+/*! theodyx-thinking.js v2.1.3 (2026-09-18) — the Our Thinking system: editorial carousels (.thk-track), the hub's search +
  * facet filter (.thk-hub), and the card polish shared by the homepage band, /our-thinking and the alumni page.
  * Carousel: prev/next arrows glide one card at a time (snap-safe: scroll-snap is lifted during the rAF tween, exactly as the
  * Ethos carousel fix of 2026-07-28 - Chrome swallows smooth scrollTo on a mandatory-snap container), a 6.5 s autoplay that
@@ -9,7 +9,7 @@
 (function () {
   'use strict';
   if (window.__thxThinking) return;
-  var API = window.__thxThinking = { v: '2.1.2' };
+  var API = window.__thxThinking = { v: '2.1.3' };
   /* 1.3.0 (owner: "when you click search our thinking it makes that large black border - remove it"): the site-wide two-tone focus ring (head, Phase 9) is lifted off the hub search input; the pill itself carries a soft focus-within state (native style) */
   (function () { var st = document.createElement('style'); st.id = 'thx-thk-css'; st.textContent = 'html body input.thk-search-in:focus-visible,html body input.thk-search-in:focus{box-shadow:none!important;outline:none!important;border:0!important}'; document.head.appendChild(st); })();
   function q(s, r) { return [].slice.call((r || document).querySelectorAll(s)); }
@@ -252,7 +252,7 @@
   q('.thk-hub').forEach(hub);
   /* ---------- capabilities index (/our-capabilities): kind chips show one group, the search narrows every row by name + deck ---------- */
   function capIndex(root) {
-    var groups = q('[data-cap="group"]', root), rows = q('.thk-row', root), tools = document.querySelector('[data-cap="tools"]') || root;
+    var groups = q('[data-cap="group"]', root), rows = q('.thk-row, .w-dyn-item', root), tools = document.querySelector('[data-cap="tools"]') || root; /* 2.1.3: the Freshfields index lists CMS items */
     var input = tools.querySelector('input'), chips = q('.thk-chip[data-kind]', tools), count = tools.querySelector('.thk-count'), empty = root.querySelector('[data-cap="empty"]');
     var kind = '', needle = '';
     function txt(el) { return (el.textContent || '').replace(/\s+/g, ' ').trim().toLowerCase(); }
@@ -260,13 +260,15 @@
       var shown = 0;
       groups.forEach(function (g) {
         var on = !kind || g.getAttribute('data-kind') === kind, n = 0;
-        q('.thk-row', g).forEach(function (r) { var ok = on && (!needle || txt(r).indexOf(needle) > -1); r.style.display = ok ? '' : 'none'; if (ok) n++; });
-        g.style.display = on && (n || !needle) ? '' : 'none'; shown += n;
+        q('.thk-row, .w-dyn-item', g).forEach(function (r) { var ok = on && (!needle || txt(r).indexOf(needle) > -1); r.style.display = ok ? '' : 'none'; if (ok) n++; });
+        /* the ff-tab tabs (theodyx-ff.js) own group visibility when nothing is being searched */
+        if (needle || kind) g.style.display = on && (n || !needle) ? '' : 'none'; else if (g.getAttribute('data-thx-hid')) g.style.display = '';
+        g.setAttribute('data-thx-hid', (needle || kind) && g.style.display === 'none' ? '1' : ''); shown += n;
       });
       if (count) count.textContent = shown ? shown + (shown === 1 ? ' capability' : ' capabilities') : 'No match yet';
       if (empty) empty.style.display = shown ? 'none' : '';
     }
-    if (input) { var t = 0; input.addEventListener('input', function () { clearTimeout(t); t = setTimeout(function () { needle = input.value.trim().toLowerCase(); apply(); }, 120); }); }
+    if (input) { if (!input.placeholder) input.placeholder = 'Search on a practice or industry'; if (input.form) input.form.addEventListener('submit', function (e) { e.preventDefault(); }); var t = 0; input.addEventListener('input', function () { clearTimeout(t); t = setTimeout(function () { needle = input.value.trim().toLowerCase(); apply(); }, 120); }); }
     chips.forEach(function (ch) { ch.addEventListener('click', function (e) { e.preventDefault(); chips.forEach(function (x) { x.classList.remove('thk-chip-on'); x.setAttribute('aria-pressed', 'false'); }); ch.classList.add('thk-chip-on'); ch.setAttribute('aria-pressed', 'true'); kind = ch.getAttribute('data-kind') || ''; apply(); if (kind) { var g = root.querySelector('[data-cap="group"][data-kind="' + kind + '"]'); if (g) g.scrollIntoView({ behavior: RED() ? 'auto' : 'smooth', block: 'start' }); } }); });
     var h = (location.hash || '').replace('#cap-', '').toLowerCase();
     var pre = { practices: 'Practice', industries: 'Industry', innovation: 'Innovation' }[h];

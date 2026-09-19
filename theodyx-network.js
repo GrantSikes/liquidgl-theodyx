@@ -1,4 +1,4 @@
-/*! theodyx-network.js v1.0.0 (2026-09-18) — the Network application form, made easy.
+/*! theodyx-network.js v1.0.1 (2026-09-18) — the Network application form, made easy.
  * Owner directive: "make it more UI/UX friendly and easy". The form's fields are native Webflow fields (editable in the Designer);
  * this file only arranges and helps them: section headings, a two-column grid for short fields, checkbox rows that read as one
  * line, availability as pill chips, the ORCID iD and bar number formatted as you type, repeatable "Add another link" rows with a
@@ -6,7 +6,7 @@
  * Fields are found by their name attribute, so the Designer can reorder or relabel them freely. No dependencies. */
 (function () {
   'use strict';
-  if (window.__thxNetwork) return; window.__thxNetwork = { v: '1.0.0' };
+  if (window.__thxNetwork) return; window.__thxNetwork = { v: '1.0.1' };
   var form = document.querySelector('form[data-name="Network Application"]'); if (!form) return;
   var SANS = '"Google Sans Flex","Google Sans",system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif';
   var st = document.createElement('style'); st.id = 'thx-net-css';
@@ -71,6 +71,8 @@
   var agr = byName('Agreement'); if (agr) { var h = document.createElement('h3'); h.className = 'nf-h'; h.textContent = 'Agreement'; var row = agr.closest('.nf-check'); row.parentNode.insertBefore(h, row); }
   /* hints under specific fields */
   function hint(n, t) { var el = byName(n); if (!el) return; var p = document.createElement('p'); p.className = 'nf-hint'; p.textContent = t; fieldOf(el).appendChild(p); }
+  /* placeholders the Data API cannot set */
+  [['Institutional-Email','name@university.edu'],['Publications','One per line: a DOI (10.1234/abcd) or a URL'],['First-Name','First name'],['Last-Name','Last name'],['Email','you@email.com']].forEach(function (x) { var el = byName(x[0]); if (el && (!el.placeholder || el.placeholder === 'Example text')) el.placeholder = x[1]; });
   hint('Institutional-Email', 'Your university, firm, or company address. It speeds up verification and is never published.');
   hint('Topics', 'Up to six, separated by commas. Example: First Amendment, media law, platform governance.');
   hint('Bar-Number', 'Exactly as your bar lists it. Example: 2019-123456 or 123456.');
