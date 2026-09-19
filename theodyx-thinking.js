@@ -1,4 +1,4 @@
-/*! theodyx-thinking.js v2.1.1 (2026-09-18) — the Our Thinking system: editorial carousels (.thk-track), the hub's search +
+/*! theodyx-thinking.js v2.1.2 (2026-09-18) — the Our Thinking system: editorial carousels (.thk-track), the hub's search +
  * facet filter (.thk-hub), and the card polish shared by the homepage band, /our-thinking and the alumni page.
  * Carousel: prev/next arrows glide one card at a time (snap-safe: scroll-snap is lifted during the rAF tween, exactly as the
  * Ethos carousel fix of 2026-07-28 - Chrome swallows smooth scrollTo on a mandatory-snap container), a 6.5 s autoplay that
@@ -9,7 +9,7 @@
 (function () {
   'use strict';
   if (window.__thxThinking) return;
-  var API = window.__thxThinking = { v: '2.1.1' };
+  var API = window.__thxThinking = { v: '2.1.2' };
   /* 1.3.0 (owner: "when you click search our thinking it makes that large black border - remove it"): the site-wide two-tone focus ring (head, Phase 9) is lifted off the hub search input; the pill itself carries a soft focus-within state (native style) */
   (function () { var st = document.createElement('style'); st.id = 'thx-thk-css'; st.textContent = 'html body input.thk-search-in:focus-visible,html body input.thk-search-in:focus{box-shadow:none!important;outline:none!important;border:0!important}'; document.head.appendChild(st); })();
   function q(s, r) { return [].slice.call((r || document).querySelectorAll(s)); }
@@ -215,17 +215,11 @@
       timers.push(setTimeout(function () { playing = false; }, lead + total + 900 + i * 30 + 600));
     }
     if (still || !('IntersectionObserver' in window)) { play(); return; }
-    /* 2.1.0 (owner): the header plays ONCE, and only once the visitor has scrolled to it - on load the video hides it, and on phones it
-       sits below the fold. The observer waits for half of the header to be in view; if the page has not been scrolled yet it holds
-       for a moment (a very tall screen can show the header without any scroll) and then plays anyway so nobody is left with a blank header. */
-    var played = false, scrolled = window.scrollY > 24, hold = null;
-    addEventListener('scroll', function () { scrolled = true; }, { passive: true });
-    function once() { if (played) return; played = true; io.disconnect(); clearTimeout(hold); play(); }
+    /* 2.1.2 (owner, phones): the header plays ONCE, the moment half of it is in view. On a desktop the video hides it until you scroll,
+       so it plays on scroll; on a phone it sits in view under the video on load, so it plays right away instead of waiting. */
+    var played = false;
     var io = new IntersectionObserver(function (es) {
-      es.forEach(function (e) {
-        if (e.isIntersecting && e.intersectionRatio >= 0.5) { if (scrolled) once(); else { clearTimeout(hold); hold = setTimeout(once, 6000); } }
-        else clearTimeout(hold);
-      });
+      es.forEach(function (e) { if (!played && e.isIntersecting && e.intersectionRatio >= 0.5) { played = true; io.disconnect(); setTimeout(play, 220); } });
     }, { threshold: [0, 0.5] });
     io.observe(group || h);
   })();
