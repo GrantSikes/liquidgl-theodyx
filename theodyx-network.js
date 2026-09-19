@@ -1,12 +1,16 @@
-/*! theodyx-network.js v1.0.1 (2026-09-18) — the Network application form, made easy.
+/*! theodyx-network.js v1.1.0 (2026-09-19) — the Network application form, made easy.
  * Owner directive: "make it more UI/UX friendly and easy". The form's fields are native Webflow fields (editable in the Designer);
  * this file only arranges and helps them: section headings, a two-column grid for short fields, checkbox rows that read as one
  * line, availability as pill chips, the ORCID iD and bar number formatted as you type, repeatable "Add another link" rows with a
  * type dropdown, black ink everywhere (the site's legacy link colour is white), and a live character count on the statement.
+ * 1.1.0 (owner): SSRN gets its own field; the Affiliation field becomes an institution typeahead backed by the Research Organization
+ * Registry (api.ror.org, the open global registry publishers use - universities, hospitals, labs; an "Enter it myself" fallback stays);
+ * the credential fields follow the primary discipline (bar fields for Law / Legal Academia, ORCID for the research disciplines) and
+ * slide open instead of snapping; validation waits for blur; the submit shows a working state.
  * Fields are found by their name attribute, so the Designer can reorder or relabel them freely. No dependencies. */
 (function () {
   'use strict';
-  if (window.__thxNetwork) return; window.__thxNetwork = { v: '1.0.1' };
+  if (window.__thxNetwork) return; window.__thxNetwork = { v: '1.1.0' };
   var form = document.querySelector('form[data-name="Network Application"]'); if (!form) return;
   var SANS = '"Google Sans Flex","Google Sans",system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif';
   var st = document.createElement('style'); st.id = 'thx-net-css';
@@ -25,10 +29,15 @@
     '.nf .nf-chip input{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none}.nf .nf-chip .w-form-label{margin:0;font-size:15px;color:inherit}.nf .nf-chip.nf-on{background:#0d0d0d;border-color:#0d0d0d;color:#fff}.nf .nf-chip:focus-within{outline:2px solid #0d0d0d;outline-offset:2px}',
     '.nf .nf-link-row{grid-column:1/-1;display:grid;grid-template-columns:minmax(150px,220px) 1fr auto;gap:10px;align-items:center}.nf .nf-link-row .nf-x{width:44px;height:52px;border:1px solid rgba(13,13,13,.22);border-radius:12px;background:#fff;color:#0d0d0d;font-size:20px;line-height:1;cursor:pointer}',
     '.nf .nf-add{grid-column:1/-1;justify-self:start;padding:11px 18px;border:1px solid #0d0d0d;border-radius:999px;background:transparent;color:#0d0d0d;font:15px/1 ' + SANS + ';cursor:pointer}.nf .nf-add:hover{background:#0d0d0d;color:#fff}',
+    '.nf .nf-combo{position:relative}.nf .nf-list{position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:30;max-height:290px;overflow:auto;margin:0;padding:6px;list-style:none;background:#fff;border:1px solid rgba(13,13,13,.18);border-radius:12px;box-shadow:0 14px 40px rgba(13,13,13,.12)}',
+    '.nf .nf-opt{padding:10px 12px;border-radius:8px;cursor:pointer;font-size:15px;line-height:1.35;color:#0d0d0d}.nf .nf-opt small{display:block;font-size:12.5px;color:rgba(13,13,13,.6)}.nf .nf-opt[aria-selected=true],.nf .nf-opt:hover{background:rgba(13,13,13,.06)}.nf .nf-opt b{font-weight:600}',
+    '.nf .nf-opt.nf-manual{color:rgba(13,13,13,.72);font-style:italic}.nf .nf-picked{margin:6px 0 0;font-size:13px;color:rgba(13,13,13,.62)}',
+    '.nf .nf-cond{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;column-gap:20px;row-gap:18px;overflow:hidden;max-height:0;opacity:0;transition:max-height .32s cubic-bezier(.22,1,.36,1),opacity .28s ease,margin .32s;margin:0}.nf .nf-cond.nf-open{max-height:900px;opacity:1}.nf .nf-cond:not(.nf-open){margin-top:-18px}',
+    '.nf .nf-bad{border-color:#b3261e!important}.nf .nf-err{margin:-2px 0 0;font-size:13px;color:#b3261e}',
     '.nf .nf-count{text-align:right;font-size:13px;color:rgba(13,13,13,.62)}.nf .nf-count.nf-low{color:#b3261e}',
     '.nf .nf-submit{grid-column:1/-1;margin-top:8px}.nf a{color:#0d0d0d!important;text-decoration:underline;text-underline-offset:2px}',
     '.ff-page .ff-form-note,.ff-page .ff-form-note *{color:rgba(13,13,13,.72)}',
-    '@media (max-width:640px){.nf{grid-template-columns:1fr}.nf .nf-half{grid-column:1/-1}.nf .nf-link-row{grid-template-columns:1fr auto}.nf .nf-link-row select{grid-column:1/-1}}'
+    '@media (max-width:640px){.nf{grid-template-columns:1fr}.nf .nf-cond{grid-template-columns:1fr}.nf .nf-half{grid-column:1/-1}.nf .nf-link-row{grid-template-columns:1fr auto}.nf .nf-link-row select{grid-column:1/-1}}'
   ].join('\n');
   document.head.appendChild(st);
 
@@ -58,7 +67,7 @@
     if (avLab) { var f = document.createElement('div'); f.className = 'nf-field'; chips.parentNode.insertBefore(f, chips); f.appendChild(avLab); f.appendChild(chips); }
   }
   /* half-width fields */
-  ['First-Name', 'Last-Name', 'Email', 'Institutional-Email', 'Honorific', 'Affiliation', 'Bar-Jurisdiction', 'Bar-Number', 'ORCID', 'LinkedIn', 'Source', 'Discipline', 'Headline'].forEach(function (n) { var el = byName(n); if (el) fieldOf(el).classList.add('nf-half'); });
+  ['First-Name', 'Last-Name', 'Email', 'Institutional-Email', 'Honorific', 'Affiliation', 'Bar-Jurisdiction', 'Bar-Number', 'ORCID', 'LinkedIn', 'SSRN', 'Source', 'Discipline', 'Headline'].forEach(function (n) { var el = byName(n); if (el) fieldOf(el).classList.add('nf-half'); });
   /* section headings, placed before the first field of each group */
   function heading(text, beforeName, hint) { var el = byName(beforeName); if (!el) return; var h = document.createElement('h3'); h.className = 'nf-h'; h.textContent = text; var f = fieldOf(el); f.parentNode.insertBefore(h, f); if (hint) { var p = document.createElement('p'); p.className = 'nf-hint'; p.style.gridColumn = '1/-1'; p.textContent = hint; f.parentNode.insertBefore(p, f); } }
   heading('About you', 'First-Name');
@@ -77,6 +86,8 @@
   hint('Topics', 'Up to six, separated by commas. Example: First Amendment, media law, platform governance.');
   hint('Bar-Number', 'Exactly as your bar lists it. Example: 2019-123456 or 123456.');
   hint('ORCID', 'Sixteen digits, formatted 0000-0000-0000-0000. Find yours at orcid.org.');
+  hint('SSRN', 'Your author page. Example: https://papers.ssrn.com/sol3/cf_dev/AbsByAuth.cfm?per_id=123456');
+  var ssrn = byName('SSRN'); if (ssrn) { ssrn.setAttribute('placeholder', 'https://papers.ssrn.com/…'); ssrn.setAttribute('inputmode', 'url'); ssrn.addEventListener('blur', function () { var v = ssrn.value.trim(); if (v && !/^https?:\/\//i.test(v)) ssrn.value = 'https://' + v.replace(/^\/+/, ''); }); }
   /* ORCID: hyphens as you type */
   var orc = byName('ORCID');
   if (orc) { orc.setAttribute('placeholder', '0000-0000-0000-0000'); orc.setAttribute('maxlength', '19'); orc.setAttribute('inputmode', 'numeric'); orc.setAttribute('autocomplete', 'off');
@@ -106,6 +117,75 @@
     rowsWrap.appendChild(add);
     u1.required = true;
   }
+  /* ---------- institution typeahead (Affiliation) via the Research Organization Registry ---------- */
+  var aff = byName('Affiliation');
+  if (aff) (function () {
+    var f = fieldOf(aff), wrap = document.createElement('div'); wrap.className = 'nf-combo'; f.insertBefore(wrap, aff); wrap.appendChild(aff);
+    var list = document.createElement('ul'); list.className = 'nf-list'; list.id = 'nf-aff-list'; list.setAttribute('role', 'listbox'); list.hidden = true; wrap.appendChild(list);
+    var rid = document.createElement('input'); rid.type = 'hidden'; rid.name = 'Affiliation-ROR'; rid.id = rid.name; wrap.appendChild(rid);
+    var picked = document.createElement('p'); picked.className = 'nf-picked'; picked.hidden = true; f.appendChild(picked);
+    aff.setAttribute('role', 'combobox'); aff.setAttribute('aria-autocomplete', 'list'); aff.setAttribute('aria-expanded', 'false'); aff.setAttribute('aria-controls', list.id); aff.setAttribute('autocomplete', 'off');
+    aff.placeholder = 'Start typing your university, firm, hospital, or company';
+    var t = 0, items = [], active = -1, manual = false, lastQ = '', ctrl = null;
+    function esc(x) { return String(x).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+    function mark(name, q) { var toks = q.trim().split(/\s+/).filter(Boolean); var out = esc(name); toks.forEach(function (tk) { out = out.replace(new RegExp('(' + tk.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'i'), '<b>$1</b>'); }); return out; }
+    function close() { list.hidden = true; aff.setAttribute('aria-expanded', 'false'); active = -1; aff.removeAttribute('aria-activedescendant'); }
+    function render(q) {
+      list.innerHTML = ''; active = -1;
+      items.forEach(function (it, i) { var li = document.createElement('li'); li.className = 'nf-opt'; li.id = 'nf-aff-' + i; li.setAttribute('role', 'option'); li.setAttribute('aria-selected', 'false'); li.innerHTML = mark(it.name, q) + '<small>' + esc([it.city, it.country].filter(Boolean).join(', ')) + '</small>'; li.addEventListener('mousedown', function (e) { e.preventDefault(); choose(i); }); list.appendChild(li); });
+      var m = document.createElement('li'); m.className = 'nf-opt nf-manual'; m.id = 'nf-aff-manual'; m.setAttribute('role', 'option'); m.setAttribute('aria-selected', 'false'); m.textContent = items.length ? 'Not listed? Keep what I typed' : 'No match. Keep what I typed'; m.addEventListener('mousedown', function (e) { e.preventDefault(); choose(-1); }); list.appendChild(m);
+      list.hidden = false; aff.setAttribute('aria-expanded', 'true');
+    }
+    function choose(i) { if (i >= 0) { var it = items[i]; aff.value = it.name; rid.value = it.id; picked.textContent = 'Matched to ' + it.name + (it.country ? ' (' + it.country + ')' : '') + ' in the Research Organization Registry.'; picked.hidden = false; } else { rid.value = ''; picked.hidden = true; manual = true; } close(); }
+    function move(d) { var opts = list.querySelectorAll('.nf-opt'); if (!opts.length) return; active = (active + d + opts.length) % opts.length; opts.forEach(function (o, i) { o.setAttribute('aria-selected', i === active ? 'true' : 'false'); }); aff.setAttribute('aria-activedescendant', opts[active].id); opts[active].scrollIntoView({ block: 'nearest' }); }
+    function search(q) {
+      if (ctrl) ctrl.abort(); ctrl = ('AbortController' in window) ? new AbortController() : null;
+      /* two lookups at once: the registry's relevance search plus a prefix search, so "cumber" already finds Cumberland */
+      var toksRaw = q.split(/\s+/).filter(Boolean).map(function (x) { return x.replace(/[^\w\u00C0-\u024F'-]/g, ''); }).filter(Boolean);
+      var adv = 'names.value:(' + toksRaw.map(function (x) { return x + '*'; }).join(' AND ') + ')';
+      var opt = ctrl ? { signal: ctrl.signal } : {};
+      Promise.all([
+        fetch('https://api.ror.org/v2/organizations?query=' + encodeURIComponent(q), opt).then(function (r) { return r.json(); }).catch(function () { return {}; }),
+        fetch('https://api.ror.org/v2/organizations?query.advanced=' + encodeURIComponent(adv), opt).then(function (r) { return r.json(); }).catch(function () { return {}; })
+      ]).then(function (ds) {
+        if (q !== lastQ) return;
+        var toks = q.toLowerCase().split(/\s+/).filter(Boolean), seen = {}, all = [];
+        ds.forEach(function (d) { (d.items || []).forEach(function (o) { if (!seen[o.id]) { seen[o.id] = 1; all.push(o); } }); });
+        items = all.map(function (o) {
+          var n = (o.names || []).filter(function (x) { return (x.types || []).indexOf('ror_display') > -1; })[0] || (o.names || [])[0] || {};
+          var loc = (o.locations || [])[0] || {}, g = loc.geonames_details || {};
+          var name = n.value || '', low = name.toLowerCase(), score = 0;
+          toks.forEach(function (tk) { if (low.indexOf(tk) > -1) score += 2; if (low.indexOf(tk) === 0) score += 2; });
+          if ((o.types || []).indexOf('education') > -1) score += 1;
+          return { id: o.id, name: name, city: g.name, country: g.country_name, score: score };
+        }).filter(function (x) { return x.name; }).sort(function (a, b) { return b.score - a.score; }).slice(0, 8);
+        render(q);
+      });
+    }
+    aff.addEventListener('input', function () { rid.value = ''; picked.hidden = true; manual = false; var q = aff.value.trim(); lastQ = q; clearTimeout(t); if (q.length < 3) { close(); return; } t = setTimeout(function () { search(q); }, 260); });
+    aff.addEventListener('keydown', function (e) { if (list.hidden) return; if (e.key === 'ArrowDown') { e.preventDefault(); move(1); } else if (e.key === 'ArrowUp') { e.preventDefault(); move(-1); } else if (e.key === 'Enter') { if (active >= 0) { e.preventDefault(); var id = list.querySelectorAll('.nf-opt')[active].id; choose(id === 'nf-aff-manual' ? -1 : active); } } else if (e.key === 'Escape') { close(); } });
+    aff.addEventListener('blur', function () { setTimeout(close, 120); });
+  })();
+  /* ---------- credentials follow the discipline ---------- */
+  var disc = byName('Discipline');
+  if (disc) (function () {
+    var LAW = ['Law', 'Legal Academia'], RES = ['Legal Academia', 'Medicine', 'Life Sciences', 'Physical Sciences', 'Engineering', 'Philosophy & Humanities', 'Education', 'Technology', 'Business & Finance', 'Policy & Government'];
+    function group(names) { var els = names.map(byName).filter(Boolean); if (!els.length) return null; var g = document.createElement('div'); g.className = 'nf-cond'; var first = fieldOf(els[0]); first.parentNode.insertBefore(g, first); els.forEach(function (el) { var f = fieldOf(el); f.classList.add('nf-half'); g.appendChild(f); }); return g; }
+    var gLaw = group(['Bar-Jurisdiction', 'Bar-Number']), gRes = group(['ORCID']);
+    var credHint = q('.nf-hint', form).filter(function (p) { return /Only what applies to you/.test(p.textContent); })[0];
+    function apply() {
+      var v = disc.value; var none = !v;
+      if (gLaw) gLaw.classList.toggle('nf-open', none || LAW.indexOf(v) > -1);
+      if (gRes) gRes.classList.toggle('nf-open', none || RES.indexOf(v) > -1);
+      if (credHint) credHint.textContent = none ? 'Choose your primary discipline above and the right credential fields appear here.' : (LAW.indexOf(v) > -1 ? 'Attorneys: your bar jurisdiction and number' + (RES.indexOf(v) > -1 ? ', and your ORCID iD if you publish.' : '.') : (RES.indexOf(v) > -1 ? 'Your ORCID iD, if you have one.' : 'No credential fields are needed for this discipline. Your links do the work.'));
+    }
+    disc.addEventListener('change', apply); apply();
+  })();
+  /* ---------- gentle validation: only on blur, in plain words ---------- */
+  function err(el, msg) { var f = fieldOf(el), e = f.querySelector('.nf-err'); if (!msg) { if (e) e.remove(); el.classList.remove('nf-bad'); return; } if (!e) { e = document.createElement('p'); e.className = 'nf-err'; f.appendChild(e); } e.textContent = msg; el.classList.add('nf-bad'); }
+  q('input[type=url]', form).forEach(function (u) { u.addEventListener('blur', function () { var v = u.value.trim(); err(u, v && !/^https?:\/\/\S+\.\S+/.test(v) ? 'Please provide a complete URL starting with https://' : ''); }); u.addEventListener('input', function () { err(u, ''); }); });
+  q('input[type=email]', form).forEach(function (u) { u.addEventListener('blur', function () { var v = u.value.trim(); err(u, v && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) ? 'That email address looks incomplete.' : ''); }); u.addEventListener('input', function () { err(u, ''); }); });
+  form.addEventListener('submit', function () { var b = form.querySelector('input[type=submit]'); if (b) { b.disabled = true; b.value = b.getAttribute('data-wait') || 'Sending…'; } });
   /* statement: live count */
   var stm = byName('Statement');
   if (stm) { var c = document.createElement('div'); c.className = 'nf-count'; fieldOf(stm).appendChild(c); var min = +stm.getAttribute('minlength') || 200, max = +stm.getAttribute('maxlength') || 1200;

@@ -1,4 +1,7 @@
-/*! theodyx-keep.js v2.0.0 (2026-09-18) — the Clients page opens from a typed line.
+/*! theodyx-keep.js v3.0.0 (2026-09-19) — the Clients page opens from a typed line, then the brand mark draws itself.
+ * 3.0.0 (owner): "keep creating" is no longer typed text - it is the monoline brand mark (Brand_Identity/Logos_and_Marks/theodyx-keep-creating-w12-t140.draw.svg),
+ * split into "keep" and "creating" so the two halves can drift to the corners. Every stroke draws in with the exact per-path timing of the
+ * brand file (stroke-dashoffset, 6.0 s in total), in the site's ink. The words stay real vector, so they are crisp at any size.
  * Owner directive (round 2): the line types itself out - "to the creatives", then "creatives" becomes "misfits", then "dreamers" -
  * and then it says "keep creating". No cursor, all lowercase, no lines. On the first scroll "keep" glides to the top-left and
  * "creating" to the bottom-right, very smoothly, while the page blooms up between them. It plays once per visit (sessionStorage).
@@ -7,12 +10,14 @@
 (function () {
   'use strict';
   if (window.__thxKeep) return;
-  window.__thxKeep = { v: '2.0.0' };
+  window.__thxKeep = { v: '3.0.0' };
   var RED = false; try { RED = matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
   if (RED) return;
   try { if (sessionStorage.getItem('thx-keep') === '1') return; sessionStorage.setItem('thx-keep', '1'); } catch (e) {}
   var SANS = '"Google Sans Flex","Google Sans",system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif';
-  var LEAD = 'to the ', ROLL = ['creatives', 'misfits', 'dreamers'], W1 = 'keep', W2 = 'creating';
+  var LEAD = 'to the ', ROLL = ['creatives', 'misfits', 'dreamers'];
+  var MARK_KEEP = "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-24 -174 470 258\" aria-hidden=\"true\"><defs><clipPath id=\"thc0\"><rect x=\"0\" y=\"-100\" width=\"78\" height=\"100\"/></clipPath></defs><g fill=\"none\" stroke=\"currentColor\" stroke-width=\"12\" stroke-linecap=\"butt\" stroke-linejoin=\"miter\" stroke-miterlimit=\"12\"><path d=\"M6 -150 L6 0\" data-k=\"draw\" data-d=\"0.24\" data-t=\"0\" data-len=\"150\"/><g clip-path=\"url(#thc0)\"><path d=\"M6 -44 L86.91 -115.95\" data-k=\"draw\" data-d=\"0.17\" data-t=\"0.24\" data-len=\"108.27\"/></g><path d=\"M28.67 -64.16 L58.8 -18.3 A30.6 30.6 0 0 0 84.37 -4.5 L139.58 -4.5\" data-k=\"draw\" data-d=\"0.22\" data-t=\"0.41\" data-len=\"140.36\"/><path d=\"M94.08 -50 L179.08 -50\" data-k=\"draw\" data-d=\"0.13\" data-t=\"0.63\" data-len=\"85\"/><path d=\"M191.08 -50 A51.5 51.5 0 0 1 190.73 -44 L178.62 -44 A39.5 39.5 0 0 0 179.08 -50 Z\" fill=\"currentColor\" stroke=\"none\" data-k=\"fade\" data-d=\".01\" data-t=\"0.76\"/><path d=\"M185.08 -50 A45.5 45.5 0 1 0 139.58 -4.5 L254.34 -4.5 A45.5 45.5 0 0 0 283.59 -15.14\" data-k=\"draw\" data-d=\"0.57\" data-t=\"0.77\" data-len=\"360.74\"/><path d=\"M208.84 -50 L293.84 -50\" data-k=\"draw\" data-d=\"0.13\" data-t=\"1.34\" data-len=\"85\"/><path d=\"M305.84 -50 A51.5 51.5 0 0 1 305.49 -44 L293.38 -44 A39.5 39.5 0 0 0 293.84 -50 Z\" fill=\"currentColor\" stroke=\"none\" data-k=\"fade\" data-d=\".01\" data-t=\"1.47\"/><path d=\"M299.84 -50 A45.5 45.5 0 1 0 254.34 -4.5\" data-k=\"draw\" data-d=\"0.34\" data-t=\"1.48\" data-len=\"214.22\"/><path d=\"M326.12 -100 L326.12 60\" data-k=\"draw\" data-d=\"0.25\" data-t=\"1.82\" data-len=\"160\"/><path d=\"M371.62 -95.5 A45.5 45.5 0 0 0 371.62 -4.5 A45.5 45.5 0 0 0 371.62 -95.5\" data-k=\"draw\" data-d=\"0.45\" data-t=\"2.07\" data-len=\"285.43\"/></g></svg>";
+  var MARK_CREATING = "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"470 -174 769.43 258\" aria-hidden=\"true\"><g fill=\"none\" stroke=\"currentColor\" stroke-width=\"12\" stroke-linecap=\"butt\" stroke-linejoin=\"miter\" stroke-miterlimit=\"12\"><path d=\"M598.43 -80.45 A45.5 45.5 0 1 0 564.62 -4.5 L584.92 -4.5 A49.3 49.3 0 0 0 634.22 -53.8 L634.22 -100\" data-k=\"draw\" data-d=\"0.51\" data-t=\"2.52\" data-len=\"324.87\"/><path d=\"M634.22 -66.6 A28.9 28.9 0 0 1 685.25 -85.18\" data-k=\"draw\" data-d=\"0.11\" data-t=\"3.03\" data-len=\"70.6\"/><path d=\"M705.93 -50 L790.93 -50\" data-k=\"draw\" data-d=\"0.13\" data-t=\"3.14\" data-len=\"85\"/><path d=\"M802.93 -50 A51.5 51.5 0 0 1 802.58 -44 L790.47 -44 A39.5 39.5 0 0 0 790.93 -50 Z\" fill=\"currentColor\" stroke=\"none\" data-k=\"fade\" data-d=\".01\" data-t=\"3.28\"/><path d=\"M796.93 -50 A45.5 45.5 0 1 0 780.68 -15.14\" data-k=\"draw\" data-d=\"0.39\" data-t=\"3.29\" data-len=\"245.89\"/><path d=\"M820.69 -61.5 A34 34 0 0 1 888.69 -61.5 L888.69 0\" data-k=\"draw\" data-d=\"0.26\" data-t=\"3.67\" data-len=\"168.27\"/><path d=\"M861.19 -59.5 A27.5 27.5 0 0 0 861.19 -4.5 A27.5 27.5 0 0 0 861.19 -59.5\" data-k=\"draw\" data-d=\"0.27\" data-t=\"3.94\" data-len=\"172.51\"/><path d=\"M932.79 -130 L932.79 -35.78 A31.28 31.28 0 0 0 964.07 -4.5 A31.28 31.28 0 0 0 995.35 -35.78 L995.35 -100\" data-k=\"draw\" data-d=\"0.4\" data-t=\"4.21\" data-len=\"256.7\"/><path d=\"M906.79 -94 L958.79 -94\" data-k=\"draw\" data-d=\"0.08\" data-t=\"4.61\" data-len=\"52\"/><path d=\"M989.35 -107.2 L1001.35 -107.2 L1001.35 -119.2 L989.35 -119.2 Z\" fill=\"currentColor\" stroke=\"none\" data-k=\"fade\" data-d=\".01\" data-t=\"4.69\"/><path d=\"M1024.15 -100 L1024.15 0\" data-k=\"draw\" data-d=\"0.16\" data-t=\"4.71\" data-len=\"100\"/><path d=\"M1024.15 -61.5 A34 34 0 0 1 1092.15 -61.5 L1092.15 -53.8 A49.3 49.3 0 0 0 1141.45 -4.5 L1163.93 -4.5\" data-k=\"draw\" data-d=\"0.34\" data-t=\"4.86\" data-len=\"214.38\"/><path d=\"M1163.93 -4.5 A45.5 45.5 0 0 0 1163.93 -95.5 A45.5 45.5 0 0 0 1163.93 -4.5\" data-k=\"draw\" data-d=\"0.45\" data-t=\"5.2\" data-len=\"285.43\"/><path d=\"M1209.43 -100 L1209.43 42 A12 12 0 0 1 1197.43 54 L1135.09 54\" data-k=\"draw\" data-d=\"0.35\" data-t=\"5.65\" data-len=\"223.19\"/></g></svg>";
 
   var st = document.createElement('style'); st.id = 'thx-keep-css';
   st.textContent = [
@@ -20,13 +25,14 @@
     '.thx-keep{position:fixed;inset:0;z-index:890;background:transparent;font-family:' + SANS + ';color:#0d0d0d;overflow:hidden;contain:strict}',
     '.thx-keep-bg{position:absolute;inset:0;background:#f4f2ec}',
     '.thx-keep-type{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);margin:0;padding:0 5vw;text-align:center;font-weight:400;letter-spacing:-.03em;line-height:1;font-size:clamp(40px,7.2vw,112px);white-space:nowrap;transition:opacity .45s ease}',
-    '.thx-keep-w{position:absolute;top:0;left:0;margin:0;font-weight:400;letter-spacing:-.035em;line-height:.9;white-space:nowrap;font-size:clamp(56px,10.5vw,156px);will-change:transform,opacity;transform-origin:0 0;opacity:0;transition:opacity .7s ease}',
+    '.thx-keep-w{position:absolute;top:0;left:0;margin:0;line-height:0;will-change:transform,opacity;transform-origin:0 0;opacity:0;transition:opacity .4s ease}',
+    '.thx-keep-w svg{display:block;height:var(--thx-mark-h,clamp(64px,13.6vw,224px));width:auto;color:#0d0d0d;overflow:visible}',
     '.thx-keep-final .thx-keep-w{opacity:1}',
     '.thx-keep-pill{position:absolute;left:50%;bottom:30px;transform:translateX(-50%) translateY(10px);display:inline-flex;align-items:center;gap:8px;padding:12px 18px;border:1px solid rgba(13,13,13,.28);border-radius:8px;background:#fff;color:#0d0d0d;font:15px/1 ' + SANS + ';cursor:pointer;opacity:0;transition:opacity .7s ease,transform .7s cubic-bezier(.22,1,.36,1),border-color .2s}',
-    '.thx-keep-final .thx-keep-pill{opacity:1;transform:translateX(-50%)}',
+    '.thx-keep-drawn .thx-keep-pill{opacity:1;transform:translateX(-50%)}',
     '.thx-keep-pill:hover{border-color:#0d0d0d}.thx-keep-pill svg{width:12px;height:12px}',
     '.thx-keep-stage{will-change:transform,opacity;transform-origin:50% 22%}',
-    '@media (max-width:767px){.thx-keep-type{font-size:clamp(30px,9.6vw,60px)}.thx-keep-w{font-size:clamp(46px,15vw,84px)}.thx-keep-pill{bottom:22px}}'
+    '@media (max-width:767px){.thx-keep-type{font-size:clamp(30px,9.6vw,60px)}.thx-keep-w svg{height:17.5vw}.thx-keep-pill{bottom:22px}}'
   ].join('\n');
   document.head.appendChild(st);
 
@@ -34,14 +40,16 @@
   root.innerHTML = '<div class="thx-keep-bg"></div><p class="thx-keep-type"></p><p class="thx-keep-w"></p><p class="thx-keep-w"></p>' +
     '<button type="button" class="thx-keep-pill">scroll <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M6 1v10M2 7l4 4 4-4"/></svg></button>';
   var bg = root.querySelector('.thx-keep-bg'), typeEl = root.querySelector('.thx-keep-type'), ws = root.querySelectorAll('.thx-keep-w'), pill = root.querySelector('.thx-keep-pill');
-  ws[0].textContent = W1; ws[1].textContent = W2;
+  ws[0].innerHTML = MARK_KEEP; ws[1].innerHTML = MARK_CREATING;
+  var strokes = [].slice.call(root.querySelectorAll('.thx-keep-w path[data-k]'));
+  strokes.forEach(function (p) { var l = p.getAttribute('data-len'); if (l) { p.style.strokeDasharray = l + 'px'; p.style.strokeDashoffset = l + 'px'; } else p.style.opacity = '0'; });
   document.body.appendChild(root);
   document.documentElement.classList.add('thx-keep-lock');
   var stage = document.querySelector('main') || document.querySelector('.page-wrapper, .ff-page') || null;
   if (stage) { stage.classList.add('thx-keep-stage'); stage.style.opacity = '0'; stage.style.transform = 'scale(.86)'; }
 
   /* ---------- 1. the typed line ---------- */
-  var timers = [], final = false;
+  var timers = [], final = false, drawn = false;
   function later(f, ms) { timers.push(setTimeout(f, ms)); }
   function typeText(target, from, to, cb) {
     /* delete back to the shared prefix, then type the rest, one character at a time */
@@ -64,7 +72,17 @@
   function toFinal() {
     if (final) return; final = true; timers.forEach(clearTimeout); timers = [];
     typeEl.style.opacity = '0';
-    setTimeout(function () { typeEl.style.display = 'none'; layout(); root.classList.add('thx-keep-final'); }, 460);
+    setTimeout(function () {
+      typeEl.style.display = 'none'; layout(); root.classList.add('thx-keep-final');
+      /* the brand file's own choreography: each stroke draws (or a joint fades in) at its authored delay and duration */
+      var end = 0;
+      strokes.forEach(function (p) {
+        var d = parseFloat(p.getAttribute('data-d')) * 1000, t = parseFloat(p.getAttribute('data-t')) * 1000; end = Math.max(end, d + t);
+        if (p.getAttribute('data-k') === 'draw') p.animate([{ strokeDashoffset: p.getAttribute('data-len') + 'px' }, { strokeDashoffset: '0px' }], { duration: d, delay: t, easing: 'linear', fill: 'forwards' });
+        else p.animate([{ opacity: 0 }, { opacity: 1 }], { duration: Math.max(d, 10), delay: t, easing: 'linear', fill: 'forwards' });
+      });
+      drawn = false; setTimeout(function () { drawn = true; root.classList.add('thx-keep-drawn'); }, end + 150);
+    }, 460);
   }
 
   /* ---------- 2. layout: centred as one line, ending in opposite corners ---------- */
@@ -103,8 +121,8 @@
     render();
     if (p < 1) raf = requestAnimationFrame(tick);
   }
-  function nudge(dp) { if (done) return; if (!final) { toFinal(); return; } if (!L) return; target = Math.max(0, Math.min(1, target + dp)); idle = 1; clearTimeout(nudge.t); nudge.t = setTimeout(function () { idle = 0; }, 160); if (!raf) raf = requestAnimationFrame(tick); }
-  function go() { if (done) return; if (!final) { toFinal(); setTimeout(go, 520); return; } target = 1; idle = 0; if (!raf) raf = requestAnimationFrame(tick); }
+  function nudge(dp) { if (done) return; if (!final) { toFinal(); return; } if (!L || !drawn) return; target = Math.max(0, Math.min(1, target + dp)); idle = 1; clearTimeout(nudge.t); nudge.t = setTimeout(function () { idle = 0; }, 160); if (!raf) raf = requestAnimationFrame(tick); }
+  function go() { if (done) return; if (!final) { toFinal(); setTimeout(go, 520); return; } if (!drawn) { setTimeout(go, 300); return; } target = 1; idle = 0; if (!raf) raf = requestAnimationFrame(tick); }
   function finish() {
     done = true;
     document.documentElement.classList.remove('thx-keep-lock');
