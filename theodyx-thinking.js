@@ -1,4 +1,4 @@
-/*! theodyx-thinking.js v2.0.0 (2026-09-18) — the Our Thinking system: editorial carousels (.thk-track), the hub's search +
+/*! theodyx-thinking.js v2.1.0 (2026-09-18) — the Our Thinking system: editorial carousels (.thk-track), the hub's search +
  * facet filter (.thk-hub), and the card polish shared by the homepage band, /our-thinking and the alumni page.
  * Carousel: prev/next arrows glide one card at a time (snap-safe: scroll-snap is lifted during the rAF tween, exactly as the
  * Ethos carousel fix of 2026-07-28 - Chrome swallows smooth scrollTo on a mandatory-snap container), a 6.5 s autoplay that
@@ -9,7 +9,7 @@
 (function () {
   'use strict';
   if (window.__thxThinking) return;
-  var API = window.__thxThinking = { v: '2.0.0' };
+  var API = window.__thxThinking = { v: '2.1.0' };
   /* 1.3.0 (owner: "when you click search our thinking it makes that large black border - remove it"): the site-wide two-tone focus ring (head, Phase 9) is lifted off the hub search input; the pill itself carries a soft focus-within state (native style) */
   (function () { var st = document.createElement('style'); st.id = 'thx-thk-css'; st.textContent = 'html body input.thk-search-in:focus-visible,html body input.thk-search-in:focus{box-shadow:none!important;outline:none!important;border:0!important}'; document.head.appendChild(st); })();
   function q(s, r) { return [].slice.call((r || document).querySelectorAll(s)); }
@@ -207,8 +207,7 @@
       var lead = still ? 0 : LEAD;
       requestAnimationFrame(function () { requestAnimationFrame(function () { if (group) group.classList.add('thx-hero-go'); }); });
       timers.push(setTimeout(function () {
-        if (!still) { caret = document.createElement('span'); caret.className = 'thx-caret'; caret.setAttribute('aria-hidden', 'true'); if (rule) h.insertBefore(caret, rule); else h.appendChild(caret); }
-        void h.offsetWidth;
+        void h.offsetWidth; /* 2.1.0: no caret (owner) */
         requestAnimationFrame(function () { requestAnimationFrame(function () { h.classList.add('thx-hero-on'); }); });
       }, lead));
       timers.push(setTimeout(function () { h.classList.add('thx-hero-done'); }, lead + total));
@@ -216,15 +215,18 @@
       timers.push(setTimeout(function () { playing = false; }, lead + total + 900 + i * 30 + 600));
     }
     if (still || !('IntersectionObserver' in window)) { play(); return; }
-    /* enter → write (if the letters are hidden); leave → after the cooldown, hide the letters again so the next entry replays */
-    var armTimer = null;
-    function arm() { clearTimeout(armTimer); armTimer = setTimeout(function () { if (!playing) { clear(); h.classList.remove('thx-hero-on', 'thx-hero-done', 'thx-hero-shine'); if (group) group.classList.remove('thx-hero-go'); if (caret && caret.parentNode) caret.parentNode.removeChild(caret); } }, Math.max(0, 6000 - (Date.now() - lastPlay))); }
+    /* 2.1.0 (owner): the header plays ONCE, and only once the visitor has scrolled to it - on load the video hides it, and on phones it
+       sits below the fold. The observer waits for half of the header to be in view; if the page has not been scrolled yet it holds
+       for a moment (a very tall screen can show the header without any scroll) and then plays anyway so nobody is left with a blank header. */
+    var played = false, scrolled = window.scrollY > 24, hold = null;
+    addEventListener('scroll', function () { scrolled = true; }, { passive: true });
+    function once() { if (played) return; played = true; io.disconnect(); clearTimeout(hold); play(); }
     var io = new IntersectionObserver(function (es) {
       es.forEach(function (e) {
-        if (e.isIntersecting && e.intersectionRatio >= 0.35) { clearTimeout(armTimer); if (!h.classList.contains('thx-hero-on') && !playing) play(); }
-        else if (!e.isIntersecting) arm();
+        if (e.isIntersecting && e.intersectionRatio >= 0.5) { if (scrolled) once(); else { clearTimeout(hold); hold = setTimeout(once, 2500); } }
+        else clearTimeout(hold);
       });
-    }, { threshold: [0, 0.35] });
+    }, { threshold: [0, 0.5] });
     io.observe(group || h);
   })();
 
