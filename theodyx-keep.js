@@ -1,4 +1,4 @@
-/*! theodyx-keep.js v1.0.0 (2026-09-18) — "Keep creating." : the page opens from two words.
+/*! theodyx-keep.js v1.0.1 (2026-09-18) — "Keep creating." : the page opens from two words.
  * Owner directive: the Clients page must start with literally the anthropic.com/path-to-hope opening — two words alone on the cream,
  * then, on the first scroll, the words drift to opposite corners while the page blooms up between them. Nothing here is a video or a
  * canvas: the words are real text (Google Sans Flex, the site's only face), the bloom is one scrubbable progress value driven by wheel /
@@ -9,7 +9,7 @@
 (function () {
   'use strict';
   if (window.__thxKeep) return;
-  window.__thxKeep = { v: '1.0.0' };
+  window.__thxKeep = { v: '1.0.1' };
   var RED = false; try { RED = matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
   if (RED) return;
   var SANS = '"Google Sans Flex","Google Sans",system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif';
@@ -21,7 +21,7 @@
   var st = document.createElement('style'); st.id = 'thx-keep-css';
   st.textContent = [
     'html.thx-keep-lock,html.thx-keep-lock body{overflow:hidden!important;overscroll-behavior:none}',
-    '.thx-keep{position:fixed;inset:0;z-index:940;background:transparent;font-family:' + SANS + ';color:#0d0d0d;overflow:hidden;contain:strict}',
+    '.thx-keep{position:fixed;inset:0;z-index:890;background:transparent;font-family:' + SANS + ';color:#0d0d0d;overflow:hidden;contain:strict}',
     '.thx-keep-bg{position:absolute;inset:0;background:#f4f2ec;transition:none}',
     '.thx-keep-lines{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}',
     '.thx-keep-lines line{stroke:#0d0d0d;stroke-width:1;stroke-dasharray:1;stroke-dashoffset:1;opacity:.55}',
