@@ -1,4 +1,4 @@
-/*! theodyx-thinking.js v2.1.4 (2026-09-18) — the Our Thinking system: editorial carousels (.thk-track), the hub's search +
+/*! theodyx-thinking.js v2.2.0 (2026-09-19) — the Our Thinking system: editorial carousels (.thk-track), the hub's search +
  * facet filter (.thk-hub), and the card polish shared by the homepage band, /our-thinking and the alumni page.
  * Carousel: prev/next arrows glide one card at a time (snap-safe: scroll-snap is lifted during the rAF tween, exactly as the
  * Ethos carousel fix of 2026-07-28 - Chrome swallows smooth scrollTo on a mandatory-snap container), a 6.5 s autoplay that
@@ -9,7 +9,7 @@
 (function () {
   'use strict';
   if (window.__thxThinking) return;
-  var API = window.__thxThinking = { v: '2.1.4' };
+  var API = window.__thxThinking = { v: '2.2.0' };
   /* 1.3.0 (owner: "when you click search our thinking it makes that large black border - remove it"): the site-wide two-tone focus ring (head, Phase 9) is lifted off the hub search input; the pill itself carries a soft focus-within state (native style) */
   (function () { var st = document.createElement('style'); st.id = 'thx-thk-css'; st.textContent = 'html body input.thk-search-in:focus-visible,html body input.thk-search-in:focus{box-shadow:none!important;outline:none!important;border:0!important}'; document.head.appendChild(st); })();
   function q(s, r) { return [].slice.call((r || document).querySelectorAll(s)); }
@@ -139,6 +139,7 @@
         ':where(.hero-sign){margin:0;font-size:clamp(26px,3vw,44px);line-height:1.1;letter-spacing:-.02em;font-weight:400}',
         '.thx-hero-group .hero-line,.thx-hero-group .hero-stand{opacity:0;transform:translateY(.55em);filter:blur(6px);transition:opacity .8s cubic-bezier(.22,1,.36,1),transform 1s cubic-bezier(.22,1,.36,1),filter .8s ease}',
         '.thx-hero-group .hero-line:nth-child(2){transition-delay:.16s}.thx-hero-group .hero-stand{transition-delay:.42s}',
+        '.thx-hero-group .hero-line.thx-hero-l2{opacity:1;transform:none;filter:none;transition:none}.thx-hero-group:has(.thx-hero-l2) .hero-stand{transition-delay:1.7s}.thx-hero-group:has(.thx-hero-l2) .hero-rule{transition-delay:2s}',
         '.thx-hero-group .hero-rule{background:var(--thx-acc);transform:scaleX(0);transform-origin:0 50%;transition:transform 1s cubic-bezier(.22,1,.36,1) .68s}',
         '.thx-hero-group.thx-hero-go .hero-line,.thx-hero-group.thx-hero-go .hero-stand{opacity:1;transform:none;filter:blur(0)}',
         '.thx-hero-group.thx-hero-go .hero-rule{transform:scaleX(1)}',
@@ -179,9 +180,10 @@
      come back (after a 6 s cooldown), and finishes with a one-time shimmer that runs through the letters after the underline draws. */
   (function heroInk() {
     /* 2.0.0: the write-on belongs to the closing line (.hero-sign) when the four-part header is present; the lone .hero-h1 keeps it otherwise */
-    var h = document.querySelector('.hero-sign') || document.querySelector('.hero-h1'); if (!h || h.classList.contains('thx-hero-ink')) return;
-    var group = h.classList.contains('hero-sign') ? h.closest('.hero-copy') : null; if (group) group.classList.add('thx-hero-group');
-    var LEAD = group ? 1050 : 0; /* the H1 lines, the standfirst and the rule go first; the closing line starts writing as the rule lands */
+    /* 2.2.0 (owner): the write-on moves to the H1's second line ("Everything around it has.") - the closing line is gone */
+    var h = document.querySelector('.hero-sign') || document.querySelector('.hero-h1 .hero-line:nth-child(2)') || document.querySelector('.hero-h1'); if (!h || h.classList.contains('thx-hero-ink')) return;
+    var group = (h.classList.contains('hero-sign') || h.classList.contains('hero-line')) ? h.closest('.hero-copy') : null; if (h.classList.contains('hero-line')) h.classList.add('thx-hero-l2'); if (group) group.classList.add('thx-hero-group');
+    var LEAD = group ? (h.classList.contains('hero-line') ? 420 : 1050) : 0; /* the H1 lines, the standfirst and the rule go first; the closing line starts writing as the rule lands */
     var txt = (h.textContent || '').replace(/\s+/g, ' ').trim(); if (!txt) return;
     var still = false; try { still = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
     h.setAttribute('aria-label', txt);

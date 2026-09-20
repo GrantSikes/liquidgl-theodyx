@@ -1,8 +1,11 @@
-/*! theodyx-network.js v2.0.0 (2026-09-19) — the Network application form, made easy.
+/*! theodyx-network.js v2.1.0 (2026-09-19) — the Network application form, made easy.
  * Owner directive: "make it more UI/UX friendly and easy". The form's fields are native Webflow fields (editable in the Designer);
  * this file only arranges and helps them: section headings, a two-column grid for short fields, checkbox rows that read as one
  * line, availability as pill chips, the ORCID iD and bar number formatted as you type, repeatable "Add another link" rows with a
  * type dropdown, black ink everywhere (the site's legacy link colour is white), and a live character count on the statement.
+ * 2.1.0 (owner): the form column is widened so answers are readable, text areas grow as you type, a required "what does it mean to be
+ * human" answer joins the intellectual-capital step, and a professional headshot is required (native Webflow file upload named
+ * Headshot, with the reference photo and the requirements beside it).
  * 2.0.0 (owner, the intake playbook, no backend): the application is four steps (Identity → Discipline & credentials → Intellectual
  * capital → Logistics & agreement) with a persistent context line, Back keeps your answers, and each step validates before the next.
  * A nominated candidate (Source = a Member / a client or partner) gets the nominator fields and skips the thesis. The discipline routes
@@ -19,12 +22,18 @@
  * Fields are found by their name attribute, so the Designer can reorder or relabel them freely. No dependencies. */
 (function () {
   'use strict';
-  if (window.__thxNetwork) return; window.__thxNetwork = { v: '2.0.0' };
+  if (window.__thxNetwork) return; window.__thxNetwork = { v: '2.1.0' };
   var form = document.querySelector('form[data-name="Network Application"]'); if (!form) return;
   var SANS = '"Google Sans Flex","Google Sans",system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif';
   var st = document.createElement('style'); st.id = 'thx-net-css';
   st.textContent = [
     '.ff-page .ff-main:has(> .w-form form.nf),.ff-page .ff-main:has(.w-form form.nf){max-width:800px;width:100%}',
+    '.ff-page #apply .ff-main,.ff-page #apply > .ff-main{max-width:860px!important;width:100%!important}',
+    '.nf .w-input,.nf .w-select,.nf .ff-input,.nf .ff-select{font-size:16px!important;line-height:1.35}.nf textarea{min-height:120px;resize:vertical;overflow:hidden;font-size:16px!important;line-height:1.5}',
+    '.nf .nf-shot{grid-column:1/-1;display:grid;grid-template-columns:minmax(0,1fr) 220px;gap:22px;align-items:start}.nf .nf-shot-ref img{display:block;width:100%;height:auto;border-radius:12px;border:1px solid rgba(13,13,13,.12)}.nf .nf-shot-ref figcaption{margin:8px 0 0;font-size:12.5px;line-height:1.4;color:rgba(13,13,13,.62)}',
+    '.nf .nf-shot ul{margin:8px 0 0;padding-left:18px;font-size:14px;line-height:1.55;color:rgba(13,13,13,.78)}',
+    '.nf .w-file-upload{margin:0}.nf .w-file-upload-default,.nf .w-file-upload-uploading,.nf .w-file-upload-success{display:flex;align-items:center;gap:12px;min-height:64px;padding:12px 16px;border:1px dashed rgba(13,13,13,.35);border-radius:12px;background:#fff}.nf .w-file-upload-label{display:inline-flex;align-items:center;gap:8px;margin:0;padding:10px 16px;border:1px solid #0d0d0d;border-radius:999px;background:#0d0d0d;color:#fff;font-size:14px;cursor:pointer}.nf .w-file-upload-label:hover{background:#262626}.nf .w-file-upload-info{font-size:14px;color:rgba(13,13,13,.7)}.nf .w-file-upload-error{grid-column:1/-1}.nf .w-file-upload-error-msg{font-size:13px;color:#b3261e}',
+    '@media (max-width:640px){.nf .nf-shot{grid-template-columns:1fr}.nf .nf-shot-ref{max-width:220px}}',
     '.nf{width:100%;display:grid;grid-template-columns:1fr 1fr;column-gap:20px;row-gap:18px;max-width:760px;font-family:' + SANS + '}',
     '.nf .nf-field{grid-column:1/-1;display:flex;flex-direction:column;gap:8px;min-width:0}.nf .nf-half{grid-column:span 1}',
     '.nf .nf-h{grid-column:1/-1;margin:26px 0 2px;padding-top:26px;border-top:1px solid rgba(13,13,13,.14);font-size:22px;line-height:1.2;font-weight:400;color:#0d0d0d}.nf .nf-h:first-child{margin-top:0;padding-top:0;border-top:0}',
@@ -175,6 +184,7 @@
     { n: 'Representation-Detail', l: 'Who represents you?', t: 'text', ph: 'Agency, bureau, or publisher, and what the exclusivity covers' },
     { n: 'Capstone', l: 'Capstone', t: 'url', ph: 'https://' },
     { n: 'Thesis', l: 'The contrarian thesis', t: 'textarea', max: 1000, hint: 'Up to 150 words.' },
+    { n: 'Human', l: 'As the world we live in becomes less personal, what does it mean to be human, for you?', t: 'textarea', max: 1500, req: 1, hint: 'Required. In your own words.' },
     { n: 'Horizon', l: 'The collaboration horizon', t: 'textarea', max: 1200, hint: 'A specific project, venture, or research architecture you want to execute in the next 24 months but currently lack the infrastructure to achieve.' },
     /* logistics */
     { n: 'City', l: 'City', t: 'text', half: 1 },
@@ -190,7 +200,7 @@
   function mk(spec) {
     var el;
     if (spec.t === 'select') { el = document.createElement('select'); el.className = 'ff-select w-select'; var o0 = document.createElement('option'); o0.value = ''; o0.textContent = 'Select…'; el.appendChild(o0); spec.o.forEach(function (v) { var o = document.createElement('option'); o.value = v; o.textContent = v; el.appendChild(o); }); }
-    else if (spec.t === 'textarea') { el = document.createElement('textarea'); el.className = 'ff-textarea w-input'; if (spec.max) el.maxLength = spec.max; }
+    else if (spec.t === 'textarea') { el = document.createElement('textarea'); el.className = 'ff-textarea w-input'; if (spec.max) el.maxLength = spec.max; if (spec.req) { el.required = true; el.minLength = 40; } }
     else if (spec.t === 'checks' || spec.t === 'radio') {
       var grp = document.createElement('div'); grp.className = spec.t === 'radio' ? 'nf-radios' : 'nf-chips';
       spec.o.forEach(function (v) { var lab = document.createElement('label'); lab.className = spec.t === 'radio' ? 'nf-radio' : 'nf-chip'; var i = document.createElement('input'); i.type = spec.t === 'radio' ? 'radio' : 'checkbox'; i.name = spec.n; i.value = v; i.id = (spec.n + '-' + v).replace(/[^\w-]+/g, '-'); var sp = document.createElement('span'); sp.className = 'w-form-label'; sp.textContent = v; lab.appendChild(i); lab.appendChild(sp); lab.setAttribute('for', i.id); i.addEventListener('change', function () { if (spec.t === 'checks') lab.classList.toggle('nf-on', i.checked); else grp.querySelectorAll('.nf-radio').forEach(function (r) { r.classList.toggle('nf-on', r.querySelector('input').checked); }); }); grp.appendChild(lab); });
@@ -216,6 +226,21 @@
   function labelOf(n, text) { var w = wrapOf(n); if (!w) return; var l = w.querySelector('label.ff-label'); if (l) l.textContent = text; }
   function hintOf(n, text) { var w = wrapOf(n); if (!w) return; var h = w.querySelector('.nf-hint'); if (!h) { h = document.createElement('p'); h.className = 'nf-hint'; w.appendChild(h); } h.textContent = text; }
 
+  /* ---------- professional headshot (native Webflow file upload named Headshot) + the reference ---------- */
+  (function () {
+    var fi = form.querySelector('input[type=file]'); if (!fi) return;
+    var up = fi.closest('.w-file-upload') || fi; var f = document.createElement('div'); f.className = 'nf-field nf-shot-field'; up.parentNode.insertBefore(f, up);
+    var lab = document.createElement('label'); lab.className = 'ff-label'; lab.textContent = 'Professional headshot*'; f.appendChild(lab);
+    var row = document.createElement('div'); row.className = 'nf-shot';
+    var left = document.createElement('div'); left.appendChild(up);
+    var ul = document.createElement('ul'); ['Front-facing, shoulders up, looking at the camera', 'Plain, uncluttered background', 'Natural light, no filters or heavy retouching', 'Taken within the last year', 'JPEG or PNG, portrait, at least 1200 px on the short side'].forEach(function (t) { var li = document.createElement('li'); li.textContent = t; ul.appendChild(li); }); left.appendChild(ul);
+    var fig = document.createElement('figure'); fig.className = 'nf-shot-ref'; fig.innerHTML = '<img src="https://pub-c09c28c1b0ac4b73b1a35509b5d50686.r2.dev/images/202609/theodyx-network-headshot-reference.jpg" alt="Reference headshot: front-facing, shoulders up, plain background, natural light" loading="lazy" width="1200" height="1500"><figcaption>What we are looking for.</figcaption>';
+    row.appendChild(left); row.appendChild(fig); f.appendChild(row);
+    fi.setAttribute('accept', 'image/jpeg,image/png'); fi.required = true; F['Headshot'] = f;
+    var l2 = up.querySelector('.w-file-upload-label'); if (l2) { var t2 = l2.querySelector('.w-inline-block, div:last-child'); if (t2) t2.textContent = 'Choose your headshot'; }
+  })();
+  /* text areas grow with the answer */
+  q('textarea', form).forEach(function (t) { function grow() { t.style.height = 'auto'; t.style.height = Math.max(120, t.scrollHeight + 2) + 'px'; } t.addEventListener('input', grow); setTimeout(grow, 0); });
   /* ---------- institution typeahead (Affiliation) via the Research Organization Registry ---------- */
   var aff = byName('Affiliation');
   if (aff) (function () {
@@ -303,9 +328,9 @@
   form.addEventListener('change', route); form.addEventListener('input', function (e) { if (e.target && (e.target.name === 'Invite-Code')) route(); });
   /* ================= steps ================= */
   var STEPS = [
-    { t: 'Identity', n: ['First-Name', 'Last-Name', 'Email', 'Institutional-Email', 'Honorific', 'Headline', 'Affiliation', 'LinkedIn', 'Source', 'Invite-Code', 'Nominator-Name', 'Nominator-Email', 'Representation-Status', 'Representation-Detail'] },
+    { t: 'Identity', n: ['First-Name', 'Last-Name', 'Email', 'Institutional-Email', 'Honorific', 'Headshot', 'Headline', 'Affiliation', 'LinkedIn', 'Source', 'Invite-Code', 'Nominator-Name', 'Nominator-Email', 'Representation-Status', 'Representation-Detail'] },
     { t: 'Discipline & credentials', n: ['Discipline', 'Topics'].concat(ALLROUTE).concat(['SSRN', 'Link-1-Type', 'Publications']) },
-    { t: 'Intellectual capital', n: ['Capstone', 'Statement', 'Thesis', 'Horizon'] },
+    { t: 'Intellectual capital', n: ['Capstone', 'Statement', 'Human', 'Thesis', 'Horizon'] },
     { t: 'Logistics & agreement', n: ['Availability', 'City', 'Region', 'Country', 'Time-Zone', 'Airport', 'Conflicts', 'Drafting', 'Display-Consent', 'Active-Network', 'Agreement', 'Newsletter'] }
   ];
   var panels = [], cur = 0;
@@ -342,7 +367,7 @@
   function go(i) { cur = i; panels.forEach(function (p, j) { p.classList.toggle('nf-on', j === i); }); head.querySelector('.nf-step-n').textContent = 'Step ' + (i + 1) + ' of ' + panels.length; head.querySelector('.nf-step-t').textContent = STEPS[i].t; head.querySelector('.nf-bar i').style.width = ((i + 1) / panels.length * 100) + '%'; ctx(); if (i > 0 || form.getAttribute('data-nf-started')) { form.setAttribute('data-nf-started', '1'); head.scrollIntoView({ behavior: 'smooth', block: 'start' }); } }
   function valid(p) {
     var ok = true, first = null;
-    q('input,select,textarea', p).forEach(function (c) { if (c.disabled || c.closest('[hidden]')) return; err(c, ''); if (!c.checkValidity()) { ok = false; if (!first) first = c; var m = c.validity.valueMissing ? 'This one is needed.' : c.validity.tooShort ? 'A little more, please: at least ' + c.minLength + ' characters.' : c.validity.typeMismatch ? (c.type === 'email' ? 'That email address looks incomplete.' : 'Please provide a complete URL starting with https://') : 'Please check this answer.'; if (c.type === 'checkbox' || c.type === 'radio') { var w = c.closest('.nf-check, .nf-chips, .nf-radios'); if (w) w.classList.add('nf-bad'); } else err(c, m); } });
+    q('input,select,textarea', p).forEach(function (c) { if (c.disabled || c.closest('[hidden]')) return; err(c, ''); if (!c.checkValidity()) { ok = false; if (!first) first = c; var m = c.validity.valueMissing ? (c.type === 'file' ? 'Please add your headshot.' : 'This one is needed.') : c.validity.tooShort ? 'A little more, please: at least ' + c.minLength + ' characters.' : c.validity.typeMismatch ? (c.type === 'email' ? 'That email address looks incomplete.' : 'Please provide a complete URL starting with https://') : 'Please check this answer.'; if (c.type === 'checkbox' || c.type === 'radio') { var w = c.closest('.nf-check, .nf-chips, .nf-radios'); if (w) w.classList.add('nf-bad'); } else err(c, m); } });
     if (first) { (first.closest('.nf-field') || first).scrollIntoView({ behavior: 'smooth', block: 'center' }); try { first.focus({ preventScroll: true }); } catch (e) {} }
     return ok;
   }
