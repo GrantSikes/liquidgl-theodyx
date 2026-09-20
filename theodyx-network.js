@@ -1,4 +1,4 @@
-/*! theodyx-network.js v2.1.1 (2026-09-19) — the Network application form, made easy.
+/*! theodyx-network.js v2.1.2 (2026-09-19) — the Network application form, made easy.
  * Owner directive: "make it more UI/UX friendly and easy". The form's fields are native Webflow fields (editable in the Designer);
  * this file only arranges and helps them: section headings, a two-column grid for short fields, checkbox rows that read as one
  * line, availability as pill chips, the ORCID iD and bar number formatted as you type, repeatable "Add another link" rows with a
@@ -22,7 +22,7 @@
  * Fields are found by their name attribute, so the Designer can reorder or relabel them freely. No dependencies. */
 (function () {
   'use strict';
-  if (window.__thxNetwork) return; window.__thxNetwork = { v: '2.1.1' };
+  if (window.__thxNetwork) return; window.__thxNetwork = { v: '2.1.2' };
   var form = document.querySelector('form[data-name="Network Application"]'); if (!form) return;
   var SANS = '"Google Sans Flex","Google Sans",system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif';
   var st = document.createElement('style'); st.id = 'thx-net-css';
@@ -33,6 +33,7 @@
     '.nf .nf-shot{grid-column:1/-1;display:grid;grid-template-columns:minmax(0,1fr) 220px;gap:22px;align-items:start}.nf .nf-shot-ref img{display:block;width:100%;height:auto;border-radius:12px;border:1px solid rgba(13,13,13,.12)}.nf .nf-shot-ref figcaption{margin:8px 0 0;font-size:12.5px;line-height:1.4;color:rgba(13,13,13,.62)}',
     '.nf .nf-shot ul{margin:8px 0 0;padding-left:18px;font-size:14px;line-height:1.55;color:rgba(13,13,13,.78)}',
     '.nf .w-file-upload{margin:0}.nf .w-file-upload-default,.nf .w-file-upload-uploading,.nf .w-file-upload-success{display:flex;align-items:center;gap:12px;min-height:64px;padding:12px 16px;border:1px dashed rgba(13,13,13,.35);border-radius:12px;background:#fff}.nf .w-file-upload-label{display:inline-flex;align-items:center;gap:8px;margin:0;padding:10px 16px;border:1px solid #0d0d0d;border-radius:999px;background:#0d0d0d;color:#fff;font-size:14px;cursor:pointer}.nf .w-file-upload-label:hover{background:#262626}.nf .w-file-upload-info{font-size:14px;color:rgba(13,13,13,.7)}.nf .w-file-upload-error{grid-column:1/-1}.nf .w-file-upload-error-msg{font-size:13px;color:#b3261e}',
+    '.nf .w-file-upload .w-hidden{display:none!important}',
     '@media (max-width:640px){.nf .nf-shot{grid-template-columns:1fr}.nf .nf-shot-ref{max-width:220px}}',
     '.ff-form-modern.w-form:has(> form.nf){display:block!important}.nf{grid-column:1/-1}',
     '.nf{width:100%;display:grid;grid-template-columns:1fr 1fr;column-gap:20px;row-gap:18px;max-width:760px;font-family:' + SANS + '}',
@@ -78,7 +79,7 @@
   }
   form.classList.add('nf');
   /* flatten the builder's inner wrapper so the grid sees every field */
-  q(':scope > div', form).forEach(function (d) { if (!d.classList.contains('w-checkbox')) { while (d.firstChild) form.insertBefore(d.firstChild, d); d.parentNode.removeChild(d); } });
+  q(':scope > div', form).forEach(function (d) { if (!d.classList.contains('w-checkbox') && !d.classList.contains('w-file-upload')) { while (d.firstChild) form.insertBefore(d.firstChild, d); d.parentNode.removeChild(d); } });
   q('input:not([type=checkbox]):not([type=submit]):not([type=file]):not([type=hidden]),select,textarea', form).forEach(function (el) { if (el.name) { el.id = el.id || el.name; fieldOf(el); } });
   /* checkboxes: the outer label holds the inline .w-checkbox and the visible text */
   q('label > .w-checkbox', form).forEach(function (cb) { var row = cb.parentNode; row.className = 'nf-check'; var inp = cb.querySelector('input'); if (inp) { inp.id = inp.id === 'checkbox' || !inp.id ? (inp.name + '-' + (inp.value || 'x')).replace(/[^\w-]+/g, '-') : inp.id; row.setAttribute('for', inp.id); } });
