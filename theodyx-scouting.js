@@ -1,4 +1,4 @@
-/* theodyx-scouting 2.6.0 (2026-09-14: the page joins the house system - Google Sans Flex everywhere, a cream hero with black ink, 12 px labels, pill chips and submit; the safety/age stages stay ink-dark) — was 2.5.0 (2026-09-13: the hero lead is a native, Webflow-editable paragraph; the dictionary sentence is only the fallback) — was 2.4.1 (2026-09-10: the page never scrolls behind a gate stage — html + body locked, preboot CSS) — was 2.4.0: the safety statement gates the page again (owner, 2026-09-06: "the one I liked
+/* theodyx-scouting 2.7.1 (2026-10-23, Workstream 4 go-live: BRIDGE_NOTES = false - the scouting API (theodyx-scouting-api, migration 0003_ws4 + worker bb04a4eb) now stores category, work status, network agreement and the parent-or-guardian fields as columns, so `notes` carries only the applicant's own text again; intakeVersion scouting-2.7.1) - was 2.7.0 (2026-10-23, Workstream 4 / partners' Decision 4, owner Lisa: self-serve is 18+ (19 in Alabama, 19 in Nebraska, 21 in Mississippi, read from the state field) and 14-17 apply through a Parent or guardian path that collects the guardian's name, relationship and email and sends guardianRequired - the same Minor as GUARD-11 v2.0, so a Minor in Arkansas, Colorado, Hawaii, Minnesota, New York, Tennessee or Utah is told Theodyx cannot represent them yet and cannot submit; under 14 is still ineligible; a required main-category select drives the photo block - the modeling instructions and the profile/full-length slots show for Modeling and Fashion only, everyone else gets one optional photo, and applicants under 18 are asked for no photos at all; a required citizenship and U.S. work-status select with the F-1/M-1/J-1 notice; an agency/management/network-agreement yes/no; the new answers ride in the payload and, until the scouting API stores them, in a marked block at the top of notes; English strings only, every other locale falls back to English until a person translates them) — was 2.6.0 (2026-09-14: the page joins the house system - Google Sans Flex everywhere, a cream hero with black ink, 12 px labels, pill chips and submit; the safety/age stages stay ink-dark) — was 2.5.0 (2026-09-13: the hero lead is a native, Webflow-editable paragraph; the dictionary sentence is only the fallback) — was 2.4.1 (2026-09-10: the page never scrolls behind a gate stage — html + body locked, preboot CSS) — was 2.4.0: the safety statement gates the page again (owner, 2026-09-06: "the one I liked
  * that would gate anyone before EVEN seeing the scouting page"). Two full-bleed stages in the page's ink, in
  * order: 1. #sc-gate-safety - "Theodyx | Safety / Your safety comes first." with the statement word for word and
  * an Acknowledged button (the page's own 1.x node, rebuilt on the 2.3.0 stage); 2. #sc-gate-age - the date of
@@ -83,6 +83,59 @@
     "fr": {"sc.safety.ok": "J\u2019ai compris", "sc.gate.eyebrow": "Theodyx \u2014 S\u00e9curit\u00e9", "sc.gate.title": "Avant de postuler", "sc.gate.dob": "Votre date de naissance", "sc.gate.go": "Continuer", "sc.gate.note": "Vous devez avoir {n} ans ou plus pour postuler directement. Nous utilisons votre date de naissance uniquement pour le v\u00e9rifier.", "sc.gate.kicker": "Our Scouting", "sc.gate.lead": "Une question avant de lire le moindre mot.", "sc.gate.m": "Mois", "sc.gate.d": "Jour", "sc.gate.y": "Ann\u00e9e", "sc.gate.ph.m": "MM", "sc.gate.ph.d": "JJ", "sc.gate.ph.y": "AAAA", "sc.gate.dobreal": "Cette date n\u2019existe pas : v\u00e9rifiez le jour et le mois."}
   };
   for (var __gl in SCD_GATE) { if (!SCD[__gl]) SCD[__gl] = {}; for (var __gk in SCD_GATE[__gl]) SCD[__gl][__gk] = SCD_GATE[__gl][__gk]; }
+  /* 2.7.0 — Workstream 4's strings, ENGLISH ONLY, in their own object so the dictionaries above stay byte-identical.
+   * TRANSLATION FALLBACK, deliberately: no other locale is registered here, so es/pt/fr (and de/it/zh/ja/ko/ar/hi/ru
+   * if Webflow Localization ever serves them) show these lines in English — the locale runtime falls back key by key.
+   * Nothing was machine-translated. Several of these are legal notices (sc.ws4.gNote*, sc.ws4.visaNote, sc.ws4.netNote,
+   * sc.ws4.picsMinor): drafts for counsel, translated by people, exactly like sc.safety.body. The full list of keys
+   * that need a human translation is Object.keys(SCD_WS4.en), also printed in theodyx-dealdesk/docs/WS4-BUILD-LOG.md. */
+  var SCD_WS4 = {
+    "en": {
+      "sc.gate.note2": "You must be {n} or older to apply. Under {m}, you apply with a parent or guardian. We use your date of birth only to check that.",
+      "sc.ws4.lbl.vertical": "Your main category",
+      "sc.ws4.err.vertical": "Choose your main category.",
+      "sc.ws4.v.modeling": "Modeling", "sc.ws4.v.fashion": "Fashion", "sc.ws4.v.beauty": "Beauty",
+      "sc.ws4.v.legal": "Legal & law", "sc.ws4.v.finance": "Business & finance", "sc.ws4.v.tech": "Tech",
+      "sc.ws4.v.education": "Education & academia", "sc.ws4.v.gaming": "Gaming", "sc.ws4.v.music": "Music",
+      "sc.ws4.v.entertainment": "Comedy & entertainment", "sc.ws4.v.lifestyle": "Lifestyle",
+      "sc.ws4.v.family": "Family & parenting", "sc.ws4.v.food": "Food & drink", "sc.ws4.v.fitness": "Fitness & health",
+      "sc.ws4.v.sports": "Sports", "sc.ws4.v.travel": "Travel", "sc.ws4.v.faith": "Faith", "sc.ws4.v.home": "Home & DIY",
+      "sc.ws4.v.outdoors": "Outdoors", "sc.ws4.v.other": "Other",
+      "sc.ws4.lbl.work": "Citizenship and U.S. work status",
+      "sc.ws4.err.work": "Tell us your citizenship or U.S. work status.",
+      "sc.ws4.w.us_citizen": "U.S. citizen", "sc.ws4.w.permanent_resident": "U.S. permanent resident (green card)",
+      "sc.ws4.w.f1": "F-1 student visa", "sc.ws4.w.m1": "M-1 student visa", "sc.ws4.w.j1": "J-1 exchange visitor visa",
+      "sc.ws4.w.opt_cpt": "Student visa with OPT or CPT work authorization", "sc.ws4.w.o1": "O-1 visa",
+      "sc.ws4.w.other_visa": "Another U.S. visa", "sc.ws4.w.not_in_us": "I don’t live in the United States",
+      "sc.ws4.visaNote": "Important if you hold an F-1, M-1 or J-1 visa: U.S. immigration rules can treat paid creator work, brand promotion and appearances done in the United States as unauthorized employment, which can end your student status. You can still apply. Theodyx will not book you for any campaign performed in the U.S. unless you hold valid work authorization (such as OPT or CPT) or another status that allows it, and we recommend speaking with your school’s international student office before any paid work.",
+      "sc.ws4.optNote": "Before we book any U.S. work we’ll ask for the dates of your OPT or CPT authorization.",
+      "sc.ws4.legend.net": "Are you under any agency, management, MCN or creator-network agreement right now? *",
+      "sc.ws4.netHint": "Include unpaid contributor, ambassador or campus programs.",
+      "sc.ws4.lbl.netDetail": "Which one, and when does it end?",
+      "sc.ws4.ph.netDetail": "e.g. Network name — ends May 2027",
+      "sc.ws4.netNote": "If we move forward we’ll ask for a copy so we can respect its terms. Please don’t send it now.",
+      "sc.ws4.err.net": "Let us know if you’re under another agreement.",
+      "sc.ws4.err.netDetail": "Which agreement, and when does it end?",
+      "sc.ws4.g.eyebrow": "Parent or guardian",
+      "sc.ws4.gNote": "Because you’re under {m}, you apply with a parent or legal guardian. Tell us who they are. If we’d like to move forward, we’ll contact them before anything is signed, and they co-sign any agreement with you. Applying is still free.",
+      "sc.ws4.gNoteState": "In {state} you’re legally an adult at {m}, so a parent or legal guardian applies with you. Tell us who they are. If we’d like to move forward, we’ll contact them before anything is signed, and they co-sign any agreement with you. Applying is still free.",
+      "sc.ws4.gExcluded": "Theodyx doesn\u2019t represent creators under {m} who live in {state} right now, so we can\u2019t take your application yet. We\u2019d love to hear from you when you turn {m}.",
+      "sc.ws4.err.excluded": "We can\u2019t accept applications from anyone under {m} who lives in {state} yet.",
+      "sc.ws4.stateNote": "In {state} the age of majority is {m}, so we’ve added a parent or guardian section below.",
+      "sc.ws4.lbl.gName": "Parent or guardian’s full name",
+      "sc.ws4.lbl.gRel": "Their relationship to you",
+      "sc.ws4.lbl.gEmail": "Parent or guardian’s email",
+      "sc.ws4.rel.parent": "Parent", "sc.ws4.rel.guardian": "Legal guardian",
+      "sc.ws4.err.gName": "Your parent or guardian’s name is required.",
+      "sc.ws4.err.gRel": "Choose their relationship to you.",
+      "sc.ws4.err.gEmail": "Enter your parent or guardian’s email address.",
+      "sc.ws4.err.gEmailSame": "Use your parent or guardian’s own email address, not yours.",
+      "sc.ws4.picsPhoto": "Photo of you",
+      "sc.ws4.picsGeneral": "Optional: one recent photo of you. A professional headshot is fine.",
+      "sc.ws4.picsMinor": "We don’t collect photos from applicants under 18 at this stage. If we’d like to see more, we’ll ask through your parent or guardian."
+    }
+  };
+  for (var __wl in SCD_WS4) { if (!SCD[__wl]) SCD[__wl] = {}; for (var __wk in SCD_WS4[__wl]) SCD[__wl][__wk] = SCD_WS4[__wl][__wk]; }
   var __I = window.__thxI18n; if (__I) { for (var __lc in SCD) __I.add(__lc, SCD[__lc]); }
   function T(k, v) { if (__I && __I.t) return __I.t(k, v); var s = SCD.en[k] || k; if (v) for (var p in v) s = s.split('{' + p + '}').join(v[p]); return s; }
 
@@ -94,6 +147,64 @@
   var QR_SRC = 'https://cdn.jsdelivr.net/gh/GrantSikes/liquidgl-theodyx@4fd766127f1588e11846fead994117da4d50cabe/vendor/qrcode.min.js';
   var QR_SRI = 'sha384-UE+eaQRn+KiuCh1sYLD51yNjGFekkZ5qoo2J9LvSo1leawRjhShWe7VY8obiE5D4';
   var MIN_AGE = 14;
+  /* 2.7.0 (Workstream 4, Decision 4) — who applies on their own. MIN_AGE (14) is still the floor for applying at all and
+   * still what the scouting API enforces; below SELF_SERVE_AGE an applicant goes down the parent-or-guardian path. U.S.
+   * states whose age for a binding personal-services contract is above 18 raise the bar when the state field names them:
+   * Alabama 19 (Ala. Code § 26-1-1, the strategy's rule), Nebraska 19, Mississippi 21 — the same "Minor" the signing
+   * paper uses (GUARD-11 v2.0 § 1.2, INTAKE-21 (v3.1 onward)), so the page and PKT-CREATOR-MINOR-V2 never disagree.
+   * MINOR_EXCLUDED_STATES is that paper's other rule: Theodyx does not represent a Minor who lives in one of them, so a
+   * Minor there is told so and cannot submit (empty the object to accept them for review instead). */
+  var SELF_SERVE_AGE = 18;
+  var MAJORITY_STATES = {
+    AL: { age: 19, name: 'Alabama', alias: ['al', 'ala', 'alabama'] },
+    NE: { age: 19, name: 'Nebraska', alias: ['ne', 'neb', 'nebr', 'nebraska'] },
+    MS: { age: 21, name: 'Mississippi', alias: ['ms', 'miss', 'mississippi'] }
+  };
+  var MINOR_EXCLUDED_STATES = {
+    AR: { name: 'Arkansas', alias: ['ar', 'ark', 'arkansas'] },
+    CO: { name: 'Colorado', alias: ['co', 'colo', 'colorado'] },
+    HI: { name: 'Hawaii', alias: ['hi', 'hawaii', 'hawai i'] },
+    MN: { name: 'Minnesota', alias: ['mn', 'minn', 'minnesota'] },
+    NY: { name: 'New York', alias: ['ny', 'nyc', 'n y', 'new york'] },
+    TN: { name: 'Tennessee', alias: ['tn', 'tenn', 'tennessee'] },
+    UT: { name: 'Utah', alias: ['ut', 'utah'] }
+  };
+  /* Teen privacy (strategy Phase 6 §6): no photographs from anyone on the guardian path. true restores the photo block for them. */
+  var MINOR_PHOTOS = false;
+  /* The scouting API validates with shared/schema.ts, whose zod object strips keys it does not know — the new answers
+   * would vanish on the server until the API change in WS4-BUILD-LOG.md ships. While this is true they are also written
+   * as a marked block at the top of `notes`, which the API already stores and mails to the team. Set false once the API
+   * stores them as fields. */
+  var BRIDGE_NOTES = false;   /* 2.7.1: the API stores the fields (0003_ws4) */
+  /* main category: [value, label key, the shared/schema.ts NICHES value it maps to (sent as niches[], which the API
+   * already accepts and stores) or null, modeling photo set]. Modeling and Fashion are the only categories for which the
+   * agency-style photo instructions make sense (strategy Phase 4 §1); Beauty is not equivalent — make-up is the work. */
+  var VERTICALS = [
+    ['modeling', 'sc.ws4.v.modeling', 'Fashion & Beauty', true],
+    ['fashion', 'sc.ws4.v.fashion', 'Fashion & Beauty', true],
+    ['beauty', 'sc.ws4.v.beauty', 'Fashion & Beauty', false],
+    ['legal', 'sc.ws4.v.legal', null, false],
+    ['finance', 'sc.ws4.v.finance', 'Business & Finance', false],
+    ['tech', 'sc.ws4.v.tech', 'Tech', false],
+    ['education', 'sc.ws4.v.education', null, false],
+    ['gaming', 'sc.ws4.v.gaming', 'Gaming', false],
+    ['music', 'sc.ws4.v.music', 'Music', false],
+    ['entertainment', 'sc.ws4.v.entertainment', 'Comedy & Entertainment', false],
+    ['lifestyle', 'sc.ws4.v.lifestyle', 'Lifestyle', false],
+    ['family', 'sc.ws4.v.family', 'Family & Parenting', false],
+    ['food', 'sc.ws4.v.food', 'Food & Drink', false],
+    ['fitness', 'sc.ws4.v.fitness', 'Fitness & Health', false],
+    ['sports', 'sc.ws4.v.sports', 'Sports', false],
+    ['travel', 'sc.ws4.v.travel', 'Travel', false],
+    ['faith', 'sc.ws4.v.faith', 'Faith', false],
+    ['home', 'sc.ws4.v.home', 'Home & DIY', false],
+    ['outdoors', 'sc.ws4.v.outdoors', 'Outdoors (Hunting/Fishing/Camping)', false],
+    ['other', 'sc.ws4.v.other', 'Other', false]
+  ];
+  /* citizenship / U.S. work status (strategy Phase 6 §5). STUDENT_VISAS get the notice and usWorkRestricted:true. */
+  var WORK_STATUS = ['us_citizen', 'permanent_resident', 'f1', 'm1', 'j1', 'opt_cpt', 'o1', 'other_visa', 'not_in_us'];
+  var STUDENT_VISAS = { f1: 1, m1: 1, j1: 1 };
+  var GUARDIAN_REL = ['parent', 'guardian'];
   var MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
   var SCOUTING_EMAIL = 'scouting@theodyx.com';
   var SS_FORM = 'theodyx_scouting_form_v1';
@@ -453,7 +564,7 @@
     entry.appendChild(go);                            /* never disabled: an empty submit has to be able to explain itself */
 
     var note = document.createElement('p'); note.id = 'sc-gate-note'; note.className = 'sc-gate-note';
-    note.textContent = T('sc.gate.note', { n: MIN_AGE });
+    note.textContent = T('sc.gate.note2', { n: MIN_AGE, m: SELF_SERVE_AGE });   /* 2.7.0: 14+ applies, under 18 with a parent or guardian */
     entry.appendChild(note);
     form.appendChild(entry);
 
@@ -601,6 +712,7 @@
     if (f) { f.value = dob; persistForm(); }
     inlineNote();
     evaluateAge(false);       /* silent: age_eligible has already been emitted by gateSubmit() */
+    refreshWs4();             /* 2.7.0: 14-17 open the form with the parent-or-guardian section showing */
     closeGates($('sc-email') || $('sc-form-you'));
     initQR();                 /* 2.4.0: the desktop "continue on your phone" code, drawn once the page is open */
   }
@@ -750,19 +862,195 @@
     return a;
   }
 
+  /* ------------------------------------------- Workstream 4 fields (2.7.0)
+   * Four additions, all built by this script into the native form (no Designer elements: the page stays deployable by a
+   * bundle swap alone, and an unrelated publish of the site can never put half of this live):
+   *   1. #sc-vertical    main category, in the About-you grid after the platform; drives the photo block (applyPhotos).
+   *   2. #sc-workStatus  citizenship and U.S. work status, full width after the city, with the F-1/M-1/J-1 notice.
+   *   3. #sc-guardian    the parent-or-guardian section (name, relationship, email + the co-sign notice), shown only while
+   *                      guardianInfo().required — under SELF_SERVE_AGE, or under the named state's age of majority.
+   *   4. #sc-net         an agency / management / network agreement yes-no (chips, same shape as #sc-rep) + which one.
+   * Everything is idempotent (data-thx-ws4) and safe on the injected fallback build too. */
+  function ws4Field(cls, inner) { var d = document.createElement('div'); d.className = cls; d.innerHTML = inner; return d; }
+  function ws4Options(sel, list, phKey) {
+    var ph = document.createElement('option'); ph.value = ''; ph.textContent = T(phKey || 'sc.ph.select'); ph.disabled = true; ph.selected = true; sel.appendChild(ph);
+    list.forEach(function (pair) { var o = document.createElement('option'); o.value = pair[0]; o.textContent = T(pair[1]); sel.appendChild(o); });
+  }
+  function buildWs4() {
+    var you = $('sc-form-you'); if (!you || you.dataset.thxWs4) return;
+    var grid = qs('.sc-grid', you); if (!grid) return;
+    you.dataset.thxWs4 = '1';
+    function fieldOf(id) { var e = $(id); return e && e.closest ? e.closest('.sc-field') : null; }
+    function after(ref, node) { if (ref && ref.parentNode === grid) grid.insertBefore(node, ref.nextSibling); else grid.appendChild(node); return node; }
+
+    /* 1. main category */
+    var fv = ws4Field('sc-field', '<label class="sc-label" for="sc-vertical">' + escapeHtml(T('sc.ws4.lbl.vertical')) + '</label><select id="sc-vertical" class="sc-select"></select>');
+    ws4Options(qs('select', fv), VERTICALS.map(function (v) { return [v[0], v[1]]; }));
+    after(fieldOf('sc-platform'), fv);
+
+    /* 2. citizenship and U.S. work status, + its notice */
+    var fw = ws4Field('sc-field sc-full', '<label class="sc-label" for="sc-workStatus">' + escapeHtml(T('sc.ws4.lbl.work')) + '</label><select id="sc-workStatus" class="sc-select"></select><p id="sc-work-note" class="sc-ws4-note" role="status" hidden></p>');
+    fw.id = 'sc-work-wrap';
+    ws4Options(qs('select', fw), WORK_STATUS.map(function (w) { return [w, 'sc.ws4.w.' + w]; }));
+    after(fieldOf('sc-city'), fw);
+
+    /* 3. parent or guardian (hidden until needed) + the state-rule line under the state field */
+    var fg = ws4Field('sc-field sc-full sc-ws4-guardian',
+      '<span class="sc-legend" id="sc-guardian-legend">' + escapeHtml(T('sc.ws4.g.eyebrow')) + '</span>' +
+      '<p id="sc-guardian-note" class="sc-ws4-note sc-ws4-note--plain"></p>' +
+      '<div class="sc-grid">' +
+        '<div class="sc-field"><label class="sc-label" for="sc-guardianName">' + escapeHtml(T('sc.ws4.lbl.gName')) + '</label><input id="sc-guardianName" class="sc-input" type="text" autocomplete="off"></div>' +
+        '<div class="sc-field"><label class="sc-label" for="sc-guardianRel">' + escapeHtml(T('sc.ws4.lbl.gRel')) + '</label><select id="sc-guardianRel" class="sc-select"></select></div>' +
+        '<div class="sc-field sc-full"><label class="sc-label" for="sc-guardianEmail">' + escapeHtml(T('sc.ws4.lbl.gEmail')) + '</label><input id="sc-guardianEmail" class="sc-input" type="email" inputmode="email" autocomplete="off"></div>' +
+      '</div>');
+    fg.id = 'sc-guardian'; fg.setAttribute('role', 'group'); fg.setAttribute('aria-labelledby', 'sc-guardian-legend'); fg.hidden = true;
+    ws4Options(qs('select', fg), GUARDIAN_REL.map(function (r) { return [r, 'sc.ws4.rel.' + r]; }));
+    after(fw, fg);
+    var stf = fieldOf('sc-state');
+    if (stf && !$('sc-state-note')) { var sn = document.createElement('p'); sn.id = 'sc-state-note'; sn.className = 'sc-ws4-info'; sn.setAttribute('role', 'status'); sn.hidden = true; stf.appendChild(sn); }
+
+    /* 4. other agreements (after "represented by") */
+    var fn = ws4Field('sc-field sc-full',
+      '<span class="sc-legend" id="sc-net-legend">' + escapeHtml(T('sc.ws4.legend.net')) + '</span>' +
+      '<p class="sc-ws4-hint" id="sc-net-hint">' + escapeHtml(T('sc.ws4.netHint')) + '</p>' +
+      '<div class="sc-chips" role="group" aria-labelledby="sc-net-legend" aria-describedby="sc-net-hint">' +
+        '<button type="button" class="sc-chip" id="sc-net-no" data-val="no" data-on="false" aria-pressed="false">' + escapeHtml(T('sc.no')) + '</button>' +
+        '<button type="button" class="sc-chip" id="sc-net-yes" data-val="yes" data-on="false" aria-pressed="false">' + escapeHtml(T('sc.yes')) + '</button>' +
+      '</div>');
+    fn.id = 'sc-net';
+    var fnd = ws4Field('sc-field sc-full', '<label class="sc-label" for="sc-netDetail">' + escapeHtml(T('sc.ws4.lbl.netDetail')) + '</label><input id="sc-netDetail" class="sc-input" type="text" placeholder="' + escapeHtml(T('sc.ws4.ph.netDetail')) + '"><p class="sc-ws4-hint">' + escapeHtml(T('sc.ws4.netNote')) + '</p>');
+    fnd.id = 'sc-netDetail-wrap'; fnd.style.display = 'none';
+    var repBy = $('sc-representedBy-wrap') || $('sc-rep');
+    after(repBy && repBy.parentNode === grid ? repBy : null, fn); after(fn, fnd);
+
+    on($('sc-vertical'), 'change', function () { applyPhotos(); persistForm(); });
+    on($('sc-workStatus'), 'change', function () { applyWorkNote(); persistForm(); });
+    on($('sc-country'), 'change', refreshWs4);
+    on($('sc-state'), 'input', refreshWs4);
+    qsa('#sc-net [data-val]').forEach(function (b) { on(b, 'click', function () { setNetwork(b.getAttribute('data-val')); if (isBad('sc-net')) validateField('sc-net'); }); });
+  }
+
+  function currentNetwork() {
+    var y = qs('#sc-net [data-val="yes"]'), n = qs('#sc-net [data-val="no"]');
+    if (y && y.getAttribute('data-on') === 'true') return 'yes';
+    if (n && n.getAttribute('data-on') === 'true') return 'no';
+    return '';
+  }
+  function setNetwork(v, skipPersist) {
+    qsa('#sc-net [data-val]').forEach(function (b) { var isOn = b.getAttribute('data-val') === v; b.setAttribute('data-on', isOn ? 'true' : 'false'); b.setAttribute('aria-pressed', isOn ? 'true' : 'false'); });
+    var w = $('sc-netDetail-wrap'); if (w) w.style.display = (v === 'yes') ? 'block' : 'none';
+    if (v !== 'yes') clearFieldMsg('sc-netDetail');
+    if (!skipPersist) persistForm();
+  }
+
+  /* The age of majority that applies: SELF_SERVE_AGE, raised when the applicant is in the U.S. (or has not picked a
+   * country yet) and the state field names one of MAJORITY_STATES. The gate itself only knows the date of birth, so the
+   * state rule is applied here, live, as the state is typed — with a line under the field saying why. */
+  function stateIn(table) {
+    var c = val('sc-country'); if (c && c !== 'United States') return null;
+    var s = val('sc-state').toLowerCase().replace(/[^a-z ]+/g, ' ').replace(/\s+/g, ' ').trim(); if (!s) return null;
+    for (var k in table) {
+      var m = table[k];
+      if (m.alias.indexOf(s) !== -1 || s.indexOf(m.name.toLowerCase()) === 0) return k;
+    }
+    return null;
+  }
+  function majorityState() { return stateIn(MAJORITY_STATES); }
+  function guardianInfo() {
+    var a = dobAge(); if (a == null && gates.ageResolved) a = gates.age;
+    var st = majorityState(), maj = st ? MAJORITY_STATES[st].age : SELF_SERVE_AGE;
+    var req = a != null && a >= MIN_AGE && a < maj;
+    var ex = req ? stateIn(MINOR_EXCLUDED_STATES) : null;
+    return { required: req, age: a, majority: maj, state: st, excluded: ex, reason: !req ? null : (a < SELF_SERVE_AGE ? 'under_' + SELF_SERVE_AGE : 'state_majority_' + st) };
+  }
+  function applyGuardian() {
+    var box = $('sc-guardian'); if (!box) return;
+    var g = guardianInfo(), stateRule = g.required && g.age >= SELF_SERVE_AGE;
+    var vars = { m: g.majority, state: g.state ? MAJORITY_STATES[g.state].name : '' };
+    if (g.excluded) vars.state = MINOR_EXCLUDED_STATES[g.excluded].name;
+    var note = $('sc-guardian-note'); if (note) note.textContent = T(g.excluded ? 'sc.ws4.gExcluded' : (stateRule ? 'sc.ws4.gNoteState' : 'sc.ws4.gNote'), vars);
+    if (note) note.classList.toggle('sc-ws4-note--warn', !!g.excluded);
+    var gGrid = qs('.sc-grid', box); if (gGrid) gGrid.style.display = g.excluded ? 'none' : '';
+    if (!g.excluded && $('sc-state-err')) clearFieldMsg('sc-state');
+    var sn = $('sc-state-note');
+    if (sn) { if (stateRule) { sn.textContent = T('sc.ws4.stateNote', vars); sn.hidden = false; } else { sn.textContent = ''; sn.hidden = true; } }
+    if (g.required === !box.hidden) return;              /* no change */
+    box.hidden = !g.required;
+    document.documentElement.classList.toggle('sc-guardian', g.required);
+    if (!g.required) ['sc-guardianName', 'sc-guardianRel', 'sc-guardianEmail'].forEach(clearFieldMsg);
+  }
+  /* Photos. Modeling/Fashion: the native block as built (the agency instructions + headshot/profile/full length).
+   * Everyone else: the instructions and the profile/full-length slots go, the headshot slot becomes "Photo of you".
+   * The guardian path: no photo slots at all (MINOR_PHOTOS). A slot that is hidden drops whatever it had uploaded, so
+   * a hidden upload can never ride along in sampleKeys. */
+  function applyPhotos() {
+    var p0 = $('sc-pic0'), block = p0 && p0.closest ? p0.closest('.sc-block--divider') : null; if (!block) return;
+    var v = val('sc-vertical'), modeling = false;
+    VERTICALS.forEach(function (r) { if (r[0] === v) modeling = r[3]; });
+    var minor = !MINOR_PHOTOS && guardianInfo().required;
+    var mode = minor ? 'minor' : (modeling ? 'modeling' : 'general');
+    if (block.getAttribute('data-ws4-mode') === mode) return;
+    block.setAttribute('data-ws4-mode', mode);
+    var note = qs('.sc-pics-note', block), grid = qs('.sc-grid3', block);
+    var f = ['sc-pic0', 'sc-pic1', 'sc-pic2'].map(function (id) { var e = $(id); return e && e.closest ? e.closest('.sc-field') : null; });
+    var alt = $('sc-pics-alt');
+    if (!alt) { alt = document.createElement('p'); alt.id = 'sc-pics-alt'; alt.className = 'sc-text sc-pics-alt'; if (note && note.parentNode) note.parentNode.insertBefore(alt, note.nextSibling); else block.insertBefore(alt, grid); }
+    /* the headshot label's words: a <span> ("Headshot ") in the native build, a bare text node in the injected fallback;
+       the original is remembered on the label so Modeling gets it back */
+    var lab0 = f[0] && qs('.sc-label', f[0]), span0 = null;
+    if (lab0) {
+      for (var ci = 0; ci < lab0.childNodes.length && !span0; ci++) {
+        var cn = lab0.childNodes[ci];
+        if (cn.nodeType === 3 && cn.nodeValue.trim()) span0 = cn;
+        else if (cn.nodeType === 1 && !cn.classList.contains('sc-opt') && !cn.classList.contains('sc-req') && cn.textContent.trim()) span0 = cn;
+      }
+      if (span0 && !lab0.hasAttribute('data-ws4-orig')) lab0.setAttribute('data-ws4-orig', span0.textContent);
+    }
+    if (note) note.style.display = mode === 'modeling' ? '' : 'none';
+    alt.textContent = mode === 'minor' ? T('sc.ws4.picsMinor') : (mode === 'general' ? T('sc.ws4.picsGeneral') : '');
+    alt.style.display = mode === 'modeling' ? 'none' : '';
+    if (grid) grid.style.display = mode === 'minor' ? 'none' : '';
+    if (f[1]) f[1].style.display = mode === 'modeling' ? '' : 'none';
+    if (f[2]) f[2].style.display = mode === 'modeling' ? '' : 'none';
+    if (span0) span0.textContent = mode === 'modeling' ? lab0.getAttribute('data-ws4-orig') : T('sc.ws4.picsPhoto') + ' ';
+    if (mode !== 'modeling') { ['sc-pic1', 'sc-pic2'].forEach(function (id) { if (dropResets[id]) dropResets[id](); }); }
+    if (mode === 'minor' && dropResets['sc-pic0']) dropResets['sc-pic0']();
+  }
+  function applyWorkNote() {
+    var n = $('sc-work-note'); if (!n) return;
+    var w = val('sc-workStatus'), t = STUDENT_VISAS[w] ? T('sc.ws4.visaNote') : (w === 'opt_cpt' ? T('sc.ws4.optNote') : '');
+    n.textContent = t; n.hidden = !t;
+    n.classList.toggle('sc-ws4-note--warn', !!STUDENT_VISAS[w]);
+  }
+  function refreshWs4() { applyGuardian(); applyPhotos(); applyWorkNote(); }
+
+  /* the note block written at the top of notes while BRIDGE_NOTES is on (see the constant). English on purpose: it is
+   * read by the team, not the applicant. */
+  function bridgeNotes(p) {
+    var L = ['[Theodyx scouting 2.7.0 intake — fields the API does not store yet]'];
+    if (p.vertical) L.push('Main category: ' + p.vertical);
+    if (p.workStatus) L.push('Citizenship / U.S. work status: ' + p.workStatus + (p.usWorkRestricted ? ' — STUDENT VISA: no U.S.-soil paid work without authorization' : ''));
+    if (p.networkAgreement != null) L.push('Agency / management / network agreement: ' + (p.networkAgreement ? 'YES — ' + (p.networkAgreementDetail || '') : 'no'));
+    if (p.guardianRequired) L.push('GUARDIAN REQUIRED (age ' + p.applicantAge + ', majority ' + p.majorityAge + (p.majorityState ? ' in ' + p.majorityState : '') + '): ' + p.guardianName + ', ' + p.guardianRelationship + ', ' + p.guardianEmail);
+    return L.join('\n') + '\n[end]';
+  }
+
   /* --------------------------------------------------------- form persist */
-  var TEXT_FIELDS = ['sc-email','sc-firstName','sc-lastName','sc-dob','sc-platform','sc-country','sc-state','sc-city','sc-instagram','sc-tiktok','sc-youtube','sc-otherPlatform','sc-otherHandle','sc-link1','sc-link2','sc-link3','sc-notes'];
+  var TEXT_FIELDS = ['sc-email','sc-firstName','sc-lastName','sc-dob','sc-platform','sc-country','sc-state','sc-city','sc-instagram','sc-tiktok','sc-youtube','sc-otherPlatform','sc-otherHandle','sc-link1','sc-link2','sc-link3','sc-notes',
+    /* 2.7.0 */ 'sc-vertical','sc-workStatus','sc-guardianName','sc-guardianRel','sc-guardianEmail','sc-netDetail'];
 
   function hydrateForm() {
     var saved = loadJSON(SS_FORM); if (!saved) { return; }
     TEXT_FIELDS.forEach(function (id) { var e = $(id); if (e && typeof saved[id] === 'string') e.value = saved[id]; });
     if (saved.represented === 'no' || saved.represented === 'yes') setRepresented(saved.represented, true);
+    if (saved.network === 'no' || saved.network === 'yes') setNetwork(saved.network, true);
     onPlatformChange();
   }
   function persistForm() {
     var obj = {};
     TEXT_FIELDS.forEach(function (id) { var e = $(id); if (e) obj[id] = e.value; });
     obj.represented = currentRepresented();
+    obj.network = currentNetwork();
     saveJSON(SS_FORM, obj);
   }
   function wirePersist() {
@@ -799,7 +1087,9 @@
    * The page ships as a native Webflow build, so ensureDom() is a no-op there and every attribute
    * below has to be applied to the live DOM rather than only to the injected fragments. All of it
    * is idempotent and guarded, so it is safe on both builds. */
-  var REQUIRED_IDS = ['sc-email', 'sc-firstName', 'sc-lastName', 'sc-dob', 'sc-platform', 'sc-country', 'sc-consent'];
+  var REQUIRED_IDS = ['sc-email', 'sc-firstName', 'sc-lastName', 'sc-dob', 'sc-platform', 'sc-country', 'sc-consent',
+    /* 2.7.0 — the guardian three are required only while #sc-guardian is shown; validation checks that, the star just labels them */
+    'sc-vertical', 'sc-workStatus', 'sc-guardianName', 'sc-guardianRel', 'sc-guardianEmail'];
 
   /* F-17: keep a short label on the checkbox and move the trailing sentence into a described-by
    * note, so the accessible name stops being a 40-word paragraph. */
@@ -933,6 +1223,7 @@
     }
     on(drop, 'click', function () { input.click(); });
     on(remove, 'click', function () { reset(true); });
+    dropResets[dropId] = function () { if (drop.classList.contains('is-done') || drop.classList.contains('is-error')) reset(false); };   /* 2.7.0: a slot the category hides drops its upload */
 
     /* ACT-04 — the zone is drawn as a drop target, so it accepts a drop. The dragged file goes
      * through exactly the same path as one chosen in the picker: same accept check, same 10 MB
@@ -1029,6 +1320,7 @@
       });
     }
   }
+  var dropResets = {};
   function escapeHtml(s) { return String(s).replace(/[&<>"']/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]; }); }
 
   function wireUploads() {
@@ -1132,11 +1424,13 @@
   /* the controls a message belongs to — the represented question is a pair of chips, not one input */
   function fieldControls(id) {
     if (id === 'sc-rep') return qsa('#sc-rep [data-val]');
+    if (id === 'sc-net') return qsa('#sc-net [data-val]');
     if (id === 'sc-turnstile') return [];
     var e = $(id); return e ? [e] : [];
   }
   function fieldMsgHost(id) {
     if (id === 'sc-rep') return $('sc-rep');
+    if (id === 'sc-net') return $('sc-net');
     if (id === 'sc-turnstile') return $('sc-turnstile');
     if (id === 'sc-consent' || id === 'sc-safety-ack') { var lab = qs('label[for="' + id + '"]'); return (lab && lab.parentNode) || null; }
     var e = $(id); if (!e) return null;
@@ -1145,6 +1439,7 @@
   /* where the summary link should send the keyboard: always a real focusable node (F-06) */
   function errAnchorTarget(id) {
     if (id === 'sc-rep') return qs('#sc-rep [data-val]');
+    if (id === 'sc-net') return qs('#sc-net [data-val]');
     if (id === 'sc-turnstile') return $('sc-turnstile-msg') || $('sc-submit');
     return $(id) || $('sc-submit');
   }
@@ -1257,6 +1552,19 @@
     if (id === 'sc-link1' || id === 'sc-link2' || id === 'sc-link3') { var l = val(id); return (l && !isUrl(l)) ? T('sc.err.links') : null; }
     if (id === 'sc-consent') { var c = $('sc-consent'); return (c && c.checked) ? null : T('sc.err.consent'); }
     if (id === 'sc-safety-ack') { var k = $('sc-safety-ack'); return (k && k.checked) ? null : T('sc.err.safety'); }
+    /* 2.7.0 */
+    if (id === 'sc-vertical') return (!$('sc-vertical') || val('sc-vertical')) ? null : T('sc.ws4.err.vertical');
+    if (id === 'sc-workStatus') return (!$('sc-workStatus') || val('sc-workStatus')) ? null : T('sc.ws4.err.work');
+    if (id === 'sc-net') { if (!$('sc-net')) return null; var nw = currentNetwork(); return (nw === 'yes' || nw === 'no') ? null : T('sc.ws4.err.net'); }
+    if (id === 'sc-netDetail') return (currentNetwork() === 'yes' && !val('sc-netDetail')) ? T('sc.ws4.err.netDetail') : null;
+    if (id === 'sc-guardianName' || id === 'sc-guardianRel' || id === 'sc-guardianEmail') {
+      var gi0 = guardianInfo(); if (!gi0.required || gi0.excluded) return null;
+      if (id === 'sc-guardianName') return val(id) ? null : T('sc.ws4.err.gName');
+      if (id === 'sc-guardianRel') return val(id) ? null : T('sc.ws4.err.gRel');
+      var ge = val(id).toLowerCase();
+      if (!isEmail(ge)) return T('sc.ws4.err.gEmail');
+      return (ge === val('sc-email').toLowerCase()) ? T('sc.ws4.err.gEmailSame') : null;
+    }
     return null;
   }
   function validateField(id) {
@@ -1265,12 +1573,12 @@
     return msg;
   }
   function isBad(id) { return fieldControls(id).some(function (e) { return e.getAttribute('aria-invalid') === 'true'; }); }
-  var INLINE_BLUR = ['sc-email', 'sc-firstName', 'sc-lastName', 'sc-dob', 'sc-representedBy', 'sc-otherPlatform', 'sc-link1', 'sc-link2', 'sc-link3'];
-  var INLINE_CHANGE = ['sc-country', 'sc-platform', 'sc-consent', 'sc-safety-ack'];
+  var INLINE_BLUR = ['sc-email', 'sc-firstName', 'sc-lastName', 'sc-dob', 'sc-representedBy', 'sc-otherPlatform', 'sc-link1', 'sc-link2', 'sc-link3', 'sc-guardianName', 'sc-guardianEmail', 'sc-netDetail'];
+  var INLINE_CHANGE = ['sc-country', 'sc-platform', 'sc-consent', 'sc-safety-ack', 'sc-vertical', 'sc-workStatus', 'sc-guardianRel'];
   function wireInlineValidation() {
     INLINE_BLUR.forEach(function (id) {
       var e = $(id); if (!e || e.dataset.thxInline) return; e.dataset.thxInline = '1';
-      on(e, 'blur', function () { if (id === 'sc-dob') { evaluateAge(true); if (!dobAge()) validateField(id); } else validateField(id); });
+      on(e, 'blur', function () { if (id === 'sc-dob') { evaluateAge(true); refreshWs4(); if (!dobAge()) validateField(id); } else validateField(id); });
       on(e, 'input', function () { if (isBad(id)) validateField(id); });
     });
     INLINE_CHANGE.forEach(function (id) {
@@ -1313,6 +1621,13 @@
     if (rep === 'yes' && !representedBy) { markBad('sc-representedBy'); errs.push(['sc-representedBy', T('sc.err.repby')]); }
     var otherPlatform = val('sc-otherPlatform');
     if (platform === 'other' && !otherPlatform) { markBad('sc-otherPlatform'); errs.push(['sc-otherPlatform', T('sc.err.other')]); }
+    /* 2.7.0 — category, work status, the guardian three (only on the guardian path), other agreements; in page order */
+    refreshWs4();
+    ['sc-vertical', 'sc-workStatus', 'sc-guardianName', 'sc-guardianRel', 'sc-guardianEmail', 'sc-net', 'sc-netDetail'].forEach(function (id) {
+      var m = fieldError(id); if (m) { markBad(id); errs.push([id, m]); }
+    });
+    var gx = guardianInfo();
+    if (gx.excluded) { markBad('sc-state'); errs.push(['sc-state', T('sc.ws4.err.excluded', { m: gx.majority, state: MINOR_EXCLUDED_STATES[gx.excluded].name })]); }
 
     var links = ['sc-link1', 'sc-link2', 'sc-link3'].map(val).filter(Boolean);
     for (var i = 0; i < links.length; i++) { if (!isUrl(links[i])) { errs.push(['sc-link1', T('sc.err.links')]); break; } }
@@ -1342,7 +1657,29 @@
     if (links.length) payload.bestLinks = links;
     if (mediaKitKey) payload.mediaKitKey = mediaKitKey;
     var samples = sampleKeys.filter(Boolean); if (samples.length) payload.sampleKeys = samples;
-    var notes = val('sc-notes'); if (notes) payload.notes = notes;
+    var notes = val('sc-notes');
+    /* 2.7.0 — Workstream 4. camelCase like the rest of the contract; the D1 columns proposed in WS4-BUILD-LOG.md are the
+       snake_case of these names (guardian_required, work_status, ...). The server must re-derive guardianRequired from dob
+       and state itself; this flag is the page's routing hint, not the authority. */
+    var vertical = val('sc-vertical');
+    if (vertical) { payload.vertical = vertical; VERTICALS.forEach(function (r) { if (r[0] === vertical && r[2]) payload.niches = [r[2]]; }); }
+    var ws = val('sc-workStatus'); if (ws) { payload.workStatus = ws; payload.usWorkRestricted = !!STUDENT_VISAS[ws]; }
+    var nw = currentNetwork(); if (nw) { payload.networkAgreement = nw === 'yes'; if (nw === 'yes') payload.networkAgreementDetail = val('sc-netDetail'); }
+    var gi = guardianInfo();
+    payload.guardianRequired = gi.required;
+    payload.majorityAge = gi.majority;
+    if (gi.state) payload.majorityState = gi.state;
+    if (gi.required) {
+      payload.applicantAge = gi.age; payload.guardianReason = gi.reason;
+      payload.guardianName = val('sc-guardianName'); payload.guardianRelationship = val('sc-guardianRel'); payload.guardianEmail = val('sc-guardianEmail').toLowerCase();
+    }
+    payload.intakeVersion = 'scouting-2.7.1';
+    if (BRIDGE_NOTES) {
+      var head = bridgeNotes(payload), room = 2000 - head.length - 2;
+      var body = notes.length > room ? notes.slice(0, Math.max(0, room - 13)) + ' [truncated]' : notes;
+      notes = head + (body ? '\n\n' + body : '');
+    }
+    if (notes) payload.notes = notes;
     /* UTM-05: the application row can be credited to a campaign. session joins it to funnel_events,
        landingPath says which page converted, utm comes from the head beacon's sessionStorage copy
        (so an in-site click that stripped the query string still carries the campaign) and falls back
@@ -1766,6 +2103,17 @@
       + '.sc-h2,.sc-gate-h{font-weight:500!important;letter-spacing:-.02em!important}.sc-label,.sc-legend,.sc-eyebrow,.sc-req,.sc-note,.sc-drop-sub,.sc-drop-main,.sc-req-note{font-size:12px!important;letter-spacing:.08em!important}'
       + '.sc-chip{border-radius:999px!important;font-size:14px!important}.sc-submit,.sc-gate-btn{border-radius:999px!important;font-size:15px!important;letter-spacing:0!important;text-transform:none!important;font-weight:500!important}'
       + '.sc-input,.sc-select,.sc-textarea{font-family:inherit!important}';
+    /* 2.7.0 — Workstream 4: the notices sit in the house system (12 px mono-free labels, hairline, ink on cream); the visa
+     * notice is the only one with weight, a left rule in the error ink, because it is the one that can cost someone status. */
+    style.textContent += '.sc-ws4-note{margin:12px 0 0;padding:12px 16px;border:1px solid var(--sc-hair);border-radius:12px;font-size:14px;line-height:1.5;color:var(--sc-ink);background:rgba(14,14,15,.03)}'
+      + '.sc-ws4-note[hidden],.sc-ws4-info[hidden],#sc-guardian[hidden]{display:none!important}'
+      + '.sc-ws4-note--warn{border-color:var(--sc-err);border-inline-start-width:3px}'
+      + '.sc-ws4-note--plain{margin:0 0 18px}'
+      + '.sc-ws4-info{margin:8px 0 0;font-size:14px;line-height:1.45;color:var(--sc-ink)}'
+      + '.sc-ws4-hint{margin:0 0 12px;font-size:14px;line-height:1.45;color:var(--sc-mute)}#sc-netDetail-wrap .sc-ws4-hint{margin:8px 0 0}'
+      + '#sc-guardian{padding:22px 20px;border:1px solid var(--sc-line);border-radius:16px;background:rgba(14,14,15,.025)}'
+      + '#sc-guardian .sc-grid{gap:22px 32px}'
+      + '.sc-pics-alt{margin:0 0 24px}';
     document.head.appendChild(style);
   }
 
@@ -1848,6 +2196,7 @@
     buildSafety();
     ensureFooter();
     fillCountries(); fillPlatforms();
+    buildWs4();               /* 2.7.0: category, work status, parent or guardian, other agreements — before the semantics pass stars them */
     /* no future birthdates; an under-14 date is allowed in and answered honestly, because the
        ineligible message is the point — a max that silently refuses the date is the dead end. */
     var dobIn = $('sc-dob');
@@ -1865,6 +2214,7 @@
     }
     neutralizeForms();
     hydrateForm();
+    refreshWs4();             /* 2.7.0: guardian section, photo block and visa notice follow whatever the session restored */
     wireInlineValidation();
     wireTurnstileOnFocus();
     u14Note();
