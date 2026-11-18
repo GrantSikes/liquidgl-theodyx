@@ -140,7 +140,7 @@
   function T(k, v) { if (__I && __I.t) return __I.t(k, v); var s = SCD.en[k] || k; if (v) for (var p in v) s = s.split('{' + p + '}').join(v[p]); return s; }
 
   /* config */
-  var API_BASE = 'https://theodyx-scouting-api.theodyx.workers.dev';
+  var API_BASE = 'https://api.theodyx.com';
   var TURNSTILE_SITE_KEY = '0x4AAAAAADp3wmr_gUgr_SNb';
   var TURNSTILE_SRC = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
   var TURNSTILE_TIMEOUT_MS = 10000;
@@ -1702,12 +1702,19 @@
     var honey = $('sc-company'); if (honey && honey.value) { return; } // bot
     var payload = collectAndValidate(); if (!payload) return;
     setSubmitting(true);
+    /* A hung request must not leave the button on "Submitting…" for good: give up after 30 s. */
+    var ac = window.AbortController ? new AbortController() : null;
+    var giveUp = ac ? setTimeout(function () { try { ac.abort(); } catch (e) {} }, 30000) : 0;
     fetch(API_BASE + '/apply', {
-      method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload)
+      method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload), signal: ac ? ac.signal : undefined
     }).then(function (r) { return r.json().catch(function () { return null; }); })
       .then(function (data) {
+        clearTimeout(giveUp);
         setSubmitting(false);
         if (data && data.ok) { onSuccess(); return; }
+        /* A Turnstile token is single-use and the server may already have spent it. Fetch a fresh
+           one on every failure, or the corrected retry is rejected as "turnstile". */
+        if (!(data && data.error === 'turnstile')) { turnstileToken = ''; if (window.turnstile) try { window.turnstile.reset(); } catch (e) {} }
         if (data && data.error === 'validation' && data.fieldErrors) {
           var keys = Object.keys(data.fieldErrors);
           var first = keys[0];
@@ -1724,6 +1731,7 @@
         }
       })
       .catch(function () {
+        clearTimeout(giveUp);
         setSubmitting(false);
         showErr('Network error — your application didn’t send. Check your connection and try again.');
       });

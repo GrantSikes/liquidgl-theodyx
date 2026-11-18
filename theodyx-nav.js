@@ -1016,14 +1016,18 @@
     var st = document.createElement('style'); st.id = 'thx-menu-css'; st.textContent = css; document.head.appendChild(st);
     var btn = document.createElement('button'); btn.type = 'button'; btn.className = 'thx-fab'; btn.setAttribute('aria-label', T('nav.open')); btn.setAttribute('aria-expanded', 'false'); btn.setAttribute('aria-controls', 'thx-menu'); btn.setAttribute('aria-haspopup', 'true');
     btn.innerHTML = '<svg viewBox="0 0 20 20" aria-hidden="true"><line x1="3" y1="7" x2="17" y2="7"/><line x1="3" y1="13" x2="17" y2="13"/></svg>';
-    var root = document.createElement('div'); root.className = 'thx-menu'; root.id = 'thx-menu'; root.setAttribute('aria-hidden', 'true');
+    var root = document.createElement('div'); root.className = 'thx-menu'; root.id = 'thx-menu'; root.setAttribute('aria-hidden', 'true'); root.setAttribute('role', 'dialog'); root.setAttribute('aria-modal', 'true'); root.setAttribute('aria-label', 'Site menu');
     var arrow = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h9M8.5 4.5 12 8l-3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
     var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
     var html = '<div class="thx-menu-scrim"></div><nav class="thx-menu-panel" aria-label="Site menu">', d = 0;
     LINKS.forEach(function (g) { html += '<div class="thx-menu-g">' + (g.h ? '<p class="thx-menu-h">' + esc(g.h) + '</p>' : '') + '<ul>'; (g.l || []).forEach(function (l) { var cur = (l[0] === '/' ? path === '/' : path.indexOf(l[0]) === 0) ? ' aria-current="page"' : ''; html += '<li style="--d:' + (d++ * 26) + 'ms"><a class="thx-menu-a" href="' + esc(l[0]) + '"' + cur + '><span>' + esc(l[1]) + '</span>' + arrow + '</a></li>'; }); html += '</ul></div>'; });
     if (FOOT.length) { html += '<div class="thx-menu-f">'; FOOT.forEach(function (l) { html += '<a href="' + esc(l[0]) + '">' + esc(l[1]) + '</a>'; }); html += '</div>'; }
     html += '</nav>';
-    root.innerHTML = html; body.appendChild(root); body.appendChild(btn);
+    root.innerHTML = html; body.appendChild(root);
+    /* Below ~900px this button is the only way into the menu, so it must not be the last tab stop:
+       place it right after the skip link (or first in <body>). It is position:fixed, so it does not move on screen. */
+    var skipEl = body.querySelector('.thx-skip');
+    if (skipEl && skipEl.parentNode === body) body.insertBefore(btn, skipEl.nextSibling); else body.insertBefore(btn, body.firstChild);
     var panel2 = root.querySelector('.thx-menu-panel'), on = false, hideT = 0, leaveT = 0;
     function mopen() {
       if (on) return; on = true; clearTimeout(hideT); clearTimeout(leaveT);

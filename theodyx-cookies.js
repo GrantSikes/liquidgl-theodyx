@@ -269,7 +269,8 @@ function banner(show){
   bannerEl.appendChild(el('p',null,T('ck.banner.p')));
   var row=el('div','thxck-row');
   var all=el('button','thxck-btn thxck-primary',T('ck.acceptall'));
-  var nec=el('button','thxck-btn',T('ck.necessaryonly'));
+  /* Same weight as Accept all: declining must be as easy to see as accepting. */
+  var nec=el('button','thxck-btn thxck-primary',T('ck.necessaryonly'));
   var pref=el('button','thxck-link',T('ck.prefs'));
   all.addEventListener('click',function(){write({analytics:true,marketing:true});announce(T('ck.ann.all'));banner(false);});
   nec.addEventListener('click',function(){write({analytics:false,marketing:false});announce(T('ck.ann.nec'));banner(false);});

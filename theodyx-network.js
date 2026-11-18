@@ -183,7 +183,7 @@
     /* academia */
     { n: 'Academic-Standing', l: 'Academic standing', t: 'select', o: ['Tenured', 'Tenure-track', 'Adjunct', 'Visiting', 'Postdoctoral', 'Doctoral candidate', 'Independent scholar', 'Other'], half: 1 },
     /* shared */
-    { n: 'Representation-Status', l: 'Are you currently under exclusive commercial or talent management, a speaking bureau, or a publishing exclusivity?', t: 'radio', o: ['Yes', 'No'] },
+    { n: 'Representation-Status', l: 'Are you currently bound by an exclusive commercial or talent management, speaking bureau, or publishing agreement?', t: 'radio', o: ['Yes', 'No'] },
     { n: 'Representation-Detail', l: 'Who represents you?', t: 'text', ph: 'Agency, bureau, or publisher, and what the exclusivity covers' },
     { n: 'Capstone', l: 'Capstone', t: 'url', ph: 'https://' },
     { n: 'Thesis', l: 'The contrarian thesis', t: 'textarea', max: 1000, hint: 'Up to 150 words.' },
