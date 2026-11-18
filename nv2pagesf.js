@@ -159,3 +159,87 @@ if(document.body)imo();if(document.readyState!=='loading')imo();else document.ad
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
 })();
+/* nv2pagesf 1.78.0 (2026-11-18, Theodyx Insights): generic click tracker. Sends event `click` with { label, href } through
+   the head's single data layer window.__thxTrack (session, path, UTM, GPC + cookie-banner opt-out are all handled there).
+   Does nothing if __thxTrack is missing or window.__thxOptedOut() is true. One delegated, passive, capture-phase listener:
+   it never prevents, stops or delays the click (the beacon is queued synchronously by sendBeacon / keepalive fetch).
+   Skips what is already measured elsewhere, so nothing is double-counted:
+     #thx-nav a[href]                  nav_click        (theodyx-nav.js)
+     .thx-nav-burger, .thx-fab         nav_menu_open    (theodyx-nav.js)
+     links to substack.com             newsletter_click (head)
+     links to x/twitter/instagram/tiktok/linkedin/youtube/pinterest   outbound_social (head)
+   Label = visible text (never an input's value, never text inside a form field), else aria-label / title / img alt.
+   Href  = same-origin pathname, or origin + pathname off-site; never a query string or fragment; null for mailto:/tel:/js.
+   Throttle: at most 1 event per 500 ms and 40 per page view. Synthetic (script-dispatched) clicks are ignored. */
+(function () {
+  try {
+    if (window.__thxClickTracker) return;
+    window.__thxClickTracker = '1.78.0';
+    var MAX = 40, GAP = 500, sent = 0, last = 0;
+    var SEL = 'a[href],button,[role="button"],input[type="submit"],input[type="button"],input[type="image"]';
+    var SOCIAL = /^(www\.)?(x\.com|twitter\.com|instagram\.com|tiktok\.com|linkedin\.com|youtube\.com|pinterest\.com)$/i;
+    var FIELD = /^(INPUT|TEXTAREA|SELECT|OPTION|SCRIPT|STYLE|NOSCRIPT|TEMPLATE|SVG)$/;
+    var now = function () { return (window.performance && performance.now) ? performance.now() : Date.now(); };
+    var clip = function (s, n) { s = String(s || '').replace(/\s+/g, ' ').trim(); return s ? s.slice(0, n) : ''; };
+    function off() {
+      if (typeof window.__thxTrack !== 'function') return true;
+      try { return typeof window.__thxOptedOut === 'function' && window.__thxOptedOut() === true; } catch (e) { return true; }
+    }
+    /* visible text of an element, skipping form fields / contenteditable / aria-hidden subtrees; stops early once long enough */
+    function text(el) {
+      var out = '';
+      (function walk(n) {
+        for (var c = n.firstChild; c && out.length < 160; c = c.nextSibling) {
+          if (c.nodeType === 3) { out += ' ' + c.nodeValue; continue; }
+          if (c.nodeType !== 1) continue;
+          var tag = (c.tagName || '').toUpperCase();
+          if (FIELD.test(tag) || c.isContentEditable || c.getAttribute('aria-hidden') === 'true' || c.hidden) continue;
+          walk(c);
+        }
+      })(el);
+      return clip(out, 120);
+    }
+    function label(el) {
+      var tag = (el.tagName || '').toUpperCase(), t = '';
+      if (tag !== 'INPUT') t = text(el); /* an <input>'s only text is its value: never read it */
+      if (!t) t = clip(el.getAttribute('aria-label'), 120);
+      if (!t) t = clip(el.getAttribute('title'), 120);
+      if (!t && tag !== 'INPUT') { var img = el.querySelector && el.querySelector('img[alt]'); if (img) t = clip(img.getAttribute('alt'), 120); }
+      if (!t && tag === 'INPUT') t = clip(el.getAttribute('alt'), 120);
+      if (!t && el.form && (el.type === 'submit' || el.type === 'image')) {
+        var f = el.form; t = clip('submit: ' + (f.getAttribute('data-name') || f.getAttribute('name') || f.id || 'form'), 120);
+      }
+      return t || null;
+    }
+    function dest(a) {
+      try {
+        var u = new URL(a.href, location.href);
+        if (u.protocol !== 'http:' && u.protocol !== 'https:') return { href: null, host: '' };
+        var host = u.hostname.replace(/^www\./i, '');
+        return { href: (u.origin === location.origin ? u.pathname : u.origin + u.pathname).slice(0, 300), host: host };
+      } catch (e) { return { href: null, host: '' }; }
+    }
+    document.addEventListener('click', function (e) {
+      try {
+        if (!e || e.isTrusted === false || sent >= MAX) return;
+        var t = e.target;
+        if (t && t.nodeType === 3) t = t.parentNode;
+        var el = t && t.closest ? t.closest(SEL) : null;
+        if (!el) return;
+        if (el.closest('.thx-nav-burger,.thx-fab')) return;
+        var href = null;
+        if (el.tagName === 'A' && el.hasAttribute('href')) {
+          if (el.closest('#thx-nav')) return;
+          var d = dest(el);
+          if (/(^|\.)substack\.com$/i.test(d.host) || SOCIAL.test(d.host)) return;
+          href = d.href;
+        }
+        var ts = now();
+        if (ts - last < GAP) return;
+        if (off()) return;
+        last = ts; sent++;
+        window.__thxTrack('click', null, false, { label: label(el), href: href });
+      } catch (err) {}
+    }, { capture: true, passive: true });
+  } catch (e) {}
+})();
