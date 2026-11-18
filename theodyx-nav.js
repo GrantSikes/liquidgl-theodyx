@@ -54,7 +54,7 @@
   if (window.__thxNav) return;
   var nav = document.getElementById('thx-nav');
   if (!nav) return;
-  var API = window.__thxNav = { v: '4.19.1' };
+  var API = window.__thxNav = { v: '4.19.2' };
   var I18N = window.__thxI18n; function T(k) { return (I18N && I18N.t) ? I18N.t(k) : ({ 'nav.open': 'Open menu', 'nav.close': 'Close menu' })[k] || k; } /* Phase 6: locale runtime (nv2pagesf) keyed by <html lang> */
   var doc = document.documentElement, body = document.body;
   var glass = nav.querySelector('.thx-nav-glass');
@@ -691,8 +691,21 @@
   (function frost() {
     if (!FROST) return;
     nav.classList.add('is-frost');
+    /* 4.19.2: on WebKit at 900 px and up (iPad in landscape, desktop Safari) the footer still fetches the WebGL lens
+       (theodyx-nav-gl.js). When it started it hid this frosted glass (.is-gl-solid) while the frost rules below hid its
+       canvas, so the bar was drawn with nothing at all - clear on most pages, frosted on the ones where the lens had not
+       finished loading. The bar is one frosted pill everywhere, so the lens is told not to start (it honours both of
+       these), and is switched off if it got in first. */
+    function noLens() {
+      try { nav.classList.remove('is-gl', 'is-gl-solid', 'is-gl-stale'); } catch (e) {}
+      try { var g = window.__thxNavGL; if (g && g.on && typeof g.disable === 'function') g.disable(); } catch (e) {}
+    }
+    try { sessionStorage.setItem('thx-nav-nogl', '1'); } catch (e) {}
+    noLens();
+    try { new MutationObserver(function () { if (nav.classList.contains('is-gl') || nav.classList.contains('is-gl-solid')) noLens(); }).observe(nav, { attributes: true, attributeFilter: ['class'] }); } catch (e) {}
     var st = document.createElement('style'); st.id = 'thx-frost-css';
     st.textContent = '.thx-nav.is-frost .thx-nav-glass,.thx-nav.is-frost.is-refract .thx-nav-glass,.thx-nav.is-frost.is-gl .thx-nav-glass{inset:0;border-radius:inherit;clip-path:none;visibility:visible;background:rgba(255,255,255,.66);-webkit-backdrop-filter:blur(18px) saturate(1.5);backdrop-filter:blur(18px) saturate(1.5);box-shadow:inset 0 1px 0 0 rgba(255,255,255,.75),inset 0 0 0 1px rgba(255,255,255,.4),0 1px 2px rgba(0,0,0,.06),0 10px 30px rgba(0,0,0,.12)}'
+      + '.thx-nav.is-frost .thx-nav-glass,.thx-nav.is-frost.is-gl-solid:not([data-open="true"]) .thx-nav-glass{visibility:visible!important}'
       + '.thx-nav.is-frost .thx-nav-glass::after,.thx-nav.is-frost .thx-nav-tint,.thx-nav.is-frost .thx-nav-gl,.thx-nav.is-frost canvas.thx-nav-gl{display:none}'
       + '.thx-nav.is-frost .thx-nav-rim{background:none;box-shadow:none}'
       + '.thx-nav.is-frost .thx-nav-menu a,.thx-nav.is-frost .thx-nav-logo,.thx-nav.is-frost .thx-nav-burger,.thx-nav.is-frost[data-ink] .thx-nav-menu a,.thx-nav.is-frost[data-ink] .thx-nav-logo,.thx-nav.is-frost .thx-nav-menu[data-ink] a,.thx-nav.is-frost .thx-nav-logo[data-ink]{color:#000;text-shadow:none}'
